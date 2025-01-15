@@ -15,7 +15,7 @@ import xbot.common.injection.swerve.SwerveInstance;
 import xbot.common.math.XYPair;
 
 public class CompetitionContract extends ElectricalContract {
- 
+
     protected final double simulationScalingValue = 256.0 * PoseSubsystem.INCHES_IN_A_METER;
 
     @Inject
