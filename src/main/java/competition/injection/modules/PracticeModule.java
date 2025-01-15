@@ -35,4 +35,8 @@ public abstract class PracticeModule {
     @Binds
     @Singleton
     public abstract BaseDriveSubsystem getDriveSubsystem(BaseSwerveDriveSubsystem impl);
+
+    @Binds
+    @Singleton
+    public abstract XCameraElectricalContract getCameraContract(ElectricalContract impl);
 }

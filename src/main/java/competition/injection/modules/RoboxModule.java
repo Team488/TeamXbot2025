@@ -35,4 +35,8 @@ public abstract class RoboxModule {
     @Binds
     @Singleton
     public abstract BaseDriveSubsystem getDriveSubsystem(BaseSwerveDriveSubsystem impl);
+
+    @Binds
+    @Singleton
+    public abstract XCameraElectricalContract getCameraContract(ElectricalContract impl);
 }

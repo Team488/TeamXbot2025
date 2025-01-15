@@ -8,7 +8,7 @@ import xbot.common.injection.electrical_contract.XSwerveDriveElectricalContract;
 import xbot.common.injection.swerve.SwerveInstance;
 import xbot.common.math.XYPair;
 
-public abstract class ElectricalContract implements XSwerveDriveElectricalContract {
+public abstract class ElectricalContract implements XCameraElectricalContract, XSwerveDriveElectricalContract {
     public abstract boolean isDriveReady();
 
     public abstract boolean areCanCodersReady();
