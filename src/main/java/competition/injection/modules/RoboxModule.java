@@ -26,6 +26,10 @@ public abstract class RoboxModule {
 
     @Binds
     @Singleton
+    public abstract XCameraElectricalContract getCameraContract(ElectricalContract impl);
+    
+    @Binds
+    @Singleton
     public abstract BasePoseSubsystem getPoseSubsystem(PoseSubsystem impl);
 
     @Binds

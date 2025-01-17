@@ -8,6 +8,7 @@ import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.PoseSubsystem;
 import dagger.Binds;
 import dagger.Module;
+import xbot.common.injection.electrical_contract.XCameraElectricalContract;
 import xbot.common.injection.electrical_contract.XSwerveDriveElectricalContract;
 import xbot.common.subsystems.drive.BaseDriveSubsystem;
 import xbot.common.subsystems.drive.BaseSwerveDriveSubsystem;
@@ -22,6 +23,10 @@ public abstract class Module2025 {
     @Binds
     @Singleton
     public abstract XSwerveDriveElectricalContract getSwerveContract(ElectricalContract impl);
+
+    @Binds
+    @Singleton
+    public abstract XCameraElectricalContract getCameraContract(ElectricalContract impl);
 
     @Binds
     @Singleton
