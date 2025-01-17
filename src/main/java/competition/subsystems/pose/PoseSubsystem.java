@@ -102,4 +102,10 @@ public class PoseSubsystem extends BasePoseSubsystem {
                 WrappedRotation2d.fromRotation2d(newPoseInMeters.getRotation())
         );
     }
+
+
+    @Override
+    public Pose2d getGroundTruthPose() {
+        return this.getCurrentPose2d();
+    }
 }
