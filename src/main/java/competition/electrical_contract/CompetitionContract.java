@@ -85,28 +85,28 @@ public class CompetitionContract extends ElectricalContract {
         return switch (swerveInstance.label()) {
             case "FrontLeftDrive" ->
                     new CANMotorControllerInfo(
-                            getDriveControllerName(swerveInstance),
+                            getSteeringControllerName(swerveInstance),
                             MotorControllerType.SparkMax,
                             CANBusId.RIO,
                             30,
                             new CANMotorControllerOutputConfig());
             case "FrontRightDrive" ->
                     new CANMotorControllerInfo(
-                            getDriveControllerName(swerveInstance),
+                            getSteeringControllerName(swerveInstance),
                             MotorControllerType.SparkMax,
                             CANBusId.RIO,
                             28,
                             new CANMotorControllerOutputConfig());
             case "RearLeftDrive" ->
                     new CANMotorControllerInfo(
-                            getDriveControllerName(swerveInstance),
+                            getSteeringControllerName(swerveInstance),
                             MotorControllerType.SparkMax,
                             CANBusId.RIO,
                             39,
                             new CANMotorControllerOutputConfig());
             case "RearRightDrive" ->
                     new CANMotorControllerInfo(
-                            getDriveControllerName(swerveInstance),
+                            getSteeringControllerName(swerveInstance),
                             MotorControllerType.SparkMax,
                             CANBusId.RIO,
                             20,
