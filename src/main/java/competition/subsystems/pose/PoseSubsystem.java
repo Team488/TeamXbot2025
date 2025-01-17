@@ -108,7 +108,7 @@ public class PoseSubsystem extends BasePoseSubsystem implements AprilTagVisionSu
 
     @Override
     public Pose2d getGroundTruthPose() {
-        return null;
+        return this.getCurrentPose2d();
     }
 
     /**
