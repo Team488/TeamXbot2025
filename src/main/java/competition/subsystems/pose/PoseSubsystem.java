@@ -114,9 +114,9 @@ public class PoseSubsystem extends BasePoseSubsystem implements AprilTagVisionSu
     /**
      * This method is called by the vision system when it has a new pose to share with the robot.
      *
-     * @param visionRobotPoseMeters
-     * @param timestampSeconds
-     * @param visionMeasurementStdDevs
+     * @param visionRobotPoseMeters The pose of the robot as measured by the vision system
+     * @param timestampSeconds The timestamp of the vision measurement
+     * @param visionMeasurementStdDevs The standard deviations of the vision measurements
      */
     @Override
     public void acceptVisionPose(Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs) {
