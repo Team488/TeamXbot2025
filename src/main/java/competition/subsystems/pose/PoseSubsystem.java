@@ -4,17 +4,21 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import competition.subsystems.drive.DriveSubsystem;
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import xbot.common.controls.sensors.XGyro.XGyroFactory;
 import xbot.common.math.WrappedRotation2d;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.pose.BasePoseSubsystem;
+import xbot.common.subsystems.vision.AprilTagVisionSubsystem;
 
 @Singleton
-public class PoseSubsystem extends BasePoseSubsystem {
+public class PoseSubsystem extends BasePoseSubsystem implements AprilTagVisionSubsystem.VisionConsumer {
 
     final SwerveDrivePoseEstimator onlyWheelsGyroSwerveOdometry;
 
@@ -27,7 +31,6 @@ public class PoseSubsystem extends BasePoseSubsystem {
 
         onlyWheelsGyroSwerveOdometry = initializeSwerveOdometry();
     }
-
 
     @Override
     protected double getLeftDriveDistance() {
@@ -101,5 +104,22 @@ public class PoseSubsystem extends BasePoseSubsystem {
                 newPoseInMeters.getTranslation().getY(),
                 WrappedRotation2d.fromRotation2d(newPoseInMeters.getRotation())
         );
+    }
+
+    @Override
+    public Pose2d getGroundTruthPose() {
+        return null;
+    }
+
+    /**
+     * This method is called by the vision system when it has a new pose to share with the robot.
+     *
+     * @param visionRobotPoseMeters The pose of the robot as measured by the vision system
+     * @param timestampSeconds The timestamp of the vision measurement
+     * @param visionMeasurementStdDevs The standard deviations of the vision measurements
+     */
+    @Override
+    public void acceptVisionPose(Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs) {
+
     }
 }

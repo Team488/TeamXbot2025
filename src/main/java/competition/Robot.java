@@ -33,6 +33,9 @@ public class Robot extends BaseRobot {
 
         dataFrameRefreshables.add((DriveSubsystem)getInjectorComponent().driveSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().poseSubsystem());
+
+        // Need to instantiate the vision subsystem so that it gets registered with the scheduler
+        getInjectorComponent().aprilTagVisionSubsystem();
     }
 
     protected BaseRobotComponent createDaggerComponent() {
