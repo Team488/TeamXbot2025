@@ -4,6 +4,7 @@ import competition.electrical_contract.Contract2025;
 import competition.electrical_contract.ElectricalContract;
 import xbot.common.command.BaseSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
+import xbot.common.controls.actuators.XCANMotorControllerPIDProperties;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 
@@ -21,7 +22,7 @@ public class AlgaeCollectionSubsystem extends BaseSubsystem {
     public AlgaeCollectionSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory, Contract2025 contract2025, PropertyFactory propertyFactory) {
 
         if (contract2025.isAlgaeCollectionReady()) {
-            this.motor = xcanMotorControllerFactory.create(contract2025.getAlgaeCollectionMotor(), getPrefix(), "AlgaeMotor");
+            this.motor = xcanMotorControllerFactory.create(contract2025.getAlgaeCollectionMotor(), getPrefix(), "AlgaeMotor", new XCANMotorControllerPIDProperties(1, 0, 0, 0, -1, 1));
         }
         else {
             this.motor = null;
