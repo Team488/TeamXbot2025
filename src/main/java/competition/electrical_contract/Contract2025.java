@@ -9,7 +9,6 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 
 import competition.subsystems.pose.PoseSubsystem;
-import xbot.common.controls.actuators.XCANTalon;
 import xbot.common.injection.electrical_contract.CANBusId;
 import xbot.common.injection.electrical_contract.CANMotorControllerInfo;
 import xbot.common.injection.electrical_contract.CANMotorControllerOutputConfig;
@@ -45,13 +44,13 @@ public class Contract2025 extends ElectricalContract {
     @Override
     public CANMotorControllerInfo getElevatorMaster() {
         return new CANMotorControllerInfo(
-                "Master Motor", MotorControllerType.TalonFx, new CANBusId("99"), 99, new CANMotorControllerOutputConfig());
+                "Master Elevator Motor", MotorControllerType.TalonFx, new CANBusId("99"), 99, new CANMotorControllerOutputConfig());
     }
 
     @Override
     public CANMotorControllerInfo getElevatorFollower() {
         return new CANMotorControllerInfo(
-                "Follower Motor", MotorControllerType.TalonFx, new CANBusId("98"), 98, new CANMotorControllerOutputConfig());
+                "Follower Elevator Motor", MotorControllerType.TalonFx, new CANBusId("98"), 98, new CANMotorControllerOutputConfig());
     }
 
     protected String getDriveControllerName(SwerveInstance swerveInstance) {
