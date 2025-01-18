@@ -16,10 +16,10 @@ import javax.inject.Singleton;
 @Singleton
 public class ElevatorSubsystem extends BaseSubsystem {
 
-    public enum ElevatorGoal{
+    public enum ElevatorGoals{
         //common TargetHeights
     }
-    double defaultElevatorPower;
+
     final DoubleProperty elevatorPower;
     final ElectricalContract contract;
 
@@ -35,7 +35,6 @@ public class ElevatorSubsystem extends BaseSubsystem {
     @Inject
     public ElevatorSubsystem(XCANMotorController.XCANMotorControllerFactory motorFactory, PropertyFactory pf, ElectricalContract contract){
 
-        defaultElevatorPower = 0.5;
         elevatorPower = pf.createPersistentProperty("Standard Power", 0.5);
         this.contract = contract;
 
