@@ -1,0 +1,25 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Run simulateJava",
+        "type": "shell",
+        "command": "./gradlew simulateJava",
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Run build",
+        "type": "shell",
+        "command": "./gradlew build",
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
+        "problemMatcher": []
+      }
+    ]
+  }
