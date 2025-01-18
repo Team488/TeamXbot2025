@@ -5,8 +5,6 @@ import competition.electrical_contract.ElectricalContract;
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.command.BaseSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
-import xbot.common.controls.actuators.XCANTalon;
-import xbot.common.injection.electrical_contract.CANTalonInfo;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 
