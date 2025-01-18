@@ -10,6 +10,8 @@ import competition.injection.components.DaggerSimulationComponent;
 import competition.simulation.Simulator;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.PoseSubsystem;
+//import edu.wpi.first.wpilibj.Preferences;
+//import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import xbot.common.command.BaseRobot;
