@@ -1,9 +1,8 @@
 package competition.subsystems.elevator;
 
-import competition.electrical_contract.Contract2025;
 import competition.electrical_contract.ElectricalContract;
+import xbot.common.advantage.DataFrameRefreshable;
 import xbot.common.command.BaseSetpointSubsystem;
-import xbot.common.command.BaseSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
@@ -12,10 +11,15 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
-public class ElevatorSubsystem extends BaseSubsystem {
+public class ElevatorSubsystem extends BaseSetpointSubsystem<Double> implements DataFrameRefreshable {
 
     public enum ElevatorGoals{
-        //common TargetHeights
+        ScoreL1,
+        ScoreL2,
+        ScoreL3,
+        ScoreL4,
+        CoralCollection,
+        ReturnToBase
     }
 
     final DoubleProperty elevatorPower;
@@ -24,36 +28,35 @@ public class ElevatorSubsystem extends BaseSubsystem {
     private boolean isCalibrated;
 
     final DoubleProperty elevatorTargetHeight;
+    final DoubleProperty currentHeight;
 
     //assuming we'll have a master and follower motors
-    public XCANMotorController master;
-    public XCANMotorController follower;
+    public XCANMotorController masterMotor;
+    public XCANMotorController followerMotor;
 
 
     @Inject
     public ElevatorSubsystem(XCANMotorController.XCANMotorControllerFactory motorFactory, PropertyFactory pf, ElectricalContract contract){
 
-        elevatorPower = pf.createPersistentProperty("Standard Power", 0.5);
+        this.elevatorPower = pf.createPersistentProperty("Elevator Power", 0.5);
         this.contract = contract;
 
-        //was going to make this ephermeral but cant find it
-        elevatorTargetHeight = pf.createPersistentProperty("Elevator Target", 0);
+        //was going to make this ephemeral but cant find it
+        this.elevatorTargetHeight = pf.createPersistentProperty("Elevator Target", 0.0);
+        this.currentHeight = pf.createPersistentProperty("Current Height", 0.0);
+
 
         if(contract.isElevatorReady()){
-            this.master = motorFactory.create(contract.getElevatorMaster(), this.getPrefix(), "Elevator Motor");
-            this.follower = motorFactory.create(contract.getElevatorFollower(), this.getPrefix(), "Elevator Motor");
+            this.masterMotor = motorFactory.create(contract.getElevatorMaster(), this.getPrefix(), "Elevator Motor");
+            this.followerMotor = motorFactory.create(contract.getElevatorFollower(), this.getPrefix(), "Elevator Motor");
         }
     }
 
-    public void setTargetHeight(double height) {
-        elevatorTargetHeight.set(height);
-    }
-
     //will implement logic later
-    public void setPower(double power) {
+    public void setPower(Double power) {
         if (contract.isElevatorReady()) {
-            master.setPower(power);
-            follower.setPower(power);
+            masterMotor.setPower(power);
+            followerMotor.setPower(power);
         }
     }
 
@@ -66,11 +69,41 @@ public class ElevatorSubsystem extends BaseSubsystem {
     }
 
     public void stop(){
-        setPower(0);
+        setPower(0.0);
+    }
+
+
+    @Override
+    public Double getCurrentValue() {
+        if (contract.isElevatorReady()){
+            return this.currentHeight.get();
+        }
+        return 0.0;
+    }
+
+    @Override
+    public void setTargetValue(Double targetHeight) {
+        this.elevatorTargetHeight.set(targetHeight);
+    }
+
+    @Override
+    public Double getTargetValue() {
+        return this.elevatorTargetHeight.get();
     }
 
     public boolean isCalibrated() {
         return isCalibrated;
     }
+
+    @Override
+    protected boolean areTwoTargetsEquivalent(Double target1, Double target2) {
+        return BaseSetpointSubsystem.areTwoDoublesEquivalent(target1, target2, 1);
+    }
+
+    @Override
+    public void refreshDataFrame() {
+        //to be implemented later
+    }
+
 
 }

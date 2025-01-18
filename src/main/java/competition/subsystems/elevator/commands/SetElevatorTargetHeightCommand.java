@@ -7,7 +7,7 @@ import javax.inject.Inject;
 
 public class SetElevatorTargetHeightCommand extends BaseCommand {
 
-    double height;
+    Double height;
     ElevatorSubsystem elevator;
 
     @Inject
@@ -19,12 +19,12 @@ public class SetElevatorTargetHeightCommand extends BaseCommand {
     @Override
     public void initialize() {
         log.info("initializing");
-        elevator.setTargetHeight(height);
+        elevator.setTargetValue(height);
     }
 
     @Override
     public void execute() {
-        elevator.setTargetHeight(height);
+        elevator.setTargetValue(height);
     }
 
     public void setHeight(double height) {

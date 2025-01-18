@@ -38,18 +38,18 @@ public class Contract2025 extends ElectricalContract {
 
     @Override
     public boolean isElevatorReady() {
-        return false;
+        return false; //return true when ready
     }
 
     @Override
     public CANMotorControllerInfo getElevatorMaster() {
-        return new CANMotorControllerInfo(
+        return new CANMotorControllerInfo( //change CANBUS ID's later
                 "Master Elevator Motor", MotorControllerType.TalonFx, new CANBusId("99"), 99, new CANMotorControllerOutputConfig());
     }
 
     @Override
     public CANMotorControllerInfo getElevatorFollower() {
-        return new CANMotorControllerInfo(
+        return new CANMotorControllerInfo( //same as above
                 "Follower Elevator Motor", MotorControllerType.TalonFx, new CANBusId("98"), 98, new CANMotorControllerOutputConfig());
     }
 
