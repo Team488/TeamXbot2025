@@ -31,6 +31,18 @@ public class Contract2025 extends ElectricalContract {
         return true;
     }
 
+    public boolean isAlgaeCollectionReady() { return false;}
+
+    //TODO: change id
+    public CANMotorControllerInfo getAlgaeCollectionMotor() {
+        return new CANMotorControllerInfo("AlgaeCollectionMotor",
+                MotorControllerType.TalonFx,
+                CANBusId.DefaultCanivore,
+                488,
+                new CANMotorControllerOutputConfig());
+    }
+
+
     @Override
     public boolean areCanCodersReady() {
         return true;

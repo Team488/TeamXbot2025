@@ -3,10 +3,10 @@ package competition.subsystems;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import competition.subsystems.collection.StopCommand;
+import competition.subsystems.algae_collection.AlgaeCollectionSubsystem;
+import competition.subsystems.algae_collection.commands.AlgaeCollectionStopCommand;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
-import competition.subsystems.drive.commands.TankDriveWithJoysticksCommand;
 
 /**
  * For setting the default commands on subsystems
@@ -23,7 +23,7 @@ public class SubsystemDefaultCommandMap {
     }
 
     @Inject
-    public void setupAlgaeCollectionSubsystem(AlgaeCollectionSubsystem algaeCollectionSubsystem, StopCommand command) {
+    public void setupAlgaeCollectionSubsystem(AlgaeCollectionSubsystem algaeCollectionSubsystem, AlgaeCollectionStopCommand command) {
         algaeCollectionSubsystem.setDefaultCommand(command);
     }
 }

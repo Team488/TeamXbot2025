@@ -1,5 +1,6 @@
-package competition.subsystems;
+package competition.subsystems.algae_collection;
 
+import competition.electrical_contract.Contract2025;
 import competition.electrical_contract.ElectricalContract;
 import xbot.common.command.BaseSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
@@ -17,23 +18,35 @@ public class AlgaeCollectionSubsystem extends BaseSubsystem {
     public DoubleProperty outputPower;
 
     @Inject
-    public AlgaeCollectionSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory, ElectricalContract electricalContract, PropertyFactory propertyFactory) {
-        this.motor = xcanMotorControllerFactory.create(electricalContract.getAlgaeCollectionMotor(), getPrefix(), "AlgaeMotor");
+    public AlgaeCollectionSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory, Contract2025 contract2025, PropertyFactory propertyFactory) {
+
+        if (contract2025.isAlgaeCollectionReady()) {
+            this.motor = xcanMotorControllerFactory.create(contract2025.getAlgaeCollectionMotor(), getPrefix(), "AlgaeMotor");
+        }
+        else {
+            this.motor = null;
+        }
 
         this.intakePower = propertyFactory.createPersistentProperty("Intake Power", .1);
         this.outputPower = propertyFactory.createPersistentProperty("Output Power", .1);
     }
 
     public void intake() {
-        motor.setPower(intakePower.get());
+        if (motor != null) {
+            motor.setPower(intakePower.get());
+        }
     }
 
     public void output() {
-        motor.setPower(outputPower.get());
+        if (motor != null) {
+            motor.setPower(outputPower.get());
+        }
     }
 
     public void stop() {
-        motor.setPower(0);
+        if (motor != null) {
+            motor.setPower(0);
+        }
     }
 }
 
