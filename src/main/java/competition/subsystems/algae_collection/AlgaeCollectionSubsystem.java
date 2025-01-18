@@ -20,8 +20,9 @@ public class AlgaeCollectionSubsystem extends BaseSubsystem {
 
     @Inject
     public AlgaeCollectionSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
-                                    ElectricalContract electricalContract, PropertyFactory propertyFactory) {
+            ElectricalContract electricalContract, PropertyFactory propertyFactory) {
 
+        propertyFactory.setPrefix(this);
         if (electricalContract.isAlgaeCollectionReady()) {
             this.motor = xcanMotorControllerFactory.create(electricalContract.getAlgaeCollectionMotor(),
                     getPrefix(), "AlgaeMotor");
@@ -51,4 +52,3 @@ public class AlgaeCollectionSubsystem extends BaseSubsystem {
         }
     }
 }
-
