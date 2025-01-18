@@ -86,28 +86,28 @@ public class Contract2024 extends Contract2025 {
         return switch (swerveInstance.label()) {
             case "FrontLeftDrive" ->
                     new CANMotorControllerInfo(
-                            getDriveControllerName(swerveInstance),
+                            getSteeringControllerName(swerveInstance),
                             MotorControllerType.SparkMax,
                             CANBusId.RIO,
                             38,
                             new CANMotorControllerOutputConfig());
             case "FrontRightDrive" ->
                     new CANMotorControllerInfo(
-                            getDriveControllerName(swerveInstance),
+                            getSteeringControllerName(swerveInstance),
                             MotorControllerType.SparkMax,
                             CANBusId.RIO,
                             30,
                             new CANMotorControllerOutputConfig());
             case "RearLeftDrive" ->
                     new CANMotorControllerInfo(
-                            getDriveControllerName(swerveInstance),
+                            getSteeringControllerName(swerveInstance),
                             MotorControllerType.SparkMax,
                             CANBusId.RIO,
                             21,
                             new CANMotorControllerOutputConfig());
             case "RearRightDrive" ->
                     new CANMotorControllerInfo(
-                            getDriveControllerName(swerveInstance),
+                            getSteeringControllerName(swerveInstance),
                             MotorControllerType.SparkMax,
                             CANBusId.RIO,
                             28,
