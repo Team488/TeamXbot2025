@@ -9,3 +9,12 @@ Asana task URL:
 # How this was tested
 - [ ] unit tests added
 - [ ] tested on robot
+
+-----
+
+PR feedback legend
+
+:star: :star: :star: must be addressed
+:star: star: should be addressed
+:star: something to consider, a good idea
+ 
