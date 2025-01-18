@@ -3,6 +3,8 @@ package competition.operator_interface;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import competition.subsystems.drive.commands.MidCageToBackLeftCoralCommand;
+import xbot.common.controls.sensors.XXboxController;
 import xbot.common.subsystems.pose.commands.SetRobotHeadingCommand;
 
 /**
@@ -18,8 +20,11 @@ public class OperatorCommandMap {
     @Inject
     public void setupMyCommands(
             OperatorInterface operatorInterface,
-            SetRobotHeadingCommand resetHeading) {
+            SetRobotHeadingCommand resetHeading, MidCageToBackLeftCoralCommand midCageToBackLeftCoralCommand) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.gamepad.getifAvailable(1).onTrue(resetHeading);
+
+        //TODO: Fix not building
+//        operatorInterface.gamepad.getXboxButton(XXboxController.XboxButton.A).onTrue(midCageToBackLeftCoralCommand);
     }
 }

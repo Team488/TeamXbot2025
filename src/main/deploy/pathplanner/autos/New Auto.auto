@@ -1,0 +1,43 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "MIDCAGE_TO_BACKLEFT"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BACKLEFT_TO_HPS"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "HPS_TO_BACKLEFT"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BACKLEFT_TO_HPS"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "HPS_TO_FRONT"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

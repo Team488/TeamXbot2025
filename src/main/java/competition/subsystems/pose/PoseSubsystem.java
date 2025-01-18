@@ -11,6 +11,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import xbot.common.controls.sensors.XGyro.XGyroFactory;
 import xbot.common.math.WrappedRotation2d;
 import xbot.common.properties.PropertyFactory;
@@ -121,5 +123,9 @@ public class PoseSubsystem extends BasePoseSubsystem implements AprilTagVisionSu
     @Override
     public void acceptVisionPose(Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs) {
 
+    }
+
+    public Command createSetPositionCommand(Pose2d pose) {
+        return Commands.runOnce(() -> setCurrentPoseInMeters(pose));
     }
 }
