@@ -1,7 +1,7 @@
 package competition.injection.components;
 
 import competition.operator_interface.OperatorCommandMap;
-import competition.simulation.Simulator;
+import competition.simulation.BaseSimulator;
 import competition.subsystems.SubsystemDefaultCommandMap;
 import xbot.common.injection.components.BaseComponent;
 import xbot.common.injection.swerve.SwerveComponentHolder;
@@ -19,5 +19,5 @@ public abstract class BaseRobotComponent extends BaseComponent {
 
     public abstract AprilTagVisionSubsystem aprilTagVisionSubsystem();
 
-    public abstract Simulator simulator();
+    public abstract BaseSimulator simulator();
 }
