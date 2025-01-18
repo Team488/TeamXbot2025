@@ -19,12 +19,14 @@ public class AlgaeCollectionSubsystem extends BaseSubsystem {
     public DoubleProperty outputPower;
 
     @Inject
-    public AlgaeCollectionSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory, Contract2025 contract2025, PropertyFactory propertyFactory) {
+    public AlgaeCollectionSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
+                                    ElectricalContract electricalContract, PropertyFactory propertyFactory) {
 
-        if (contract2025.isAlgaeCollectionReady()) {
-            this.motor = xcanMotorControllerFactory.create(contract2025.getAlgaeCollectionMotor(), getPrefix(), "AlgaeMotor", new XCANMotorControllerPIDProperties(1, 0, 0, 0, -1, 1));
-        }
-        else {
+        if (electricalContract.isAlgaeCollectionReady()) {
+            this.motor = xcanMotorControllerFactory.create(electricalContract.getAlgaeCollectionMotor(),
+                    getPrefix(), "AlgaeMotor",
+                    new XCANMotorControllerPIDProperties(1, 0, 0, 0, -1, 1));
+        } else {
             this.motor = null;
         }
 

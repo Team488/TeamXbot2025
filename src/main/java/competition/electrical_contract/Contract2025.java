@@ -31,7 +31,7 @@ public class Contract2025 extends ElectricalContract {
         return true;
     }
 
-    public boolean isAlgaeCollectionReady() { return false;}
+    public boolean isAlgaeCollectionReady() { return false; }
 
     //TODO: change id
     public CANMotorControllerInfo getAlgaeCollectionMotor() {
