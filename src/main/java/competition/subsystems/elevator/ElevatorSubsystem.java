@@ -53,6 +53,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Double> implements 
     }
 
     //will implement logic later
+    @Override
     public void setPower(Double power) {
         if (contract.isElevatorReady()) {
             masterMotor.setPower(power);
@@ -91,6 +92,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Double> implements 
         return this.elevatorTargetHeight.get();
     }
 
+    @Override
     public boolean isCalibrated() {
         return isCalibrated;
     }
