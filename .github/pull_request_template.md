@@ -14,7 +14,9 @@ Asana task URL:
 
 PR feedback legend
 
-:star: :star: :star: must be addressed
-:star: star: should be addressed
-:star: something to consider, a good idea
  
+| Symbol | Meaning                  |
+|--------|--------------------------|
+| :star: :star: :star:     | must be addressed                 |
+| :star: :star:     | should be addressed        |
+| :star:     | something to consider, a good idea                  |
