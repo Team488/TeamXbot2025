@@ -17,6 +17,8 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
 
     public abstract CANMotorControllerInfo getSteeringMotor(SwerveInstance swerveInstance);
 
+    public abstract CANMotorControllerInfo getAlgaeCollectionMotor();
+
     public abstract DeviceInfo getSteeringEncoder(SwerveInstance swerveInstance);
 
     public abstract XYPair getSwerveModuleOffsetsInInches(SwerveInstance swerveInstance);
