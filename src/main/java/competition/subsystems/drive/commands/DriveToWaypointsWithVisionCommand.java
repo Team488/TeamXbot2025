@@ -49,6 +49,7 @@ public class DriveToWaypointsWithVisionCommand extends SwerveSimpleTrajectoryCom
 //        noteAcquisitionMode = NoteAcquisitionMode.BlindApproach;
         hasDoneVisionCheckYet = false;
         // The init here takes care of going to the initially given "static" note position.
+        retrieveWaypointsFromVision();
         super.initialize();
     }
 
@@ -75,7 +76,6 @@ public class DriveToWaypointsWithVisionCommand extends SwerveSimpleTrajectoryCom
         } else {
             log.info("Not using max speed override");
         }
-
         this.logic.setConstantVelocity(suggestedSpeed);
 
         reset();
@@ -88,17 +88,19 @@ public class DriveToWaypointsWithVisionCommand extends SwerveSimpleTrajectoryCom
         }
 
         List<XTableValues.Coordinate> coordinates = this.xclient.getCoordinates("target_waypoints");
+        if(coordinates == null){
+            this.prepareToDriveAtGivenNoteWithWaypoints(null);
+            return;
+        }
         ArrayList<Translation2d> waypoints = new ArrayList<Translation2d>();
         for (XTableValues.Coordinate coordinate : coordinates) {
             waypoints.add(new Translation2d(coordinate.getX(), coordinate.getY()));
         }
-
         this.prepareToDriveAtGivenNoteWithWaypoints(waypoints.toArray(new Translation2d[waypoints.size()]));
     }
 
     @Override
     public void execute() {
-        this.retrieveWaypointsFromVision();
         super.execute();
     }
 

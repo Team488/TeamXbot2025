@@ -3,7 +3,9 @@ package competition.operator_interface;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import xbot.common.controls.sensors.XXboxController;
 import xbot.common.subsystems.pose.commands.SetRobotHeadingCommand;
+import competition.subsystems.drive.commands.DriveToWaypointsWithVisionCommand;
 
 /**
  * Maps operator interface buttons to commands
@@ -18,8 +20,10 @@ public class OperatorCommandMap {
     @Inject
     public void setupMyCommands(
             OperatorInterface operatorInterface,
-            SetRobotHeadingCommand resetHeading) {
+            SetRobotHeadingCommand resetHeading,
+            DriveToWaypointsWithVisionCommand driveToWaypointsCommand) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.gamepad.getifAvailable(1).onTrue(resetHeading);
+        operatorInterface.gamepad.getifAvailable(XXboxController.XboxButton.RightBumper).onTrue(driveToWaypointsCommand);
     }
 }
