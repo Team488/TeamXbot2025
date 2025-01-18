@@ -1,13 +1,19 @@
 package competition.injection.modules;
 
+import competition.subsystems.pose.PoseSubsystem;
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import xbot.common.injection.swerve.FrontLeftDrive;
 import xbot.common.injection.swerve.FrontRightDrive;
 import xbot.common.injection.swerve.RearLeftDrive;
 import xbot.common.injection.swerve.RearRightDrive;
 import xbot.common.injection.swerve.SwerveComponent;
 import xbot.common.injection.swerve.SwerveInstance;
+import xbot.common.subsystems.pose.BasePoseSubsystem;
+import xbot.common.subsystems.vision.AprilTagVisionSubsystem;
 
 import javax.inject.Singleton;
 
@@ -43,5 +49,17 @@ public class CommonModule {
         return builder
                 .swerveInstance(new SwerveInstance("RearRightDrive"))
                 .build();
+    }
+
+    @Provides
+    @Singleton
+    public AprilTagVisionSubsystem.VisionConsumer visionConsumer(BasePoseSubsystem poseSubsystem) {
+        return (AprilTagVisionSubsystem.VisionConsumer) poseSubsystem;
+    }
+
+    @Provides
+    @Singleton
+    public AprilTagFieldLayout fieldLayout() {
+        return AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape);
     }
 }

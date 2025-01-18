@@ -1,25 +1,20 @@
 package competition.electrical_contract;
 
-import javax.inject.Inject;
-
-import com.ctre.phoenix.motorcontrol.FeedbackDevice;
-
 import competition.subsystems.pose.PoseSubsystem;
 import xbot.common.injection.electrical_contract.CANBusId;
 import xbot.common.injection.electrical_contract.CANMotorControllerInfo;
 import xbot.common.injection.electrical_contract.CANMotorControllerOutputConfig;
-import xbot.common.injection.electrical_contract.CANTalonInfo;
 import xbot.common.injection.electrical_contract.DeviceInfo;
 import xbot.common.injection.electrical_contract.MotorControllerType;
 import xbot.common.injection.swerve.SwerveInstance;
 import xbot.common.math.XYPair;
 
-public class CompetitionContract extends ElectricalContract {
+import javax.inject.Inject;
 
-    protected final double simulationScalingValue = 256.0 * PoseSubsystem.INCHES_IN_A_METER;
+public class Contract2023 extends Contract2024 {
 
     @Inject
-    public CompetitionContract() {}
+    public Contract2023() {}
 
     @Override
     public boolean isDriveReady() {
@@ -29,18 +24,6 @@ public class CompetitionContract extends ElectricalContract {
     @Override
     public boolean areCanCodersReady() {
         return true;
-    }
-
-    protected String getDriveControllerName(SwerveInstance swerveInstance) {
-        return "DriveSubsystem/" + swerveInstance.label() + "/Drive";
-    }
-
-    protected String getSteeringControllerName(SwerveInstance swerveInstance) {
-        return "DriveSubsystem/" + swerveInstance.label() + "/Steering";
-    }
-
-    protected String getSteeringEncoderControllerName(SwerveInstance swerveInstance) {
-        return "DriveSubsystem/" + swerveInstance.label() + "/SteeringEncoder";
     }
 
     @Override
@@ -85,28 +68,28 @@ public class CompetitionContract extends ElectricalContract {
         return switch (swerveInstance.label()) {
             case "FrontLeftDrive" ->
                     new CANMotorControllerInfo(
-                            getDriveControllerName(swerveInstance),
+                            getSteeringControllerName(swerveInstance),
                             MotorControllerType.SparkMax,
                             CANBusId.RIO,
                             30,
                             new CANMotorControllerOutputConfig());
             case "FrontRightDrive" ->
                     new CANMotorControllerInfo(
-                            getDriveControllerName(swerveInstance),
+                            getSteeringControllerName(swerveInstance),
                             MotorControllerType.SparkMax,
                             CANBusId.RIO,
                             28,
                             new CANMotorControllerOutputConfig());
             case "RearLeftDrive" ->
                     new CANMotorControllerInfo(
-                            getDriveControllerName(swerveInstance),
+                            getSteeringControllerName(swerveInstance),
                             MotorControllerType.SparkMax,
                             CANBusId.RIO,
                             39,
                             new CANMotorControllerOutputConfig());
             case "RearRightDrive" ->
                     new CANMotorControllerInfo(
-                            getDriveControllerName(swerveInstance),
+                            getSteeringControllerName(swerveInstance),
                             MotorControllerType.SparkMax,
                             CANBusId.RIO,
                             20,

@@ -2,7 +2,8 @@
 package competition;
 
 import competition.injection.components.BaseRobotComponent;
-import competition.injection.components.DaggerPracticeRobotComponent;
+import competition.injection.components.DaggerRobotComponent2023;
+import competition.injection.components.DaggerRobotComponent2024;
 import competition.injection.components.DaggerRobotComponent;
 import competition.injection.components.DaggerRoboxComponent;
 import competition.injection.components.DaggerSimulationComponent;
@@ -32,6 +33,9 @@ public class Robot extends BaseRobot {
 
         dataFrameRefreshables.add((DriveSubsystem)getInjectorComponent().driveSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().poseSubsystem());
+
+        // Need to instantiate the vision subsystem so that it gets registered with the scheduler
+        getInjectorComponent().aprilTagVisionSubsystem();
     }
 
     protected BaseRobotComponent createDaggerComponent() {
@@ -44,9 +48,12 @@ public class Robot extends BaseRobot {
             String chosenContract = Preferences.getString("ContractToUse", "Competition");
 
             switch (chosenContract) {
-                case "Practice":
-                    System.out.println("Using practice contract");
-                    return DaggerPracticeRobotComponent.create();
+                case "2023":
+                    System.out.println("Using 2023 contract");
+                    return DaggerRobotComponent2023.create();
+                case "2024":
+                    System.out.println("Using 2024 contract");
+                    return DaggerRobotComponent2024.create();
                 case "Robox":
                     System.out.println("Using Robox contract");
                     return DaggerRoboxComponent.create();

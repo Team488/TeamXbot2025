@@ -1,8 +1,7 @@
 package competition.injection.modules;
 
-import competition.electrical_contract.CompetitionContract;
 import competition.electrical_contract.ElectricalContract;
-import competition.electrical_contract.UnitTestCompetitionContract;
+import competition.electrical_contract.UnitTestContract2025;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.PoseSubsystem;
 import dagger.Binds;
@@ -19,11 +18,15 @@ import javax.inject.Singleton;
 public abstract class UnitTestRobotModule {
     @Binds
     @Singleton
-    public abstract ElectricalContract getElectricalContract(UnitTestCompetitionContract impl);
+    public abstract ElectricalContract getElectricalContract(UnitTestContract2025 impl);
 
     @Binds
     @Singleton
     public abstract XSwerveDriveElectricalContract getSwerveContract(ElectricalContract impl);
+
+    @Binds
+    @Singleton
+    public abstract XCameraElectricalContract getCameraContract(ElectricalContract impl);
 
     @Binds
     @Singleton

@@ -1,7 +1,7 @@
 package competition.injection.modules;
 
+import competition.electrical_contract.Contract2023;
 import competition.electrical_contract.ElectricalContract;
-import competition.electrical_contract.RoboxContract;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.PoseSubsystem;
 import dagger.Binds;
@@ -15,10 +15,10 @@ import xbot.common.subsystems.pose.BasePoseSubsystem;
 import javax.inject.Singleton;
 
 @Module
-public abstract class RoboxModule {
+public abstract class Module2023 {
     @Binds
     @Singleton
-    public abstract ElectricalContract getElectricalContract(RoboxContract impl);
+    public abstract ElectricalContract getElectricalContract(Contract2023 impl);
 
     @Binds
     @Singleton
@@ -27,7 +27,7 @@ public abstract class RoboxModule {
     @Binds
     @Singleton
     public abstract XCameraElectricalContract getCameraContract(ElectricalContract impl);
-    
+
     @Binds
     @Singleton
     public abstract BasePoseSubsystem getPoseSubsystem(PoseSubsystem impl);
