@@ -2,24 +2,19 @@ package competition.subsystems.elevator.commands;
 
 import competition.subsystems.elevator.ElevatorSubsystem;
 import xbot.common.command.BaseCommand;
-import xbot.common.command.BaseSubsystem;
-import xbot.common.properties.PropertyFactory;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
-public class ElevatorMaintainerCommand extends BaseCommand {
-
-    public enum MaintainerMode{
-        Calibrating,
-        GaveUp,
-        Calibrated,
-    }
+@Singleton
+public class StopElevatorCommand extends BaseCommand {
 
     ElevatorSubsystem elevator;
 
     @Inject
-    public ElevatorMaintainerCommand(ElevatorSubsystem elevator, PropertyFactory pf){
+    public StopElevatorCommand(ElevatorSubsystem elevator) {
         this.elevator = elevator;
+        addRequirements(elevator);
     }
 
     @Override
@@ -28,8 +23,7 @@ public class ElevatorMaintainerCommand extends BaseCommand {
     }
 
     @Override
-    public void execute(){
-
+    public void execute() {
+        elevator.stop();
     }
-
 }
