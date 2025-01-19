@@ -2,8 +2,10 @@ package competition.injection.modules;
 
 import javax.inject.Singleton;
 
-import competition.electrical_contract.CompetitionContract;
+import competition.electrical_contract.Contract2025;
 import competition.electrical_contract.ElectricalContract;
+import competition.simulation.BaseSimulator;
+import competition.simulation.NoopSimulator;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.PoseSubsystem;
 import dagger.Binds;
@@ -15,14 +17,18 @@ import xbot.common.subsystems.drive.BaseSwerveDriveSubsystem;
 import xbot.common.subsystems.pose.BasePoseSubsystem;
 
 @Module
-public abstract class CompetitionModule {
+public abstract class Module2025 {
     @Binds
     @Singleton
-    public abstract ElectricalContract getElectricalContract(CompetitionContract impl);
+    public abstract ElectricalContract getElectricalContract(Contract2025 impl);
 
     @Binds
     @Singleton
     public abstract XSwerveDriveElectricalContract getSwerveContract(ElectricalContract impl);
+
+    @Binds
+    @Singleton
+    public abstract XCameraElectricalContract getCameraContract(ElectricalContract impl);
 
     @Binds
     @Singleton
@@ -38,5 +44,5 @@ public abstract class CompetitionModule {
 
     @Binds
     @Singleton
-    public abstract XCameraElectricalContract getCameraContract(ElectricalContract impl);
+    public abstract BaseSimulator getSimulator(NoopSimulator impl);
 }

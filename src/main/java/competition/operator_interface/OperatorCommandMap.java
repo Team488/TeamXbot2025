@@ -3,6 +3,7 @@ package competition.operator_interface;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import competition.simulation.commands.ResetSimulatedPose;
 import xbot.common.subsystems.pose.commands.SetRobotHeadingCommand;
 
 /**
@@ -21,5 +22,12 @@ public class OperatorCommandMap {
             SetRobotHeadingCommand resetHeading) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.gamepad.getifAvailable(1).onTrue(resetHeading);
+    }
+
+    @Inject
+    public void setupSimulatorCommands(
+        ResetSimulatedPose resetPose
+    ) {
+        resetPose.includeOnSmartDashboard();
     }
 }
