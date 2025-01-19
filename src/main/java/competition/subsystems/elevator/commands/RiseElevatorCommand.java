@@ -22,6 +22,6 @@ public class RiseElevatorCommand extends BaseCommand {
 
     @Override
     public void execute(){
-        elevator.rise();
+        elevator.raise();
     }
 }

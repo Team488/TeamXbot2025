@@ -1,6 +1,7 @@
 package competition.subsystems.elevator;
 
 import competition.electrical_contract.ElectricalContract;
+import edu.wpi.first.units.measure.Distance;
 import xbot.common.advantage.DataFrameRefreshable;
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
@@ -11,7 +12,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
-public class ElevatorSubsystem extends BaseSetpointSubsystem<Double> implements DataFrameRefreshable {
+public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implements DataFrameRefreshable {
 
     public enum ElevatorGoals{
         ScoreL1,
@@ -32,8 +33,6 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Double> implements 
 
     //assuming we'll have a master and follower motors
     public XCANMotorController masterMotor;
-    public XCANMotorController followerMotor;
-
 
     @Inject
     public ElevatorSubsystem(XCANMotorController.XCANMotorControllerFactory motorFactory, PropertyFactory pf, ElectricalContract contract){
@@ -47,49 +46,42 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Double> implements 
 
 
         if(contract.isElevatorReady()){
-            this.masterMotor = motorFactory.create(contract.getElevatorMaster(), this.getPrefix(), "Elevator Motor");
-            this.followerMotor = motorFactory.create(contract.getElevatorFollower(), this.getPrefix(), "Elevator Motor");
+            this.masterMotor = motorFactory.create(contract.getElevatorMotor(), this.getPrefix(), "Elevator Motor");
         }
     }
 
     //will implement logic later
     @Override
-    public void setPower(Double power) {
-        if (contract.isElevatorReady()) {
-            masterMotor.setPower(power);
-            followerMotor.setPower(power);
-        }
+    public void setPower(Distance power) {
+
     }
 
-    public void rise(){
-        setPower(elevatorPower.get());
+    public void raise(){
+        //setPower();
     }
 
     public void lower(){
-        setPower(-elevatorPower.get());
+       // setPower(-elevatorPower.get());
     }
 
     public void stop(){
-        setPower(0.0);
+       // setPower(0.0);
     }
 
 
     @Override
-    public Double getCurrentValue() {
-        if (contract.isElevatorReady()){
-            return this.currentHeight.get();
-        }
-        return 0.0;
+    public Distance getCurrentValue() {
+        return null;
     }
 
     @Override
-    public void setTargetValue(Double targetHeight) {
-        this.elevatorTargetHeight.set(targetHeight);
+    public Distance getTargetValue() {
+        return null;
     }
 
     @Override
-    public Double getTargetValue() {
-        return this.elevatorTargetHeight.get();
+    public void setTargetValue(Distance value) {
+
     }
 
     @Override
@@ -98,13 +90,17 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Double> implements 
     }
 
     @Override
-    protected boolean areTwoTargetsEquivalent(Double target1, Double target2) {
-        return BaseSetpointSubsystem.areTwoDoublesEquivalent(target1, target2, 1);
+    protected boolean areTwoTargetsEquivalent(Distance target1, Distance target2) {
+        return false;
     }
 
     @Override
     public void refreshDataFrame() {
-        //to be implemented later
+        masterMotor.refreshDataFrame();
+    }
+
+    public void periodic(){
+        masterMotor.periodic();
     }
 
 

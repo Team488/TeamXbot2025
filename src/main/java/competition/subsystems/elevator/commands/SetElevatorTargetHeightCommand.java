@@ -1,13 +1,14 @@
 package competition.subsystems.elevator.commands;
 
 import competition.subsystems.elevator.ElevatorSubsystem;
+import edu.wpi.first.units.measure.Distance;
 import xbot.common.command.BaseCommand;
 
 import javax.inject.Inject;
 
 public class SetElevatorTargetHeightCommand extends BaseCommand {
 
-    Double height;
+    Distance height;
     ElevatorSubsystem elevator;
 
     @Inject
@@ -27,7 +28,7 @@ public class SetElevatorTargetHeightCommand extends BaseCommand {
         elevator.setTargetValue(height);
     }
 
-    public void setHeight(double height) {
+    public void setHeight(Distance height) {
         this.height = height;
     }
 }
