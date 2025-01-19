@@ -3,6 +3,7 @@ package competition.simulation;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -38,6 +39,7 @@ public class MapleSimulator implements BaseSimulator {
         aKitLog = new AKitLogger("Simulator/");
 
         arena = SimulatedArena.getInstance();
+        arena.resetFieldForAuto();
         // TODO: custom things to provide here like motor ratios and what have you
         config = DriveTrainSimulationConfig.Default().withCustomModuleTranslations(new Translation2d[] {
                 drive.getFrontLeftSwerveModuleSubsystem().getModuleTranslation(),
@@ -72,6 +74,11 @@ public class MapleSimulator implements BaseSimulator {
         swerveDriveSimulation.periodic();
 
         // read values back out from sim
+        aKitLog.record(
+                "FieldSimulation/Algae", arena.getGamePiecesArrayByType("Algae"));
+        aKitLog.record(
+                "FieldSimulation/Coral", arena.getGamePiecesArrayByType("Coral"));
+
         aKitLog.record("RobotGroundTruthPose", swerveDriveSimulation.getActualPoseInSimulationWorld());
         aKitLog.record("MapleOdometryPose", swerveDriveSimulation.getOdometryEstimatedPose());
 
@@ -86,6 +93,7 @@ public class MapleSimulator implements BaseSimulator {
 
     @Override
     public void resetPosition(Pose2d pose) {
+        arena.resetFieldForAuto();
         this.swerveDriveSimulation.getDriveTrainSimulation().setSimulationWorldPose(pose);
         this.pose.setCurrentPoseInMeters(pose);
     }
