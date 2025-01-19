@@ -5,6 +5,8 @@ import javax.inject.Singleton;
 
 import competition.subsystems.algae_collection.AlgaeCollectionSubsystem;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionStopCommand;
+import competition.subsystems.coral_scorer.CoralScorerSubsystem;
+import competition.subsystems.coral_scorer.commands.StopScoreCommand;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 
@@ -25,5 +27,10 @@ public class SubsystemDefaultCommandMap {
     @Inject
     public void setupAlgaeCollectionSubsystem(AlgaeCollectionSubsystem algaeCollectionSubsystem, AlgaeCollectionStopCommand command) {
         algaeCollectionSubsystem.setDefaultCommand(command);
+    }
+
+    @Inject
+    public void setupCoralScorerSubsystem(CoralScorerSubsystem subsystem, StopScoreCommand command) {
+        subsystem.setDefaultCommand(command);
     }
 }
