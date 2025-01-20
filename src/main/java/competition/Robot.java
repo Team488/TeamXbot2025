@@ -40,9 +40,9 @@ public class Robot extends BaseRobot {
     protected BaseRobotComponent createDaggerComponent() {
         if (BaseRobot.isReal()) {
             // Initialize the contract to use if this is a fresh robot. Assume competition since that's the safest.
-            if (!Preferences.containsKey("ContractToUse")) {
+            /*if (!Preferences.containsKey("ContractToUse")) {
                 Preferences.setString("ContractToUse", "Competition");
-            }
+            }*/
 
             String chosenContract = Preferences.getString("ContractToUse", "Competition");
 
