@@ -175,6 +175,9 @@ public class Contract2024 extends Contract2025 {
     public static String rearCenterNoteCameraName= "NoteRearCenter"; //TODO - one of these cameras
 
     public CameraInfo[] getCameraInfo() {
+        return new CameraInfo[] {};
+        /*
+
         return new CameraInfo[] {
                 new CameraInfo("Apriltag_FrontLeft_Camera",
                         "AprilTagFrontLeft",
@@ -225,5 +228,7 @@ public class Contract2024 extends Contract2025 {
                         new Transform3d(new Translation3d(), new Rotation3d()),
                         EnumSet.of(CameraCapabilities.GAME_SPECIFIC))
         };
+
+         */
     }
 }

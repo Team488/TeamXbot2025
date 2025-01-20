@@ -4,6 +4,7 @@ import competition.subsystems.pose.PoseSubsystem;
 import xbot.common.injection.electrical_contract.CANBusId;
 import xbot.common.injection.electrical_contract.CANMotorControllerInfo;
 import xbot.common.injection.electrical_contract.CANMotorControllerOutputConfig;
+import xbot.common.injection.electrical_contract.CameraInfo;
 import xbot.common.injection.electrical_contract.DeviceInfo;
 import xbot.common.injection.electrical_contract.MotorControllerType;
 import xbot.common.injection.swerve.SwerveInstance;
@@ -126,5 +127,10 @@ public class Contract2023 extends Contract2024 {
             case "RearRightDrive" -> new XYPair(-15, -15);
             default -> new XYPair(0, 0);
         };
+    }
+
+    @Override
+    public CameraInfo[] getCameraInfo() {
+        return new CameraInfo[]{};
     }
 }
