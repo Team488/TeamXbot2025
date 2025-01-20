@@ -4,6 +4,10 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import competition.simulation.commands.ResetSimulatedPose;
+import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
+import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
+import xbot.common.controls.sensors.XXboxController;
+import xbot.common.subsystems.drive.swerve.commands.ChangeActiveSwerveModuleCommand;
 import xbot.common.subsystems.pose.commands.SetRobotHeadingCommand;
 
 /**
@@ -22,6 +26,17 @@ public class OperatorCommandMap {
             SetRobotHeadingCommand resetHeading) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.gamepad.getifAvailable(1).onTrue(resetHeading);
+    }
+
+    @Inject
+    public void setupProgrammerCommands(
+            OperatorInterface oi,
+            DebugSwerveModuleCommand debugModule,
+            ChangeActiveSwerveModuleCommand changeActiveModule,
+            SwerveDriveWithJoysticksCommand typicalSwerveDrive) {
+        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(changeActiveModule);
+        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(debugModule);
+        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(typicalSwerveDrive);
     }
 
     @Inject
