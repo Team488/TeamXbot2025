@@ -28,10 +28,45 @@ public class MidCageToBackLeftCoralCommand extends SequentialCommandGroup {
         }
 
         //TODO: convert Blue to Red if needed
-        var startingPose = pose.createSetPositionCommand(scoreCoral1.getStartingPose());
+        var startingPose = pose.createSetPositionCommand(scoreCoral1.getPathStartingPose());
 
         this.addCommands(startingPose);
         this.addCommands(scoreCoral1);
 
+        var driveToHPS1 = followPathCommandProvider.get();
+        try {
+            driveToHPS1.setPath(PathPlannerPath.fromPathFile("BACKLEFT_TO_HPS"));
+        } catch (ParseException | IOException e) {
+            log.info("Cant find path");
+            cancel();
+        }
+        this.addCommands(driveToHPS1);
+
+        var scoreCoral2 = followPathCommandProvider.get();
+        try {
+            scoreCoral2.setPath(PathPlannerPath.fromPathFile("HPS_TO_BACKLEFT"));
+        } catch (ParseException | IOException e) {
+            log.info("Cant find path");
+            cancel();
+        }
+        this.addCommands(scoreCoral2);
+
+        var driveToHPS2 = followPathCommandProvider.get();
+        try {
+            driveToHPS2.setPath(PathPlannerPath.fromPathFile("BACKLEFT_TO_HPS"));
+        } catch (ParseException | IOException e) {
+            log.info("Cant find path");
+            cancel();
+        }
+        this.addCommands(driveToHPS2);
+
+        var scoreCoral3 = followPathCommandProvider.get();
+        try {
+            scoreCoral3.setPath(PathPlannerPath.fromPathFile("HPS_TO_FRONT"));
+        } catch (ParseException | IOException e) {
+            log.info("Cant find path");
+            cancel();
+        }
+        this.addCommands(scoreCoral3);
     }
 }

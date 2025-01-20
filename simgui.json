@@ -1,8 +1,13 @@
 {
   "NTProvider": {
     "types": {
+      "/AdvantageKit/RealOutputs/Alerts": "Alerts",
       "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Alerts": "Alerts",
       "/SmartDashboard/Scheduler": "Scheduler"
     }
+  },
+  "NetworkTables Info": {
+    "visible": true
   }
 }

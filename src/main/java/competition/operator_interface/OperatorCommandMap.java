@@ -24,7 +24,6 @@ public class OperatorCommandMap {
         resetHeading.setHeadingToApply(0);
         operatorInterface.gamepad.getifAvailable(1).onTrue(resetHeading);
 
-        //TODO: Fix not building
-//        operatorInterface.gamepad.getXboxButton(XXboxController.XboxButton.A).onTrue(midCageToBackLeftCoralCommand);
+        operatorInterface.gamepad.getXboxButton(XXboxController.XboxButton.A).onTrue(midCageToBackLeftCoralCommand);
     }
 }

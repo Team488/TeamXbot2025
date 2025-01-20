@@ -17,6 +17,8 @@ import xbot.common.injection.swerve.FrontRightDrive;
 import xbot.common.injection.swerve.RearLeftDrive;
 import xbot.common.injection.swerve.RearRightDrive;
 import xbot.common.injection.swerve.SwerveComponent;
+import xbot.common.math.PIDDefaults;
+import xbot.common.math.PIDManager;
 import xbot.common.math.PIDManager.PIDManagerFactory;
 import xbot.common.properties.Property;
 import xbot.common.properties.PropertyFactory;
@@ -33,6 +35,7 @@ public class DriveSubsystem extends BaseSwerveDriveSubsystem implements DataFram
     private Rotation2d staticHeadingTarget = new Rotation2d(); // The heading you want to constantly be at
     private boolean lookAtPointActive = false;
     private boolean staticHeadingActive = false;
+    private PIDManager pathPlannerRotationPidManager;
 
     @Inject
     public DriveSubsystem(PIDManagerFactory pidFactory, PropertyFactory pf,
@@ -44,6 +47,10 @@ public class DriveSubsystem extends BaseSwerveDriveSubsystem implements DataFram
 
         pf.setPrefix(this.getPrefix());
         pf.setDefaultLevel(Property.PropertyLevel.Important);
+
+        pathPlannerRotationPidManager = pidFactory.create(
+                this.getPrefix() + "PathPlannerRotationPID",
+                new PIDDefaults(4, 0,0));
     }
 
     public Translation2d getLookAtPointTarget() {
@@ -97,5 +104,9 @@ public class DriveSubsystem extends BaseSwerveDriveSubsystem implements DataFram
             setStaticHeadingTargetActive(false);
             setLookAtPointTargetActive(false);
         });
+    }
+
+    public PIDManager getPathPlannerRotationPid() {
+        return pathPlannerRotationPidManager;
     }
 }

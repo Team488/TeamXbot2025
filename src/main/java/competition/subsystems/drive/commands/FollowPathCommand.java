@@ -1,24 +1,24 @@
 package competition.subsystems.drive.commands;
 
-import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
 import com.pathplanner.lib.trajectory.PathPlannerTrajectoryState;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.PoseSubsystem;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.Timer;
 
+import org.json.simple.parser.ParseException;
 import org.littletonrobotics.junction.Logger;
 import xbot.common.command.BaseCommand;
-import xbot.common.math.PIDManager;
 import xbot.common.math.XYPair;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
 
 import javax.inject.Inject;
+import java.io.IOException;
 
 public class FollowPathCommand extends BaseCommand {
     private final Timer timer = new Timer();
@@ -26,32 +26,18 @@ public class FollowPathCommand extends BaseCommand {
     private PathPlannerPath path;
     private final PoseSubsystem pose;
     private PathPlannerTrajectory trajectory;
-    PIDManager translationPID;
     HeadingModule headingModule;
+    PIDController translationPID;
     RobotConfig robotConfig;
-    double massKg = 68.039;
-    double momentOfInertia = 20.250;
-    ModuleConfig moduleConfig;
-    double wheelRadius = 0.051;
-    double maxDriveVelocityMPS = 3.5;
-    double wheelCOF = 1.0;
-    double driveGearing = 6.120;
-    double driveCurrentLimits = 35.0;
-    int numMotors = 8;
-    DCMotor dcMotor = DCMotor.getKrakenX60(numMotors);
-    double trackWidth = 0.584;
+
 
     @Inject
     public FollowPathCommand(DriveSubsystem driveSubsystem, PoseSubsystem pose,
                              HeadingModule.HeadingModuleFactory headingModuleFactory) {
         this.drive = driveSubsystem;
         this.pose = pose;
-        this.moduleConfig = new ModuleConfig(wheelRadius, maxDriveVelocityMPS,
-                wheelCOF, dcMotor, driveGearing, driveCurrentLimits, numMotors);
-        this.robotConfig = new RobotConfig(massKg, momentOfInertia, moduleConfig, trackWidth);
-
-        translationPID = drive.getPathPlannerTranslationPid();
         headingModule = headingModuleFactory.create(drive.getPathPlannerRotationPid());
+        translationPID = new PIDController(5,0,0);
 
         addRequirements(driveSubsystem);
     }
@@ -62,12 +48,20 @@ public class FollowPathCommand extends BaseCommand {
         translationPID.reset();
         headingModule.reset();
 
+        try {
+            robotConfig = RobotConfig.fromGUISettings();
+        } catch (ParseException | IOException e) {
+            log.info("RobotConfig problem");
+            cancel();
+        }
+
         trajectory = new PathPlannerTrajectory(
                 path,
                 drive.getSwerveDriveKinematics().toChassisSpeeds(drive.getSwerveModuleStates()),
                 pose.getCurrentPose2d().getRotation(), robotConfig);
 
         this.timer.restart();
+        Logger.recordOutput("PathPlanner/FollowPathCommand/trajectoryTime", trajectory.getTotalTimeSeconds());
     }
 
     @Override
@@ -87,7 +81,7 @@ public class FollowPathCommand extends BaseCommand {
                 currentPose.getY(), desiredState.pose.getY());
 
         // Calculate omega
-        double omega = headingModule.calculateHeadingPower(desiredState.heading.getRadians());
+        double omega = headingModule.calculateHeadingPower(desiredState.pose.getRotation().getDegrees());
 
         // Convert Field relative chassis speeds to robot relative
         ChassisSpeeds chassisSpeeds =
@@ -102,6 +96,7 @@ public class FollowPathCommand extends BaseCommand {
         Logger.recordOutput("PathPlanner/FollowPathCommand/vxFeedBack", vxFeedBack);
         Logger.recordOutput("PathPlanner/FollowPathCommand/vyFeedback", vyFeedBack);
         Logger.recordOutput("PathPlanner/FollowPathCommand/desiredOmega", omega);
+        Logger.recordOutput("PathPlanner/FollowPathCommand/timer", timer.get());
     }
 
     @Override
@@ -116,8 +111,6 @@ public class FollowPathCommand extends BaseCommand {
         driveRobotRelative(new ChassisSpeeds(0, 0, 0));
         drive.stop();
     }
-
-
 
     public void driveRobotRelative(ChassisSpeeds robotRelativeSpeeds) {
         //AdvantageScope Logging
@@ -142,8 +135,7 @@ public class FollowPathCommand extends BaseCommand {
     public void setPath(PathPlannerPath path) {
         this.path = path;
     }
-
-    public Pose2d getStartingPose() {
-        return trajectory.getInitialState().pose;
+    public Pose2d getPathStartingPose() {
+        return path.getStartingHolonomicPose().get();
     }
 }
