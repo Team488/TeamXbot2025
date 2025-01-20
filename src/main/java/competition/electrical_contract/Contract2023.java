@@ -9,6 +9,7 @@ import xbot.common.injection.electrical_contract.MotorControllerType;
 import xbot.common.injection.swerve.SwerveInstance;
 import xbot.common.math.XYPair;
 
+
 import javax.inject.Inject;
 
 public class Contract2023 extends Contract2024 {
