@@ -11,6 +11,7 @@ import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
@@ -23,34 +24,46 @@ public class ElevatorMechanism extends BaseSubsystem {
     final LoggedMechanism2d mech2d;
     final LoggedMechanismLigament2d elevatorLigament;
     final LoggedMechanismLigament2d armLigament;
+    final LoggedMechanismLigament2d coralLigament;
 
-    final double elevatorLigamentBaseLength = 0.7;
-    final double armLigamentBaseAngle = 145;
-
+    // TODO: these will be replaced by reading from the subsystem(s) when they exist and can be simulated    
     public Distance elevatorHeight = Meters.zero();
     public Angle armAngle = Degrees.zero();
+    public boolean coralInScorer = true;
+
+    // these constants define the mechanism geometry rendering at zero height and zero angle
+    // all tuned by trial and error
+    final double elevatorLigamentBaseLengthMeters = 0.7;
+    final double armLigamentBaseAngleDegrees = 145;
+    final double armLengthMeters = 0.47;
+    final double scorerLengthMeters = 0.6;
+    final double scorerAngleDegrees = -145;
+    final double coralLengthMeters = 0.3;
+    // where the base of the elevator appears on the robot, 
+    final Translation2d elevatorBasePositionMeters = new Translation2d(0.57, 0.05);
 
     @Inject
-    public ElevatorMechanism() {
-
+    public ElevatorMechanism(/* TODO: Inject references to the Elevator + Arm + Scorer subsystems when they exist */ ) {
         this.mech2d = new LoggedMechanism2d(1, 2);
-        var root = mech2d.getRoot("ElevatorRoot", 0.57, 0.05);
-        this.elevatorLigament = new LoggedMechanismLigament2d("elevator", elevatorLigamentBaseLength, 90, 6, new Color8Bit(Color.kBrown));
+        var root = mech2d.getRoot("ElevatorRoot", elevatorBasePositionMeters.getX(), elevatorBasePositionMeters.getY());
+        this.elevatorLigament = new LoggedMechanismLigament2d("elevator", elevatorLigamentBaseLengthMeters, 90, 6, new Color8Bit(Color.kBrown));
         root.append(elevatorLigament);
 
         
-        this.armLigament = new LoggedMechanismLigament2d("arm", 0.47, armLigamentBaseAngle, 4, new Color8Bit(Color.kRed));
+        this.armLigament = new LoggedMechanismLigament2d("arm", armLengthMeters, armLigamentBaseAngleDegrees, 4, new Color8Bit(Color.kRed));
         elevatorLigament.append(armLigament);
 
-        var scorerLigament = new LoggedMechanismLigament2d("scorer", 0.6, -145, 3, new Color8Bit(Color.kBlue));
+        this.coralLigament = new LoggedMechanismLigament2d("coral", coralLengthMeters, scorerAngleDegrees, 10, new Color8Bit(Color.kBeige));
+        armLigament.append(coralLigament);
+        var scorerLigament = new LoggedMechanismLigament2d("scorer", scorerLengthMeters, scorerAngleDegrees, 3, new Color8Bit(Color.kBlue));
         armLigament.append(scorerLigament);
     }
 
     public void periodic() {
         // update mechanism based on current elevatorHeight and armAngle
-        elevatorLigament.setLength(elevatorLigamentBaseLength + elevatorHeight.in(Units.Meters));
-        armLigament.setAngle(armLigamentBaseAngle + armAngle.in(Degrees));
-
+        elevatorLigament.setLength(elevatorLigamentBaseLengthMeters + elevatorHeight.in(Units.Meters));
+        armLigament.setAngle(armLigamentBaseAngleDegrees + armAngle.in(Degrees));
+        coralLigament.setLength(this.coralInScorer ? coralLengthMeters : 0.0);
         aKitLog.record("Mech2d", mech2d);
 
         // Record the robot relevative positive of the Elevator so AdvantageScope can render it correctly
