@@ -31,7 +31,7 @@ import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 public class MapleSimulator implements BaseSimulator {
     final PoseSubsystem pose;
     final DriveSubsystem drive;
-    final Duration loopPeriod = Duration.ofMillis(20);
+    final double loopPeriodSec = 0.02; 
 
     protected final AKitLogger aKitLog;
 
@@ -43,10 +43,10 @@ public class MapleSimulator implements BaseSimulator {
     // elevator stuff
     // Simulation classes help us simulate what's going on, including gravity.
     final ElevatorSim elevatorSim;
-    final DCMotor elevatorGearBox = DCMotor.getVex775Pro(4);
+    final DCMotor elevatorGearBox = DCMotor.getKrakenX60(2);
 
     // Placeholder for getting real elevator voltage from the ElevatorSubsystem
-    public double elevatorVoltage = 2;
+    public double elevatorVoltage = 0;
     final ElevatorMechanism elevatorMechanism;
 
     @Inject
@@ -86,11 +86,11 @@ public class MapleSimulator implements BaseSimulator {
          */
         this.elevatorSim = new ElevatorSim(
             elevatorGearBox,
-            ElevatorSimConstants.kElevatorGearing,
-            ElevatorSimConstants.kCarriageMass,
-            ElevatorSimConstants.kElevatorDrumRadius,
-            ElevatorSimConstants.kMinElevatorHeightMeters,
-            ElevatorSimConstants.kMaxElevatorHeightMeters,
+            ElevatorSimConstants.elevatorGearing,
+            ElevatorSimConstants.carriageMass,
+            ElevatorSimConstants.elevatorDrumRadius,
+            ElevatorSimConstants.minElevatorHeightMeters,
+            ElevatorSimConstants.maxElevatorHeightMeters,
             true,
             0,
             0.0,
@@ -105,8 +105,8 @@ public class MapleSimulator implements BaseSimulator {
     protected void updateElevatorSimulation() {
         this.elevatorSim.setInputVoltage(elevatorVoltage);
 
-        //this.elevatorSim.update(loopPeriod.toSeconds());
-        this.elevatorSim.update(0.020);
+        this.elevatorSim.update(loopPeriodSec);
+        
         // Read out the new elevator position for rendering
         this.elevatorMechanism.elevatorHeight = Meters.of(this.elevatorSim.getPositionMeters());
     }
