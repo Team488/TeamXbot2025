@@ -1,6 +1,7 @@
 package competition.simulation;
 
 import competition.subsystems.drive.DriveSubsystem;
+import competition.subsystems.elevator.ElevatorMechanism;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -42,15 +43,17 @@ public class MapleSimulator implements BaseSimulator {
     // elevator stuff
     // Simulation classes help us simulate what's going on, including gravity.
     final ElevatorSim elevatorSim;
-    final DCMotor elevatorGearBox = DCMotor.getKrakenX60(2);
+    final DCMotor elevatorGearBox = DCMotor.getVex775Pro(4);
 
     // Placeholder for getting real elevator voltage from the ElevatorSubsystem
-    public double elevatorVoltage = 0;
+    public double elevatorVoltage = 2;
+    final ElevatorMechanism elevatorMechanism;
 
     @Inject
-    public MapleSimulator(PoseSubsystem pose, DriveSubsystem drive) {
+    public MapleSimulator(PoseSubsystem pose, DriveSubsystem drive, ElevatorMechanism elevatorMechanism) {
         this.pose = pose;
         this.drive = drive;
+        this.elevatorMechanism = elevatorMechanism;
 
         aKitLog = new AKitLogger("Simulator/");
 
@@ -90,7 +93,7 @@ public class MapleSimulator implements BaseSimulator {
             ElevatorSimConstants.kMaxElevatorHeightMeters,
             true,
             0,
-            0.01,
+            0.0,
             0.0);
     }
 
@@ -100,12 +103,12 @@ public class MapleSimulator implements BaseSimulator {
     }
 
     protected void updateElevatorSimulation() {
-        this.elevatorSim.setInput(elevatorVoltage);
-        this.elevatorSim.update(loopPeriod.toSeconds());
+        this.elevatorSim.setInputVoltage(elevatorVoltage);
 
+        //this.elevatorSim.update(loopPeriod.toSeconds());
+        this.elevatorSim.update(0.020);
         // Read out the new elevator position for rendering
-        
-        
+        this.elevatorMechanism.elevatorHeight = Meters.of(this.elevatorSim.getPositionMeters());
     }
 
     protected void updateDriveSimulation() {
