@@ -35,17 +35,17 @@ public class MapleSimulator implements BaseSimulator {
 
     protected final AKitLogger aKitLog;
 
-    // maple-sim stuff
+    // maple-sim stuff ----------------------------
     final DriveTrainSimulationConfig config;
     final SimulatedArena arena;
     final SelfControlledSwerveDriveSimulation swerveDriveSimulation;
 
-    // elevator stuff
+    // elevator stuff ----------------------------
     // Simulation classes help us simulate what's going on, including gravity.
     final ElevatorSim elevatorSim;
     final DCMotor elevatorGearBox = DCMotor.getKrakenX60(2);
 
-    // Placeholder for getting real elevator voltage from the ElevatorSubsystem
+    // Placeholder for getting real elevator voltage from the ElevatorSubsystem when it exists
     public double elevatorVoltage = 0;
     final ElevatorMechanism elevatorMechanism;
 
@@ -109,6 +109,14 @@ public class MapleSimulator implements BaseSimulator {
         
         // Read out the new elevator position for rendering
         this.elevatorMechanism.elevatorHeight = Meters.of(this.elevatorSim.getPositionMeters());
+        // TODO: convert this height into an encoder tick count to set on the elevator subsystem
+        // var simEncoderTicks = elevatorHeightToEncoderTicks(this.elevatorSim.getPositionMeters());
+        // this.elevatorSubsystem.setSimulatedEncoderTicks(simEncoderTicks);
+    }
+
+    static long elevatorHeightToEncoderTicks(double height) {
+        // so much math
+        return 0;
     }
 
     protected void updateDriveSimulation() {
@@ -131,10 +139,7 @@ public class MapleSimulator implements BaseSimulator {
                 "FieldSimulation/Coral", arena.getGamePiecesArrayByType("Coral"));
 
         // this is where the robot really is in the sim
-        aKitLog.record("FieldSimulation/RobotGroundTruthPose", swerveDriveSimulation.getActualPoseInSimulationWorld());
-        // This one isn't crazy useful since we're doing our own odometry, but it's here
-        // for completeness
-        aKitLog.record("FieldSimulation/MapleOdometryPose", swerveDriveSimulation.getOdometryEstimatedPose());
+        aKitLog.record("FieldSimulation/Robot", swerveDriveSimulation.getActualPoseInSimulationWorld());
 
         // tell the pose subystem about where the robot has moved based on odometry
         pose.ingestSimulatedSwerveModulePositions(swerveDriveSimulation.getLatestModulePositions());
