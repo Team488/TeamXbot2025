@@ -48,6 +48,7 @@ public class MapleSimulator implements BaseSimulator {
     // Placeholder for getting real elevator voltage from the ElevatorSubsystem when it exists
     public double elevatorVoltage = 0;
     final ElevatorMechanism elevatorMechanism;
+    public boolean elevatorIsAtBottom = true;
 
     @Inject
     public MapleSimulator(PoseSubsystem pose, DriveSubsystem drive, ElevatorMechanism elevatorMechanism) {
@@ -108,10 +109,17 @@ public class MapleSimulator implements BaseSimulator {
         this.elevatorSim.update(loopPeriodSec);
         
         // Read out the new elevator position for rendering
-        this.elevatorMechanism.elevatorHeight = Meters.of(this.elevatorSim.getPositionMeters());
+        var elevatorCurrentHeight = Meters.of(this.elevatorSim.getPositionMeters());
+        // TODO: instead of setting the mechanism directly this should go via setting the encoder ticks on the elevator subsystem when it exists
+        this.elevatorMechanism.elevatorHeight = elevatorCurrentHeight;
         // TODO: convert this height into an encoder tick count to set on the elevator subsystem
         // var simEncoderTicks = elevatorHeightToEncoderTicks(this.elevatorSim.getPositionMeters());
         // this.elevatorSubsystem.setSimulatedEncoderTicks(simEncoderTicks);
+        
+        // this would be used to simulate the bottom position sensor being triggered
+        this.elevatorIsAtBottom = elevatorCurrentHeight.in(Meters) <= ElevatorSimConstants.elevatorBottomSensorTriggerHeight;
+        aKitLog.record("FieldSimulation/ElevatorHeight-Meters", elevatorCurrentHeight.in(Meters));
+        aKitLog.record("FieldSimulation/ElevatorBottomSensorTriggered", this.elevatorIsAtBottom);
     }
 
     static long elevatorHeightToEncoderTicks(double height) {
