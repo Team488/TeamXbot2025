@@ -28,6 +28,9 @@ public class OperatorCommandMap {
         operatorInterface.gamepad.getifAvailable(1).onTrue(resetHeading);
     }
 
+    // Programmer commands are only meant to be used to debug or test the robot. They should not be used in competition,
+    // and many do dangerous things like bypass various safeties or force the robot into states that aren't useful
+    // (e.g. only driving a single swerve module at a time for testing purposes).
     @Inject
     public void setupProgrammerCommands(
             OperatorInterface oi,

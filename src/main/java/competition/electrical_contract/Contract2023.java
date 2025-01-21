@@ -131,6 +131,7 @@ public class Contract2023 extends Contract2024 {
 
     @Override
     public CameraInfo[] getCameraInfo() {
+        // 2023 has no cameras, so return an empty array
         return new CameraInfo[]{};
     }
 }
