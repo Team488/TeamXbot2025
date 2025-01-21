@@ -8,16 +8,12 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import xbot.common.advantage.AKitLogger;
 import xbot.common.controls.sensors.mock_adapters.MockGyro;
 
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
 
-import java.time.Duration;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -31,31 +27,22 @@ import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 public class MapleSimulator implements BaseSimulator {
     final PoseSubsystem pose;
     final DriveSubsystem drive;
-    final double loopPeriodSec = 0.02; 
 
     protected final AKitLogger aKitLog;
+
+    final ElevatorSimulator elevatorSimulator;
 
     // maple-sim stuff ----------------------------
     final DriveTrainSimulationConfig config;
     final SimulatedArena arena;
     final SelfControlledSwerveDriveSimulation swerveDriveSimulation;
 
-    // elevator stuff ----------------------------
-    // Simulation classes help us simulate what's going on, including gravity.
-    final ElevatorSim elevatorSim;
-    final DCMotor elevatorGearBox = DCMotor.getKrakenX60(2);
-
-    // Placeholder for getting real elevator voltage from the ElevatorSubsystem when it exists
-    public double elevatorVoltage = 0;
-    final ElevatorMechanism elevatorMechanism;
-    public boolean elevatorIsAtBottom = true;
-
     @Inject
-    public MapleSimulator(PoseSubsystem pose, DriveSubsystem drive, ElevatorMechanism elevatorMechanism) {
+    public MapleSimulator(PoseSubsystem pose, DriveSubsystem drive, ElevatorSimulator elevatorSimulator) {
         this.pose = pose;
         this.drive = drive;
-        this.elevatorMechanism = elevatorMechanism;
-
+        this.elevatorSimulator = elevatorSimulator;
+        
         aKitLog = new AKitLogger("Simulator/");
 
         /**
@@ -81,50 +68,11 @@ public class MapleSimulator implements BaseSimulator {
         pose.setCurrentPoseInMeters(startingPose);
 
         arena.addDriveTrainSimulation(swerveDriveSimulation.getDriveTrainSimulation());
-
-        /**
-         * Elevator sim setup
-         */
-        this.elevatorSim = new ElevatorSim(
-            elevatorGearBox,
-            ElevatorSimConstants.elevatorGearing,
-            ElevatorSimConstants.carriageMass,
-            ElevatorSimConstants.elevatorDrumRadius,
-            ElevatorSimConstants.minElevatorHeightMeters,
-            ElevatorSimConstants.maxElevatorHeightMeters,
-            true,
-            0,
-            0.0,
-            0.0);
     }
 
     public void update() {
         this.updateDriveSimulation();
-        this.updateElevatorSimulation();
-    }
-
-    protected void updateElevatorSimulation() {
-        this.elevatorSim.setInputVoltage(elevatorVoltage);
-
-        this.elevatorSim.update(loopPeriodSec);
-        
-        // Read out the new elevator position for rendering
-        var elevatorCurrentHeight = Meters.of(this.elevatorSim.getPositionMeters());
-        // TODO: instead of setting the mechanism directly this should go via setting the encoder ticks on the elevator subsystem when it exists
-        this.elevatorMechanism.elevatorHeight = elevatorCurrentHeight;
-        // TODO: convert this height into an encoder tick count to set on the elevator subsystem
-        // var simEncoderTicks = elevatorHeightToEncoderTicks(this.elevatorSim.getPositionMeters());
-        // this.elevatorSubsystem.setSimulatedEncoderTicks(simEncoderTicks);
-        
-        // this would be used to simulate the bottom position sensor being triggered
-        this.elevatorIsAtBottom = elevatorCurrentHeight.in(Meters) <= ElevatorSimConstants.elevatorBottomSensorTriggerHeight;
-        aKitLog.record("FieldSimulation/ElevatorHeight-Meters", elevatorCurrentHeight.in(Meters));
-        aKitLog.record("FieldSimulation/ElevatorBottomSensorTriggered", this.elevatorIsAtBottom);
-    }
-
-    static long elevatorHeightToEncoderTicks(double height) {
-        // so much math
-        return 0;
+        elevatorSimulator.update();
     }
 
     protected void updateDriveSimulation() {
@@ -154,10 +102,6 @@ public class MapleSimulator implements BaseSimulator {
 
         // update gyro reading from sim
         ((MockGyro) pose.imu).setYaw(this.swerveDriveSimulation.getOdometryEstimatedPose().getRotation().getDegrees());
-        // if we want to give the gyro ground truth to make debugging other problems
-        // easier swap to this:
-        // ((MockGyro)
-        // pose.imu).setYaw(this.swerveDriveSimulation.getActualPoseInSimulationWorld().getRotation().getDegrees());
     }
 
     @Override
