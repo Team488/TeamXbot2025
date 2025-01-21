@@ -6,13 +6,17 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import xbot.common.advantage.AKitLogger;
 import xbot.common.controls.sensors.mock_adapters.MockGyro;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+
+import java.time.Duration;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -26,6 +30,7 @@ import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 public class MapleSimulator implements BaseSimulator {
     final PoseSubsystem pose;
     final DriveSubsystem drive;
+    final Duration loopPeriod = Duration.ofMillis(20);
 
     protected final AKitLogger aKitLog;
 
@@ -35,10 +40,12 @@ public class MapleSimulator implements BaseSimulator {
     final SelfControlledSwerveDriveSimulation swerveDriveSimulation;
 
     // elevator stuff
-    Distance elevatorHeight = Meters.zero();
-    // TODO: find true value for max
-    final Distance elevatorMaxPhysicalHeight = Meters.of(2.0);
-    final LinearVelocity elevatorVelocity = MetersPerSecond.of(0.0);
+    // Simulation classes help us simulate what's going on, including gravity.
+    final ElevatorSim elevatorSim;
+    final DCMotor elevatorGearBox = DCMotor.getKrakenX60(2);
+
+    // Placeholder for getting real elevator voltage from the ElevatorSubsystem
+    public double elevatorVoltage = 0;
 
     @Inject
     public MapleSimulator(PoseSubsystem pose, DriveSubsystem drive) {
@@ -70,11 +77,35 @@ public class MapleSimulator implements BaseSimulator {
         pose.setCurrentPoseInMeters(startingPose);
 
         arena.addDriveTrainSimulation(swerveDriveSimulation.getDriveTrainSimulation());
-    }
 
+        /**
+         * Elevator sim setup
+         */
+        this.elevatorSim = new ElevatorSim(
+            elevatorGearBox,
+            ElevatorSimConstants.kElevatorGearing,
+            ElevatorSimConstants.kCarriageMass,
+            ElevatorSimConstants.kElevatorDrumRadius,
+            ElevatorSimConstants.kMinElevatorHeightMeters,
+            ElevatorSimConstants.kMaxElevatorHeightMeters,
+            true,
+            0,
+            0.01,
+            0.0);
+    }
 
     public void update() {
         this.updateDriveSimulation();
+        this.updateElevatorSimulation();
+    }
+
+    protected void updateElevatorSimulation() {
+        this.elevatorSim.setInput(elevatorVoltage);
+        this.elevatorSim.update(loopPeriod.toSeconds());
+
+        // Read out the new elevator position for rendering
+        
+        
     }
 
     protected void updateDriveSimulation() {
@@ -98,16 +129,19 @@ public class MapleSimulator implements BaseSimulator {
 
         // this is where the robot really is in the sim
         aKitLog.record("FieldSimulation/RobotGroundTruthPose", swerveDriveSimulation.getActualPoseInSimulationWorld());
-        // This one isn't crazy useful since we're doing our own odometry, but it's here for completeness
+        // This one isn't crazy useful since we're doing our own odometry, but it's here
+        // for completeness
         aKitLog.record("FieldSimulation/MapleOdometryPose", swerveDriveSimulation.getOdometryEstimatedPose());
 
         // tell the pose subystem about where the robot has moved based on odometry
         pose.ingestSimulatedSwerveModulePositions(swerveDriveSimulation.getLatestModulePositions());
-        
+
         // update gyro reading from sim
         ((MockGyro) pose.imu).setYaw(this.swerveDriveSimulation.getOdometryEstimatedPose().getRotation().getDegrees());
-        // if we want to give the gyro ground truth to make debugging other problems easier swap to this:
-        // ((MockGyro) pose.imu).setYaw(this.swerveDriveSimulation.getActualPoseInSimulationWorld().getRotation().getDegrees());
+        // if we want to give the gyro ground truth to make debugging other problems
+        // easier swap to this:
+        // ((MockGyro)
+        // pose.imu).setYaw(this.swerveDriveSimulation.getActualPoseInSimulationWorld().getRotation().getDegrees());
     }
 
     @Override
