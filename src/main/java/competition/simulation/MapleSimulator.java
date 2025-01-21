@@ -3,13 +3,16 @@ package competition.simulation;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
 import xbot.common.advantage.AKitLogger;
 import xbot.common.controls.sensors.mock_adapters.MockGyro;
+
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -31,6 +34,12 @@ public class MapleSimulator implements BaseSimulator {
     final SimulatedArena arena;
     final SelfControlledSwerveDriveSimulation swerveDriveSimulation;
 
+    // elevator stuff
+    Distance elevatorHeight = Meters.zero();
+    // TODO: find true value for max
+    final Distance elevatorMaxPhysicalHeight = Meters.of(2.0);
+    final LinearVelocity elevatorVelocity = MetersPerSecond.of(0.0);
+
     @Inject
     public MapleSimulator(PoseSubsystem pose, DriveSubsystem drive) {
         this.pose = pose;
@@ -38,6 +47,9 @@ public class MapleSimulator implements BaseSimulator {
 
         aKitLog = new AKitLogger("Simulator/");
 
+        /**
+         * MapleSim arena and drive setup
+         */
         arena = SimulatedArena.getInstance();
         arena.resetFieldForAuto();
         // TODO: custom things to provide here like motor ratios and what have you
@@ -48,7 +60,7 @@ public class MapleSimulator implements BaseSimulator {
                 drive.getRearRightSwerveModuleSubsystem().getModuleTranslation()
         });
 
-        // middle ish of the field on blue
+        // starting middle ish of the field on blue
         var startingPose = new Pose2d(6, 4, new Rotation2d());
 
         // Creating the SelfControlledSwerveDriveSimulation instance
@@ -60,7 +72,12 @@ public class MapleSimulator implements BaseSimulator {
         arena.addDriveTrainSimulation(swerveDriveSimulation.getDriveTrainSimulation());
     }
 
+
     public void update() {
+        this.updateDriveSimulation();
+    }
+
+    protected void updateDriveSimulation() {
         // drive simulated robot from requested robot commands
         swerveDriveSimulation.runSwerveStates(new SwerveModuleState[] {
                 drive.getFrontLeftSwerveModuleSubsystem().getTargetState(),
@@ -79,8 +96,10 @@ public class MapleSimulator implements BaseSimulator {
         aKitLog.record(
                 "FieldSimulation/Coral", arena.getGamePiecesArrayByType("Coral"));
 
-        aKitLog.record("RobotGroundTruthPose", swerveDriveSimulation.getActualPoseInSimulationWorld());
-        aKitLog.record("MapleOdometryPose", swerveDriveSimulation.getOdometryEstimatedPose());
+        // this is where the robot really is in the sim
+        aKitLog.record("FieldSimulation/RobotGroundTruthPose", swerveDriveSimulation.getActualPoseInSimulationWorld());
+        // This one isn't crazy useful since we're doing our own odometry, but it's here for completeness
+        aKitLog.record("FieldSimulation/MapleOdometryPose", swerveDriveSimulation.getOdometryEstimatedPose());
 
         // tell the pose subystem about where the robot has moved based on odometry
         pose.ingestSimulatedSwerveModulePositions(swerveDriveSimulation.getLatestModulePositions());
