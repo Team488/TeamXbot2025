@@ -39,10 +39,6 @@ public class Robot extends BaseRobot {
 
     protected BaseRobotComponent createDaggerComponent() {
         if (BaseRobot.isReal()) {
-            // Initialize the contract to use if this is a fresh robot. Assume competition since that's the safest.
-            if (!Preferences.containsKey("ContractToUse")) {
-                Preferences.setString("ContractToUse", "Competition");
-            }
 
             String chosenContract = Preferences.getString("ContractToUse", "Competition");
 
@@ -57,6 +53,12 @@ public class Robot extends BaseRobot {
                     System.out.println("Using Robox contract");
                     return DaggerRoboxComponent.create();
                 default:
+                    // Moved setting the default contract to here; there was some bug where
+                    // other chassis were being set to "Competition" when they shouldn't have been.
+                    // Root cause is unknown, so far now only setting this after checking for any other value.
+                    if (!Preferences.containsKey("ContractToUse")) {
+                        Preferences.setString("ContractToUse", "Competition");
+                    }
                     System.out.println("Using Competition contract");
                     // In all other cases, return the competition component.
                     return DaggerRobotComponent.create();

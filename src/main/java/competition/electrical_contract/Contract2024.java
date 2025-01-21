@@ -175,6 +175,11 @@ public class Contract2024 extends Contract2025 {
     public static String rearCenterNoteCameraName= "NoteRearCenter"; //TODO - one of these cameras
 
     public CameraInfo[] getCameraInfo() {
+        // 2024 was having issues due to PhotonLib version mismatch, so temporarily
+        // disabling all vision activities by declaring no cameras.
+        return new CameraInfo[] {};
+
+        /*
         return new CameraInfo[] {
                 new CameraInfo("Apriltag_FrontLeft_Camera",
                         "AprilTagFrontLeft",
@@ -225,5 +230,6 @@ public class Contract2024 extends Contract2025 {
                         new Transform3d(new Translation3d(), new Rotation3d()),
                         EnumSet.of(CameraCapabilities.GAME_SPECIFIC))
         };
+         */
     }
 }
