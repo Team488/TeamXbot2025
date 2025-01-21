@@ -1,4 +1,4 @@
 package competition.subsystems.drive;
 
-public class CommonSwerveActions {
+public interface CommonSwerveActions {
 }
