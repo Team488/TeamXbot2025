@@ -14,11 +14,16 @@ import xbot.common.logging.RobotAssertionManager;
 @Singleton
 public class OperatorInterface {
     public XXboxController gamepad;
+    public XXboxController programmerGamepad;
 
     @Inject
     public OperatorInterface(XXboxControllerFactory controllerFactory, RobotAssertionManager assertionManager) {
         gamepad = controllerFactory.create(0);
         gamepad.setLeftInversion(false, true);
         gamepad.setRightInversion(true, true);
+
+        programmerGamepad = controllerFactory.create(3);
+        programmerGamepad.setLeftInversion(false, true);
+        programmerGamepad.setRightInversion(true, true);
     }
 }

@@ -1,5 +1,7 @@
 package competition.subsystems.pose;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -23,6 +25,9 @@ public class PoseSubsystem extends BasePoseSubsystem implements AprilTagVisionSu
     final SwerveDrivePoseEstimator onlyWheelsGyroSwerveOdometry;
 
     private final DriveSubsystem drive;
+
+    // only used when simulating the robot
+    protected Optional<SwerveModulePosition[]> simulatedModulePositions = Optional.empty();
 
     @Inject
     public PoseSubsystem(XGyroFactory gyroFactory, PropertyFactory propManager, DriveSubsystem drive) {
@@ -78,6 +83,11 @@ public class PoseSubsystem extends BasePoseSubsystem implements AprilTagVisionSu
     }
 
     private SwerveModulePosition[] getSwerveModulePositions() {
+        // if we have simulated data, return that directly instead of asking the
+        // modules
+        if(simulatedModulePositions.isPresent()) {
+            return simulatedModulePositions.get();
+        }
         return new SwerveModulePosition[] {
                 drive.getFrontLeftSwerveModuleSubsystem().getCurrentPosition(),
                 drive.getFrontRightSwerveModuleSubsystem().getCurrentPosition(),
@@ -121,5 +131,10 @@ public class PoseSubsystem extends BasePoseSubsystem implements AprilTagVisionSu
     @Override
     public void acceptVisionPose(Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs) {
 
+    }
+
+    // used by the physics simulator to mock what the swerve modules are doing currently for pose estimation
+    public void ingestSimulatedSwerveModulePositions(SwerveModulePosition[] positions) {
+        this.simulatedModulePositions = Optional.of(positions);
     }
 }
