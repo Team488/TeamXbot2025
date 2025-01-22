@@ -42,7 +42,7 @@ public class Contract2025 extends ElectricalContract {
                 new CANMotorControllerOutputConfig());
     }
 
-    public boolean isCoralCollectionMotor() { return false; }
+    public boolean isCoralCollectionMotorReady() { return false; }
 
     public CANMotorControllerInfo getCoralCollectionMotor(){
         return new CANMotorControllerInfo("CoralCollectionMotor",
