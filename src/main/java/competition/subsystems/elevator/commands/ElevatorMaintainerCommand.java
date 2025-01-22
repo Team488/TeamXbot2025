@@ -34,6 +34,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     @Override
     public void initialize() {
         log.info("initializing");
+
     }
 
     @Override
@@ -58,6 +59,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     @Override
     protected double getHumanInput() {
+
         return 0;
     }
 
