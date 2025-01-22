@@ -57,8 +57,8 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     }
 
     @Override
-    protected Distance getHumanInput() {
-        return null;
+    protected double getHumanInput() {
+        return 0;
     }
 
     @Override

@@ -11,6 +11,10 @@ import xbot.common.properties.PropertyFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import static edu.wpi.first.units.Units.Feet;
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
+
 @Singleton
 public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implements DataFrameRefreshable {
 
@@ -28,8 +32,9 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
 
     private boolean isCalibrated;
 
-    final DoubleProperty elevatorTargetHeight;
-    final DoubleProperty currentHeight;
+    public Distance elevatorTargetHeight;
+    final Distance distanceFromTargetHeight;
+    final Distance currentHeight;
 
     //assuming we'll have a master and follower motors
     public XCANMotorController masterMotor;
@@ -40,10 +45,9 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
         this.elevatorPower = pf.createPersistentProperty("Elevator Power", 0.5);
         this.contract = contract;
 
-        //was going to make this ephemeral but cant find it
-        this.elevatorTargetHeight = pf.createPersistentProperty("Elevator Target", 0.0);
-        this.currentHeight = pf.createPersistentProperty("Current Height", 0.0);
-
+        this.elevatorTargetHeight = Inches.of(0);
+        this.distanceFromTargetHeight = Feet.of(0);
+        this.currentHeight = Inches.of(0);
 
         if(contract.isElevatorReady()){
             this.masterMotor = motorFactory.create(contract.getElevatorMotor(), this.getPrefix(), "Elevator Motor");
@@ -52,8 +56,10 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
 
     //will implement logic later
     @Override
-    public void setPower(Distance power) {
-
+    public void setPower(double power) {
+        if(contract.isElevatorReady()){
+            masterMotor.setPower(power);
+        }
     }
 
     public void raise(){
@@ -71,17 +77,17 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
 
     @Override
     public Distance getCurrentValue() {
-        return null;
+        return currentHeight;
     }
 
     @Override
     public Distance getTargetValue() {
-        return null;
+        return elevatorTargetHeight;
     }
 
     @Override
     public void setTargetValue(Distance value) {
-
+        elevatorTargetHeight = value;
     }
 
     @Override
@@ -91,7 +97,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
 
     @Override
     protected boolean areTwoTargetsEquivalent(Distance target1, Distance target2) {
-        return false;
+        return target1.isEquivalent(target2);
     }
 
     @Override
@@ -101,6 +107,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
 
     public void periodic(){
         masterMotor.periodic();
+        aKitLog.record("ElevatorTargetHeight",elevatorTargetHeight);
     }
 
 
