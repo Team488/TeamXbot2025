@@ -19,8 +19,8 @@ public class CoralScorerSubsystem extends BaseSubsystem {
     @Inject
     public CoralScorerSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
                                 ElectricalContract electricalContract, PropertyFactory propertyFactory) {
-        if (electricalContract.isAlgaeCollectionReady()) {
-            this.motor = xcanMotorControllerFactory.create(electricalContract.getAlgaeCollectionMotor(),
+        if (electricalContract.isCoralCollectionMotor()) {
+            this.motor = xcanMotorControllerFactory.create(electricalContract.getCoralCollectionMotor(),
                     getPrefix(), "CoralScorer",
                     new XCANMotorControllerPIDProperties(1, 0, 0, 0, -1, 1));
 
