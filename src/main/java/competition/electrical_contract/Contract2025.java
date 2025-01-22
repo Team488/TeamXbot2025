@@ -42,6 +42,16 @@ public class Contract2025 extends ElectricalContract {
                 new CANMotorControllerOutputConfig());
     }
 
+    public boolean isCoralCollectionMotorReady() { return false; }
+
+    public CANMotorControllerInfo getCoralCollectionMotor(){
+        return new CANMotorControllerInfo("CoralCollectionMotor",
+                MotorControllerType.TalonFx,
+                CANBusId.DefaultCanivore,
+                4888,
+                new CANMotorControllerOutputConfig());
+    }
+
 
     @Override
     public boolean areCanCodersReady() {
