@@ -21,8 +21,8 @@ public class CoralScorerSubsystem extends BaseSubsystem {
                                 ElectricalContract electricalContract, PropertyFactory propertyFactory) {
         if (electricalContract.isCoralCollectionMotorReady()) {
             this.motor = xcanMotorControllerFactory.create(electricalContract.getCoralCollectionMotor(),
-                    getPrefix(), "CoralScorer",
-                    new XCANMotorControllerPIDProperties(1, 0, 0, 0, -1, 1));
+                    getPrefix(), "CoralScorer");
+
 
 
         } else {
@@ -30,7 +30,7 @@ public class CoralScorerSubsystem extends BaseSubsystem {
         }
 
         this.intakePower = propertyFactory.createPersistentProperty("intakePower", .1);
-        this.scorePower = propertyFactory.createPersistentProperty("scorerPower", .1);
+        this.scorePower = propertyFactory.createPersistentProperty("scorerPower", -.1);
     }
 
         public void intake() {
@@ -49,6 +49,6 @@ public class CoralScorerSubsystem extends BaseSubsystem {
             }
         }
 
-        //this.motor = motor;
+
     }
 
