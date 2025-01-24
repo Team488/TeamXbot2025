@@ -54,13 +54,12 @@ public class OperatorCommandMap {
         oi.programmerGamepad.getPovIfAvailable(90).onTrue(debugModule);
         oi.programmerGamepad.getPovIfAvailable(180).onTrue(typicalSwerveDrive);
 
-        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).onTrue(intakeCoralCommand);
-        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).onTrue(scoreCoralCommand);
-        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.Back).onTrue(stopCoralCommand);
+        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeCoralCommand);
+        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreCoralCommand);
 
-        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(algaeCollectionIntakeCommand);
-        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(algaeCollectionOutputCommand);
-        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(algaeCollectionStopCommand);
+        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(algaeCollectionIntakeCommand);
+        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(algaeCollectionOutputCommand);
+
     }
 
     @Inject
