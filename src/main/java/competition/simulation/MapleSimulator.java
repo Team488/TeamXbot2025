@@ -14,7 +14,6 @@ import xbot.common.controls.sensors.mock_adapters.MockGyro;
 
 import static edu.wpi.first.units.Units.Meters;
 
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -31,6 +30,7 @@ public class MapleSimulator implements BaseSimulator {
     protected final AKitLogger aKitLog;
 
     final ElevatorSimulator elevatorSimulator;
+    final ArmSimulator armSimulator;
 
     // maple-sim stuff ----------------------------
     final DriveTrainSimulationConfig config;
@@ -38,11 +38,13 @@ public class MapleSimulator implements BaseSimulator {
     final SelfControlledSwerveDriveSimulation swerveDriveSimulation;
 
     @Inject
-    public MapleSimulator(PoseSubsystem pose, DriveSubsystem drive, ElevatorSimulator elevatorSimulator) {
+    public MapleSimulator(PoseSubsystem pose, DriveSubsystem drive, ElevatorSimulator elevatorSimulator,
+            ArmSimulator armSimulator) {
         this.pose = pose;
         this.drive = drive;
         this.elevatorSimulator = elevatorSimulator;
-        
+        this.armSimulator = armSimulator;
+
         aKitLog = new AKitLogger("Simulator/");
 
         /**
@@ -73,6 +75,7 @@ public class MapleSimulator implements BaseSimulator {
     public void update() {
         this.updateDriveSimulation();
         elevatorSimulator.update();
+        armSimulator.update();
     }
 
     protected void updateDriveSimulation() {
