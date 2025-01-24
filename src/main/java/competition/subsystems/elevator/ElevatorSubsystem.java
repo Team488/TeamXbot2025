@@ -62,7 +62,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
         returnToBaseHeight = Feet.of(2);
 
         if(contract.isElevatorReady()){
-            this.masterMotor = motorFactory.create(contract.getElevatorMotor(), this.getPrefix(), "Elevator Motor");
+            this.masterMotor = motorFactory.create(contract.getElevatorMotor(), this.getPrefix(), "ElevatorMotor");
         }
     }
 
