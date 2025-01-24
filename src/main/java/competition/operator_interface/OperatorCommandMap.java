@@ -4,11 +4,15 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import competition.simulation.commands.ResetSimulatedPose;
+import competition.subsystems.algae_collection.commands.AlgaeCollectionIntakeCommand;
+import competition.subsystems.algae_collection.commands.AlgaeCollectionOutputCommand;
+import competition.subsystems.algae_collection.commands.AlgaeCollectionStopCommand;
 import competition.subsystems.coral_scorer.commands.IntakeCoralCommand;
 import competition.subsystems.coral_scorer.commands.ScoreCoralCommand;
 import competition.subsystems.coral_scorer.commands.StopCoralCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
+import edu.wpi.first.wpilibj2.command.button.POVButton;
 import xbot.common.controls.sensors.XXboxController;
 import xbot.common.subsystems.drive.swerve.commands.ChangeActiveSwerveModuleCommand;
 import xbot.common.subsystems.pose.commands.SetRobotHeadingCommand;
@@ -42,15 +46,21 @@ public class OperatorCommandMap {
             SwerveDriveWithJoysticksCommand typicalSwerveDrive,
             IntakeCoralCommand intakeCoralCommand,
             ScoreCoralCommand scoreCoralCommand,
-            StopCoralCommand stopCoralCommand) {
-        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(changeActiveModule);
-        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(debugModule);
-        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(typicalSwerveDrive);
+            StopCoralCommand stopCoralCommand,
+            AlgaeCollectionIntakeCommand algaeCollectionIntakeCommand,
+            AlgaeCollectionOutputCommand algaeCollectionOutputCommand,
+            AlgaeCollectionStopCommand algaeCollectionStopCommand) {
+        oi.programmerGamepad.getPovIfAvailable(0).onTrue(changeActiveModule);
+        oi.programmerGamepad.getPovIfAvailable(90).onTrue(debugModule);
+        oi.programmerGamepad.getPovIfAvailable(180).onTrue(typicalSwerveDrive);
 
         oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).onTrue(intakeCoralCommand);
         oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).onTrue(scoreCoralCommand);
-        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(stopCoralCommand);
+        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.Back).onTrue(stopCoralCommand);
 
+        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(algaeCollectionIntakeCommand);
+        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(algaeCollectionOutputCommand);
+        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(algaeCollectionStopCommand);
     }
 
     @Inject
