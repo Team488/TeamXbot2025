@@ -1,5 +1,6 @@
 package competition.simulation;
 
+import competition.simulation.arm.ArmSimulator;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.elevator.ElevatorMechanism;
 import competition.subsystems.pose.PoseSubsystem;
