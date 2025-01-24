@@ -2,7 +2,7 @@ package competition.subsystems.drive.commands;
 
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.PoseSubsystem;
-import competition.subsystems.vision.MockAprilTagVisionSubsystem;
+import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -14,7 +14,7 @@ import javax.inject.Inject;
 import java.util.HashMap;
 
 public class AlignToReefWithAprilTagCommand extends BaseCommand {
-    MockAprilTagVisionSubsystem aprilTagVisionSubsystem;
+    AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
     DriveSubsystem drive;
     HeadingModule headingModule;
     PoseSubsystem pose;
@@ -27,8 +27,8 @@ public class AlignToReefWithAprilTagCommand extends BaseCommand {
     public static Pose2d BlueBackRightReefFace = new Pose2d(5.150, 2.880, Rotation2d.fromDegrees(120));
 
     @Inject
-    public AlignToReefWithAprilTagCommand(MockAprilTagVisionSubsystem aprilTagVisionSubsystem, DriveSubsystem drive,
-                                           HeadingModule.HeadingModuleFactory headingModuleFactory, PoseSubsystem pose) {
+    public AlignToReefWithAprilTagCommand(AprilTagVisionSubsystemExtended aprilTagVisionSubsystem, DriveSubsystem drive,
+                                          HeadingModule.HeadingModuleFactory headingModuleFactory, PoseSubsystem pose) {
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
         this.drive = drive;
         this.headingModule = headingModuleFactory.create(drive.getRotateToHeadingPid());

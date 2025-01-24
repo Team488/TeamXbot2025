@@ -2,7 +2,7 @@ package competition.subsystems.drive.commands;
 
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.PoseSubsystem;
-import competition.subsystems.vision.MockAprilTagVisionSubsystem;
+import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -26,13 +26,13 @@ public class DriveToNearestReefFaceCommand extends SwerveSimpleTrajectoryCommand
     public static Pose2d BlueBackRightReefFace = new Pose2d(5.150, 2.880, Rotation2d.fromDegrees(120));
 
     DriveSubsystem drive;
-    MockAprilTagVisionSubsystem aprilTagVisionSubsystem;
+    AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
     Pose2d targetReefFacePose;
 
     @Inject
     public DriveToNearestReefFaceCommand(DriveSubsystem drive, PoseSubsystem pose, PropertyFactory pf,
                                          HeadingModule.HeadingModuleFactory headingModuleFactory,
-                                         MockAprilTagVisionSubsystem aprilTagVisionSubsystem) {
+                                         AprilTagVisionSubsystemExtended aprilTagVisionSubsystem) {
         super(drive, pose, pf, headingModuleFactory);
         this.drive = drive;
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;

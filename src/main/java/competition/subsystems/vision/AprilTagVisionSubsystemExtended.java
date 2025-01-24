@@ -13,11 +13,11 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
-public class MockAprilTagVisionSubsystem extends AprilTagVisionSubsystem {
+public class AprilTagVisionSubsystemExtended extends AprilTagVisionSubsystem {
     @Inject
-    public MockAprilTagVisionSubsystem(VisionConsumer consumer, PropertyFactory pf,
-                                       AprilTagFieldLayout fieldLayout, XCameraElectricalContract contract,
-                                       AprilTagVisionIOFactory visionIOFactory) {
+    public AprilTagVisionSubsystemExtended(VisionConsumer consumer, PropertyFactory pf,
+                                           AprilTagFieldLayout fieldLayout, XCameraElectricalContract contract,
+                                           AprilTagVisionIOFactory visionIOFactory) {
         super(consumer, pf, fieldLayout, contract, visionIOFactory);
     }
 
