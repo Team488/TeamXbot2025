@@ -35,7 +35,7 @@ public class OperatorCommandMap {
         operatorInterface.gamepad.getifAvailable(1).onTrue(resetHeading);
 
         // Below are for testing purposes only!!!
-        SwervePointKinematics kinematicValuesForTesting = new SwervePointKinematics(0.2, 0, 0, 1.5);
+        SwervePointKinematics kinematicValuesForTesting = new SwervePointKinematics(0.3, 0, 0, 2);
 
         // Command 1: to (1,0) then back to (0,0)
         var command1 = swerveSimpleTrajectoryCommandProvider.get();
@@ -51,7 +51,6 @@ public class OperatorCommandMap {
         command1.logic.setKeyPoints(points1);
         command1.logic.setVelocityMode(SwerveSimpleTrajectoryMode.KinematicsForIndividualPoints);
 
-        // Command 2: same as Command1 but uses global values mode (slightly faster is the difference)
         var command2 = swerveSimpleTrajectoryCommandProvider.get();
         List<XbotSwervePoint> points2 = new ArrayList<>();
 
@@ -64,12 +63,11 @@ public class OperatorCommandMap {
         command2.logic.setKeyPoints(points2);
         command2.logic.setVelocityMode(SwerveSimpleTrajectoryMode.KinematicsForPointsList);
 
-        // Command 3: Slightly further drive (pray)
         var command3 = swerveSimpleTrajectoryCommandProvider.get();
         List<XbotSwervePoint> points3 = new ArrayList<>();
 
-        XbotSwervePoint p5 = XbotSwervePoint.createPotentiallyFilppedXbotSwervePoint(new Translation2d(6, 2), new Rotation2d(), 10);
-        XbotSwervePoint p6 = XbotSwervePoint.createPotentiallyFilppedXbotSwervePoint(new Translation2d(6, 4), new Rotation2d(), 10);
+        XbotSwervePoint p5 = XbotSwervePoint.createPotentiallyFilppedXbotSwervePoint(new Translation2d(16, 2), new Rotation2d(), 10);
+        XbotSwervePoint p6 = XbotSwervePoint.createPotentiallyFilppedXbotSwervePoint(new Translation2d(2, 2), new Rotation2d(), 10);
 
         points3.add(p5);
         points3.add(p6);
@@ -77,7 +75,7 @@ public class OperatorCommandMap {
         command3.logic.setKeyPoints(points3);
         command3.logic.setVelocityMode(SwerveSimpleTrajectoryMode.KinematicsForPointsList);
 
-        // Command 4: Really far for observation purposes
+        // Command 4: Far drive for observation purposes
         var command4 = swerveSimpleTrajectoryCommandProvider.get();
         List<XbotSwervePoint> points4 = new ArrayList<>();
 
