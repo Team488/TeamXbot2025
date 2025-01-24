@@ -67,6 +67,17 @@ public class Contract2025 extends ElectricalContract {
         return true;
     }
 
+    @Override
+    public boolean isElevatorReady() {
+        return false; //return true when ready
+    }
+
+    @Override
+    public CANMotorControllerInfo getElevatorMotor() {
+        return new CANMotorControllerInfo( //change deviceId later
+                "Master Elevator Motor", MotorControllerType.TalonFx, CANBusId.DefaultCanivore, 99, new CANMotorControllerOutputConfig());
+    }
+
     protected String getDriveControllerName(SwerveInstance swerveInstance) {
         return "DriveSubsystem/" + swerveInstance.label() + "/Drive";
     }
