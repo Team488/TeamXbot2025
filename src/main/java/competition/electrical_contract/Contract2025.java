@@ -42,10 +42,40 @@ public class Contract2025 extends ElectricalContract {
                 new CANMotorControllerOutputConfig());
     }
 
+    public boolean isCoralCollectionMotorReady() { return false; }
+
+    public CANMotorControllerInfo getCoralCollectionMotor() {
+        return new CANMotorControllerInfo("CoralCollectionMotor",
+                MotorControllerType.TalonFx,
+                CANBusId.DefaultCanivore,
+                4888,
+                new CANMotorControllerOutputConfig());
+    }
+
+    public boolean isArmPivotMotorReady() { return false; }
+
+    public CANMotorControllerInfo getArmPivotMotor() {
+        return new CANMotorControllerInfo("ArmPivotMotor",
+                MotorControllerType.TalonFx,
+                CANBusId.DefaultCanivore,
+                709,
+                new CANMotorControllerOutputConfig());
+    }
 
     @Override
     public boolean areCanCodersReady() {
         return true;
+    }
+
+    @Override
+    public boolean isElevatorReady() {
+        return false; //return true when ready
+    }
+
+    @Override
+    public CANMotorControllerInfo getElevatorMotor() {
+        return new CANMotorControllerInfo( //change deviceId later
+                "Master Elevator Motor", MotorControllerType.TalonFx, CANBusId.DefaultCanivore, 99, new CANMotorControllerOutputConfig());
     }
 
     protected String getDriveControllerName(SwerveInstance swerveInstance) {
