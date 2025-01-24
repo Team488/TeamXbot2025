@@ -75,7 +75,11 @@ public class PoseSubsystem extends BasePoseSubsystem {
                 getSwerveModulePositions()
         );
         this.aprilTagVisionSubsystem.getAllPoseObservations().forEach(observation -> {
-            fullSwerveOdometry.addVisionMeasurement(observation.visionRobotPoseMeters(), observation.timestampSeconds(), observation.visionMeasurementStdDevs());
+            fullSwerveOdometry.addVisionMeasurement(
+                observation.visionRobotPoseMeters(),
+                observation.timestampSeconds(),
+                observation.visionMeasurementStdDevs()
+            );
         });
 
         // Report poses
