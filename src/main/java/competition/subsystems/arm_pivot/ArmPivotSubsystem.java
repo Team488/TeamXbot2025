@@ -1,6 +1,7 @@
 package competition.subsystems.arm_pivot;
 
 import competition.electrical_contract.ElectricalContract;
+import edu.wpi.first.units.measure.Angle;
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.command.BaseSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
@@ -10,7 +11,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
-public class ArmPivotSubsystem extends BaseSetpointSubsystem {
+public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
     public final XCANMotorController armMotor;
 
     @Inject
@@ -27,22 +28,22 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem {
     }
 
     @Override
-    public Object getCurrentValue() {
+    public Angle getCurrentValue() {
         return null;
     }
 
     @Override
-    public Object getTargetValue() {
+    public Angle getTargetValue() {
         return null;
     }
 
     @Override
-    public void setTargetValue(Object value) {
+    public void setTargetValue(Angle value) {
 
     }
 
     @Override
-    public void setPower(Object power) {
+    public void setPower(double power) {
 
     }
 
@@ -52,7 +53,7 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem {
     }
 
     @Override
-    protected boolean areTwoTargetsEquivalent(Object target1, Object target2) {
+    protected boolean areTwoTargetsEquivalent(Angle target1, Angle target2) {
         return false;
     }
 }
