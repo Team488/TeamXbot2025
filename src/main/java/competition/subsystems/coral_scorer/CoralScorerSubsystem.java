@@ -34,22 +34,22 @@ public class CoralScorerSubsystem extends BaseSubsystem {
         this.scorePower = propertyFactory.createPersistentProperty("scorerPower", -.1);
     }
 
-        public void intake() {
-            if (motor != null){
-                motor.setPower(intakePower.get());
-            }
+    public void intake() {
+        if (motor != null){
+            motor.setPower(intakePower.get());
         }
-        public void scorer(){
-            if (motor != null){
-                motor.setPower(scorePower.get());
-            }
-        }
-        public void stop(){
-            if (motor!=null){
-                motor.setPower(0);
-            }
-        }
-
-
     }
+    public void scorer(){
+        if (motor != null){
+            motor.setPower(scorePower.get());
+        }
+    }
+    public void stop(){
+        if (motor!=null){
+            motor.setPower(0);
+        }
+    }
+
+
+}
 

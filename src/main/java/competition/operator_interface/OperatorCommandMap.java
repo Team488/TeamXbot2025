@@ -4,6 +4,9 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import competition.simulation.commands.ResetSimulatedPose;
+import competition.subsystems.coral_scorer.commands.IntakeCoralCommand;
+import competition.subsystems.coral_scorer.commands.ScoreCoralCommand;
+import competition.subsystems.coral_scorer.commands.StopCoralCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import xbot.common.controls.sensors.XXboxController;
@@ -36,10 +39,18 @@ public class OperatorCommandMap {
             OperatorInterface oi,
             DebugSwerveModuleCommand debugModule,
             ChangeActiveSwerveModuleCommand changeActiveModule,
-            SwerveDriveWithJoysticksCommand typicalSwerveDrive) {
+            SwerveDriveWithJoysticksCommand typicalSwerveDrive,
+            IntakeCoralCommand intakeCoralCommand,
+            ScoreCoralCommand scoreCoralCommand,
+            StopCoralCommand stopCoralCommand) {
         oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(changeActiveModule);
         oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(debugModule);
         oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(typicalSwerveDrive);
+
+        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).onTrue(intakeCoralCommand);
+        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).onTrue(scoreCoralCommand);
+        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(stopCoralCommand);
+
     }
 
     @Inject
