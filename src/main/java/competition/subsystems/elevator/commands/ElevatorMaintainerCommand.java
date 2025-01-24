@@ -7,6 +7,7 @@ import xbot.common.command.BaseCommand;
 import xbot.common.command.BaseMaintainerCommand;
 import xbot.common.command.BaseSubsystem;
 import xbot.common.logic.HumanVsMachineDecider;
+import xbot.common.math.MathUtils;
 import xbot.common.math.PIDManager;
 import xbot.common.properties.PropertyFactory;
 
@@ -20,6 +21,8 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         Calibrated,
     }
 
+    private final OperatorInterface oi;
+
     ElevatorSubsystem elevator;
 
     @Inject
@@ -28,6 +31,8 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
                                      PIDManager.PIDManagerFactory pidf,
                                      OperatorInterface oi){
         super(elevator,pf,hvmFactory, 1, 0.2);
+
+        this.oi = oi;
 
     }
 
@@ -39,17 +44,29 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     @Override
     public void execute(){
-
+        double humanInput = getHumanInputMagnitude();
+        //add power setting to the thing, refer to the 2018
     }
 
     @Override
     protected void coastAction() {
-
+        elevator.setPower(0);
     }
 
     @Override
     protected void calibratedMachineControlAction() {
 
+    }
+
+    @Override
+    protected void uncalibratedMachineControlAction() {
+        //this is just a placeholder for now until we have something to calibrate
+        humanControlAction();
+    }
+
+    @Override
+    protected void humanControlAction() {
+        elevator.setPower(getHumanInput());
     }
 
     @Override
@@ -59,13 +76,14 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     @Override
     protected double getHumanInput() {
-
-        return 0;
+        return MathUtils.deadband(
+                oi.programmerGamepad.getLeftVector().getY(),
+                0.15);
     }
 
     @Override
     protected double getHumanInputMagnitude() {
-        return 0;
+        return Math.abs(getHumanInput());
     }
 
 }
