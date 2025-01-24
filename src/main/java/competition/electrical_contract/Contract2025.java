@@ -44,7 +44,7 @@ public class Contract2025 extends ElectricalContract {
 
     public boolean isCoralCollectionMotorReady() { return false; }
 
-    public CANMotorControllerInfo getCoralCollectionMotor(){
+    public CANMotorControllerInfo getCoralCollectionMotor() {
         return new CANMotorControllerInfo("CoralCollectionMotor",
                 MotorControllerType.TalonFx,
                 CANBusId.DefaultCanivore,
@@ -52,6 +52,15 @@ public class Contract2025 extends ElectricalContract {
                 new CANMotorControllerOutputConfig());
     }
 
+    public boolean isArmPivotMotorReady() { return false; }
+
+    public CANMotorControllerInfo getArmPivotMotor() {
+        return new CANMotorControllerInfo("ArmPivotMotor",
+                MotorControllerType.TalonFx,
+                CANBusId.DefaultCanivore,
+                709,
+                new CANMotorControllerOutputConfig());
+    }
 
     @Override
     public boolean areCanCodersReady() {
