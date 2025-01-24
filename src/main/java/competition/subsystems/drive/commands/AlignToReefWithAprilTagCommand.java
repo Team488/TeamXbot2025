@@ -47,7 +47,7 @@ public class AlignToReefWithAprilTagCommand extends BaseCommand {
 
         double omega = headingModule.calculateHeadingPower(getClosestReefFacePose().getRotation().getDegrees());
 
-        drive.move(new XYPair(-driveValues.getX(), -driveValues.getY()), omega);
+        drive.move(new XYPair(-driveValues.getX(), -driveValues.getY()), omega, pose.getCurrentPose2d());
 
         aKitLog.record("dx power", driveValues.getX());
         aKitLog.record("dy power", driveValues.getY());
