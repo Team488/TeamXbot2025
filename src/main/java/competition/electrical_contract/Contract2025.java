@@ -69,6 +69,11 @@ public class Contract2025 extends ElectricalContract {
         return new DeviceInfo("CoralSensor", 0);
     }
 
+    public boolean isElevatorBottomSensorReady() { return false; }
+
+    @Override
+    public DeviceInfo getElevatorBottomSensor() { return new DeviceInfo("ElevatorBottomSensor",1); }
+
     @Override
     public boolean areCanCodersReady() {
         return true;
