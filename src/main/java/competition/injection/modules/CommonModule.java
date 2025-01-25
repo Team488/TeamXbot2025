@@ -53,6 +53,12 @@ public class CommonModule {
 
     @Provides
     @Singleton
+    public AprilTagVisionSubsystem.VisionConsumer visionConsumer(BasePoseSubsystem poseSubsystem) {
+        return (AprilTagVisionSubsystem.VisionConsumer) poseSubsystem;
+    }
+
+    @Provides
+    @Singleton
     public AprilTagFieldLayout fieldLayout() {
         return AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape);
     }

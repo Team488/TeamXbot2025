@@ -5,17 +5,14 @@ import xbot.common.command.BaseCommand;
 
 import javax.inject.Inject;
 
-public class StopCoralCommand extends BaseCommand {
+public class CoralIntakeStopCommand extends BaseCommand {
     CoralScorerSubsystem coral;
 
     @Inject
-    public StopCoralCommand(CoralScorerSubsystem coralScorerSubsystem){
+    public CoralIntakeStopCommand(CoralScorerSubsystem coralScorerSubsystem){
         coral = coralScorerSubsystem;
         this.addRequirements(coral);
     }
-
     @Override
-    public void initialize() {
-        coral.stop();
-    }
+    public void initialize() { coral.stop(); }
 }

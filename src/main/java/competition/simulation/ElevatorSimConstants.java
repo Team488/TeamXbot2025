@@ -8,5 +8,4 @@ public class ElevatorSimConstants {
     public static final double minElevatorHeightMeters = 0;
     public static final double maxElevatorHeightMeters = 1.25;
     public static final double elevatorBottomSensorTriggerHeight = 0.01;
-    public static final double rotationsPerMeterHeight = 1;
 }
