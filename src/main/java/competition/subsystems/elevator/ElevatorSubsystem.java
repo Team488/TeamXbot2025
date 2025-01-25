@@ -113,7 +113,9 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
 
     @Override
     public void refreshDataFrame() {
-        masterMotor.refreshDataFrame();
+        if(contract.isElevatorReady()){
+            masterMotor.refreshDataFrame();
+        }
     }
 
     public void periodic(){

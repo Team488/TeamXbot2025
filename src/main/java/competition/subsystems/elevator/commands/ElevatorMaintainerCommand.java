@@ -11,6 +11,9 @@ import xbot.common.math.MathUtils;
 import xbot.common.math.PIDManager;
 import xbot.common.properties.PropertyFactory;
 
+import static edu.wpi.first.units.Units.Inch;
+import static edu.wpi.first.units.Units.Inches;
+
 import javax.inject.Inject;
 
 public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
@@ -44,8 +47,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     @Override
     public void execute(){
-        double humanInput = getHumanInputMagnitude();
-        //add power setting to the thing, refer to the 2018
+        maintain();
     }
 
     @Override
@@ -69,9 +71,13 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         elevator.setPower(getHumanInput());
     }
 
+    //returns error magnitude of elevator in inches
     @Override
     protected double getErrorMagnitude() {
-        return 0;
+        var current = elevator.getCurrentValue();
+        var target = elevator.getTargetValue();
+
+        return Math.abs(current.in(Inches)/target.in(Inches));
     }
 
     @Override
