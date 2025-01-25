@@ -14,7 +14,7 @@ public class ArmSimConstants {
     public static final Mass armMass = Kilogram.of(8.0); // Kilograms
     public static final Distance armLength = Meters.of(0.5);
     public static final Angle minAngleRads = Degrees.of(-45);
-    public static final Angle maxAngleRads = Degrees.of(90);
+    public static final Angle maxAngleRads = Degrees.of(125 - 45);
     public static final Angle startingAngle = minAngleRads;
     public static final Angle armEncoderAnglePerRotation = Degrees.of(0.1);
 }

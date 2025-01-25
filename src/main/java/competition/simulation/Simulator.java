@@ -61,4 +61,9 @@ public class Simulator implements BaseSimulator {
     public void resetPosition(Pose2d pose) {
         this.pose.setCurrentPoseInMeters(pose);
     }
+
+    @Override
+    public Pose2d getGroundTruthPose() {
+        return pose.getCurrentPose2d();
+    }
 }

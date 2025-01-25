@@ -48,9 +48,12 @@ public class ArmSimulator {
         armSim.update(SimulationConstants.loopPeriodSec); // 20ms
 
         // Read out the new arm position for rendering
+        // TODO: the frame of reference of the simulated arm is wrong, gravity isn't being applied
+        // in the same way we think
         var armMotorRotations = armSim.getAngleRads() / ArmSimConstants.armEncoderAnglePerRotation.in(Radians);
 
         armMotor.setPosition(Rotations.of(armMotorRotations));
-        elevatorMechanism.armAngle = Radians.of(armSim.getAngleRads());
+        // correct for frame of reference for the arm pivot in the mechanism vs sim model
+        elevatorMechanism.armAngle = Radians.of(armSim.getAngleRads()).plus(ArmSimConstants.minAngleRads.times(-1)).times(-1);
     }
 }
