@@ -4,7 +4,6 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import competition.subsystems.drive.DriveSubsystem;
-import competition.subsystems.deadwheel.DeadwheelSubsystem;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -13,6 +12,7 @@ import xbot.common.math.WrappedRotation2d;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.pose.BasePoseSubsystem;
 import xbot.common.subsystems.vision.AprilTagVisionSubsystem;
+import xbot.common.subsystems.deadwheel.DeadwheelSubsystem;
 
 @Singleton
 public class PoseSubsystem extends BasePoseSubsystem {
