@@ -15,6 +15,7 @@ import static edu.wpi.first.units.Units.Rotations;
 
 @Singleton
 public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
+
     public final XCANMotorController armMotor;
     Angle targetAngle;
     ElectricalContract electricalContract;
@@ -44,6 +45,7 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
     public Angle getCurrentValue() {
         double currentAngle = (this.armMotor.getPosition().in(Rotations) - rotationsAtZero) * degreesPerRotations.get();
         return Degrees.of(currentAngle);
+
     }
 
     @Override
