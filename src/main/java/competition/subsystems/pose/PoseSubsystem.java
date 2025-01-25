@@ -6,6 +6,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import competition.subsystems.drive.DriveSubsystem;
+import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -20,21 +21,25 @@ import xbot.common.subsystems.pose.BasePoseSubsystem;
 import xbot.common.subsystems.vision.AprilTagVisionSubsystem;
 
 @Singleton
-public class PoseSubsystem extends BasePoseSubsystem implements AprilTagVisionSubsystem.VisionConsumer {
+public class PoseSubsystem extends BasePoseSubsystem {
 
     final SwerveDrivePoseEstimator onlyWheelsGyroSwerveOdometry;
+    final SwerveDrivePoseEstimator fullSwerveOdometry;
 
     private final DriveSubsystem drive;
+    private final AprilTagVisionSubsystem aprilTagVisionSubsystem;
 
     // only used when simulating the robot
     protected Optional<SwerveModulePosition[]> simulatedModulePositions = Optional.empty();
 
     @Inject
-    public PoseSubsystem(XGyroFactory gyroFactory, PropertyFactory propManager, DriveSubsystem drive) {
+    public PoseSubsystem(XGyroFactory gyroFactory, PropertyFactory propManager, DriveSubsystem drive, AprilTagVisionSubsystem aprilTagVisionSubsystem) {
         super(gyroFactory, propManager);
         this.drive = drive;
+        this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
 
         onlyWheelsGyroSwerveOdometry = initializeSwerveOdometry();
+        fullSwerveOdometry = initializeSwerveOdometry();
     }
 
     @Override
@@ -58,19 +63,37 @@ public class PoseSubsystem extends BasePoseSubsystem implements AprilTagVisionSu
 
     @Override
     protected void updateOdometry() {
+        // Update pose estimators
         onlyWheelsGyroSwerveOdometry.update(
                 this.getCurrentHeading(),
                 getSwerveModulePositions()
         );
-
         aKitLog.record("WheelsOnlyEstimate", onlyWheelsGyroSwerveOdometry.getEstimatedPosition());
 
-        Translation2d positionSource = onlyWheelsGyroSwerveOdometry.getEstimatedPosition().getTranslation();
+        fullSwerveOdometry.update(
+                this.getCurrentHeading(),
+                getSwerveModulePositions()
+        );
+        this.aprilTagVisionSubsystem.getAllPoseObservations().forEach(observation -> {
+            fullSwerveOdometry.addVisionMeasurement(
+                observation.visionRobotPoseMeters(),
+                observation.timestampSeconds(),
+                observation.visionMeasurementStdDevs()
+            );
+        });
+
+        // Report poses
         Pose2d estimatedPosition = new Pose2d(
-                positionSource,
+                onlyWheelsGyroSwerveOdometry.getEstimatedPosition().getTranslation(),
                 getCurrentHeading()
         );
         aKitLog.record("RobotPose", estimatedPosition);
+
+        Pose2d visionEnhancedPosition = new Pose2d(
+                fullSwerveOdometry.getEstimatedPosition().getTranslation(),
+                fullSwerveOdometry.getEstimatedPosition().getRotation()
+        );
+        aKitLog.record("VisionEnhancedPose", visionEnhancedPosition);
 
         totalDistanceX = estimatedPosition.getX();
         totalDistanceY = estimatedPosition.getY();
@@ -119,18 +142,6 @@ public class PoseSubsystem extends BasePoseSubsystem implements AprilTagVisionSu
     @Override
     public Pose2d getGroundTruthPose() {
         return this.getCurrentPose2d();
-    }
-
-    /**
-     * This method is called by the vision system when it has a new pose to share with the robot.
-     *
-     * @param visionRobotPoseMeters The pose of the robot as measured by the vision system
-     * @param timestampSeconds The timestamp of the vision measurement
-     * @param visionMeasurementStdDevs The standard deviations of the vision measurements
-     */
-    @Override
-    public void acceptVisionPose(Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs) {
-
     }
 
     // used by the physics simulator to mock what the swerve modules are doing currently for pose estimation

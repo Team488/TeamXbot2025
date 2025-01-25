@@ -1,0 +1,56 @@
+package competition.simulation.arm;
+
+import javax.inject.Inject;
+
+import competition.simulation.SimulationConstants;
+import competition.subsystems.arm_pivot.ArmPivotSubsystem;
+import competition.subsystems.elevator.ElevatorMechanism;
+
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Kilograms;
+import static edu.wpi.first.units.Units.Rotations;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import xbot.common.controls.actuators.mock_adapters.MockCANMotorController;
+
+public class ArmSimulator {
+    final DCMotor motor = DCMotor.getKrakenX60(1);
+    final SingleJointedArmSim armSim;
+
+    final ElevatorMechanism elevatorMechanism;
+    final ArmPivotSubsystem armPivotSubsystem;
+    final MockCANMotorController armMotor;
+
+
+    @Inject
+    public ArmSimulator(ElevatorMechanism elevatorMechanism, ArmPivotSubsystem armPivotSubsystem) {
+        this.elevatorMechanism = elevatorMechanism;
+        this.armPivotSubsystem = armPivotSubsystem;
+        this.armMotor = (MockCANMotorController)armPivotSubsystem.armMotor;
+
+        this.armSim = new SingleJointedArmSim(
+                motor,
+                ArmSimConstants.armReduction,
+                SingleJointedArmSim.estimateMOI(ArmSimConstants.armLength.in(Meters),
+                        ArmSimConstants.armMass.in(Kilograms)),
+                ArmSimConstants.armLength.in(Meters),
+                ArmSimConstants.minAngleRads.in(Radians),
+                ArmSimConstants.maxAngleRads.in(Radians),
+                true,
+                0
+        );
+    }
+
+    public void update() {
+        armSim.setInput(this.armMotor.getPower() * RobotController.getBatteryVoltage());
+        armSim.update(SimulationConstants.loopPeriodSec); // 20ms
+
+        // Read out the new arm position for rendering
+        var armMotorRotations = armSim.getAngleRads() / ArmSimConstants.armEncoderAnglePerRotation.in(Radians);
+
+        armMotor.setPosition(Rotations.of(armMotorRotations));
+        elevatorMechanism.armAngle = Radians.of(armSim.getAngleRads());
+    }
+}
