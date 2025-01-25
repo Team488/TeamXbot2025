@@ -47,7 +47,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     @Override
     public void execute(){
-        maintain();
+        super.maintain();
     }
 
     @Override
@@ -68,7 +68,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     @Override
     protected void humanControlAction() {
-        elevator.setPower(getHumanInput());
+        super.humanControlAction();
     }
 
     //returns error magnitude of elevator in inches
