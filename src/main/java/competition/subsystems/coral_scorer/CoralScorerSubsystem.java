@@ -18,6 +18,7 @@ public class CoralScorerSubsystem extends BaseSubsystem {
     public DoubleProperty scorePower;
     public XDigitalInput coralSensor;
     public BooleanProperty isCoralReady;
+    public ElectricalContract electricalContract;
 
     @Inject
     public CoralScorerSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
@@ -45,28 +46,30 @@ public class CoralScorerSubsystem extends BaseSubsystem {
         this.scorePower = propertyFactory.createPersistentProperty("scorerPower", -.1);
 
         this.isCoralReady = propertyFactory.createPersistentProperty("isCoralReady", false);
+
+        this.electricalContract = electricalContract;
+    }
+
+    public void setCoralScorerMotorPower(double power) {
+        if (electricalContract.isCoralCollectionMotorReady()) {
+            this.motor.setPower(power);
+        }
     }
 
     public void intake() {
-        if (motor != null){
-            motor.setPower(intakePower.get());
-        }
+        setCoralScorerMotorPower(intakePower.get());
     }
     public void scorer() {
-        if (motor != null){
-            motor.setPower(scorePower.get());
-        }
+        setCoralScorerMotorPower(scorePower.get());
     }
     public void stop() {
-        if (motor!=null){
-            motor.setPower(0);
-        }
+        setCoralScorerMotorPower(0);
     }
     public boolean hasCoral() {
-        if (coralSensor != null) {
-            isCoralReady.set(true);
+        if (electricalContract.isCoralSensorReady()) {
+            return isCoralReady.get();
         }
-        return isCoralReady.get();
+        return false;
     }
 }
 
