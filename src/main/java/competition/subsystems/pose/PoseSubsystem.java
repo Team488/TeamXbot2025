@@ -16,6 +16,7 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import xbot.common.controls.sensors.XGyro.XGyroFactory;
 import xbot.common.math.WrappedRotation2d;
+import xbot.common.properties.BooleanProperty;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.pose.BasePoseSubsystem;
 import xbot.common.subsystems.vision.AprilTagVisionSubsystem;
@@ -28,6 +29,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
 
     private final DriveSubsystem drive;
     private final AprilTagVisionSubsystem aprilTagVisionSubsystem;
+    private final BooleanProperty useVisionAssistedPose;
 
     // only used when simulating the robot
     protected Optional<SwerveModulePosition[]> simulatedModulePositions = Optional.empty();
@@ -40,6 +42,9 @@ public class PoseSubsystem extends BasePoseSubsystem {
 
         onlyWheelsGyroSwerveOdometry = initializeSwerveOdometry();
         fullSwerveOdometry = initializeSwerveOdometry();
+
+        propManager.setPrefix(this);
+        useVisionAssistedPose = propManager.createPersistentProperty("UseVisionAssistedPose", true);
     }
 
     @Override
@@ -87,7 +92,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
                 onlyWheelsGyroSwerveOdometry.getEstimatedPosition().getTranslation(),
                 getCurrentHeading()
         );
-        aKitLog.record("RobotPose", estimatedPosition);
+        aKitLog.record("OdometryOnlyRobotPose", estimatedPosition);
 
         Pose2d visionEnhancedPosition = new Pose2d(
                 fullSwerveOdometry.getEstimatedPosition().getTranslation(),
@@ -95,8 +100,11 @@ public class PoseSubsystem extends BasePoseSubsystem {
         );
         aKitLog.record("VisionEnhancedPose", visionEnhancedPosition);
 
-        totalDistanceX = estimatedPosition.getX();
-        totalDistanceY = estimatedPosition.getY();
+        Pose2d robotPose = this.useVisionAssistedPose.get() ? visionEnhancedPosition : estimatedPosition;
+        aKitLog.record("RobotPose", robotPose);
+
+        totalDistanceX = robotPose.getX();
+        totalDistanceY = robotPose.getY();
 
         double prevTotalDistanceX = totalDistanceX;
         double prevTotalDistanceY = totalDistanceY;
@@ -129,6 +137,13 @@ public class PoseSubsystem extends BasePoseSubsystem {
                         newXPositionMeters,
                         newYPositionMeters,
                         this.getCurrentHeading()));
+        fullSwerveOdometry.resetPosition(
+                heading,
+                getSwerveModulePositions(),
+                new Pose2d(
+                        newXPositionMeters,
+                        newYPositionMeters,
+                        this.getCurrentHeading()));
     }
 
     public void setCurrentPoseInMeters(Pose2d newPoseInMeters) {
@@ -136,6 +151,17 @@ public class PoseSubsystem extends BasePoseSubsystem {
                 newPoseInMeters.getTranslation().getX(),
                 newPoseInMeters.getTranslation().getY(),
                 WrappedRotation2d.fromRotation2d(newPoseInMeters.getRotation())
+        );
+    }
+
+    @Override
+    public Pose2d getCurrentPose2d() {
+        return useVisionAssistedPose.get() ? new Pose2d(
+                fullSwerveOdometry.getEstimatedPosition().getTranslation(),
+                fullSwerveOdometry.getEstimatedPosition().getRotation()
+        ) : new Pose2d(
+                onlyWheelsGyroSwerveOdometry.getEstimatedPosition().getTranslation(),
+                onlyWheelsGyroSwerveOdometry.getEstimatedPosition().getRotation()
         );
     }
 
