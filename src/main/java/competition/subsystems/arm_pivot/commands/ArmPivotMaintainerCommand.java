@@ -35,7 +35,10 @@ public class ArmPivotMaintainerCommand extends BaseMaintainerCommand<Angle> {
        pf.setDefaultLevel(Property.PropertyLevel.Debug);
    }
 
-
+    @Override
+    public void initialize() {
+        log.info("Initializing");
+    }
 
     @Override
     protected void coastAction() { //rest when no human control and before pid
@@ -49,7 +52,6 @@ public class ArmPivotMaintainerCommand extends BaseMaintainerCommand<Angle> {
 
     @Override
     protected double getErrorMagnitude() { //distance from goal
-
        Angle currentAngle = armPivotSubsystem.getCurrentValue();
        Angle targetAngle = armPivotSubsystem.getTargetValue();
        Angle error = targetAngle.minus(currentAngle);
@@ -65,10 +67,5 @@ public class ArmPivotMaintainerCommand extends BaseMaintainerCommand<Angle> {
     @Override
     protected double getHumanInputMagnitude() { //turns values into absolute value
         return getHumanInput();
-    }
-
-    @Override
-    public void initialize() {
-        log.info("Initializing");
     }
 }
