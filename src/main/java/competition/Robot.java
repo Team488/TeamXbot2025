@@ -7,7 +7,7 @@ import competition.injection.components.DaggerRobotComponent2024;
 import competition.injection.components.DaggerRobotComponent;
 import competition.injection.components.DaggerRoboxComponent;
 import competition.injection.components.DaggerSimulationComponent;
-import competition.simulation.Simulator;
+import competition.simulation.BaseSimulator;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.PoseSubsystem;
 //import edu.wpi.first.wpilibj.Preferences;
@@ -20,7 +20,7 @@ import xbot.common.subsystems.pose.BasePoseSubsystem;
 
 public class Robot extends BaseRobot {
 
-    Simulator simulator;
+    BaseSimulator simulator;
 
     @Override
     protected void initializeSystems() {
@@ -28,6 +28,7 @@ public class Robot extends BaseRobot {
         getInjectorComponent().subsystemDefaultCommandMap();
         getInjectorComponent().operatorCommandMap();
         getInjectorComponent().swerveDefaultCommandMap();
+        getInjectorComponent().elevatorMechanism();
 
         if (BaseRobot.isSimulation()) {
             simulator = getInjectorComponent().simulator();
@@ -35,17 +36,12 @@ public class Robot extends BaseRobot {
 
         dataFrameRefreshables.add((DriveSubsystem)getInjectorComponent().driveSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().poseSubsystem());
-
-        // Need to instantiate the vision subsystem so that it gets registered with the scheduler
-        getInjectorComponent().aprilTagVisionSubsystem();
+        dataFrameRefreshables.add(getInjectorComponent().visionSubsystem());
+        dataFrameRefreshables.add(getInjectorComponent().aprilTagVisionSubsystem());
     }
 
     protected BaseRobotComponent createDaggerComponent() {
         if (BaseRobot.isReal()) {
-            // Initialize the contract to use if this is a fresh robot. Assume competition since that's the safest.
-            if (!Preferences.containsKey("ContractToUse")) {
-                Preferences.setString("ContractToUse", "Competition");
-            }
 
             String chosenContract = Preferences.getString("ContractToUse", "Competition");
 
@@ -60,6 +56,12 @@ public class Robot extends BaseRobot {
                     System.out.println("Using Robox contract");
                     return DaggerRoboxComponent.create();
                 default:
+                    // Moved setting the default contract to here; there was some bug where
+                    // other chassis were being set to "Competition" when they shouldn't have been.
+                    // Root cause is unknown, so far now only setting this after checking for any other value.
+                    if (!Preferences.containsKey("ContractToUse")) {
+                        Preferences.setString("ContractToUse", "Competition");
+                    }
                     System.out.println("Using Competition contract");
                     // In all other cases, return the competition component.
                     return DaggerRobotComponent.create();

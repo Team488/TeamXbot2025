@@ -84,7 +84,7 @@ public class DriveToWaypointsWithVisionCommand extends SwerveSimpleTrajectoryCom
     //allows for driving not in a straight line
     public void retrieveWaypointsFromVision() {
         if (this.xclient == null) {
-            this.xclient = new XTablesClient();
+            this.xclient = new XTablesClient("192.168.0.17",9999,1736,1737);
         }
         List<XTableValues.Coordinate> coordinates = this.xclient.getCoordinates("target_waypoints");
         if(coordinates == null){
