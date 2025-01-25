@@ -5,6 +5,7 @@ import edu.wpi.first.units.measure.Distance;
 import xbot.common.advantage.DataFrameRefreshable;
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
+import xbot.common.controls.sensors.XDigitalInput;
 import xbot.common.properties.PropertyFactory;
 
 import javax.inject.Inject;
@@ -44,8 +45,12 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
     public final Distance humanLoadHeight;
     public final Distance returnToBaseHeight;
 
+    public final XDigitalInput bottomSensor;
+
+
     @Inject
-    public ElevatorSubsystem(XCANMotorController.XCANMotorControllerFactory motorFactory, PropertyFactory pf, ElectricalContract contract){
+    public ElevatorSubsystem(XCANMotorController.XCANMotorControllerFactory motorFactory, PropertyFactory pf,
+                             ElectricalContract contract, XDigitalInput.XDigitalInputFactory xDigitalInputFactory){
 
         this.contract = contract;
 
@@ -64,7 +69,13 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
         if(contract.isElevatorReady()){
             this.masterMotor = motorFactory.create(contract.getElevatorMotor(), this.getPrefix(), "Elevator Motor");
         }
+        if (contract.isElevatorBottomSensorReady()){
+            this.bottomSensor= xDigitalInputFactory.create(contract.getElevatorBottomSensor(), "Elevator Bottom Sensor0");
+        }else{
+            this.bottomSensor=null;
+        }
     }
+
 
     //will implement logic later
     @Override
@@ -100,6 +111,14 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
             default -> setTargetValue(returnToBaseHeight);
         }
     }
+
+    public boolean touchBottom(){
+        if (contract.isElevatorBottomSensorReady()){
+            return this.bottomSensor.get();
+        }
+        return false;
+    }
+
 
     @Override
     public boolean isCalibrated() {
