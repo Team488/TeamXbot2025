@@ -9,6 +9,7 @@ import xbot.common.command.BaseSubsystem;
 import xbot.common.logic.HumanVsMachineDecider;
 import xbot.common.math.MathUtils;
 import xbot.common.math.PIDManager;
+import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 
 import static edu.wpi.first.units.Units.Inch;
@@ -28,6 +29,9 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     ElevatorSubsystem elevator;
 
+    final DoubleProperty maxPowerGoingUp;
+    final DoubleProperty maxPowerGoingDown;
+
     @Inject
     public ElevatorMaintainerCommand(ElevatorSubsystem elevator, PropertyFactory pf,
                                      HumanVsMachineDecider.HumanVsMachineDeciderFactory hvmFactory,
@@ -38,6 +42,8 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
         this.oi = oi;
 
+        maxPowerGoingUp = pf.createPersistentProperty("motorPowerLimitUp", 1);
+        maxPowerGoingDown = pf.createPersistentProperty("motorPowerLimitDown", 0.01);
     }
 
     @Override
@@ -78,9 +84,12 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     @Override
     protected double getHumanInput() {
-        return MathUtils.deadband(
-                oi.programmerGamepad.getLeftVector().getY(),
-                0.15);
+        return MathUtils.constrainDouble(
+                MathUtils.deadband(
+                    oi.programmerGamepad.getLeftVector().getY(),
+                    0.15,
+                    (a) -> (a)), 
+                maxPowerGoingDown.get(), maxPowerGoingUp.get());
     }
 
     @Override
