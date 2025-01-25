@@ -12,7 +12,7 @@ import xbot.common.math.WrappedRotation2d;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.pose.BasePoseSubsystem;
 import xbot.common.subsystems.vision.AprilTagVisionSubsystem;
-import xbot.common.subsystems.deadwheel.DeadwheelSubsystem;
+import competition.subsystems.deadwheel.DeadwheelSubsystem;
 
 @Singleton
 public class PoseSubsystem extends BasePoseSubsystem {
