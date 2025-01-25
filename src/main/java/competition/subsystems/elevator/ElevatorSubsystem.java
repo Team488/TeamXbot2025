@@ -14,7 +14,7 @@ import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.Inches;
 
 @Singleton
-public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implements DataFrameRefreshable {
+public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     public enum ElevatorGoals{
         ScoreL1,
@@ -65,6 +65,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
 
         if(contract.isElevatorReady()){
             this.masterMotor = motorFactory.create(contract.getElevatorMotor(), this.getPrefix(), "ElevatorMotor");
+            this.registerDataFrameRefreshable(masterMotor);
         }
     }
 
@@ -111,13 +112,6 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
     @Override
     protected boolean areTwoTargetsEquivalent(Distance target1, Distance target2) {
         return target1.isEquivalent(target2);
-    }
-
-    @Override
-    public void refreshDataFrame() {
-        if(contract.isElevatorReady()){
-            masterMotor.refreshDataFrame();
-        }
     }
 
     public void periodic(){
