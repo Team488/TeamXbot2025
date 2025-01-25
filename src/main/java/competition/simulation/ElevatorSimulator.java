@@ -9,6 +9,7 @@ import javax.inject.Singleton;
 import competition.subsystems.elevator.ElevatorMechanism;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import xbot.common.advantage.AKitLogger;
 import xbot.common.controls.actuators.mock_adapters.MockCANMotorController;
@@ -49,7 +50,7 @@ public class ElevatorSimulator {
     }
 
     public void update() {
-        this.elevatorSim.setInputVoltage(this.motor.getPower());
+        this.elevatorSim.setInputVoltage(this.motor.getPower() * RobotController.getBatteryVoltage());
 
         this.elevatorSim.update(loopPeriodSec);
         
