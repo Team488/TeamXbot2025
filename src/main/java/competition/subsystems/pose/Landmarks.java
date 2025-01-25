@@ -5,12 +5,12 @@ import edu.wpi.first.math.geometry.Rotation2d;
 
 public class Landmarks {
 
-    // Auto starting positions TODO: Check if legal, these positions make the robot's back bumper barely on the line
+    // Auto starting positions
     public static Pose2d BlueLeftStartingLine = new Pose2d(7.56, 7.262, Rotation2d.fromDegrees(180));
     public static Pose2d BlueMidStartingLine = new Pose2d(7.56, 6.135, Rotation2d.fromDegrees(180));
     public static Pose2d BlueRightStartingLine = new Pose2d(7.56, 5.044, Rotation2d.fromDegrees(180));
 
-    // Reef faces TODO: test in sim
+    // Reef faces
     // Close Left Reef Face
     public static Pose2d BlueCloseLeftBranchA = new Pose2d(4.002, 5.174, Rotation2d.fromDegrees(-60));
     public static Pose2d BlueCloseLeftAlgae = new Pose2d(3.834 ,5.137, Rotation2d.fromDegrees(-60));
