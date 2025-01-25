@@ -2,19 +2,13 @@ package competition.simulation;
 
 import competition.simulation.arm.ArmSimulator;
 import competition.subsystems.drive.DriveSubsystem;
-import competition.subsystems.elevator.ElevatorMechanism;
 import competition.subsystems.pose.PoseSubsystem;
-import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import xbot.common.advantage.AKitLogger;
 import xbot.common.controls.sensors.mock_adapters.MockGyro;
-
-import static edu.wpi.first.units.Units.Meters;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -23,13 +17,11 @@ import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SelfControlledSwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
-import xbot.common.subsystems.vision.AprilTagVisionSubsystem;
 
 @Singleton
 public class MapleSimulator implements BaseSimulator {
     final PoseSubsystem pose;
     final DriveSubsystem drive;
-    final AprilTagVisionSubsystem vision;
 
     protected final AKitLogger aKitLog;
 
@@ -43,10 +35,9 @@ public class MapleSimulator implements BaseSimulator {
 
     @Inject
     public MapleSimulator(PoseSubsystem pose, DriveSubsystem drive, ElevatorSimulator elevatorSimulator,
-                          AprilTagVisionSubsystem visionSubsystem, ArmSimulator armSimulator) {
+                          ArmSimulator armSimulator) {
         this.pose = pose;
         this.drive = drive;
-        this.vision = visionSubsystem;
         this.elevatorSimulator = elevatorSimulator;
         this.armSimulator = armSimulator;
 
@@ -90,12 +81,6 @@ public class MapleSimulator implements BaseSimulator {
                 drive.getFrontRightSwerveModuleSubsystem().getTargetState(),
                 drive.getRearLeftSwerveModuleSubsystem().getTargetState(),
                 drive.getRearRightSwerveModuleSubsystem().getTargetState()
-        });
-        vision.getAllPoseObservations().forEach(observation -> {
-            swerveDriveSimulation.addVisionEstimation(
-                    observation.visionRobotPoseMeters(),
-                    observation.timestampSeconds(),
-                    observation.visionMeasurementStdDevs());
         });
 
         // run the simulation
