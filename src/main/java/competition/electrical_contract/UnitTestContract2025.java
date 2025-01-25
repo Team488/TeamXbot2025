@@ -11,6 +11,8 @@ public class UnitTestContract2025 extends Contract2025 {
 
     public boolean isCoralCollectionMotorReady() { return true; }
 
+    public boolean isCoralSensorReady() { return true;}
+
     public boolean isArmPivotMotorReady() { return true; }
 
     public boolean isElevatorReady() { return true;}
