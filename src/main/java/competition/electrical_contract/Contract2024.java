@@ -167,7 +167,12 @@ public class Contract2024 extends Contract2025 {
     private static double aprilCameraXDisplacement = 13.153 / PoseSubsystem.INCHES_IN_A_METER;
     private static double aprilCameraYDisplacement = 12.972 / PoseSubsystem.INCHES_IN_A_METER;
     private static double aprilCameraZDisplacement = 9.014 / PoseSubsystem.INCHES_IN_A_METER;
+    private static double rearAprilCameraXDisplacement = 12.875 / PoseSubsystem.INCHES_IN_A_METER;
+    private static double rearAprilCameraYDisplacement = 12.875 / PoseSubsystem.INCHES_IN_A_METER;
+    private static double rearAprilCameraZDisplacement = 0;
     private static double aprilCameraPitch = Math.toRadians(-55.5);
+    private static double rearAprilCameraPitch = Math.toRadians(0);
+    private static double rearAprilCameraYaw = Math.toRadians(180);
     private static double aprilCameraYaw = Math.toRadians(10);
 
     public static String rearLeftNoteCameraName = "NoteRearLeft";
@@ -195,18 +200,18 @@ public class Contract2024 extends Contract2025 {
                 new CameraInfo("Apriltag_RearLeft_Camera",
                         "AprilTagRearLeft",
                         new Transform3d(new Translation3d(
-                                -aprilCameraXDisplacement,
-                                aprilCameraYDisplacement,
-                                aprilCameraZDisplacement),
-                                new Rotation3d(0, aprilCameraPitch, Math.toRadians(180) - aprilCameraYaw)),
+                                -rearAprilCameraXDisplacement,
+                                rearAprilCameraYDisplacement,
+                                rearAprilCameraZDisplacement),
+                                new Rotation3d(0, 0, Math.toRadians(180))),
                         EnumSet.of(CameraCapabilities.APRIL_TAG)),
                 new CameraInfo("Apriltag_RearRight_Camera",
                         "AprilTagRearRight",
                         new Transform3d(new Translation3d(
-                                -aprilCameraXDisplacement,
-                                -aprilCameraYDisplacement,
-                                aprilCameraZDisplacement),
-                                new Rotation3d(0, aprilCameraPitch, Math.toRadians(180) + aprilCameraYaw)),
+                                -rearAprilCameraXDisplacement,
+                                -rearAprilCameraYDisplacement,
+                                rearAprilCameraZDisplacement),
+                                new Rotation3d(0, 0, Math.toRadians(180))),
                         EnumSet.of(CameraCapabilities.APRIL_TAG)),
                 new CameraInfo("GamePiece_FrontLeft_Camera",
                         rearCenterNoteCameraName,

@@ -86,7 +86,6 @@ public class DriveToWaypointsWithVisionCommand extends SwerveSimpleTrajectoryCom
         if (this.xclient == null) {
             this.xclient = new XTablesClient();
         }
-
         List<XTableValues.Coordinate> coordinates = this.xclient.getCoordinates("target_waypoints");
         if(coordinates == null){
             this.prepareToDriveAtGivenNoteWithWaypoints(null);
