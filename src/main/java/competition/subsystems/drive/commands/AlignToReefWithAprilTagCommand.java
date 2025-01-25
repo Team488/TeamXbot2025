@@ -26,6 +26,8 @@ public class AlignToReefWithAprilTagCommand extends BaseCommand {
     public static Pose2d BlueBackReefFace = new Pose2d(5.821, 5.821 , Rotation2d.fromDegrees(-180));
     public static Pose2d BlueBackRightReefFace = new Pose2d(5.150, 2.880, Rotation2d.fromDegrees(120));
 
+    public double cameraOffset = 0.5;
+
     @Inject
     public AlignToReefWithAprilTagCommand(AprilTagVisionSubsystemExtended aprilTagVisionSubsystem, DriveSubsystem drive,
                                           HeadingModule.HeadingModuleFactory headingModuleFactory, PoseSubsystem pose) {
@@ -64,7 +66,7 @@ public class AlignToReefWithAprilTagCommand extends BaseCommand {
     public Translation2d getXYPowersAlignToAprilTag() {
         Translation2d aprilTagData = aprilTagVisionSubsystem.getReefAprilTagCameraData();
 
-        double dx = drive.getPositionalPid().calculate(0.5, aprilTagData.getX());
+        double dx = drive.getPositionalPid().calculate(cameraOffset, aprilTagData.getX());
         double dy = drive.getPositionalPid().calculate(0, aprilTagData.getY());
 
         aKitLog.record("AprilTag X", aprilTagData.getX());
