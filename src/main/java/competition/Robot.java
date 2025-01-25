@@ -39,6 +39,7 @@ public class Robot extends BaseRobot {
         dataFrameRefreshables.add(getInjectorComponent().aprilTagVisionSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().armPivotSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().elevatorSubsystem());
+        dataFrameRefreshables.add(getInjectorComponent().coralScorerSubsystem());
     }
 
     protected BaseRobotComponent createDaggerComponent() {

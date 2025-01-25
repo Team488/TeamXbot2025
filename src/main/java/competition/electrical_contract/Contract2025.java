@@ -62,6 +62,13 @@ public class Contract2025 extends ElectricalContract {
                 new CANMotorControllerOutputConfig());
     }
 
+    public boolean isCoralSensorReady() { return false; }
+
+    @Override
+    public DeviceInfo getCoralSensor() {
+        return new DeviceInfo("CoralSensor", 0);
+    }
+
     @Override
     public boolean areCanCodersReady() {
         return true;
