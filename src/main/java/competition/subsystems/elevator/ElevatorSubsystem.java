@@ -123,6 +123,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
     public void periodic(){
         masterMotor.periodic();
         aKitLog.record("ElevatorTargetHeight",elevatorTargetHeight);
+        aKitLog.record("ElevatorMotorVoltage", masterMotor.getVoltage());
+        aKitLog.record("ElevatorMotorCurrent", masterMotor.getCurrent());
     }
 
 
