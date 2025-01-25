@@ -139,11 +139,6 @@ public class PoseSubsystem extends BasePoseSubsystem {
         );
     }
 
-    @Override
-    public Pose2d getGroundTruthPose() {
-        return this.getCurrentPose2d();
-    }
-
     // used by the physics simulator to mock what the swerve modules are doing currently for pose estimation
     public void ingestSimulatedSwerveModulePositions(SwerveModulePosition[] positions) {
         this.simulatedModulePositions = Optional.of(positions);
