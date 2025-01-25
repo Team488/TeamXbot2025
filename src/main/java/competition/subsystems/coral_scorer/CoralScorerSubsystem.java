@@ -1,6 +1,7 @@
 package competition.subsystems.coral_scorer;
 
 import competition.electrical_contract.ElectricalContract;
+import xbot.common.advantage.DataFrameRefreshable;
 import xbot.common.command.BaseSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
 import xbot.common.controls.sensors.XDigitalInput;
@@ -12,13 +13,12 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
-public class CoralScorerSubsystem extends BaseSubsystem {
-    public XCANMotorController motor = null;
-    public DoubleProperty intakePower;
-    public DoubleProperty scorePower;
-    public XDigitalInput coralSensor;
-    public BooleanProperty isCoralReady;
-    public ElectricalContract electricalContract;
+public class CoralScorerSubsystem extends BaseSubsystem implements DataFrameRefreshable {
+    public final XCANMotorController motor;
+    public final DoubleProperty intakePower;
+    public final DoubleProperty scorePower;
+    public final XDigitalInput coralSensor;
+    public final ElectricalContract electricalContract;
 
     @Inject
     public CoralScorerSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
@@ -28,9 +28,6 @@ public class CoralScorerSubsystem extends BaseSubsystem {
         if (electricalContract.isCoralCollectionMotorReady()) {
             this.motor = xcanMotorControllerFactory.create(electricalContract.getCoralCollectionMotor(),
                     getPrefix(), "CoralScorer");
-
-
-
         } else {
             this.motor = null;
         }
@@ -44,8 +41,6 @@ public class CoralScorerSubsystem extends BaseSubsystem {
 
         this.intakePower = propertyFactory.createPersistentProperty("intakePower", .1);
         this.scorePower = propertyFactory.createPersistentProperty("scorerPower", -.1);
-
-        this.isCoralReady = propertyFactory.createPersistentProperty("isCoralReady", false);
 
         this.electricalContract = electricalContract;
     }
@@ -67,9 +62,17 @@ public class CoralScorerSubsystem extends BaseSubsystem {
     }
     public boolean hasCoral() {
         if (electricalContract.isCoralSensorReady()) {
-            return isCoralReady.get();
+            return this.coralSensor.get();
         }
         return false;
+    }
+
+    public void periodic() {
+        aKitLog.record("coralPresent", this.hasCoral());
+    }
+    @Override
+    public void refreshDataFrame() {
+        coralSensor.refreshDataFrame();
     }
 }
 
