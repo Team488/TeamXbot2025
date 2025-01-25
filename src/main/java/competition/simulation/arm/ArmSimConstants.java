@@ -16,7 +16,5 @@ public class ArmSimConstants {
     public static final Angle minAngleRads = Degrees.of(-45);
     public static final Angle maxAngleRads = Degrees.of(90);
     public static final Angle startingAngle = minAngleRads;
-    // distance per pulse = (angle per revolution) / (pulses per revolution)
-    //  = (2 * PI rads) / (4096 pulses)
-    public static final Distance armEncoderDistPerPulse = Meters.of(2.0 * Math.PI / 4096);
+    public static final Angle armEncoderAnglePerRotation = Degrees.of(0.1);
 }
