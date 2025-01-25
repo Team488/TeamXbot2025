@@ -1,19 +1,13 @@
 package competition.subsystems.pose;
 
 import java.util.Optional;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
 import competition.subsystems.drive.DriveSubsystem;
-import edu.wpi.first.apriltag.AprilTag;
-import edu.wpi.first.math.Matrix;
+import competition.subsystems.deadwheel.DeadwheelSubsystem;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
 import xbot.common.controls.sensors.XGyro.XGyroFactory;
 import xbot.common.math.WrappedRotation2d;
 import xbot.common.properties.PropertyFactory;
@@ -25,39 +19,44 @@ public class PoseSubsystem extends BasePoseSubsystem {
 
     final SwerveDrivePoseEstimator onlyWheelsGyroSwerveOdometry;
     final SwerveDrivePoseEstimator fullSwerveOdometry;
+    final SwerveDrivePoseEstimator onlyDeadwheelOdometry;
+    final SwerveDrivePoseEstimator fullVisionDeadwheelOdometry;
+    final SwerveDrivePoseEstimator fullSwerveDeadwheelOdometry;
 
     private final DriveSubsystem drive;
     private final AprilTagVisionSubsystem aprilTagVisionSubsystem;
+    private final DeadwheelSubsystem deadwheelSubsystem;
 
-    // only used when simulating the robot
     protected Optional<SwerveModulePosition[]> simulatedModulePositions = Optional.empty();
 
     @Inject
-    public PoseSubsystem(XGyroFactory gyroFactory, PropertyFactory propManager, DriveSubsystem drive, AprilTagVisionSubsystem aprilTagVisionSubsystem) {
+    public PoseSubsystem(XGyroFactory gyroFactory, PropertyFactory propManager, DriveSubsystem drive, 
+                         AprilTagVisionSubsystem aprilTagVisionSubsystem, DeadwheelSubsystem deadwheelSubsystem) {
         super(gyroFactory, propManager);
         this.drive = drive;
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
+        this.deadwheelSubsystem = deadwheelSubsystem;
 
         onlyWheelsGyroSwerveOdometry = initializeSwerveOdometry();
         fullSwerveOdometry = initializeSwerveOdometry();
+        onlyDeadwheelOdometry = initializeDeadwheelOdometry();
+        fullVisionDeadwheelOdometry = initializeDeadwheelOdometry();
+        fullSwerveDeadwheelOdometry = initializeDeadwheelOdometry();
     }
-
-    @Override
-    protected double getLeftDriveDistance() {
-        return drive.getLeftTotalDistance();
-    }
-
-    @Override
-    protected double getRightDriveDistance() {
-        return drive.getRightTotalDistance();
-    }
-
 
     private SwerveDrivePoseEstimator initializeSwerveOdometry() {
         return new SwerveDrivePoseEstimator(
                 drive.getSwerveDriveKinematics(),
                 getCurrentHeading(),
                 getSwerveModulePositions(),
+                new Pose2d());
+    }
+
+    private SwerveDrivePoseEstimator initializeDeadwheelOdometry() {
+        return new SwerveDrivePoseEstimator(
+                drive.getSwerveDriveKinematics(),
+                getCurrentHeading(),
+                getDeadwheelPositions(),
                 new Pose2d());
     }
 
@@ -82,6 +81,42 @@ public class PoseSubsystem extends BasePoseSubsystem {
             );
         });
 
+        onlyDeadwheelOdometry.update(
+                this.getCurrentHeading(),
+                getDeadwheelPositions()
+        );
+        aKitLog.record("DeadwheelOnlyEstimate", onlyDeadwheelOdometry.getEstimatedPosition());
+
+        fullVisionDeadwheelOdometry.update(
+                this.getCurrentHeading(),
+                getDeadwheelPositions()
+        );
+        this.aprilTagVisionSubsystem.getAllPoseObservations().forEach(observation -> {
+            fullVisionDeadwheelOdometry.addVisionMeasurement(
+                observation.visionRobotPoseMeters(),
+                observation.timestampSeconds(),
+                observation.visionMeasurementStdDevs()
+            );
+        });
+        aKitLog.record("FullVisionDeadwheelEstimate", fullVisionDeadwheelOdometry.getEstimatedPosition());
+
+        fullSwerveDeadwheelOdometry.update(
+                this.getCurrentHeading(),
+                getSwerveModulePositions()
+        );
+        fullSwerveDeadwheelOdometry.update(
+                this.getCurrentHeading(),
+                getDeadwheelPositions()
+        );
+        this.aprilTagVisionSubsystem.getAllPoseObservations().forEach(observation -> {
+            fullSwerveDeadwheelOdometry.addVisionMeasurement(
+                observation.visionRobotPoseMeters(),
+                observation.timestampSeconds(),
+                observation.visionMeasurementStdDevs()
+            );
+        });
+        aKitLog.record("FullSwerveDeadwheelEstimate", fullSwerveDeadwheelOdometry.getEstimatedPosition());
+
         // Report poses
         Pose2d estimatedPosition = new Pose2d(
                 onlyWheelsGyroSwerveOdometry.getEstimatedPosition().getTranslation(),
@@ -105,18 +140,24 @@ public class PoseSubsystem extends BasePoseSubsystem {
         this.totalVelocity = (Math.sqrt(Math.pow(velocityX, 2.0) + Math.pow(velocityY, 2.0))); // Unnecessary?
     }
 
-    private SwerveModulePosition[] getSwerveModulePositions() {
-        // if we have simulated data, return that directly instead of asking the
-        // modules
-        if(simulatedModulePositions.isPresent()) {
-            return simulatedModulePositions.get();
-        }
+    private SwerveModulePosition[] getDeadwheelPositions() {
         return new SwerveModulePosition[] {
-                drive.getFrontLeftSwerveModuleSubsystem().getCurrentPosition(),
-                drive.getFrontRightSwerveModuleSubsystem().getCurrentPosition(),
-                drive.getRearLeftSwerveModuleSubsystem().getCurrentPosition(),
-                drive.getRearRightSwerveModuleSubsystem().getCurrentPosition()
+                new SwerveModulePosition(deadwheelSubsystem.getLeftDistance(), new WrappedRotation2d(0)),
+                new SwerveModulePosition(deadwheelSubsystem.getRightDistance(), new WrappedRotation2d(0)),
+                new SwerveModulePosition(deadwheelSubsystem.getFrontDistance(), new WrappedRotation2d(0))
         };
+    }
+
+    // Override methods remain unchanged
+
+    @Override
+    protected double getLeftDriveDistance() {
+        return drive.getLeftTotalDistance();
+    }
+
+    @Override
+    protected double getRightDriveDistance() {
+        return drive.getRightTotalDistance();
     }
 
     public void setCurrentPosition(double newXPositionMeters, double newYPositionMeters, WrappedRotation2d heading) {
@@ -144,7 +185,6 @@ public class PoseSubsystem extends BasePoseSubsystem {
         return this.getCurrentPose2d();
     }
 
-    // used by the physics simulator to mock what the swerve modules are doing currently for pose estimation
     public void ingestSimulatedSwerveModulePositions(SwerveModulePosition[] positions) {
         this.simulatedModulePositions = Optional.of(positions);
     }
