@@ -34,6 +34,7 @@ import xbot.common.properties.BooleanProperty;
 import xbot.common.properties.Property;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.pose.BasePoseSubsystem;
+import xbot.common.subsystems.deadwheel.DeadwheelSubsystem;
 
 @Singleton
 public class PoseSubsystem extends BasePoseSubsystem {
