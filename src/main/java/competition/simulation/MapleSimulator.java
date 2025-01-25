@@ -109,4 +109,9 @@ public class MapleSimulator implements BaseSimulator {
         this.swerveDriveSimulation.getDriveTrainSimulation().setSimulationWorldPose(pose);
         this.pose.setCurrentPoseInMeters(pose);
     }
+
+    @Override
+    public Pose2d getGroundTruthPose() {
+        return this.swerveDriveSimulation.getActualPoseInSimulationWorld();
+    }
 }
