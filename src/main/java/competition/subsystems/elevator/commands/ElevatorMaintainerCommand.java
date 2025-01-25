@@ -3,16 +3,13 @@ package competition.subsystems.elevator.commands;
 import competition.operator_interface.OperatorInterface;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.units.measure.Distance;
-import xbot.common.command.BaseCommand;
 import xbot.common.command.BaseMaintainerCommand;
-import xbot.common.command.BaseSubsystem;
 import xbot.common.logic.HumanVsMachineDecider;
 import xbot.common.math.MathUtils;
 import xbot.common.math.PIDManager;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 
-import static edu.wpi.first.units.Units.Inch;
 import static edu.wpi.first.units.Units.Inches;
 
 import javax.inject.Inject;
@@ -29,8 +26,8 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     ElevatorSubsystem elevator;
 
-    final DoubleProperty maxPowerGoingUp;
-    final DoubleProperty maxPowerGoingDown;
+    final DoubleProperty humanMaxPowerGoingUp;
+    final DoubleProperty humanMaxPowerGoingDown;
 
     @Inject
     public ElevatorMaintainerCommand(ElevatorSubsystem elevator, PropertyFactory pf,
@@ -42,8 +39,8 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
         this.oi = oi;
 
-        maxPowerGoingUp = pf.createPersistentProperty("maxPowerGoingUp", 1);
-        maxPowerGoingDown = pf.createPersistentProperty("maxPowerGoingDown", -0.01);
+        humanMaxPowerGoingUp = pf.createPersistentProperty("maxPowerGoingUp", 1);
+        humanMaxPowerGoingDown = pf.createPersistentProperty("maxPowerGoingDown", -0.01);
     }
 
     @Override
@@ -87,9 +84,9 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         return MathUtils.constrainDouble(
                 MathUtils.deadband(
                     oi.programmerGamepad.getLeftVector().getY(),
-                    0.15,
+                    oi.getOperatorGamepadTypicalDeadband(),
                     (a) -> (a)),
-                maxPowerGoingDown.get(), maxPowerGoingUp.get());
+                humanMaxPowerGoingDown.get(), humanMaxPowerGoingUp.get());
     }
 
     @Override
