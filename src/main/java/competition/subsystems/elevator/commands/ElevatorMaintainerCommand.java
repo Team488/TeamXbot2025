@@ -42,8 +42,8 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
         this.oi = oi;
 
-        maxPowerGoingUp = pf.createPersistentProperty("motorPowerLimitUp", 1);
-        maxPowerGoingDown = pf.createPersistentProperty("motorPowerLimitDown", 0.01);
+        maxPowerGoingUp = pf.createPersistentProperty("maxPowerGoingUp", 1);
+        maxPowerGoingDown = pf.createPersistentProperty("maxPowerGoingDown", -0.01);
     }
 
     @Override
@@ -88,7 +88,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
                 MathUtils.deadband(
                     oi.programmerGamepad.getLeftVector().getY(),
                     0.15,
-                    (a) -> (a)), 
+                    (a) -> (a)),
                 maxPowerGoingDown.get(), maxPowerGoingUp.get());
     }
 
