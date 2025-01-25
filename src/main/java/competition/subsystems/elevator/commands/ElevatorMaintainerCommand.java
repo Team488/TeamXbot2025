@@ -47,11 +47,6 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     }
 
     @Override
-    public void execute(){
-        super.execute();
-    }
-
-    @Override
     protected void coastAction() {
         elevator.setPower(0);
     }

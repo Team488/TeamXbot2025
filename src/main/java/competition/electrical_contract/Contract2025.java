@@ -69,7 +69,7 @@ public class Contract2025 extends ElectricalContract {
 
     @Override
     public boolean isElevatorReady() {
-        return true; //return true when ready
+        return false; //return true when ready
     }
 
     @Override
