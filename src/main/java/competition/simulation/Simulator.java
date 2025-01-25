@@ -10,7 +10,7 @@ import xbot.common.math.MovingAverageForTranslation2d;
 
 import javax.inject.Inject;
 
-public class Simulator {
+public class Simulator implements BaseSimulator {
 
     MovingAverageForTranslation2d translationAverageCalculator =
             new MovingAverageForTranslation2d(15);
@@ -55,5 +55,10 @@ public class Simulator {
                         currentPose.getTranslation().getY() + currentAverage.getY() * poseAdjustmentFactorForDriveSimulation),
                 currentPose.getRotation().plus(Rotation2d.fromDegrees(currentRotationAverage * headingAdjustmentFactorForDriveSimulation)));
         pose.setCurrentPoseInMeters(updatedPose);
+    }
+
+    @Override
+    public void resetPosition(Pose2d pose) {
+        this.pose.setCurrentPoseInMeters(pose);
     }
 }

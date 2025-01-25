@@ -2,6 +2,8 @@ package competition.injection.modules;
 
 import competition.electrical_contract.ElectricalContract;
 import competition.electrical_contract.UnitTestContract2025;
+import competition.simulation.BaseSimulator;
+import competition.simulation.MapleSimulator;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.PoseSubsystem;
 import dagger.Binds;
@@ -39,4 +41,8 @@ public abstract class UnitTestRobotModule {
     @Binds
     @Singleton
     public abstract BaseDriveSubsystem getDriveSubsystem(BaseSwerveDriveSubsystem impl);
+
+    @Binds
+    @Singleton
+    public abstract BaseSimulator getSimulator(MapleSimulator impl);
 }
