@@ -18,4 +18,9 @@ public class NoopSimulator implements BaseSimulator {
     public void resetPosition(Pose2d pose) {
         // Do nothing, used just in case a real robot accidentally tries to call this method
     }
+
+    @Override
+    public Pose2d getGroundTruthPose() {
+        return new Pose2d();
+    }
 }

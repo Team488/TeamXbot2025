@@ -7,6 +7,8 @@ public class UnitTestContract2025 extends Contract2025 {
     @Inject
     public UnitTestContract2025() {}
 
+
+
     public boolean isAlgaeCollectionReady() { return true; }
 
     public boolean isCoralCollectionMotorReady() { return true; }
