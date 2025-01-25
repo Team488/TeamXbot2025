@@ -53,6 +53,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
         this.distanceFromTargetHeight = Feet.of(0);
         this.currentHeight = Inches.of(0);
 
+        pf.setPrefix(this);
+
         //these are not real measured heights yet, just placeholders
         l1Height = Feet.of(3);
         l2Height = Feet.of(4);

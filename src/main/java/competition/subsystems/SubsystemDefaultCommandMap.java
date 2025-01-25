@@ -10,6 +10,7 @@ import competition.subsystems.coral_scorer.commands.CoralIntakeStopCommand;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.elevator.ElevatorSubsystem;
+import competition.subsystems.elevator.commands.ElevatorMaintainerCommand;
 import competition.subsystems.elevator.commands.SetElevatorTargetHeightCommand;
 
 /**
@@ -37,7 +38,7 @@ public class SubsystemDefaultCommandMap {
     }
 
     @Inject
-    public void setupElevatorSubsystem(ElevatorSubsystem elevatorSubsystem, SetElevatorTargetHeightCommand command){
+    public void setupElevatorSubsystem(ElevatorSubsystem elevatorSubsystem, ElevatorMaintainerCommand command){
         elevatorSubsystem.setDefaultCommand(command);
     }
 }
