@@ -39,7 +39,7 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> implements D
         this.degreesPerRotations = propertyFactory.createPersistentProperty("Degrees Per Rotations", 1);
     }
 
-    //
+
 
     @Override
     public Angle getCurrentValue() {
@@ -49,7 +49,6 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> implements D
 
     @Override
     public Angle getTargetValue() {
-
         return targetAngle;
     }
 
