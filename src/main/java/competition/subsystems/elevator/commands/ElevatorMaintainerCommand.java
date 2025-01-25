@@ -34,6 +34,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
                                      PIDManager.PIDManagerFactory pidf,
                                      OperatorInterface oi){
         super(elevator,pf,hvmFactory, 1, 0.2);
+        this.elevator = elevator;
 
         this.oi = oi;
 
@@ -47,7 +48,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     @Override
     public void execute(){
-        super.maintain();
+        super.execute();
     }
 
     @Override
