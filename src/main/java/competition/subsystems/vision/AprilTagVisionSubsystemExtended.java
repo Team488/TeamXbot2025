@@ -15,10 +15,10 @@ import javax.inject.Singleton;
 @Singleton
 public class AprilTagVisionSubsystemExtended extends AprilTagVisionSubsystem {
     @Inject
-    public AprilTagVisionSubsystemExtended(VisionConsumer consumer, PropertyFactory pf,
+    public AprilTagVisionSubsystemExtended(PropertyFactory pf,
                                            AprilTagFieldLayout fieldLayout, XCameraElectricalContract contract,
                                            AprilTagVisionIOFactory visionIOFactory) {
-        super(consumer, pf, fieldLayout, contract, visionIOFactory);
+        super(pf, fieldLayout, contract, visionIOFactory);
     }
 
     @Override
@@ -32,13 +32,13 @@ public class AprilTagVisionSubsystemExtended extends AprilTagVisionSubsystem {
     }
 
     public Translation2d getReefAprilTagCameraData() {
-        Transform3d data = inputs[0].latestTargetObservation.cameraToTarget();
+        Transform3d data = getLatestTargetObservation(0).cameraToTarget();
 
         return new Translation2d(data.getX(), data.getY());
     }
 
     public boolean reefAprilTagCameraHasCorrectTarget(int targetAprilTagID) {
-        AprilTagVisionIO.TargetObservation targetObservation = inputs[0].latestTargetObservation;
+        AprilTagVisionIO.TargetObservation targetObservation = getLatestTargetObservation(0);
         return targetObservation != null && targetObservation.fiducialId() == targetAprilTagID;
     }
 }
