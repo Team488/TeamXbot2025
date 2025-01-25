@@ -7,6 +7,7 @@ import javax.inject.Singleton;
 import competition.simulation.commands.ResetSimulatedPose;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
+import competition.subsystems.pose.commands.ToTestLocationCommand;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import xbot.common.controls.sensors.XXboxController;
@@ -32,7 +33,8 @@ public class OperatorCommandMap {
     public void setupMyCommands(
             OperatorInterface operatorInterface,
             SetRobotHeadingCommand resetHeading,
-            Provider<SwerveSimpleTrajectoryCommand> provider) {
+            Provider<SwerveSimpleTrajectoryCommand> provider,
+            ToTestLocationCommand locationCommand) {
         resetHeading.setHeadingToApply(0);
         //operatorInterface.gamepad.getifAvailable(1).onTrue(resetHeading);
 
@@ -52,6 +54,7 @@ public class OperatorCommandMap {
         toGoal.logic.setConstantVelocity(2);
         toGoal.logic.setKeyPoints(toGoalPoints);
 
+        operatorInterface.gamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(locationCommand);
         operatorInterface.gamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(toOrigin);
         operatorInterface.gamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(toGoal);
     }
