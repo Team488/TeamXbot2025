@@ -12,8 +12,6 @@ import xbot.common.advantage.AKitLogger;
 
 @Singleton
 public class ElevatorSimulator {
-    final double loopPeriodSec = 0.02; 
-
     protected final AKitLogger aKitLog;
 
     final ElevatorSim elevatorSim;
@@ -45,7 +43,7 @@ public class ElevatorSimulator {
     public void update() {
         this.elevatorSim.setInputVoltage(elevatorVoltage);
 
-        this.elevatorSim.update(loopPeriodSec);
+        this.elevatorSim.update(SimulationConstants.loopPeriodSec);
         
         // Read out the new elevator position for rendering
         var elevatorCurrentHeight = Meters.of(this.elevatorSim.getPositionMeters());
