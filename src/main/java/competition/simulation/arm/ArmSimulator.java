@@ -45,7 +45,8 @@ public class ArmSimulator {
     }
 
     public void update() {
-        armSim.setInput(this.armMotor.getPower() * RobotController.getBatteryVoltage());
+        // invert power because the simulated arm is going "backwards"
+        armSim.setInput(this.armMotor.getPower() * RobotController.getBatteryVoltage() * -1.0);
         armSim.update(SimulationConstants.loopPeriodSec); // 20ms
 
         // Read out the new arm position for rendering
