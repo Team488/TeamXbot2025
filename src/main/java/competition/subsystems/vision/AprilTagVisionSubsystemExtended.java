@@ -39,6 +39,6 @@ public class AprilTagVisionSubsystemExtended extends AprilTagVisionSubsystem {
 
     public boolean reefAprilTagCameraHasCorrectTarget(int targetAprilTagID) {
         AprilTagVisionIO.TargetObservation targetObservation = getLatestTargetObservation(0);
-        return targetObservation != null && targetObservation.fiducialId() == targetAprilTagID;
+        return targetObservation.fiducialId() == targetAprilTagID;
     }
 }

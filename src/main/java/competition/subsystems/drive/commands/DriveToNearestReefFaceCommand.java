@@ -1,6 +1,7 @@
 package competition.subsystems.drive.commands;
 
 import competition.subsystems.drive.DriveSubsystem;
+import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -18,12 +19,12 @@ import java.util.HashMap;
 
 public class DriveToNearestReefFaceCommand extends SwerveSimpleTrajectoryCommand {
 
-    public static Pose2d BlueCloseReefFace = new Pose2d(3.158, 4.026, Rotation2d.fromDegrees(0));
-    public static Pose2d BlueCloseRightReefFace = new Pose2d(3.829, 2.880, Rotation2d.fromDegrees(60));
-    public static Pose2d BlueCloseLeftReefFace = new Pose2d(3.829, 5.180, Rotation2d.fromDegrees(-60));
-    public static Pose2d BlueBackLeftReefFace = new Pose2d(5.150, 5.180, Rotation2d.fromDegrees(-120));
-    public static Pose2d BlueBackReefFace = new Pose2d(5.850, 4.026 , Rotation2d.fromDegrees(-180));
-    public static Pose2d BlueBackRightReefFace = new Pose2d(5.150, 2.880, Rotation2d.fromDegrees(120));
+    Pose2d BlueCloseReefFace = Landmarks.BlueCloseAlgae;
+    Pose2d BlueCloseRightReefFace = Landmarks.BlueCloseRightAlgae;
+    Pose2d BlueCloseLeftReefFace = Landmarks.BlueCloseLeftAlgae;
+    Pose2d BlueFarLeftReefFace = Landmarks.BlueFarLeftAlgae;
+    Pose2d BlueFarReefFace = Landmarks.BlueFarAlgae;
+    Pose2d BlueFarRightReefFace = Landmarks.BlueFarRightAlgae;
 
     DriveSubsystem drive;
     AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
@@ -73,20 +74,20 @@ public class DriveToNearestReefFaceCommand extends SwerveSimpleTrajectoryCommand
                 BlueCloseLeftReefFace).getTranslation().getDistance(currentPose.getTranslation());
         double closeRightDistance = PoseSubsystem.convertBlueToRedIfNeeded(
                 BlueCloseRightReefFace).getTranslation().getDistance(currentPose.getTranslation());
-        double backLeftDistance = PoseSubsystem.convertBlueToRedIfNeeded(
-                BlueBackLeftReefFace).getTranslation().getDistance(currentPose.getTranslation());
-        double backDistance = PoseSubsystem.convertBlueToRedIfNeeded(
-                BlueBackReefFace).getTranslation().getDistance(currentPose.getTranslation());
-        double backRightDistance = PoseSubsystem.convertBlueToRedIfNeeded(
-                BlueBackRightReefFace).getTranslation().getDistance(currentPose.getTranslation());
+        double farLeftDistance = PoseSubsystem.convertBlueToRedIfNeeded(
+                BlueFarLeftReefFace).getTranslation().getDistance(currentPose.getTranslation());
+        double farDistance = PoseSubsystem.convertBlueToRedIfNeeded(
+                BlueFarReefFace).getTranslation().getDistance(currentPose.getTranslation());
+        double farRightDistance = PoseSubsystem.convertBlueToRedIfNeeded(
+                BlueFarRightReefFace).getTranslation().getDistance(currentPose.getTranslation());
 
         HashMap<Double, Pose2d> hashMap = new HashMap<>();
         hashMap.put(closeLeftDistance, PoseSubsystem.convertBlueToRedIfNeeded(BlueCloseLeftReefFace));
         hashMap.put(closeDistance, PoseSubsystem.convertBlueToRedIfNeeded(BlueCloseReefFace));
         hashMap.put(closeRightDistance, PoseSubsystem.convertBlueToRedIfNeeded(BlueCloseRightReefFace));
-        hashMap.put(backLeftDistance, PoseSubsystem.convertBlueToRedIfNeeded(BlueBackLeftReefFace));
-        hashMap.put(backDistance, PoseSubsystem.convertBlueToRedIfNeeded(BlueBackReefFace));
-        hashMap.put(backRightDistance, PoseSubsystem.convertBlueToRedIfNeeded(BlueBackRightReefFace));
+        hashMap.put(farLeftDistance, PoseSubsystem.convertBlueToRedIfNeeded(BlueFarLeftReefFace));
+        hashMap.put(farDistance, PoseSubsystem.convertBlueToRedIfNeeded(BlueFarReefFace));
+        hashMap.put(farRightDistance, PoseSubsystem.convertBlueToRedIfNeeded(BlueFarRightReefFace));
 
         double leastDistance = closeLeftDistance;
 
@@ -106,17 +107,17 @@ public class DriveToNearestReefFaceCommand extends SwerveSimpleTrajectoryCommand
             hashMap.put(PoseSubsystem.convertBlueToRedIfNeeded(BlueCloseLeftReefFace), 8);
             hashMap.put(PoseSubsystem.convertBlueToRedIfNeeded(BlueCloseReefFace), 7);
             hashMap.put(PoseSubsystem.convertBlueToRedIfNeeded(BlueCloseRightReefFace), 6);
-            hashMap.put(PoseSubsystem.convertBlueToRedIfNeeded(BlueBackLeftReefFace), 9);
-            hashMap.put(PoseSubsystem.convertBlueToRedIfNeeded(BlueBackReefFace), 10);
-            hashMap.put(PoseSubsystem.convertBlueToRedIfNeeded(BlueBackRightReefFace), 11);
+            hashMap.put(PoseSubsystem.convertBlueToRedIfNeeded(BlueFarLeftReefFace), 9);
+            hashMap.put(PoseSubsystem.convertBlueToRedIfNeeded(BlueFarReefFace), 10);
+            hashMap.put(PoseSubsystem.convertBlueToRedIfNeeded(BlueFarRightReefFace), 11);
         }
         else {
             hashMap.put(BlueCloseLeftReefFace, 19);
             hashMap.put(BlueCloseReefFace, 18);
             hashMap.put(BlueCloseRightReefFace, 17);
-            hashMap.put(BlueBackLeftReefFace, 20);
-            hashMap.put(BlueBackReefFace, 21);
-            hashMap.put(BlueBackRightReefFace, 22);
+            hashMap.put(BlueFarLeftReefFace, 20);
+            hashMap.put(BlueFarReefFace, 21);
+            hashMap.put(BlueFarRightReefFace, 22);
         }
         aKitLog.record("TargetAprilTagID", hashMap.get(targetReefFacePose));
 
