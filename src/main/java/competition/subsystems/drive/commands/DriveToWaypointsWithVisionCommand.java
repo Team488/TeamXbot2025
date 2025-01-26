@@ -45,7 +45,8 @@ public class DriveToWaypointsWithVisionCommand extends SwerveSimpleTrajectoryCom
     public void prepareToDriveWithWaypoints(Translation2d[] waypoints, Rotation2d potentialRotation){
         List<XbotSwervePoint> swervePoints = new ArrayList<>();
         for (Translation2d waypoint : waypoints){
-            swervePoints.add(XbotSwervePoint.createPotentiallyFilppedXbotSwervePoint(waypoint, (potentialRotation != null ? potentialRotation : Rotation2d.fromDegrees(180)),this.drive.getDriveToWaypointsDurationPerPoint()));
+            swervePoints.add(XbotSwervePoint.createPotentiallyFilppedXbotSwervePoint(waypoint,
+                (potentialRotation != null ? potentialRotation : Rotation2d.fromDegrees(180)),this.drive.getDriveToWaypointsDurationPerPoint()));
         }
 
         this.logic.setKeyPoints(swervePoints);
