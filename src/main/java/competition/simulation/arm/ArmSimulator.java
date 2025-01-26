@@ -11,6 +11,7 @@ import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Rotations;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import xbot.common.controls.actuators.mock_adapters.MockCANMotorController;
@@ -39,7 +40,7 @@ public class ArmSimulator {
                 ArmSimConstants.minAngleRads.in(Radians),
                 ArmSimConstants.maxAngleRads.in(Radians),
                 true,
-                0
+                ArmSimConstants.startingAngle.in(Radians)
         );
     }
 
@@ -48,12 +49,21 @@ public class ArmSimulator {
         armSim.update(SimulationConstants.loopPeriodSec); // 20ms
 
         // Read out the new arm position for rendering
-        // TODO: the frame of reference of the simulated arm is wrong, gravity isn't being applied
-        // in the same way we think
-        var armMotorRotations = armSim.getAngleRads() / ArmSimConstants.armEncoderAnglePerRotation.in(Radians);
+        var armRelativeAngle = getArmAngle();
 
+
+        var armMotorRotations = armRelativeAngle.in(Radians) / ArmSimConstants.armEncoderAnglePerRotation.in(Radians);
         armMotor.setPosition(Rotations.of(armMotorRotations));
+
+
         // correct for frame of reference for the arm pivot in the mechanism vs sim model
-        elevatorMechanism.armAngle = Radians.of(armSim.getAngleRads()).plus(ArmSimConstants.minAngleRads.times(-1)).times(-1);
+        elevatorMechanism.armAngle = armRelativeAngle;
+    }
+
+    public Angle getArmAngle() {
+        // convert from the armSim frame of reference to our actual arm frame of reference where the bottom is 0' and the top is 125'
+        var armSimAngle = Radians.of(armSim.getAngleRads());
+
+        return armSimAngle.minus(ArmSimConstants.maxAngleRads).times(-1);
     }
 }

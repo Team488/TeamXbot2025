@@ -17,7 +17,7 @@ import static edu.wpi.first.units.Units.Rotations;
 @Singleton
 public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
     public final XCANMotorController armMotor;
-    Angle targetAngle;
+    Angle targetAngle = Degrees.of(0);
     ElectricalContract electricalContract;
     DoubleProperty degreesPerRotations;
     double rotationsAtZero;
