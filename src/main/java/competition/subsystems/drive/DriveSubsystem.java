@@ -26,7 +26,7 @@ import xbot.common.subsystems.drive.BaseSwerveDriveSubsystem;
 import java.util.function.Supplier;
 
 @Singleton
-public class DriveSubsystem extends BaseSwerveDriveSubsystem implements DataFrameRefreshable {
+public class DriveSubsystem extends BaseSwerveDriveSubsystem {
     private static Logger log = LogManager.getLogger(DriveSubsystem.class);
 
     private Translation2d lookAtPointTarget = new Translation2d(); // The target point to look at

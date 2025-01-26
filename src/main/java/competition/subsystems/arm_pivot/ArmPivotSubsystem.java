@@ -17,7 +17,7 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Rotations;
 
 @Singleton
-public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> implements DataFrameRefreshable {
+public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
     public final XCANMotorController armMotor;
     private final XAbsoluteEncoder armAbsoluteEncoder;
     private final XDigitalInput lowSensor;
@@ -46,6 +46,7 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> implements D
                     "ArmPivotAbsoluteEncoder");
             this.lowSensor = xDigitalInputFactory.create(electricalContract.getArmPivotLowSensor(),
                     "ArmPivotLowSensor");
+            this.registerDataFrameRefreshable(this.armMotor);
         } else {
             this.armMotor = null;
             this.armAbsoluteEncoder = null;
