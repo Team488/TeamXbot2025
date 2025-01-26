@@ -33,7 +33,6 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
     final Distance distanceFromTargetHeight;
     final Distance currentHeight;
 
-    //assuming we'll have a master and follower motors
     public XCANMotorController masterMotor;
 
     //important heights
@@ -49,7 +48,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
 
         this.contract = contract;
 
-        this.elevatorTargetHeight = Feet.of(0);
+        this.elevatorTargetHeight = Feet.of(2);
         this.distanceFromTargetHeight = Feet.of(0);
         this.currentHeight = Inches.of(0);
 

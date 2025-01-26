@@ -11,6 +11,8 @@ import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meter;
+import static edu.wpi.first.units.Units.Meters;
 
 import javax.inject.Inject;
 
@@ -23,6 +25,8 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     }
 
     private final OperatorInterface oi;
+
+    private final PIDManager positionPID;
 
     ElevatorSubsystem elevator;
 
@@ -38,14 +42,16 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         this.elevator = elevator;
 
         this.oi = oi;
+        positionPID = pidf.create(getPrefix() + "positionPID", 0.5, 0.01, 0);
 
         humanMaxPowerGoingUp = pf.createPersistentProperty("maxPowerGoingUp", 1);
-        humanMaxPowerGoingDown = pf.createPersistentProperty("maxPowerGoingDown", -0.01);
+        humanMaxPowerGoingDown = pf.createPersistentProperty("maxPowerGoingDown", -0.05);
     }
 
     @Override
     public void initialize() {
         log.info("initializing");
+        //initializeMachineControlAction();
 
     }
 
@@ -56,6 +62,15 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     @Override
     protected void calibratedMachineControlAction() {
+        if(isMaintainerAtGoal()){
+            elevator.setPower(0.0);
+        }
+        else {
+            double power = positionPID.calculate(
+                    elevator.getTargetValue().in(Meters),
+                    elevator.getCurrentValue().in(Meters));
+            elevator.setPower(power);
+        }
 
     }
 
