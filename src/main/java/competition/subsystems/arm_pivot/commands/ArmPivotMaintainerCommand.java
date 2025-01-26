@@ -7,7 +7,9 @@ import competition.subsystems.arm_pivot.ArmPivotSubsystem;
 import edu.wpi.first.units.measure.Angle;
 import xbot.common.command.BaseMaintainerCommand;
 import xbot.common.logic.HumanVsMachineDecider;
+import xbot.common.math.MathUtils;
 import xbot.common.math.PIDManager;
+import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.Property;
 import xbot.common.properties.PropertyFactory;
 
@@ -20,7 +22,8 @@ public class ArmPivotMaintainerCommand extends BaseMaintainerCommand<Angle> {
 
    ArmPivotSubsystem armPivotSubsystem;
    OperatorInterface oi;
-
+   final DoubleProperty humanMaxPower;
+   final DoubleProperty humanMinPower;
 
    @Inject
    public ArmPivotMaintainerCommand(ArmPivotSubsystem armPivotSubsystem, PropertyFactory pf,
@@ -32,7 +35,10 @@ public class ArmPivotMaintainerCommand extends BaseMaintainerCommand<Angle> {
        this.armPivotSubsystem = armPivotSubsystem;
        this.oi = oi;
        pf.setPrefix(this);
-       pf.setDefaultLevel(Property.PropertyLevel.Debug);
+       pf.setDefaultLevel(Property.PropertyLevel.Important);
+
+       humanMaxPower = pf.createPersistentProperty("HumanMaxPower", .1);
+       humanMinPower = pf.createPersistentProperty("HumanMinPower", -.1);
    }
 
     @Override
@@ -61,7 +67,12 @@ public class ArmPivotMaintainerCommand extends BaseMaintainerCommand<Angle> {
 
     @Override
     protected double getHumanInput() { //gamepad controls: Left joy stick up/down & Left bumper to switch between elevator/arm
-       return oi.programmerGamepad.getLeftStickY();
+       return MathUtils.constrainDouble(
+               MathUtils.deadband(
+                       oi.programmerGamepad.getLeftStickY(),
+                       oi.getOperatorGamepadTypicalDeadband(),
+                       (a) -> (a)),
+               humanMinPower.get(), humanMaxPower.get());
     }
 
     @Override

@@ -72,7 +72,9 @@ public class CoralScorerSubsystem extends BaseSubsystem implements DataFrameRefr
     }
     @Override
     public void refreshDataFrame() {
-        coralSensor.refreshDataFrame();
+        if(electricalContract.isCoralSensorReady()) {
+            coralSensor.refreshDataFrame();
+        }
     }
 }
 
