@@ -39,7 +39,6 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> implements D
         propertyFactory.setPrefix(this);
         this.electricalContract = electricalContract;
 
-        // should be electricalContract.isArmPivotSubsystemReady
         if (electricalContract.isArmPivotReady()) {
             this.armMotor = xcanMotorControllerFactory.create(electricalContract.getArmPivotMotor(),
                     getPrefix(), "ArmPivotMotor");
@@ -57,6 +56,9 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> implements D
         this.minArmPosition = propertyFactory.createPersistentProperty("Min AbsEncoder Position", 0.25);
         this.maxArmPosition = propertyFactory.createPersistentProperty("Max AbsEncoder Position", 0.28);
     }
+
+
+
 
     @Override
     public Angle getCurrentValue() {
