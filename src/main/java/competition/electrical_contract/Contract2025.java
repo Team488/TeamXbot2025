@@ -86,8 +86,11 @@ public class Contract2025 extends ElectricalContract {
 
     @Override
     public CANMotorControllerInfo getElevatorMotor() {
-        return new CANMotorControllerInfo( //change deviceId later
-                "Master Elevator Motor", MotorControllerType.TalonFx, CANBusId.DefaultCanivore, 99, new CANMotorControllerOutputConfig());
+        return new CANMotorControllerInfo(
+                "ElevatorMotor",
+                MotorControllerType.TalonFx,
+                CANBusId.DefaultCanivore, 99, //change deviceId later
+                new CANMotorControllerOutputConfig());
     }
 
     protected String getDriveControllerName(SwerveInstance swerveInstance) {

@@ -58,6 +58,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
         this.distanceFromTargetHeight = Feet.of(0);
         this.currentHeight = Inches.of(0);
 
+        pf.setPrefix(this);
+
         //these are not real measured heights yet, just placeholders
         l1Height = Feet.of(3);
         l2Height = Feet.of(4);
@@ -67,7 +69,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
         returnToBaseHeight = Feet.of(2);
 
         if(contract.isElevatorReady()){
-            this.masterMotor = motorFactory.create(contract.getElevatorMotor(), this.getPrefix(), "Elevator Motor");
+            this.masterMotor = motorFactory.create(contract.getElevatorMotor(), this.getPrefix(), "ElevatorMotor");
         }
         if (contract.isElevatorBottomSensorReady()){
             this.bottomSensor= xDigitalInputFactory.create(contract.getElevatorBottomSensor(), "Elevator Bottom Sensor0");
@@ -133,7 +135,9 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
 
     @Override
     public void refreshDataFrame() {
-        masterMotor.refreshDataFrame();
+        if(contract.isElevatorReady()){
+            masterMotor.refreshDataFrame();
+        }
     }
 
     public void periodic(){
