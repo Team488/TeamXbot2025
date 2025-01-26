@@ -41,4 +41,9 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
     public abstract boolean isCoralSensorReady();
 
     public abstract DeviceInfo getCoralSensor();
+
+    public abstract boolean isElevatorBottomSensorReady();
+
+    public abstract DeviceInfo getElevatorBottomSensor();
+
 }
