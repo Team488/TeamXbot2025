@@ -108,14 +108,7 @@ dependencies {
     annotationProcessor 'com.google.dagger:dagger-compiler:2.44.2'
     testAnnotationProcessor 'com.google.dagger:dagger-compiler:2.44.2'
 
-//    implementation "org.zeromq:jeromq:0.6.0"
-//    implementation "com.google.code.gson:gson:2.10.1"
-//    implementation "org.eclipse.jetty:jetty-webapp:11.0.21"
-//    implementation "org.eclipse.jetty:jetty-servlets:11.0.21"
-//    implementation "org.jmdns:jmdns:3.5.9"
-//    implementation "org.slf4j:slf4j-api:1.7.36"
-//    implementation "org.slf4j:slf4j-simple:1.7.36"
-//    implementation "com.github.oshi:oshi-core:6.1.1"
+    // xtables
     implementation "org.kobe.xbot:xtables:4.6.3"
 
     def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)

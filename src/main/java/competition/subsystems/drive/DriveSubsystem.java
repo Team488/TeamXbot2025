@@ -22,6 +22,7 @@ import xbot.common.properties.Property;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.properties.XPropertyManager;
 import xbot.common.subsystems.drive.BaseSwerveDriveSubsystem;
+import xbot.common.properties.DoubleProperty;
 
 import java.util.function.Supplier;
 
@@ -33,6 +34,8 @@ public class DriveSubsystem extends BaseSwerveDriveSubsystem implements DataFram
     private Rotation2d staticHeadingTarget = new Rotation2d(); // The heading you want to constantly be at
     private boolean lookAtPointActive = false;
     private boolean staticHeadingActive = false;
+    private final DoubleProperty driveToWaypointsSpeed;
+    private final DoubleProperty driveToWaypointsDurationPerPoint;
 
     @Inject
     public DriveSubsystem(PIDManagerFactory pidFactory, PropertyFactory pf,
@@ -44,6 +47,8 @@ public class DriveSubsystem extends BaseSwerveDriveSubsystem implements DataFram
 
         pf.setPrefix(this.getPrefix());
         pf.setDefaultLevel(Property.PropertyLevel.Important);
+        driveToWaypointsSpeed = pf.createPersistentProperty("Speed to drive to waypoints", 2); // m/s
+        driveToWaypointsDurationPerPoint = pf.createPersistentProperty("Time to drive to waypoints", 5); // m/s
     }
 
     public Translation2d getLookAtPointTarget() {
@@ -97,5 +102,13 @@ public class DriveSubsystem extends BaseSwerveDriveSubsystem implements DataFram
             setStaticHeadingTargetActive(false);
             setLookAtPointTargetActive(false);
         });
+    }
+
+    public double getDriveToWaypointsSpeed() {
+        return driveToWaypointsSpeed.get();
+    }
+
+    public double getDriveToWaypointsDurationPerPoint() {
+        return driveToWaypointsDurationPerPoint.get();
     }
 }

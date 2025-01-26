@@ -4,6 +4,8 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
+
+import org.kobe.xbot.JClient.XTablesClient;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCameraExtended;
 import org.photonvision.PhotonPoseEstimator;
@@ -18,6 +20,7 @@ import xbot.common.properties.BooleanProperty;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.Property;
 import xbot.common.properties.PropertyFactory;
+import xbot.common.properties.StringProperty;
 import xbot.common.subsystems.vision.AprilTagCamera;
 import xbot.common.subsystems.vision.CameraCapabilities;
 import xbot.common.subsystems.vision.SimpleCamera;
@@ -40,6 +43,14 @@ public class VisionSubsystem extends BaseSubsystem implements DataFrameRefreshab
     final DoubleProperty robotDisplacementThresholdToRejectVisionUpdate;
     final DoubleProperty singleTagStableDistance;
     final DoubleProperty multiTagStableDistance;
+
+    // xtables properties
+    final StringProperty xtablesCoordinateLocation;
+    final StringProperty xtablesHeadingLocation;
+
+    // always persisted xtables instance
+    private XTablesClient xclient;
+
     AprilTagFieldLayout aprilTagFieldLayout;
     final ArrayList<AprilTagCamera> aprilTagCameras;
     final ArrayList<SimpleCamera> allCameras;
@@ -57,6 +68,8 @@ public class VisionSubsystem extends BaseSubsystem implements DataFrameRefreshab
         singleTagStableDistance = pf.createPersistentProperty("Single tag stable distance", 2.0);
         multiTagStableDistance = pf.createPersistentProperty("Multi tag stable distance", 4.0);
 
+        xtablesCoordinateLocation = pf.createPersistentProperty("Xtables Coordinate Location", "target_waypoints");
+        xtablesHeadingLocation = pf.createPersistentProperty("Xtables Heading Location", "target_heading");
         var trackingNt = NetworkTableInstance.getDefault().getTable("SmartDashboard");
 
         waitForStablePoseTime = pf.createPersistentProperty("Pose stable time", 0.0, Property.PropertyLevel.Debug);
@@ -88,6 +101,24 @@ public class VisionSubsystem extends BaseSubsystem implements DataFrameRefreshab
 
         allCameras = new ArrayList<>();
         allCameras.addAll(aprilTagCameras);
+
+        xclient = new XTablesClient();
+    }
+
+    public XTablesClient getXTablesClient(){
+        // in case of any weirdness
+        if(xclient == null){
+            xclient = new XTablesClient();
+        }
+        return xclient;
+    }
+
+    public String getXtablesCoordinateLocation(){
+        return xtablesCoordinateLocation.get();
+    }
+
+    public String getXtablesHeadingLocation(){
+        return xtablesHeadingLocation.get();
     }
 
     public List<Optional<EstimatedRobotPose>> getPhotonVisionEstimatedPoses(Pose2d previousEstimatedRobotPose) {
