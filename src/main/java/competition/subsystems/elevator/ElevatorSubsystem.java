@@ -112,12 +112,13 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
         }
     }
 
-    public boolean touchBottom(){
+    public boolean isTouchingBottom(){
         if (contract.isElevatorBottomSensorReady()){
             return this.bottomSensor.get();
         }
         return false;
     }
+
 
 
     @Override
@@ -138,6 +139,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
     public void periodic(){
         masterMotor.periodic();
         aKitLog.record("ElevatorTargetHeight",elevatorTargetHeight);
+        aKitLog.record("ElevatorBottomSensor",this.isTouchingBottom());
     }
 
 
