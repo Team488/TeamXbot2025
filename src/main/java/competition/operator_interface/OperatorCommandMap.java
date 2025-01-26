@@ -35,7 +35,7 @@ public class OperatorCommandMap {
         operatorInterface.gamepad.getifAvailable(1).onTrue(resetHeading);
 
         // Below are for testing purposes only!!!
-        SwervePointKinematics kinematicValuesForTesting = new SwervePointKinematics(0.3, 0, 0, 2);
+        SwervePointKinematics kinematicValuesForTesting = new SwervePointKinematics(0.5, 0, 0, 2.5);
 
         // Command 1: to (1,0) then back to (0,0)
         var command1 = swerveSimpleTrajectoryCommandProvider.get();
@@ -66,7 +66,7 @@ public class OperatorCommandMap {
         var command3 = swerveSimpleTrajectoryCommandProvider.get();
         List<XbotSwervePoint> points3 = new ArrayList<>();
 
-        XbotSwervePoint p5 = XbotSwervePoint.createPotentiallyFilppedXbotSwervePoint(new Translation2d(16, 2), new Rotation2d(), 10);
+        XbotSwervePoint p5 = XbotSwervePoint.createPotentiallyFilppedXbotSwervePoint(new Translation2d(14, 2), new Rotation2d(), 10);
         XbotSwervePoint p6 = XbotSwervePoint.createPotentiallyFilppedXbotSwervePoint(new Translation2d(2, 2), new Rotation2d(), 10);
 
         points3.add(p5);
