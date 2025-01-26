@@ -15,26 +15,35 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import xbot.common.controls.sensors.XGyro.XGyroFactory;
 import xbot.common.math.WrappedRotation2d;
+import xbot.common.properties.BooleanProperty;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.pose.BasePoseSubsystem;
 import xbot.common.subsystems.vision.AprilTagVisionSubsystem;
 
 @Singleton
-public class PoseSubsystem extends BasePoseSubsystem implements AprilTagVisionSubsystem.VisionConsumer {
+public class PoseSubsystem extends BasePoseSubsystem {
 
     final SwerveDrivePoseEstimator onlyWheelsGyroSwerveOdometry;
+    final SwerveDrivePoseEstimator fullSwerveOdometry;
 
     private final DriveSubsystem drive;
+    private final AprilTagVisionSubsystem aprilTagVisionSubsystem;
+    private final BooleanProperty useVisionAssistedPose;
 
     // only used when simulating the robot
     protected Optional<SwerveModulePosition[]> simulatedModulePositions = Optional.empty();
 
     @Inject
-    public PoseSubsystem(XGyroFactory gyroFactory, PropertyFactory propManager, DriveSubsystem drive) {
+    public PoseSubsystem(XGyroFactory gyroFactory, PropertyFactory propManager, DriveSubsystem drive, AprilTagVisionSubsystem aprilTagVisionSubsystem) {
         super(gyroFactory, propManager);
         this.drive = drive;
+        this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
 
         onlyWheelsGyroSwerveOdometry = initializeSwerveOdometry();
+        fullSwerveOdometry = initializeSwerveOdometry();
+
+        propManager.setPrefix(this);
+        useVisionAssistedPose = propManager.createPersistentProperty("UseVisionAssistedPose", true);
     }
 
     @Override
@@ -58,22 +67,43 @@ public class PoseSubsystem extends BasePoseSubsystem implements AprilTagVisionSu
 
     @Override
     protected void updateOdometry() {
+        // Update pose estimators
         onlyWheelsGyroSwerveOdometry.update(
                 this.getCurrentHeading(),
                 getSwerveModulePositions()
         );
-
         aKitLog.record("WheelsOnlyEstimate", onlyWheelsGyroSwerveOdometry.getEstimatedPosition());
 
-        Translation2d positionSource = onlyWheelsGyroSwerveOdometry.getEstimatedPosition().getTranslation();
+        fullSwerveOdometry.update(
+                this.getCurrentHeading(),
+                getSwerveModulePositions()
+        );
+        this.aprilTagVisionSubsystem.getAllPoseObservations().forEach(observation -> {
+            fullSwerveOdometry.addVisionMeasurement(
+                observation.visionRobotPoseMeters(),
+                observation.timestampSeconds(),
+                observation.visionMeasurementStdDevs()
+            );
+        });
+
+        // Report poses
         Pose2d estimatedPosition = new Pose2d(
-                positionSource,
+                onlyWheelsGyroSwerveOdometry.getEstimatedPosition().getTranslation(),
                 getCurrentHeading()
         );
-        aKitLog.record("RobotPose", estimatedPosition);
+        aKitLog.record("OdometryOnlyRobotPose", estimatedPosition);
 
-        totalDistanceX = estimatedPosition.getX();
-        totalDistanceY = estimatedPosition.getY();
+        Pose2d visionEnhancedPosition = new Pose2d(
+                fullSwerveOdometry.getEstimatedPosition().getTranslation(),
+                fullSwerveOdometry.getEstimatedPosition().getRotation()
+        );
+        aKitLog.record("VisionEnhancedPose", visionEnhancedPosition);
+
+        Pose2d robotPose = this.useVisionAssistedPose.get() ? visionEnhancedPosition : estimatedPosition;
+        aKitLog.record("RobotPose", robotPose);
+
+        totalDistanceX = robotPose.getX();
+        totalDistanceY = robotPose.getY();
 
         double prevTotalDistanceX = totalDistanceX;
         double prevTotalDistanceY = totalDistanceY;
@@ -106,6 +136,13 @@ public class PoseSubsystem extends BasePoseSubsystem implements AprilTagVisionSu
                         newXPositionMeters,
                         newYPositionMeters,
                         this.getCurrentHeading()));
+        fullSwerveOdometry.resetPosition(
+                heading,
+                getSwerveModulePositions(),
+                new Pose2d(
+                        newXPositionMeters,
+                        newYPositionMeters,
+                        this.getCurrentHeading()));
     }
 
     public void setCurrentPoseInMeters(Pose2d newPoseInMeters) {
@@ -117,20 +154,14 @@ public class PoseSubsystem extends BasePoseSubsystem implements AprilTagVisionSu
     }
 
     @Override
-    public Pose2d getGroundTruthPose() {
-        return this.getCurrentPose2d();
-    }
-
-    /**
-     * This method is called by the vision system when it has a new pose to share with the robot.
-     *
-     * @param visionRobotPoseMeters The pose of the robot as measured by the vision system
-     * @param timestampSeconds The timestamp of the vision measurement
-     * @param visionMeasurementStdDevs The standard deviations of the vision measurements
-     */
-    @Override
-    public void acceptVisionPose(Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs) {
-
+    public Pose2d getCurrentPose2d() {
+        return useVisionAssistedPose.get() ? new Pose2d(
+                fullSwerveOdometry.getEstimatedPosition().getTranslation(),
+                fullSwerveOdometry.getEstimatedPosition().getRotation()
+        ) : new Pose2d(
+                onlyWheelsGyroSwerveOdometry.getEstimatedPosition().getTranslation(),
+                onlyWheelsGyroSwerveOdometry.getEstimatedPosition().getRotation()
+        );
     }
 
     // used by the physics simulator to mock what the swerve modules are doing currently for pose estimation

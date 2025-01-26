@@ -3,26 +3,32 @@ package competition.simulation.arm;
 import javax.inject.Inject;
 
 import competition.simulation.SimulationConstants;
+import competition.subsystems.arm_pivot.ArmPivotSubsystem;
 import competition.subsystems.elevator.ElevatorMechanism;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Kilograms;
+import static edu.wpi.first.units.Units.Rotations;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import xbot.common.controls.actuators.mock_adapters.MockCANMotorController;
 
 public class ArmSimulator {
     final DCMotor motor = DCMotor.getKrakenX60(1);
     final SingleJointedArmSim armSim;
 
     final ElevatorMechanism elevatorMechanism;
+    final ArmPivotSubsystem armPivotSubsystem;
+    final MockCANMotorController armMotor;
 
-    // TODO: replace this with reading the arm voltage from the subsystem when it exists
-    public double armVoltage = 0;
 
     @Inject
-    public ArmSimulator(ElevatorMechanism elevatorMechanism) {
+    public ArmSimulator(ElevatorMechanism elevatorMechanism, ArmPivotSubsystem armPivotSubsystem) {
         this.elevatorMechanism = elevatorMechanism;
+        this.armPivotSubsystem = armPivotSubsystem;
+        this.armMotor = (MockCANMotorController)armPivotSubsystem.armMotor;
 
         this.armSim = new SingleJointedArmSim(
                 motor,
@@ -33,17 +39,21 @@ public class ArmSimulator {
                 ArmSimConstants.minAngleRads.in(Radians),
                 ArmSimConstants.maxAngleRads.in(Radians),
                 true,
-                0,
-                ArmSimConstants.armEncoderDistPerPulse.in(Meters),
-                0.0 // Add noise with a std-dev of 1 tick
+                0
         );
     }
 
     public void update() {
-        armSim.setInput(armVoltage);
+        armSim.setInput(this.armMotor.getPower() * RobotController.getBatteryVoltage());
         armSim.update(SimulationConstants.loopPeriodSec); // 20ms
 
-        // TODO: This should instead fake the values to the arm encoder on the arm subsystem when it exists
-        elevatorMechanism.armAngle = Radians.of(armSim.getAngleRads());
+        // Read out the new arm position for rendering
+        // TODO: the frame of reference of the simulated arm is wrong, gravity isn't being applied
+        // in the same way we think
+        var armMotorRotations = armSim.getAngleRads() / ArmSimConstants.armEncoderAnglePerRotation.in(Radians);
+
+        armMotor.setPosition(Rotations.of(armMotorRotations));
+        // correct for frame of reference for the arm pivot in the mechanism vs sim model
+        elevatorMechanism.armAngle = Radians.of(armSim.getAngleRads()).plus(ArmSimConstants.minAngleRads.times(-1)).times(-1);
     }
 }
