@@ -1,6 +1,7 @@
 package competition.simulation;
 
 import competition.simulation.arm.ArmSimulator;
+import competition.simulation.reef.ReefSimulator;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
