@@ -1,22 +1,26 @@
 package competition.simulation.reef;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 
-import java.util.AbstractMap.SimpleEntry;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.units.measure.Distance;
 import xbot.common.advantage.AKitLogger;
 
+@Singleton
 public class ReefSimulator {
     enum ReefFace {
         FAR, FAR_LEFT, FAR_RIGHT, CLOSE, CLOSE_LEFT, CLOSE_RIGHT
@@ -48,7 +52,7 @@ public class ReefSimulator {
     public ReefSimulator() {
         aKitLog = new AKitLogger("Simulator/");
         this.resetField();
-        this.fillReefWithCoral();
+        //this.fillReefWithCoral();
     }
 
     public void update() {
@@ -66,6 +70,29 @@ public class ReefSimulator {
                 }
             }
         }
+    }
+
+    public void scoreCoralNearestTo(Translation3d scorerPose) {
+        var coralDistanceMap = new HashMap<ReefCoralKey, Distance>();
+        for (ReefFace face : ReefFace.values()) {
+            for (ReefLevel level : ReefLevel.values()) {
+                for (ReefPost post : ReefPost.values()) {
+                    var key = new ReefCoralKey(face, level, post);
+                    // TODO: consider some logic to ignore locations that already have coral on them
+                    // or otherwise cause the coral to drop to the floor if that happens?
+                    var pose = getCoralPose(key.face, key.level, key.post);
+                    var distance = Meters.of(scorerPose.getDistance(pose.getTranslation()));
+                    coralDistanceMap.put(key, distance);
+                }
+            }
+        }
+        // sort coralDistanceMap by distance and find the key for the smallest distance
+        var closestCoral = coralDistanceMap.entrySet().stream()
+            .min(Map.Entry.comparingByValue())
+            .map(Map.Entry::getKey)
+            .orElseThrow(() -> new IllegalStateException("No corals found"));
+        System.out.println("Found closest coral: " + closestCoral);
+        reefCoralLocations.add(closestCoral);
     }
 
     public void resetField() {

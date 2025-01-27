@@ -33,7 +33,7 @@ public class ElevatorMechanism extends BaseSubsystem {
 
     // these constants define the mechanism geometry rendering at zero height and zero angle
     // all tuned by trial and error
-    final double elevatorLigamentBaseLengthMeters = 0.7;
+    public final double elevatorLigamentBaseLengthMeters = 0.7;
     final double armLigamentBaseAngleDegrees = 145;
     final double armLengthMeters = 0.47;
     final double scorerLengthMeters = 0.6;
