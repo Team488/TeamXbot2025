@@ -62,7 +62,7 @@ public class ElevatorMechanism extends BaseSubsystem {
     public void periodic() {
         // update mechanism based on current elevatorHeight and armAngle
         elevatorLigament.setLength(elevatorLigamentBaseLengthMeters + elevatorHeight.in(Units.Meters));
-        armLigament.setAngle(armLigamentBaseAngleDegrees + armAngle.in(Degrees));
+        armLigament.setAngle(armLigamentBaseAngleDegrees - armAngle.in(Degrees));
         coralLigament.setLength(this.coralInScorer ? coralLengthMeters : 0.0);
         aKitLog.record("Mech2d", mech2d);
 
