@@ -27,6 +27,7 @@ public class MapleSimulator implements BaseSimulator {
 
     final ElevatorSimulator elevatorSimulator;
     final ArmSimulator armSimulator;
+    final ReefSimulator reefSimulator;
 
     // maple-sim stuff ----------------------------
     final DriveTrainSimulationConfig config;
@@ -35,11 +36,12 @@ public class MapleSimulator implements BaseSimulator {
 
     @Inject
     public MapleSimulator(PoseSubsystem pose, DriveSubsystem drive, ElevatorSimulator elevatorSimulator,
-                          ArmSimulator armSimulator) {
+                          ArmSimulator armSimulator, ReefSimulator reefSimulator) {
         this.pose = pose;
         this.drive = drive;
         this.elevatorSimulator = elevatorSimulator;
         this.armSimulator = armSimulator;
+        this.reefSimulator = reefSimulator;
 
         aKitLog = new AKitLogger("Simulator/");
 
@@ -72,6 +74,22 @@ public class MapleSimulator implements BaseSimulator {
         this.updateDriveSimulation();
         elevatorSimulator.update();
         armSimulator.update();
+        reefSimulator.update();
+    }
+
+    protected void updateCoralScorerSensor() {
+        // if the elevator is at the collection height
+        // && the arm is at the collection angle
+        // && the coralScorer is intaking
+        // && the robot is close to the human loading area
+        // simulate giving the robot a piece of coral
+
+        // OR
+        // if the elevator is at a reef height
+        // && the arm is at the right angle
+        // && there is a piece of coral in the scorer
+        // && the scorer is ejecting
+        // simulate scoring a piece of coral on the reef
     }
 
     protected void updateDriveSimulation() {
