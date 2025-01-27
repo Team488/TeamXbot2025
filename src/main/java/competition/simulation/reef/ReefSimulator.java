@@ -33,7 +33,8 @@ public class ReefSimulator {
     record ReefCoralKey(ReefFace face, ReefLevel level, ReefPost post) {
     }
 
-    record ReefAlgaeKey(ReefFace face, ReefLevel level) {}
+    record ReefAlgaeKey(ReefFace face, ReefLevel level) {
+    }
 
     final AKitLogger aKitLog;
     final Translation2d reefCenter = new Translation2d(4.4785, 4.0132);
@@ -81,8 +82,8 @@ public class ReefSimulator {
 
     public Pose3d[] getCoralPoses() {
         return reefCoralLocations.stream()
-            .map(coralLocation -> getCoralPose(coralLocation.face(), coralLocation.level(), coralLocation.post()))
-            .toArray(Pose3d[]::new);
+                .map(coralLocation -> getCoralPose(coralLocation.face(), coralLocation.level(), coralLocation.post()))
+                .toArray(Pose3d[]::new);
     }
 
     public Pose3d getCoralPose(ReefFace face, ReefLevel level, ReefPost post) {
@@ -100,7 +101,7 @@ public class ReefSimulator {
         };
         var reefCenterToFarPost = reefCenterToFar.plus(level4Adjustment).plus(postTranslation);
         var algaeTranslation = reefCenterToFarPost.rotateBy(rotation).plus(reefCenter);
-        
+
         var z = switch (level) {
             case LEVEL_1 -> 0.5;
             case LEVEL_2 -> 0.8 - 0.1;
@@ -108,7 +109,7 @@ public class ReefSimulator {
             case LEVEL_4 -> 1.83 - 0.1;
         };
 
-        var rotation3d = switch(level) {
+        var rotation3d = switch (level) {
             case LEVEL_4 -> new Rotation3d(0, Math.PI / 2, 0);
             case LEVEL_1 -> new Rotation3d(0.0, 0.0, rotation.getRadians());
             default -> {
@@ -123,12 +124,12 @@ public class ReefSimulator {
 
     public Pose3d[] getAlgaePoses() {
         return reefAlgaeLocations.stream()
-            .map(algaeLocation -> getAlgaePose(algaeLocation.face(), algaeLocation.level()))
-            .toArray(Pose3d[]::new);
+                .map(algaeLocation -> getAlgaePose(algaeLocation.face(), algaeLocation.level()))
+                .toArray(Pose3d[]::new);
     }
 
-    public Rotation2d getRotationFromFarFace(ReefFace face){
-        Rotation2d rotation = switch(face) {
+    public Rotation2d getRotationFromFarFace(ReefFace face) {
+        Rotation2d rotation = switch (face) {
             case FAR -> Rotation2d.fromDegrees(0);
             case FAR_LEFT -> Rotation2d.fromDegrees(faceAngleDeltaDeg);
             case FAR_RIGHT -> Rotation2d.fromDegrees(-faceAngleDeltaDeg);
@@ -144,10 +145,10 @@ public class ReefSimulator {
         // given a reef face and level, return a Pose3d for where that piece of
         // algae is stuck on the reef
         // TODO: this number isn't right, update it
-        
+
         var rotation = getRotationFromFarFace(face);
         var algaeTranslation = reefCenterToFar.rotateBy(rotation).plus(reefCenter);
-        
+
         var z = switch (level) {
             case LEVEL_1 -> throw new IllegalArgumentException("Algae can't be on level 1");
             case LEVEL_2 -> 0.9;
@@ -156,5 +157,5 @@ public class ReefSimulator {
         };
         return new Pose3d(new Translation3d(algaeTranslation.getX(), algaeTranslation.getY(), z), new Rotation3d());
     }
-    
+
 }
