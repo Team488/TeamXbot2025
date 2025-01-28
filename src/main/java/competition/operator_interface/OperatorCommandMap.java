@@ -35,7 +35,7 @@ public class OperatorCommandMap {
         operatorInterface.gamepad.getifAvailable(1).onTrue(resetHeading);
 
         // Below are for testing purposes only!!!
-        SwervePointKinematics kinematicValuesForTesting = new SwervePointKinematics(0.5, 0, 0, 2.5);
+        SwervePointKinematics kinematicValuesForTesting = new SwervePointKinematics(0.5, 0, 0, 3.5);
 
         // Command 1: to (1,0) then back to (0,0)
         var command1 = swerveSimpleTrajectoryCommandProvider.get();
@@ -88,7 +88,7 @@ public class OperatorCommandMap {
         command4.logic.setKeyPoints(points4);
         command4.logic.setVelocityMode(SwerveSimpleTrajectoryMode.KinematicsForPointsList);
 
-        operatorInterface.gamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(command4); // 2 Invididual kinematics values
+        //operatorInterface.gamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(command4); // 2 Invididual kinematics values
         operatorInterface.gamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(command2); // 3 One thingy
         operatorInterface.gamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(command3);
     }
