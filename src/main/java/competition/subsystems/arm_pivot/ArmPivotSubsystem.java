@@ -15,9 +15,9 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Rotations;
 
 @Singleton
-public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> implements DataFrameRefreshable {
+public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
     public final XCANMotorController armMotor;
-    Angle targetAngle;
+    Angle targetAngle = Degrees.of(0);
     ElectricalContract electricalContract;
     DoubleProperty degreesPerRotations;
     double rotationsAtZero;
@@ -32,6 +32,7 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> implements D
         if (electricalContract.isArmPivotMotorReady()) {
             this.armMotor = xcanMotorControllerFactory.create(electricalContract.getArmPivotMotor(),
                     getPrefix(), "ArmPivotMotor");
+            this.registerDataFrameRefreshable(this.armMotor);
         } else {
             this.armMotor = null;
         }
@@ -72,12 +73,5 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> implements D
     @Override
     protected boolean areTwoTargetsEquivalent(Angle target1, Angle target2) {
         return target1.isEquivalent(target2);
-    }
-
-    @Override
-    public void refreshDataFrame() {
-        if(electricalContract.isArmPivotMotorReady()) {
-            this.armMotor.refreshDataFrame();
-        }
     }
 }
