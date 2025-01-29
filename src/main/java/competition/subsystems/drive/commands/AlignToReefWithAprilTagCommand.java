@@ -24,14 +24,6 @@ public class AlignToReefWithAprilTagCommand extends BaseCommand {
     DriveSubsystem drive;
     HeadingModule headingModule;
     PoseSubsystem pose;
-
-    Pose2d blueCloseReefFace = Landmarks.BlueCloseAlgae;
-    Pose2d blueCloseRightReefFace = Landmarks.BlueCloseRightAlgae;
-    Pose2d blueCloseLeftReefFace = Landmarks.BlueCloseLeftAlgae;
-    Pose2d blueFarLeftReefFace = Landmarks.BlueFarLeftAlgae;
-    Pose2d blueFarReefFace = Landmarks.BlueFarAlgae;
-    Pose2d blueFarRightReefFace = Landmarks.BlueFarRightAlgae;
-
     public Distance cameraXOffset;
     public Pose2d targetReefFacePose;
 
@@ -52,7 +44,7 @@ public class AlignToReefWithAprilTagCommand extends BaseCommand {
     public void initialize() {
         drive.getPositionalPid().reset();
 
-        targetReefFacePose = getClosestReefFacePose();
+        targetReefFacePose = pose.getClosestReefFacePose();
         aKitLog.record("TargetReefFace", targetReefFacePose);
     }
 
@@ -78,7 +70,8 @@ public class AlignToReefWithAprilTagCommand extends BaseCommand {
 
     public Translation2d getXYPowersAlignToAprilTag() {
         // only calculate powers if we have target april tag in sight
-        if (aprilTagVisionSubsystem.reefAprilTagCameraHasCorrectTarget(getTargetAprilTagID())) {
+        if (aprilTagVisionSubsystem.reefAprilTagCameraHasCorrectTarget(
+                aprilTagVisionSubsystem.getTargetAprilTagID(targetReefFacePose))) {
             Translation2d aprilTagData = aprilTagVisionSubsystem.getReefAprilTagCameraData();
 
             double dx = drive.getPositionalPid().calculate(cameraXOffset.in(Meters), aprilTagData.getX());
@@ -90,65 +83,5 @@ public class AlignToReefWithAprilTagCommand extends BaseCommand {
         }
         cancel();
         return new Translation2d(0,0);
-    }
-
-    private Pose2d getClosestReefFacePose() {
-        Pose2d currentPose = pose.getCurrentPose2d();
-
-        double closeDistance = PoseSubsystem.convertBlueToRedIfNeeded(
-                blueCloseReefFace).getTranslation().getDistance(currentPose.getTranslation());
-        double closeLeftDistance = PoseSubsystem.convertBlueToRedIfNeeded(
-                blueCloseLeftReefFace).getTranslation().getDistance(currentPose.getTranslation());
-        double closeRightDistance = PoseSubsystem.convertBlueToRedIfNeeded(
-                blueCloseRightReefFace).getTranslation().getDistance(currentPose.getTranslation());
-        double backLeftDistance = PoseSubsystem.convertBlueToRedIfNeeded(
-                blueFarLeftReefFace).getTranslation().getDistance(currentPose.getTranslation());
-        double backDistance = PoseSubsystem.convertBlueToRedIfNeeded(
-                blueFarReefFace).getTranslation().getDistance(currentPose.getTranslation());
-        double backRightDistance = PoseSubsystem.convertBlueToRedIfNeeded(
-                blueFarRightReefFace).getTranslation().getDistance(currentPose.getTranslation());
-
-        HashMap<Double, Pose2d> hashMap = new HashMap<>();
-        hashMap.put(closeLeftDistance, PoseSubsystem.convertBlueToRedIfNeeded(blueCloseLeftReefFace));
-        hashMap.put(closeDistance, PoseSubsystem.convertBlueToRedIfNeeded(blueCloseReefFace));
-        hashMap.put(closeRightDistance, PoseSubsystem.convertBlueToRedIfNeeded(blueCloseRightReefFace));
-        hashMap.put(backLeftDistance, PoseSubsystem.convertBlueToRedIfNeeded(blueFarLeftReefFace));
-        hashMap.put(backDistance, PoseSubsystem.convertBlueToRedIfNeeded(blueFarReefFace));
-        hashMap.put(backRightDistance, PoseSubsystem.convertBlueToRedIfNeeded(blueFarRightReefFace));
-
-        double leastDistance = closeLeftDistance;
-
-        for (Double distance : hashMap.keySet()) {
-            if (distance < leastDistance) {
-                leastDistance = distance;
-            }
-        }
-        return hashMap.get(leastDistance);
-    }
-
-
-    private int getTargetAprilTagID() {
-        HashMap<Pose2d, Integer> hashMap = new HashMap<>();
-
-        // Note: flipped april tag IDs across the y-midpoint of the field
-        if (DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red) {
-            hashMap.put(PoseSubsystem.convertBlueToRedIfNeeded(blueCloseLeftReefFace), 8);
-            hashMap.put(PoseSubsystem.convertBlueToRedIfNeeded(blueCloseReefFace), 7);
-            hashMap.put(PoseSubsystem.convertBlueToRedIfNeeded(blueCloseRightReefFace), 6);
-            hashMap.put(PoseSubsystem.convertBlueToRedIfNeeded(blueFarLeftReefFace), 9);
-            hashMap.put(PoseSubsystem.convertBlueToRedIfNeeded(blueFarReefFace), 10);
-            hashMap.put(PoseSubsystem.convertBlueToRedIfNeeded(blueFarRightReefFace), 11);
-        }
-        else {
-            hashMap.put(blueCloseLeftReefFace, 19);
-            hashMap.put(blueCloseReefFace, 18);
-            hashMap.put(blueCloseRightReefFace, 17);
-            hashMap.put(blueFarLeftReefFace, 20);
-            hashMap.put(blueFarReefFace, 21);
-            hashMap.put(blueFarRightReefFace, 22);
-        }
-        aKitLog.record("TargetAprilTagID", hashMap.get(targetReefFacePose));
-
-        return hashMap.get(targetReefFacePose);
     }
 }
