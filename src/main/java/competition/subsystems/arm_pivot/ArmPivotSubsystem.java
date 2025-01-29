@@ -20,7 +20,7 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
     public final XCANMotorController armMotor;
     public final XAbsoluteEncoder armAbsoluteEncoder;
     public final XDigitalInput lowSensor;
-    Angle targetAngle;
+    Angle targetAngle = Degrees.of(0);
     ElectricalContract electricalContract;
     DoubleProperty degreesPerRotations;
     double rotationsAtZero;

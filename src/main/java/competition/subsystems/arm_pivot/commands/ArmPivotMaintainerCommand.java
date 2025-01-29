@@ -69,7 +69,7 @@ public class ArmPivotMaintainerCommand extends BaseMaintainerCommand<Angle> {
     protected double getHumanInput() { //gamepad controls: Left joy stick up/down & Left bumper to switch between elevator/arm
        return MathUtils.constrainDouble(
                MathUtils.deadband(
-                       oi.programmerGamepad.getLeftStickY(),
+                       oi.programmerGamepad.getRightStickY(),
                        oi.getOperatorGamepadTypicalDeadband(),
                        (a) -> (a)),
                humanMinPower.get(), humanMaxPower.get());

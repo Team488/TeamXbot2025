@@ -33,7 +33,7 @@ public class ElevatorMechanism extends BaseSubsystem {
 
     // these constants define the mechanism geometry rendering at zero height and zero angle
     // all tuned by trial and error
-    final double elevatorLigamentBaseLengthMeters = 0.7;
+    public final double elevatorLigamentBaseLengthMeters = 0.7;
     final double armLigamentBaseAngleDegrees = 145;
     final double armLengthMeters = 0.47;
     final double scorerLengthMeters = 0.6;
@@ -62,7 +62,7 @@ public class ElevatorMechanism extends BaseSubsystem {
     public void periodic() {
         // update mechanism based on current elevatorHeight and armAngle
         elevatorLigament.setLength(elevatorLigamentBaseLengthMeters + elevatorHeight.in(Units.Meters));
-        armLigament.setAngle(armLigamentBaseAngleDegrees + armAngle.in(Degrees));
+        armLigament.setAngle(armLigamentBaseAngleDegrees - armAngle.in(Degrees));
         coralLigament.setLength(this.coralInScorer ? coralLengthMeters : 0.0);
         aKitLog.record("Mech2d", mech2d);
 
