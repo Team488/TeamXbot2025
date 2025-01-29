@@ -16,6 +16,7 @@ import xbot.common.advantage.AKitLogger;
 import xbot.common.controls.actuators.mock_adapters.MockCANMotorController;
 import xbot.common.math.PIDManager;
 import xbot.common.math.PIDManager.PIDManagerFactory;
+import xbot.common.properties.PropertyFactory;
 import edu.wpi.first.wpilibj.MockDigitalInput;
 
 @Singleton
@@ -33,11 +34,12 @@ public class ElevatorSimulator {
 
     @Inject
     public ElevatorSimulator(ElevatorMechanism elevatorMechanism, ElevatorSubsystem elevatorSubsystem,
-            PIDManagerFactory pidManagerFactory) {
+            PIDManagerFactory pidManagerFactory, PropertyFactory pf) {
         aKitLog = new AKitLogger("Simulator/");
+        pf.setPrefix("ElevatorSimulator");
         this.elevatorMechanism = elevatorMechanism;
         this.elevatorSubsystem = elevatorSubsystem;
-        this.pidManager = pidManagerFactory.create("ElevatorSimulationPositionalPID", 0.001, 0.0, 0.0, 0.0, -1.0, 1.0);
+        this.pidManager = pidManagerFactory.create("ElevatorSimulationPositionalPID", 0.01, 0.001, 0.0, 0.0, 1.0, -1.0);
         this.motor = (MockCANMotorController) elevatorSubsystem.masterMotor;
         this.bottomSensor = (MockDigitalInput) elevatorSubsystem.bottomSensor;
 
@@ -64,8 +66,11 @@ public class ElevatorSimulator {
             var targetPosition = motor.getTargetPosition();
             var currentPosition = motor.getPosition();
             var gravityFeedForward = 0.1; // constant force to fight gravity
-            var output = pidManager.calculate(currentPosition.in(Rotations), targetPosition.in(Rotations))
+            var output = pidManager.calculate(targetPosition.in(Rotations), currentPosition.in(Rotations))
                     + gravityFeedForward;
+            aKitLog.record("Elevator/targetPosition", targetPosition.in(Rotations));
+            aKitLog.record("Elevator/currentPosition", currentPosition.in(Rotations));
+            aKitLog.record("Elevator/power", output);
             motor.setPower(output);
         } else {
             pidManager.reset();
