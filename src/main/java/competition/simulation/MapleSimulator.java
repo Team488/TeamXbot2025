@@ -42,6 +42,8 @@ public class MapleSimulator implements BaseSimulator {
     final Distance humanLoadingDistanceThreshold = Meters.of(0.5);
 
     // maple-sim stuff ----------------------------
+    final DriveTrainSimulationConfig config;
+    final SimulatedArena arena;
     final SelfControlledSwerveDriveSimulation swerveDriveSimulation;
 
     @Inject
@@ -51,6 +53,8 @@ public class MapleSimulator implements BaseSimulator {
         this.drive = drive;
         this.elevatorSimulator = elevatorSimulator;
         this.armSimulator = armSimulator;
+        this.reefSimulator = reefSimulator;
+        this.coralScorerSimulator = coralScorerSimulator;
 
         aKitLog = new AKitLogger("Simulator/");
 
