@@ -61,12 +61,6 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
         return Rotations.of(0);
     }
 
-    public void  preventNegative() {
-        if (coralScorerSubsystem.hasCoral()) {
-
-        }
-    }
-
     @Override
     public Angle getTargetValue() {
         return targetAngle;
