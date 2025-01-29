@@ -70,6 +70,9 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
 
     @Override
     public void setPower(double power) {
+        if (getMotorPositionFromZeroOffset().in(Rotations) < 0 && power < 0) {
+                power = 0;
+        }
         if (electricalContract.isArmPivotMotorReady()) {
             this.armMotor.setPower(power);
         }
