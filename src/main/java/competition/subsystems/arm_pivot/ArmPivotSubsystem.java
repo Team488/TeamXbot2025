@@ -24,8 +24,6 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
     double rotationsAtZero;
     boolean isCalibrated = false;
 
-    ElevatorSubsystem elevatorSubsystem;
-
     @Inject
     public ArmPivotSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
                              ElectricalContract electricalContract, PropertyFactory propertyFactory) {
@@ -74,7 +72,7 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
 
     @Override
     public void setPower(double power) {
-        if (getMotorPositionFromZeroOffset().in(Rotations) < 0) {
+        if (getMotorPositionFromZeroOffset().in(Rotations) < 0 && power < 0) {
                 power = 0;
         }
         if (electricalContract.isArmPivotMotorReady()) {
