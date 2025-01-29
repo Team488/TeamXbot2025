@@ -68,6 +68,6 @@ public class ElevatorSimulator {
     }
 
     public boolean isAtCollectionHeight() {
-        this.elevatorMechanism.elevatorHeight.isNear(Meters.of(0.0), 0.05);
+        return this.elevatorMechanism.elevatorHeight.isNear(Meters.of(0.0), 0.05);
     }    
 }
