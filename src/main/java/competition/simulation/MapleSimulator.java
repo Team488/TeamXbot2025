@@ -10,6 +10,7 @@ import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.Distance;
 import xbot.common.advantage.AKitLogger;
@@ -87,31 +88,34 @@ public class MapleSimulator implements BaseSimulator {
         elevatorSimulator.update();
         armSimulator.update();
         reefSimulator.update();
+        this.updateCoralLoadFromHumanPlayer();
+        this.updateCoralScorerSensor();
     }
 
     protected void updateCoralScorerSensor() {
-        
-
-        // OR
+        // TODO:
         // if the elevator is at a reef height
         // && the arm is at the right angle
         // && there is a piece of coral in the scorer
         // && the scorer is ejecting
         // simulate scoring a piece of coral on the reef
+
+        // for now this is just some quick hacky logic, whenever we outtake just score coral to closest spot on reef
+        if(coralScorerSimulator.isScoring()) {
+            coralScorerSimulator.simulateCoralUnload();
+            var currentTranslation2d = this.getGroundTruthPose().getTranslation();
+            // TODO: more math around where the arm actually is in space and the orientation of the robot
+            var aproxElevatorTranslation3d = new Translation3d(currentTranslation2d.getX(), currentTranslation2d.getY(), 0.0);
+            reefSimulator.scoreCoralNearestTo(aproxElevatorTranslation3d);
+        }
     }
 
     protected void updateCoralLoadFromHumanPlayer() {
-        // if the elevator is at the collection height
-        // && the arm is at the collection angle
-        // && the coralScorer is intaking
-        // && the robot is close to the human loading area
-        // simulate giving the robot a piece of coral
         var elevatorAtCollectionHeight = elevatorSimulator.isAtCollectionHeight();
         var armAtCollectionAngle = armSimulator.isAtCollectionAngle();
         var coralScorerIsIntaking = coralScorerSimulator.isIntaking();
         Pose2d[] coralStations = {Landmarks.BlueLeftCoralStationMid, Landmarks.BlueRightCoralStationMid};
         var currentPose = this.getGroundTruthPose();
-
         var robotNearHumanLoading = false; 
         for (Pose2d station : coralStations) {
             if (currentPose.getTranslation().getDistance(station.getTranslation()) < humanLoadingDistanceThreshold.in(Meters)) {
