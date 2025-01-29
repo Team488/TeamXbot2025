@@ -1,12 +1,13 @@
 package competition.simulation;
 
+import competition.simulation.arm.ArmSimulator;
+import competition.simulation.reef.ReefSimulator;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-
 import xbot.common.advantage.AKitLogger;
 import xbot.common.controls.sensors.mock_adapters.MockGyro;
 
@@ -25,19 +26,31 @@ public class MapleSimulator implements BaseSimulator {
 
     protected final AKitLogger aKitLog;
 
-    // maple-sim stuff
+    final ElevatorSimulator elevatorSimulator;
+    final ArmSimulator armSimulator;
+    final ReefSimulator reefSimulator;
+
+    // maple-sim stuff ----------------------------
     final DriveTrainSimulationConfig config;
     final SimulatedArena arena;
     final SelfControlledSwerveDriveSimulation swerveDriveSimulation;
 
     @Inject
-    public MapleSimulator(PoseSubsystem pose, DriveSubsystem drive) {
+    public MapleSimulator(PoseSubsystem pose, DriveSubsystem drive, ElevatorSimulator elevatorSimulator,
+                          ArmSimulator armSimulator, ReefSimulator reefSimulator) {
         this.pose = pose;
         this.drive = drive;
+        this.elevatorSimulator = elevatorSimulator;
+        this.armSimulator = armSimulator;
+        this.reefSimulator = reefSimulator;
 
         aKitLog = new AKitLogger("Simulator/");
 
+        /**
+         * MapleSim arena and drive setup
+         */
         arena = SimulatedArena.getInstance();
+        arena.resetFieldForAuto();
         // TODO: custom things to provide here like motor ratios and what have you
         config = DriveTrainSimulationConfig.Default().withCustomModuleTranslations(new Translation2d[] {
                 drive.getFrontLeftSwerveModuleSubsystem().getModuleTranslation(),
@@ -46,8 +59,8 @@ public class MapleSimulator implements BaseSimulator {
                 drive.getRearRightSwerveModuleSubsystem().getModuleTranslation()
         });
 
-        // middle ish of the field on blue
-        var startingPose = new Pose2d(2, 2, new Rotation2d());
+        // starting middle ish of the field on blue
+        var startingPose = new Pose2d(6, 4, new Rotation2d());
 
         // Creating the SelfControlledSwerveDriveSimulation instance
         this.swerveDriveSimulation = new SelfControlledSwerveDriveSimulation(
@@ -59,6 +72,28 @@ public class MapleSimulator implements BaseSimulator {
     }
 
     public void update() {
+        this.updateDriveSimulation();
+        elevatorSimulator.update();
+        armSimulator.update();
+        reefSimulator.update();
+    }
+
+    protected void updateCoralScorerSensor() {
+        // if the elevator is at the collection height
+        // && the arm is at the collection angle
+        // && the coralScorer is intaking
+        // && the robot is close to the human loading area
+        // simulate giving the robot a piece of coral
+
+        // OR
+        // if the elevator is at a reef height
+        // && the arm is at the right angle
+        // && there is a piece of coral in the scorer
+        // && the scorer is ejecting
+        // simulate scoring a piece of coral on the reef
+    }
+
+    protected void updateDriveSimulation() {
         // drive simulated robot from requested robot commands
         swerveDriveSimulation.runSwerveStates(new SwerveModuleState[] {
                 drive.getFrontLeftSwerveModuleSubsystem().getTargetState(),
@@ -72,26 +107,30 @@ public class MapleSimulator implements BaseSimulator {
         swerveDriveSimulation.periodic();
 
         // read values back out from sim
-        aKitLog.record("RobotGroundTruthPose", swerveDriveSimulation.getActualPoseInSimulationWorld());
-        aKitLog.record("MapleOdometryPose", swerveDriveSimulation.getOdometryEstimatedPose());
+        aKitLog.record(
+                "FieldSimulation/Algae", arena.getGamePiecesArrayByType("Algae"));
+        aKitLog.record(
+                "FieldSimulation/Coral", arena.getGamePiecesArrayByType("Coral"));
+
+        // this is where the robot really is in the sim
+        aKitLog.record("FieldSimulation/Robot", swerveDriveSimulation.getActualPoseInSimulationWorld());
 
         // tell the pose subystem about where the robot has moved based on odometry
         pose.ingestSimulatedSwerveModulePositions(swerveDriveSimulation.getLatestModulePositions());
-        
+
         // update gyro reading from sim
         ((MockGyro) pose.imu).setYaw(this.swerveDriveSimulation.getOdometryEstimatedPose().getRotation().getDegrees());
-        // if we want to give the gyro ground truth to make debugging other problems easier swap to this:
-        // ((MockGyro) pose.imu).setYaw(this.swerveDriveSimulation.getActualPoseInSimulationWorld().getRotation().getDegrees());
     }
 
     @Override
     public void resetPosition(Pose2d pose) {
+        arena.resetFieldForAuto();
         this.swerveDriveSimulation.getDriveTrainSimulation().setSimulationWorldPose(pose);
         this.pose.setCurrentPoseInMeters(pose);
     }
 
     @Override
     public Pose2d getGroundTruthPose() {
-        return null;
+        return this.swerveDriveSimulation.getActualPoseInSimulationWorld();
     }
 }
