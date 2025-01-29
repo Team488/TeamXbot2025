@@ -8,6 +8,7 @@ import competition.subsystems.elevator.ElevatorMechanism;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Rotations;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -66,5 +67,9 @@ public class ArmSimulator {
         var armSimAngle = Radians.of(armSim.getAngleRads());
 
         return armSimAngle.minus(ArmSimConstants.maxAngleRads).times(-1);
+    }
+
+    public boolean isAtCollectionAngle() {
+        return getArmAngle().isNear(Degrees.of(0), 0.05);
     }
 }
