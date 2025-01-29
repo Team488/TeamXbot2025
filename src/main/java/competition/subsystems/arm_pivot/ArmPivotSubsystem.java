@@ -2,6 +2,7 @@ package competition.subsystems.arm_pivot;
 
 import competition.electrical_contract.ElectricalContract;
 import competition.subsystems.coral_scorer.CoralScorerSubsystem;
+import competition.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.units.measure.Angle;
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
@@ -23,7 +24,7 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
     double rotationsAtZero;
     boolean isCalibrated = false;
 
-    CoralScorerSubsystem coralScorerSubsystem;
+    ElevatorSubsystem elevatorSubsystem;
 
     @Inject
     public ArmPivotSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
@@ -61,6 +62,10 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
         return Rotations.of(0);
     }
 
+    private Angle getCalibratedPosition() {
+        return getCurrentValue().plus(getMotorPositionFromZeroOffset());
+    }
+
     @Override
     public Angle getTargetValue() {
         return targetAngle;
@@ -73,10 +78,10 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
 
     @Override
     public void setPower(double power) {
-        if (electricalContract.isArmPivotMotorReady() && coralScorerSubsystem.hasCoral()) {
-            if (power < 0) {
+        if (getCalibratedPosition().in(Rotations) < 0) {
                 power = 0;
             }
+        if (electricalContract.isArmPivotMotorReady()) {
             this.armMotor.setPower(power);
         }
     }
