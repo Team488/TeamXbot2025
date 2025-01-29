@@ -65,5 +65,9 @@ public class ElevatorSimulator {
         bottomSensor.setValue(elevatorIsAtBottom);
         aKitLog.record("FieldSimulation/ElevatorHeight-Meters", elevatorCurrentHeight.in(Meters));
         aKitLog.record("FieldSimulation/ElevatorBottomSensorTriggered", elevatorIsAtBottom);
+    }
+
+    public boolean isAtCollectionHeight() {
+        this.elevatorMechanism.elevatorHeight.isNear(Meters.of(0.0), 0.05);
     }    
 }
