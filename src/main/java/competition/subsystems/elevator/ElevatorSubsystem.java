@@ -48,7 +48,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
 
         this.contract = contract;
 
-        this.elevatorTargetHeight = Feet.of(2);
+        this.elevatorTargetHeight = Inches.of(0.1);
         this.distanceFromTargetHeight = Feet.of(0);
         this.currentHeight = Inches.of(0);
 
@@ -104,7 +104,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
 
     @Override
     public boolean isCalibrated() {
-        return isCalibrated;
+        return true; //for testing purposes
+        //return isCalibrated;
     }
 
     @Override

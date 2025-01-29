@@ -62,15 +62,15 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     @Override
     protected void calibratedMachineControlAction() {
-        if(isMaintainerAtGoal()){
-            elevator.setPower(0.0);
-        }
-        else {
+//        if(isMaintainerAtGoal()){
+//            elevator.setPower(0.0);
+//        }
+//        else {
             double power = positionPID.calculate(
                     elevator.getTargetValue().in(Meters),
                     elevator.getCurrentValue().in(Meters));
             elevator.setPower(power);
-        }
+      //  }
 
     }
 
