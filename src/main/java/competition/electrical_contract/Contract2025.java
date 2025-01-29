@@ -9,7 +9,6 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 
 import competition.subsystems.pose.PoseSubsystem;
-import xbot.common.controls.sensors.XAbsoluteEncoder;
 import xbot.common.injection.electrical_contract.CANBusId;
 import xbot.common.injection.electrical_contract.CANMotorControllerInfo;
 import xbot.common.injection.electrical_contract.CANMotorControllerOutputConfig;
@@ -83,6 +82,7 @@ public class Contract2025 extends ElectricalContract {
     public DeviceInfo getArmPivotAbsoluteEncoder() {
         return new DeviceInfo("ArmPivotAbsoluteEncoder", 100);
     }
+    public boolean isArmPivotAbsoluteEncoderReady() { return false; }
     public DeviceInfo getArmPivotLowSensor() {
         return new DeviceInfo("ArmPivotLowSensor", 101);
     }

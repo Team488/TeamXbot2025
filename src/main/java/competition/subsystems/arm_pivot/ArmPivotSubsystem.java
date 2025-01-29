@@ -2,7 +2,6 @@ package competition.subsystems.arm_pivot;
 
 import competition.electrical_contract.ElectricalContract;
 import edu.wpi.first.units.measure.Angle;
-import xbot.common.advantage.DataFrameRefreshable;
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
 import xbot.common.controls.sensors.XAbsoluteEncoder;
@@ -19,16 +18,16 @@ import static edu.wpi.first.units.Units.Rotations;
 @Singleton
 public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
     public final XCANMotorController armMotor;
-    private final XAbsoluteEncoder armAbsoluteEncoder;
-    private final XDigitalInput lowSensor;
+    public final XAbsoluteEncoder armAbsoluteEncoder;
+    public final XDigitalInput lowSensor;
     Angle targetAngle;
     ElectricalContract electricalContract;
     DoubleProperty degreesPerRotations;
     double rotationsAtZero;
     boolean isCalibrated = false;
-    double positionToDegrees = 125.0;
-    DoubleProperty minArmPosition;
-    DoubleProperty maxArmPosition;
+    final DoubleProperty rangeOfMotionDegrees;
+    final DoubleProperty minArmPosition;
+    final DoubleProperty maxArmPosition;
 
     @Inject
     public ArmPivotSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
@@ -47,6 +46,8 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
             this.lowSensor = xDigitalInputFactory.create(electricalContract.getArmPivotLowSensor(),
                     "ArmPivotLowSensor");
             this.registerDataFrameRefreshable(this.armMotor);
+            this.registerDataFrameRefreshable(this.armAbsoluteEncoder);
+            this.registerDataFrameRefreshable(this.lowSensor);
         } else {
             this.armMotor = null;
             this.armAbsoluteEncoder = null;
@@ -54,8 +55,10 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
         }
 
         this.degreesPerRotations = propertyFactory.createPersistentProperty("Degrees Per Rotations", 1);
-        this.minArmPosition = propertyFactory.createPersistentProperty("Min AbsEncoder Position", 0.25);
-        this.maxArmPosition = propertyFactory.createPersistentProperty("Max AbsEncoder Position", 0.28);
+
+        this.rangeOfMotionDegrees = propertyFactory.createPersistentProperty("Range of Motion in Degrees", 125);
+        this.minArmPosition = propertyFactory.createPersistentProperty("Min AbsEncoder Position in Degrees", 90);
+        this.maxArmPosition = propertyFactory.createPersistentProperty("Max AbsEncoder Position in Degrees", 100);
     }
 
 
@@ -95,31 +98,18 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
     }
 
     public Angle getArmAngle() {
-        double absoluteEncoderPosition = armAbsoluteEncoder.getAbsolutePosition().in(Degrees);
-        double armPosition = 0;
-
-        // arm's absolute encoder not in overlapped zone
-        if (absoluteEncoderPosition < minArmPosition.get() || absoluteEncoderPosition > maxArmPosition.get()) {
-            if (absoluteEncoderPosition < minArmPosition.get()) {
-                armPosition = (absoluteEncoderPosition + 1 - maxArmPosition.get());
-            } else {
-                armPosition = (absoluteEncoderPosition - minArmPosition.get());
-            }
-        } // arm's absolute encoder in overlapped zone
-        else if (absoluteEncoderPosition > minArmPosition.get() && absoluteEncoderPosition < maxArmPosition.get()) {
-            if (lowSensor.get()) {
-                armPosition = (absoluteEncoderPosition - minArmPosition.get());
-            } else {
-                armPosition = 1 - (maxArmPosition.get() - absoluteEncoderPosition);
-            }
+        // if armAbsoluteEncoder is null, return 0
+        if (armAbsoluteEncoder.getAbsolutePosition() == null) {
+            return Angle.ofBaseUnits(0, Degrees);
         }
-        // convert from [0,1] position to arm angle in degrees.
-        return Degrees.of(armPosition * positionToDegrees);
+        return getArmAngle(minArmPosition.get(), minArmPosition.get(),
+                armAbsoluteEncoder.getAbsolutePosition(), lowSensor.get(), rangeOfMotionDegrees.get());
     }
 
-    public static Angle getArmAngleTest(double minPosition, double maxPosition,
-                                        double absEncoderPosition, boolean sensorHit, double positionToDegrees) {
+    public static Angle getArmAngle(double minPosition, double maxPosition,
+                                    Angle absEncoderAngle, boolean sensorHit, double rangeOfMotionDegrees) {
         double armPosition = 0;
+        double absEncoderPosition = absEncoderAngle.in(Degrees) / 360;
 
         if (absEncoderPosition < minPosition || absEncoderPosition > maxPosition) {
             if (absEncoderPosition < minPosition) {
@@ -135,13 +125,6 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
             }
         }
         // convert from [0,1] position to arm angle in degrees
-        return Degrees.of(armPosition * positionToDegrees);
-    }
-
-    @Override
-    public void refreshDataFrame() {
-        if (electricalContract.isArmPivotReady()) {
-            this.armMotor.refreshDataFrame();
-        }
+        return Degrees.of(armPosition * rangeOfMotionDegrees);
     }
 }

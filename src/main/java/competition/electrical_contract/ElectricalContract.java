@@ -37,6 +37,7 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
     public abstract boolean isArmPivotReady();
 
     public abstract CANMotorControllerInfo getArmPivotMotor();
+    public abstract boolean isArmPivotAbsoluteEncoderReady();
 
     public abstract DeviceInfo getArmPivotAbsoluteEncoder();
 

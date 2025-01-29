@@ -17,6 +17,10 @@ public class UnitTestContract2025 extends Contract2025 {
 
     public boolean isArmPivotMotorReady() { return true; }
 
+    public boolean isArmPivotAbsoluteEncoderReady() { return true; }
+
+    public boolean isArmPivotLowSensorReady() { return true; }
+
     public boolean isElevatorReady() { return true;}
 
     public boolean isDriveReady() { return true;}
@@ -24,5 +28,4 @@ public class UnitTestContract2025 extends Contract2025 {
     public boolean areCanCodersReady() { return true; }
 
     public boolean isElevatorBottomSensorReady() { return true; }
-
 }
