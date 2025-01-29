@@ -6,6 +6,7 @@ import static edu.wpi.first.units.Units.Rotations;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import competition.simulation.MotorInternalPIDHelper;
 import competition.simulation.SimulationConstants;
 import competition.subsystems.elevator.ElevatorMechanism;
 import competition.subsystems.elevator.ElevatorSubsystem;
@@ -60,21 +61,7 @@ public class ElevatorSimulator {
     }
 
     public void update() {
-        // based on the motor state, potentially run internal PID if need be
-        if (motor.getControlMode() == MockCANMotorController.ControlMode.Position) {
-            // run a simple pid to mimic the internal pid of the motor controller
-            var targetPosition = motor.getTargetPosition();
-            var currentPosition = motor.getPosition();
-            var gravityFeedForward = 0.1; // constant force to fight gravity
-            var output = pidManager.calculate(targetPosition.in(Rotations), currentPosition.in(Rotations))
-                    + gravityFeedForward;
-            aKitLog.record("Elevator/targetPosition", targetPosition.in(Rotations));
-            aKitLog.record("Elevator/currentPosition", currentPosition.in(Rotations));
-            aKitLog.record("Elevator/power", output);
-            motor.setPower(output);
-        } else {
-            pidManager.reset();
-        }
+        MotorInternalPIDHelper.updateInternalPID(motor, pidManager);
 
         this.elevatorSim.setInputVoltage(this.motor.getPower() * RobotController.getBatteryVoltage());
 
