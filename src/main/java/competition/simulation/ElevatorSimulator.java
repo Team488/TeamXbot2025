@@ -13,6 +13,8 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import xbot.common.advantage.AKitLogger;
 import xbot.common.controls.actuators.mock_adapters.MockCANMotorController;
+import edu.wpi.first.wpilibj.MockDigitalInput;
+
 
 @Singleton
 public class ElevatorSimulator {
@@ -23,9 +25,8 @@ public class ElevatorSimulator {
 
     final ElevatorSubsystem elevatorSubsystem;
     final MockCANMotorController motor;
-    // Placeholder for getting real elevator voltage from the ElevatorSubsystem when it exists
+    final MockDigitalInput bottomSensor;
     final ElevatorMechanism elevatorMechanism;
-    public boolean elevatorIsAtBottom = true;
 
     @Inject
     public ElevatorSimulator(ElevatorMechanism elevatorMechanism, ElevatorSubsystem elevatorSubsystem) {
@@ -33,6 +34,7 @@ public class ElevatorSimulator {
         this.elevatorMechanism = elevatorMechanism;
         this.elevatorSubsystem = elevatorSubsystem;
         this.motor = (MockCANMotorController)elevatorSubsystem.masterMotor;
+        this.bottomSensor = (MockDigitalInput)elevatorSubsystem.bottomSensor;
 
         this.elevatorSim = new ElevatorSim(
             elevatorGearBox,
@@ -59,8 +61,13 @@ public class ElevatorSimulator {
         this.motor.setPosition(Rotations.of(elevatorCurrentHeight.in(Meters) * ElevatorSimConstants.rotationsPerMeterHeight));
         
         // this would be used to simulate the bottom position sensor being triggered
-        this.elevatorIsAtBottom = elevatorCurrentHeight.in(Meters) <= ElevatorSimConstants.elevatorBottomSensorTriggerHeight;
+        var elevatorIsAtBottom = elevatorCurrentHeight.in(Meters) <= ElevatorSimConstants.elevatorBottomSensorTriggerHeight;
+        bottomSensor.setValue(elevatorIsAtBottom);
         aKitLog.record("FieldSimulation/ElevatorHeight-Meters", elevatorCurrentHeight.in(Meters));
-        aKitLog.record("FieldSimulation/ElevatorBottomSensorTriggered", this.elevatorIsAtBottom);
+        aKitLog.record("FieldSimulation/ElevatorBottomSensorTriggered", elevatorIsAtBottom);
+    }
+
+    public boolean isAtCollectionHeight() {
+        return this.elevatorMechanism.elevatorHeight.isNear(Meters.of(0.0), 0.05);
     }    
 }

@@ -24,6 +24,7 @@ public class AlgaeCollectionSubsystem extends BaseSubsystem {
         if (electricalContract.isAlgaeCollectionReady()) {
             this.motor = xcanMotorControllerFactory.create(electricalContract.getAlgaeCollectionMotor(),
                     getPrefix(), "AlgaeMotor");
+            this.registerDataFrameRefreshable(motor);
         } else {
             this.motor = null;
         }
