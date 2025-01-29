@@ -5,11 +5,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Timer;
 import xbot.common.command.BaseCommand;
+import xbot.common.subsystems.drive.swerve.SwerveModuleSubsystem;
 
 import javax.inject.Inject;
 
-
-import static edu.wpi.first.units.Units.Degree;
 import static edu.wpi.first.units.Units.Degrees;
 
 public class CalibrateDriveCommand extends BaseCommand {
@@ -20,6 +19,7 @@ public class CalibrateDriveCommand extends BaseCommand {
     double frontRightModuleStartPosition;
     double rearLeftModuleStartPosition;
     double rearRightModuleStartPosition;
+    boolean startingPositionsLogged = false;
 
     @Inject
     public CalibrateDriveCommand(DriveSubsystem drive) {
@@ -31,37 +31,37 @@ public class CalibrateDriveCommand extends BaseCommand {
     public void initialize() {
         log.info("Initializing");
         this.timer.restart();
-        drive.setTargetSwerveStates(new SwerveModuleState(0,new Rotation2d(0)));
-
-        // log starting drive motor positions
-        frontLeftModuleStartPosition = drive.getFrontLeftSwerveModuleSubsystem().getDriveSubsystem()
-                .getMotorController().getPosition().in(Degrees) / 360;
-        frontRightModuleStartPosition = drive.getFrontRightSwerveModuleSubsystem()
-                .getDriveSubsystem().getMotorController().getPosition().in(Degree) / 360;
-        rearLeftModuleStartPosition = drive.getRearLeftSwerveModuleSubsystem()
-                .getDriveSubsystem().getMotorController().getPosition().in(Degree) / 360;
-        rearRightModuleStartPosition = drive.getRearRightSwerveModuleSubsystem()
-                .getDriveSubsystem().getMotorController().getPosition().in(Degree) / 360;
-
-        aKitLog.record("frontLeftModuleStartPosition", frontLeftModuleStartPosition);
-        aKitLog.record("frontRightModuleStartPosition", frontRightModuleStartPosition);
-        aKitLog.record("rearLeftModuleStartPosition", rearLeftModuleStartPosition);
-        aKitLog.record("rearRightModuleStartPosition", rearRightModuleStartPosition);
+        drive.setAllSwerveModulesToTargetState(new SwerveModuleState(0,new Rotation2d(0)));
     }
 
     @Override
     public void execute() {
         // wait for modules to be zeroed
-        if (timer.hasElapsed(2)) {
-            drive.setTargetSwerveStates(new SwerveModuleState(power, new Rotation2d(0)));
-            double frontLeftModuleDeltaPosition = drive.getFrontLeftSwerveModuleSubsystem().getDriveSubsystem()
-                    .getMotorController().getPosition().in(Degrees) / 360 - frontLeftModuleStartPosition;
-            double frontRightModuleDeltaPosition = drive.getFrontRightSwerveModuleSubsystem().getDriveSubsystem()
-                    .getMotorController().getPosition().in(Degree) / 360 - frontRightModuleStartPosition;
-            double rearLeftModuleDeltaPosition = drive.getRearLeftSwerveModuleSubsystem().getDriveSubsystem()
-                    .getMotorController().getPosition().in(Degree) / 360 - rearLeftModuleStartPosition;
-            double rearRightModuleDeltaPosition = drive.getRearRightSwerveModuleSubsystem().getDriveSubsystem()
-                    .getMotorController().getPosition().in(Degree) / 360 - rearRightModuleStartPosition;
+        if (timer.hasElapsed(2) && !startingPositionsLogged) {
+            // log starting drive motor positions
+            frontLeftModuleStartPosition = getDriveMotorPosition(drive.getFrontLeftSwerveModuleSubsystem());
+            frontRightModuleStartPosition = getDriveMotorPosition(drive.getFrontRightSwerveModuleSubsystem());
+            rearLeftModuleStartPosition = getDriveMotorPosition(drive.getRearLeftSwerveModuleSubsystem());
+            rearRightModuleStartPosition = getDriveMotorPosition(drive.getRearRightSwerveModuleSubsystem());
+
+            aKitLog.record("frontLeftModuleStartPosition", frontLeftModuleStartPosition);
+            aKitLog.record("frontRightModuleStartPosition", frontRightModuleStartPosition);
+            aKitLog.record("rearLeftModuleStartPosition", rearLeftModuleStartPosition);
+            aKitLog.record("rearRightModuleStartPosition", rearRightModuleStartPosition);
+            startingPositionsLogged = true;
+        }
+        // after starting positions are logged, start logging the delta
+        else if (timer.hasElapsed(2) && startingPositionsLogged) {
+            drive.setAllSwerveModulesToTargetState(new SwerveModuleState(power, new Rotation2d(0)));
+
+            double frontLeftModuleDeltaPosition = getDeltaPosition(drive.getFrontLeftSwerveModuleSubsystem(),
+                    frontLeftModuleStartPosition);
+            double frontRightModuleDeltaPosition = getDeltaPosition(drive.getFrontRightSwerveModuleSubsystem(),
+                    frontRightModuleStartPosition);
+            double rearLeftModuleDeltaPosition = getDeltaPosition(drive.getRearLeftSwerveModuleSubsystem(),
+                    rearLeftModuleStartPosition);
+            double rearRightModuleDeltaPosition = getDeltaPosition(drive.getRearRightSwerveModuleSubsystem(),
+                    rearRightModuleStartPosition);
 
             double averageDeltaPosition = (frontLeftModuleDeltaPosition + frontRightModuleDeltaPosition
                     + rearLeftModuleDeltaPosition + rearRightModuleDeltaPosition) / 4;
@@ -78,5 +78,13 @@ public class CalibrateDriveCommand extends BaseCommand {
     public void end(boolean interrupted) {
         this.timer.stop();
         drive.stop();
+    }
+
+    private double getDriveMotorPosition(SwerveModuleSubsystem module) {
+        return module.getDriveSubsystem().getMotorController().getPosition().in(Degrees) / 360;
+    }
+
+    private double getDeltaPosition(SwerveModuleSubsystem module, double startingPosition) {
+        return getDriveMotorPosition(module) - startingPosition;
     }
 }
