@@ -1,4 +1,4 @@
-package competition.simulation;
+package competition.simulation.elevator;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Rotations;
@@ -6,6 +6,7 @@ import static edu.wpi.first.units.Units.Rotations;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import competition.simulation.SimulationConstants;
 import competition.subsystems.elevator.ElevatorMechanism;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.math.system.plant.DCMotor;
