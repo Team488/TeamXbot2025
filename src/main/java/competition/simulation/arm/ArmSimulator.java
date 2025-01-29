@@ -69,7 +69,7 @@ public class ArmSimulator {
         return armSimAngle.minus(ArmSimConstants.maxAngleRads).times(-1);
     }
 
-	public boolean isAtCollectionAngle() {
-		return getArmAngle().isNear(Degrees.of(0), 0.05);
-	}
+    public boolean isAtCollectionAngle() {
+        return getArmAngle().isNear(Degrees.of(0), 0.05);
+    }
 }
