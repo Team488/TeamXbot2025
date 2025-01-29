@@ -10,8 +10,10 @@ import xbot.common.properties.PropertyFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
 
 @Singleton
 public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implements DataFrameRefreshable {
@@ -31,7 +33,6 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
 
     public Distance elevatorTargetHeight;
     final Distance distanceFromTargetHeight;
-    final Distance currentHeight;
 
     public XCANMotorController masterMotor;
 
@@ -50,15 +51,14 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
 
         this.elevatorTargetHeight = Inches.of(0.1);
         this.distanceFromTargetHeight = Feet.of(0);
-        this.currentHeight = Inches.of(0);
 
         pf.setPrefix(this);
 
         //these are not real measured heights yet, just placeholders
-        l1Height = Feet.of(3);
-        l2Height = Feet.of(4);
-        l3Height = Feet.of(5);
-        l4Height = Feet.of(6);
+        l1Height = Feet.of(0.5);
+        l2Height = Feet.of(1);
+        l3Height = Feet.of(1.5);
+        l4Height = Feet.of(2);
         humanLoadHeight = Feet.of(3);
         returnToBaseHeight = Feet.of(2);
 
@@ -77,6 +77,11 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
 
     @Override
     public Distance getCurrentValue() {
+        Distance currentHeight = Inches.of(0);
+        if (contract.isElevatorReady()){
+            double rotations = this.masterMotor.getPosition().in(Degrees) / 360;
+            currentHeight = Meters.of(rotations / 1.5); //hastily written code will clean up later
+        }
         return currentHeight;
     }
 
@@ -123,6 +128,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
     public void periodic(){
         masterMotor.periodic();
         aKitLog.record("ElevatorTargetHeight",elevatorTargetHeight);
+        aKitLog.record("ElevatorCurrentHeight",getCurrentValue().in(Meters));
     }
 
 

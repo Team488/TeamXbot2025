@@ -12,7 +12,10 @@ import competition.subsystems.coral_scorer.commands.ScoreCoralCommand;
 import competition.subsystems.coral_scorer.commands.StopCoralCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
-import edu.wpi.first.wpilibj2.command.button.POVButton;
+import competition.subsystems.elevator.commands.RiseToL1Command;
+import competition.subsystems.elevator.commands.RiseToL2Command;
+import competition.subsystems.elevator.commands.RiseToL3Command;
+import competition.subsystems.elevator.commands.RiseToL4Command;
 import xbot.common.controls.sensors.XXboxController;
 import xbot.common.subsystems.drive.swerve.commands.ChangeActiveSwerveModuleCommand;
 import xbot.common.subsystems.pose.commands.SetRobotHeadingCommand;
@@ -49,7 +52,11 @@ public class OperatorCommandMap {
             StopCoralCommand stopCoralCommand,
             AlgaeCollectionIntakeCommand algaeCollectionIntakeCommand,
             AlgaeCollectionOutputCommand algaeCollectionOutputCommand,
-            AlgaeCollectionStopCommand algaeCollectionStopCommand) {
+            AlgaeCollectionStopCommand algaeCollectionStopCommand,
+            RiseToL1Command riseToL1Command,
+            RiseToL2Command riseToL2Command,
+            RiseToL3Command riseToL3Command,
+            RiseToL4Command riseToL4Command) {
         oi.programmerGamepad.getPovIfAvailable(0).onTrue(changeActiveModule);
         oi.programmerGamepad.getPovIfAvailable(90).onTrue(debugModule);
         oi.programmerGamepad.getPovIfAvailable(180).onTrue(typicalSwerveDrive);
@@ -57,8 +64,13 @@ public class OperatorCommandMap {
         oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeCoralCommand);
         oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreCoralCommand);
 
-        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(algaeCollectionIntakeCommand);
-        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(algaeCollectionOutputCommand);
+        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(riseToL1Command);
+        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(riseToL2Command);
+        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(riseToL3Command);
+        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(riseToL4Command);
+
+//        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(algaeCollectionIntakeCommand);
+//        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(algaeCollectionOutputCommand);
 
     }
 
