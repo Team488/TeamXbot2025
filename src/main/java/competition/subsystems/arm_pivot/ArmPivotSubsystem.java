@@ -2,6 +2,7 @@ package competition.subsystems.arm_pivot;
 
 import competition.electrical_contract.ElectricalContract;
 import edu.wpi.first.units.measure.Angle;
+import xbot.common.advantage.DataFrameRefreshable;
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
 import xbot.common.properties.DoubleProperty;
@@ -16,7 +17,7 @@ import static edu.wpi.first.units.Units.Rotations;
 @Singleton
 public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
     public final XCANMotorController armMotor;
-    Angle targetAngle;
+    Angle targetAngle = Degrees.of(0);
     ElectricalContract electricalContract;
     DoubleProperty degreesPerRotations;
     double rotationsAtZero;
@@ -31,6 +32,7 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
         if (electricalContract.isArmPivotMotorReady()) {
             this.armMotor = xcanMotorControllerFactory.create(electricalContract.getArmPivotMotor(),
                     getPrefix(), "ArmPivotMotor");
+            this.registerDataFrameRefreshable(this.armMotor);
         } else {
             this.armMotor = null;
         }
@@ -38,7 +40,7 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
         this.degreesPerRotations = propertyFactory.createPersistentProperty("Degrees Per Rotations", 1);
     }
 
-    //
+
 
     @Override
     public Angle getCurrentValue() {
@@ -48,7 +50,6 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
 
     @Override
     public Angle getTargetValue() {
-
         return targetAngle;
     }
 

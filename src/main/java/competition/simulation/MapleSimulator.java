@@ -1,19 +1,14 @@
 package competition.simulation;
 
+import competition.simulation.arm.ArmSimulator;
 import competition.subsystems.drive.DriveSubsystem;
-import competition.subsystems.elevator.ElevatorMechanism;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import xbot.common.advantage.AKitLogger;
 import xbot.common.controls.sensors.mock_adapters.MockGyro;
-
-import static edu.wpi.first.units.Units.Meters;
-
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -31,6 +26,7 @@ public class MapleSimulator implements BaseSimulator {
     protected final AKitLogger aKitLog;
 
     final ElevatorSimulator elevatorSimulator;
+    final ArmSimulator armSimulator;
 
     // maple-sim stuff ----------------------------
     final DriveTrainSimulationConfig config;
@@ -38,11 +34,13 @@ public class MapleSimulator implements BaseSimulator {
     final SelfControlledSwerveDriveSimulation swerveDriveSimulation;
 
     @Inject
-    public MapleSimulator(PoseSubsystem pose, DriveSubsystem drive, ElevatorSimulator elevatorSimulator) {
+    public MapleSimulator(PoseSubsystem pose, DriveSubsystem drive, ElevatorSimulator elevatorSimulator,
+                          ArmSimulator armSimulator) {
         this.pose = pose;
         this.drive = drive;
         this.elevatorSimulator = elevatorSimulator;
-        
+        this.armSimulator = armSimulator;
+
         aKitLog = new AKitLogger("Simulator/");
 
         /**
@@ -73,6 +71,7 @@ public class MapleSimulator implements BaseSimulator {
     public void update() {
         this.updateDriveSimulation();
         elevatorSimulator.update();
+        armSimulator.update();
     }
 
     protected void updateDriveSimulation() {
@@ -109,5 +108,10 @@ public class MapleSimulator implements BaseSimulator {
         arena.resetFieldForAuto();
         this.swerveDriveSimulation.getDriveTrainSimulation().setSimulationWorldPose(pose);
         this.pose.setCurrentPoseInMeters(pose);
+    }
+
+    @Override
+    public Pose2d getGroundTruthPose() {
+        return this.swerveDriveSimulation.getActualPoseInSimulationWorld();
     }
 }
