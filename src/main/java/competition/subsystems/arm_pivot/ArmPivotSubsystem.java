@@ -1,8 +1,6 @@
 package competition.subsystems.arm_pivot;
 
 import competition.electrical_contract.ElectricalContract;
-import competition.subsystems.coral_scorer.CoralScorerSubsystem;
-import competition.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.units.measure.Angle;
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
