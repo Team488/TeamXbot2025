@@ -1,63 +1,62 @@
-package competition.subsystems.deadwheel;
-
-import xbot.common.controls.sensors.XEncoder;
-import xbot.common.controls.sensors.XEncoderFactory;
-import xbot.common.math.WrappedRotation2d;
-import xbot.common.properties.PropertyFactory;
-import xbot.common.subsystems.BaseSubsystem;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-@Singleton
 public class DeadwheelSubsystem extends BaseSubsystem {
 
     private final XEncoder leftEncoder;
     private final XEncoder rightEncoder;
     private final XEncoder frontEncoder;
+    private final double trackWidth;
 
-    private final double wheelDiameterMeters = 0.032; // 32 mm
-    private final int pulsesPerRevolution = 2000;
-    private final double distancePerPulse = (Math.PI * wheelDiameterMeters) / pulsesPerRevolution;
+    private final double wheelDiameterMeters;
+    private final int pulsesPerRevolution;
+    private final double distancePerPulse;
+
+    private Pose2d currentPose = new Pose2d();
+    private double prevLeftDistance = 0;
+    private double prevRightDistance = 0;
+    private double prevFrontDistance = 0;
 
     @Inject
-    public DeadwheelSubsystem(XEncoderFactory encoderFactory, PropertyFactory propFactory) {
+    public DeadwheelSubsystem(XEncoderFactory encoderFactory, PropertyFactory propFactory, 
+                              @Named("TrackWidth") double trackWidth, 
+                              @Named("WheelDiameterMeters") double wheelDiameterMeters, 
+                              @Named("PulsesPerRevolution") int pulsesPerRevolution) {
         leftEncoder = encoderFactory.create("LeftDeadwheelEncoder");
         rightEncoder = encoderFactory.create("RightDeadwheelEncoder");
         frontEncoder = encoderFactory.create("FrontDeadwheelEncoder");
+
+        this.wheelDiameterMeters = wheelDiameterMeters;
+        this.pulsesPerRevolution = pulsesPerRevolution;
+        this.trackWidth = trackWidth;
+        this.distancePerPulse = (Math.PI * wheelDiameterMeters) / pulsesPerRevolution;
 
         leftEncoder.setDistancePerPulse(distancePerPulse);
         rightEncoder.setDistancePerPulse(distancePerPulse);
         frontEncoder.setDistancePerPulse(distancePerPulse);
     }
 
-    public double getLeftDistance() {
-        return leftEncoder.getDistance();
-    }
+    public Pose2d updateOdometry() {
+        double leftDistance = leftEncoder.getDistance();
+        double rightDistance = rightEncoder.getDistance();
+        double frontDistance = frontEncoder.getDistance();
 
-    public double getRightDistance() {
-        return rightEncoder.getDistance();
-    }
+        double d_left = leftDistance - prevLeftDistance;
+        double d_right = rightDistance - prevRightDistance;
+        double d_front = frontDistance - prevFrontDistance;
 
-    public double getFrontDistance() {
-        return frontEncoder.getDistance();
-    }
+        double d_theta = (d_right - d_left) / trackWidth;
+        double avg_distance = (d_left + d_right) / 2.0;
+        double d_x = avg_distance * Math.cos(currentPose.getRotation().getRadians());
+        double d_y = avg_distance * Math.sin(currentPose.getRotation().getRadians());
 
-    public double getLeftRate() {
-        return leftEncoder.getRate();
-    }
+        prevLeftDistance = leftDistance;
+        prevRightDistance = rightDistance;
+        prevFrontDistance = frontDistance;
 
-    public double getRightRate() {
-        return rightEncoder.getRate();
-    }
+        currentPose = new Pose2d(
+            currentPose.getX() + d_x,
+            currentPose.getY() + d_y,
+            currentPose.getRotation().plus(new Rotation2d(d_theta))
+        );
 
-    public double getFrontRate() {
-        return frontEncoder.getRate();
-    }
-
-    public void resetEncoders() {
-        leftEncoder.reset();
-        rightEncoder.reset();
-        frontEncoder.reset();
+        return currentPose;
     }
 }
