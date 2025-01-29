@@ -135,7 +135,9 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     }
 
     public void periodic(){
-        masterMotor.periodic();
+        if (contract.isElevatorReady()){
+            masterMotor.periodic();
+        }
         aKitLog.record("ElevatorTargetHeight",elevatorTargetHeight);
         aKitLog.record("ElevatorBottomSensor",this.isTouchingBottom());
     }
