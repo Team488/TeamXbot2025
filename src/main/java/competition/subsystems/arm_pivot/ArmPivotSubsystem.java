@@ -44,8 +44,16 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
 
     @Override
     public Angle getCurrentValue() {
-        double currentAngle = (this.armMotor.getPosition().in(Rotations) - rotationsAtZero) * degreesPerRotations.get();
+        double currentAngle = getMotorPositionFromZero().in(Rotations) * degreesPerRotations.get();
         return Degrees.of(currentAngle);
+    }
+
+    private Angle getMotorPositionFromZero() {
+        if (electricalContract.isArmPivotMotorReady()) {
+            return Rotations.of(this.armMotor.getPosition().in(Rotations) - rotationsAtZero);
+        } else {
+            return Rotations.of(0);
+        }
     }
 
     @Override
