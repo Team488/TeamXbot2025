@@ -25,12 +25,12 @@ public class AlignToReefWithAprilTagCommand extends BaseCommand {
     HeadingModule headingModule;
     PoseSubsystem pose;
 
-    Pose2d BlueCloseReefFace = Landmarks.BlueCloseAlgae;
-    Pose2d BlueCloseRightReefFace = Landmarks.BlueCloseRightAlgae;
-    Pose2d BlueCloseLeftReefFace = Landmarks.BlueCloseLeftAlgae;
-    Pose2d BlueFarLeftReefFace = Landmarks.BlueFarLeftAlgae;
-    Pose2d BlueFarReefFace = Landmarks.BlueFarAlgae;
-    Pose2d BlueFarRightReefFace = Landmarks.BlueFarRightAlgae;
+    Pose2d blueCloseReefFace = Landmarks.BlueCloseAlgae;
+    Pose2d blueCloseRightReefFace = Landmarks.BlueCloseRightAlgae;
+    Pose2d blueCloseLeftReefFace = Landmarks.BlueCloseLeftAlgae;
+    Pose2d blueFarLeftReefFace = Landmarks.BlueFarLeftAlgae;
+    Pose2d blueFarReefFace = Landmarks.BlueFarAlgae;
+    Pose2d blueFarRightReefFace = Landmarks.BlueFarRightAlgae;
 
     public Distance cameraXOffset;
     public Pose2d targetReefFacePose;
@@ -96,25 +96,25 @@ public class AlignToReefWithAprilTagCommand extends BaseCommand {
         Pose2d currentPose = pose.getCurrentPose2d();
 
         double closeDistance = PoseSubsystem.convertBlueToRedIfNeeded(
-                BlueCloseReefFace).getTranslation().getDistance(currentPose.getTranslation());
+                blueCloseReefFace).getTranslation().getDistance(currentPose.getTranslation());
         double closeLeftDistance = PoseSubsystem.convertBlueToRedIfNeeded(
-                BlueCloseLeftReefFace).getTranslation().getDistance(currentPose.getTranslation());
+                blueCloseLeftReefFace).getTranslation().getDistance(currentPose.getTranslation());
         double closeRightDistance = PoseSubsystem.convertBlueToRedIfNeeded(
-                BlueCloseRightReefFace).getTranslation().getDistance(currentPose.getTranslation());
+                blueCloseRightReefFace).getTranslation().getDistance(currentPose.getTranslation());
         double backLeftDistance = PoseSubsystem.convertBlueToRedIfNeeded(
-                BlueFarLeftReefFace).getTranslation().getDistance(currentPose.getTranslation());
+                blueFarLeftReefFace).getTranslation().getDistance(currentPose.getTranslation());
         double backDistance = PoseSubsystem.convertBlueToRedIfNeeded(
-                BlueFarReefFace).getTranslation().getDistance(currentPose.getTranslation());
+                blueFarReefFace).getTranslation().getDistance(currentPose.getTranslation());
         double backRightDistance = PoseSubsystem.convertBlueToRedIfNeeded(
-                BlueFarRightReefFace).getTranslation().getDistance(currentPose.getTranslation());
+                blueFarRightReefFace).getTranslation().getDistance(currentPose.getTranslation());
 
         HashMap<Double, Pose2d> hashMap = new HashMap<>();
-        hashMap.put(closeLeftDistance, PoseSubsystem.convertBlueToRedIfNeeded(BlueCloseLeftReefFace));
-        hashMap.put(closeDistance, PoseSubsystem.convertBlueToRedIfNeeded(BlueCloseReefFace));
-        hashMap.put(closeRightDistance, PoseSubsystem.convertBlueToRedIfNeeded(BlueCloseRightReefFace));
-        hashMap.put(backLeftDistance, PoseSubsystem.convertBlueToRedIfNeeded(BlueFarLeftReefFace));
-        hashMap.put(backDistance, PoseSubsystem.convertBlueToRedIfNeeded(BlueFarReefFace));
-        hashMap.put(backRightDistance, PoseSubsystem.convertBlueToRedIfNeeded(BlueFarRightReefFace));
+        hashMap.put(closeLeftDistance, PoseSubsystem.convertBlueToRedIfNeeded(blueCloseLeftReefFace));
+        hashMap.put(closeDistance, PoseSubsystem.convertBlueToRedIfNeeded(blueCloseReefFace));
+        hashMap.put(closeRightDistance, PoseSubsystem.convertBlueToRedIfNeeded(blueCloseRightReefFace));
+        hashMap.put(backLeftDistance, PoseSubsystem.convertBlueToRedIfNeeded(blueFarLeftReefFace));
+        hashMap.put(backDistance, PoseSubsystem.convertBlueToRedIfNeeded(blueFarReefFace));
+        hashMap.put(backRightDistance, PoseSubsystem.convertBlueToRedIfNeeded(blueFarRightReefFace));
 
         double leastDistance = closeLeftDistance;
 
@@ -132,20 +132,20 @@ public class AlignToReefWithAprilTagCommand extends BaseCommand {
 
         // Note: flipped april tag IDs across the y-midpoint of the field
         if (DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red) {
-            hashMap.put(PoseSubsystem.convertBlueToRedIfNeeded(BlueCloseLeftReefFace), 8);
-            hashMap.put(PoseSubsystem.convertBlueToRedIfNeeded(BlueCloseReefFace), 7);
-            hashMap.put(PoseSubsystem.convertBlueToRedIfNeeded(BlueCloseRightReefFace), 6);
-            hashMap.put(PoseSubsystem.convertBlueToRedIfNeeded(BlueFarLeftReefFace), 9);
-            hashMap.put(PoseSubsystem.convertBlueToRedIfNeeded(BlueFarReefFace), 10);
-            hashMap.put(PoseSubsystem.convertBlueToRedIfNeeded(BlueFarRightReefFace), 11);
+            hashMap.put(PoseSubsystem.convertBlueToRedIfNeeded(blueCloseLeftReefFace), 8);
+            hashMap.put(PoseSubsystem.convertBlueToRedIfNeeded(blueCloseReefFace), 7);
+            hashMap.put(PoseSubsystem.convertBlueToRedIfNeeded(blueCloseRightReefFace), 6);
+            hashMap.put(PoseSubsystem.convertBlueToRedIfNeeded(blueFarLeftReefFace), 9);
+            hashMap.put(PoseSubsystem.convertBlueToRedIfNeeded(blueFarReefFace), 10);
+            hashMap.put(PoseSubsystem.convertBlueToRedIfNeeded(blueFarRightReefFace), 11);
         }
         else {
-            hashMap.put(BlueCloseLeftReefFace, 19);
-            hashMap.put(BlueCloseReefFace, 18);
-            hashMap.put(BlueCloseRightReefFace, 17);
-            hashMap.put(BlueFarLeftReefFace, 20);
-            hashMap.put(BlueFarReefFace, 21);
-            hashMap.put(BlueFarRightReefFace, 22);
+            hashMap.put(blueCloseLeftReefFace, 19);
+            hashMap.put(blueCloseReefFace, 18);
+            hashMap.put(blueCloseRightReefFace, 17);
+            hashMap.put(blueFarLeftReefFace, 20);
+            hashMap.put(blueFarReefFace, 21);
+            hashMap.put(blueFarRightReefFace, 22);
         }
         aKitLog.record("TargetAprilTagID", hashMap.get(targetReefFacePose));
 
