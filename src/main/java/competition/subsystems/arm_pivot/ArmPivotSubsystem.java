@@ -62,10 +62,6 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
         return Rotations.of(0);
     }
 
-    private Angle getCalibratedPosition() {
-        return getCurrentValue().plus(getMotorPositionFromZeroOffset());
-    }
-
     @Override
     public Angle getTargetValue() {
         return targetAngle;
@@ -78,9 +74,9 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
 
     @Override
     public void setPower(double power) {
-        if (getCalibratedPosition().in(Rotations) < 0) {
+        if (getMotorPositionFromZeroOffset().in(Rotations) < 0) {
                 power = 0;
-            }
+        }
         if (electricalContract.isArmPivotMotorReady()) {
             this.armMotor.setPower(power);
         }
