@@ -2,6 +2,7 @@ package competition.simulation.arm;
 
 import javax.inject.Inject;
 
+import competition.simulation.MotorInternalPIDHelper;
 import competition.simulation.SimulationConstants;
 import competition.subsystems.arm_pivot.ArmPivotSubsystem;
 import competition.subsystems.elevator.ElevatorMechanism;
@@ -16,10 +17,13 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import xbot.common.controls.actuators.mock_adapters.MockCANMotorController;
+import xbot.common.math.PIDManager;
+import xbot.common.properties.PropertyFactory;
 
 public class ArmSimulator {
     final DCMotor motor = DCMotor.getKrakenX60(1);
     final SingleJointedArmSim armSim;
+    final PIDManager pidManager;
 
     final ElevatorMechanism elevatorMechanism;
     final ArmPivotSubsystem armPivotSubsystem;
@@ -27,7 +31,9 @@ public class ArmSimulator {
 
 
     @Inject
-    public ArmSimulator(ElevatorMechanism elevatorMechanism, ArmPivotSubsystem armPivotSubsystem) {
+    public ArmSimulator(ElevatorMechanism elevatorMechanism, ArmPivotSubsystem armPivotSubsystem, PIDManager.PIDManagerFactory pidManagerFactory, PropertyFactory pf) {
+        pf.setPrefix("ArmSimulator");
+        this.pidManager = pidManagerFactory.create("ArmSimulationPositionalPID", 0.01, 0.001, 0.0, 0.0, 1.0, -1.0);
         this.elevatorMechanism = elevatorMechanism;
         this.armPivotSubsystem = armPivotSubsystem;
         this.armMotor = (MockCANMotorController)armPivotSubsystem.armMotor;
@@ -46,6 +52,9 @@ public class ArmSimulator {
     }
 
     public void update() {
+        // based on the motor state, potentially run internal PID if need be
+        MotorInternalPIDHelper.updateInternalPID(armMotor, pidManager);
+        
         // invert power because the simulated arm is going "backwards"
         armSim.setInput(this.armMotor.getPower() * RobotController.getBatteryVoltage() * -1.0);
         armSim.update(SimulationConstants.loopPeriodSec); // 20ms
