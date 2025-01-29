@@ -82,10 +82,13 @@ public class Contract2025 extends ElectricalContract {
     public DeviceInfo getArmPivotAbsoluteEncoder() {
         return new DeviceInfo("ArmPivotAbsoluteEncoder", 100);
     }
+
     public boolean isArmPivotAbsoluteEncoderReady() { return false; }
+
     public DeviceInfo getArmPivotLowSensor() {
         return new DeviceInfo("ArmPivotLowSensor", 101);
     }
+    public boolean isArmPivotLowSensorReady() { return false; }
 
     @Override
     public boolean isElevatorReady() {

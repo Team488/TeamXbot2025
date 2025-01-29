@@ -98,12 +98,11 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
     }
 
     public Angle getArmAngle() {
-        // if armAbsoluteEncoder is null, return 0
-        if (armAbsoluteEncoder.getAbsolutePosition() == null) {
-            return Angle.ofBaseUnits(0, Degrees);
+        if (electricalContract.isArmPivotAbsoluteEncoderReady() && electricalContract.isArmPivotLowSensorReady()) {
+            return getArmAngle(minArmPosition.get(), maxArmPosition.get(),
+                    armAbsoluteEncoder.getAbsolutePosition(), lowSensor.get(), rangeOfMotionDegrees.get());
         }
-        return getArmAngle(minArmPosition.get(), minArmPosition.get(),
-                armAbsoluteEncoder.getAbsolutePosition(), lowSensor.get(), rangeOfMotionDegrees.get());
+        return Angle.ofBaseUnits(0, Degrees);
     }
 
     public static Angle getArmAngle(double minPosition, double maxPosition,
