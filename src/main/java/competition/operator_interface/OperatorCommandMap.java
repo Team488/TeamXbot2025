@@ -64,10 +64,10 @@ public class OperatorCommandMap {
         oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeCoralCommand);
         oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreCoralCommand);
 
-        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(riseToL1Command);
         oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(riseToL2Command);
         oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(riseToL3Command);
         oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(riseToL4Command);
+        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(riseToL1Command);
 
 //        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(algaeCollectionIntakeCommand);
 //        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(algaeCollectionOutputCommand);

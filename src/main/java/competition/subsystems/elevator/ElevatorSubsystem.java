@@ -5,6 +5,7 @@ import edu.wpi.first.units.measure.Distance;
 import xbot.common.advantage.DataFrameRefreshable;
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
+import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 
 import javax.inject.Inject;
@@ -14,6 +15,7 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Rotations;
 
 @Singleton
 public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implements DataFrameRefreshable {
@@ -29,10 +31,13 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
 
     final ElectricalContract contract;
 
-    private boolean isCalibrated;
+    private boolean isCalibrated = true; //set to true just for testing purposes
+    //TODO: Add a calibration routine
 
     public Distance elevatorTargetHeight;
     final Distance distanceFromTargetHeight;
+
+    final DoubleProperty metersPerRotation;
 
     public XCANMotorController masterMotor;
 
@@ -53,6 +58,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
         this.distanceFromTargetHeight = Feet.of(0);
 
         pf.setPrefix(this);
+        //to be tuned
+        this.metersPerRotation = pf.createPersistentProperty("MetersPerRotation", 1.5);
 
         //these are not real measured heights yet, just placeholders
         l1Height = Feet.of(0.5);
@@ -79,8 +86,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
     public Distance getCurrentValue() {
         Distance currentHeight = Inches.of(0);
         if (contract.isElevatorReady()){
-            double rotations = this.masterMotor.getPosition().in(Degrees) / 360;
-            currentHeight = Meters.of(rotations / 1.5); //hastily written code will clean up later
+            currentHeight = Meters.of(this.masterMotor.getPosition().in(Rotations) * metersPerRotation.get()); //hastily written code will clean up later
         }
         return currentHeight;
     }
@@ -109,8 +115,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
 
     @Override
     public boolean isCalibrated() {
-        return true; //for testing purposes
-        //return isCalibrated;
+        return isCalibrated;
     }
 
     @Override

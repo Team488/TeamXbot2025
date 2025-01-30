@@ -42,10 +42,10 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         this.elevator = elevator;
 
         this.oi = oi;
-        positionPID = pidf.create(getPrefix() + "positionPID", 0.5, 0.01, 0.5);
+        positionPID = pidf.create(getPrefix() + "positionPID", 0.01, 0, 0.0);
 
         humanMaxPowerGoingUp = pf.createPersistentProperty("maxPowerGoingUp", 1);
-        humanMaxPowerGoingDown = pf.createPersistentProperty("maxPowerGoingDown", -0.3);
+        humanMaxPowerGoingDown = pf.createPersistentProperty("maxPowerGoingDown", -0.5);
     }
 
     @Override
@@ -65,7 +65,8 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         double power = positionPID.calculate(
                 elevator.getTargetValue().in(Meters),
                 elevator.getCurrentValue().in(Meters));
-        elevator.setPower(power + 0.01);
+        power = MathUtils.constrainDouble(power, -0.8, 1);
+        elevator.setPower(power);
 
     }
 
@@ -86,7 +87,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         var current = elevator.getCurrentValue();
         var target = elevator.getTargetValue();
 
-        return Math.abs(current.in(Inches)/target.in(Inches));
+        return Math.abs(target.in(Meters) - current.in(Meters));
     }
 
     @Override
