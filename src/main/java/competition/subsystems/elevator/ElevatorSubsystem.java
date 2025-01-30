@@ -64,13 +64,13 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
         pf.setPrefix(this);
         //to be tuned
-        this.metersPerRotation = pf.createPersistentProperty("MetersPerRotation", 1.5);
+        this.metersPerRotation = pf.createPersistentProperty("MetersPerRotation", 3);
 
         //these are not real measured heights yet, just placeholders
-        l1Height = Feet.of(0.5);
-        l2Height = Feet.of(1);
-        l3Height = Feet.of(1.5);
-        l4Height = Feet.of(2);
+        l1Height = Feet.of(1);
+        l2Height = Feet.of(2);
+        l3Height = Feet.of(3);
+        l4Height = Feet.of(4);
         humanLoadHeight = Feet.of(3);
         returnToBaseHeight = Feet.of(2);
 
@@ -149,7 +149,6 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
             masterMotor.periodic();
         }
         aKitLog.record("ElevatorTargetHeight",elevatorTargetHeight);
-        Elevator-Function-in-Advantage-Scope
         aKitLog.record("ElevatorCurrentHeight",getCurrentValue().in(Meters));
         aKitLog.record("ElevatorBottomSensor",this.isTouchingBottom());
     }
