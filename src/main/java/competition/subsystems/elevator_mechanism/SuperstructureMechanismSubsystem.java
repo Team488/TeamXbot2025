@@ -4,35 +4,35 @@ import javax.inject.Inject;
 
 import competition.subsystems.arm_pivot.ArmPivotSubsystem;
 import competition.subsystems.coral_scorer.CoralScorerSubsystem;
-import competition.subsystems.elevator.ElevatorMechanism;
+import competition.subsystems.elevator.SuperstructureMechanism;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import xbot.common.command.BaseSubsystem;
 
 /*
  * Responsible for rendering a Mech2d object representing the elevator-arm-scorer system as perceived by the robot code.
  */
-public class ElevatorMechanismSubsystem extends BaseSubsystem {
+public class SuperstructureMechanismSubsystem extends BaseSubsystem {
     final ElevatorSubsystem elevatorSubsystem;
     final ArmPivotSubsystem armPivotSubsystem;
     final CoralScorerSubsystem coralScorerSubsystem;
 
-    final ElevatorMechanism elevatorMechanism;
+    final SuperstructureMechanism superstructureMechanism;
 
     @Inject
-    public ElevatorMechanismSubsystem(ElevatorSubsystem elevatorSubsystem, ArmPivotSubsystem armPivotSubsystem, CoralScorerSubsystem coralScorerSubsystem) {
+    public SuperstructureMechanismSubsystem(ElevatorSubsystem elevatorSubsystem, ArmPivotSubsystem armPivotSubsystem, CoralScorerSubsystem coralScorerSubsystem) {
         this.elevatorSubsystem = elevatorSubsystem;
         this.armPivotSubsystem = armPivotSubsystem;
         this.coralScorerSubsystem = coralScorerSubsystem;
 
-        elevatorMechanism = new ElevatorMechanism();
+        superstructureMechanism = new SuperstructureMechanism();
     }
     
     @Override
     public void periodic() {
-        elevatorMechanism.setElevatorHeight(elevatorSubsystem.getCurrentValue());
-        elevatorMechanism.setArmAngle(armPivotSubsystem.getCurrentValue());
-        elevatorMechanism.setCoralInScorer(coralScorerSubsystem.hasCoral());
+        superstructureMechanism.setElevatorHeight(elevatorSubsystem.getCurrentValue());
+        superstructureMechanism.setArmAngle(armPivotSubsystem.getCurrentValue());
+        superstructureMechanism.setCoralInScorer(coralScorerSubsystem.hasCoral());
 
-        aKitLog.record("ElevatorMechanism", elevatorMechanism.getMechanism());
+        aKitLog.record("SuperstructureMechanism", superstructureMechanism.getMechanism());
     }
 }

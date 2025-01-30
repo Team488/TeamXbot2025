@@ -13,7 +13,7 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 
-public class ElevatorMechanism {
+public class SuperstructureMechanism {
     final LoggedMechanism2d mech2d;
     final LoggedMechanismLigament2d elevatorLigament;
     final LoggedMechanismLigament2d armLigament;
@@ -34,7 +34,7 @@ public class ElevatorMechanism {
     // where the base of the elevator appears on the robot, 
     final Translation2d elevatorBasePositionMeters = new Translation2d(0.57, 0.05);
 
-    public ElevatorMechanism() {
+    public SuperstructureMechanism() {
         this.mech2d = new LoggedMechanism2d(1, 2);
         var root = mech2d.getRoot("ElevatorRoot", elevatorBasePositionMeters.getX(), elevatorBasePositionMeters.getY());
         this.elevatorLigament = new LoggedMechanismLigament2d("elevator", elevatorLigamentBaseLengthMeters, 90, 6, new Color8Bit(Color.kBrown));

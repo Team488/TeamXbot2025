@@ -5,7 +5,7 @@ import competition.simulation.coral_scorer.CoralScorerSimulator;
 import competition.simulation.reef.ReefSimulator;
 import competition.subsystems.coral_scorer.CoralScorerSubsystem;
 import competition.subsystems.drive.DriveSubsystem;
-import competition.subsystems.elevator.ElevatorMechanism;
+import competition.subsystems.elevator.SuperstructureMechanism;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -34,7 +34,7 @@ public class MapleSimulator implements BaseSimulator {
 
     protected final AKitLogger aKitLog;
 
-    final ElevatorMechanism elevatorMechanism;
+    final SuperstructureMechanism superstructureMechanism;
 
     // sub simulators ----------------------------
     final ElevatorSimulator elevatorSimulator;
@@ -58,7 +58,7 @@ public class MapleSimulator implements BaseSimulator {
         this.armSimulator = armSimulator;
         this.reefSimulator = reefSimulator;
         this.coralScorerSimulator = coralScorerSimulator;
-        this.elevatorMechanism = new ElevatorMechanism();
+        this.superstructureMechanism = new SuperstructureMechanism();
 
         aKitLog = new AKitLogger("Simulator/");
 
@@ -94,14 +94,14 @@ public class MapleSimulator implements BaseSimulator {
         reefSimulator.update();
         this.updateCoralLoadFromHumanPlayer();
         this.updateCoralScorerSensor();
-        this.updateElevatorMechanism();
+        this.updateSuperstructureMechanism();
     }
     
-    void updateElevatorMechanism() {
-        elevatorMechanism.setElevatorHeight(elevatorSimulator.getCurrentHeight());
-        elevatorMechanism.setArmAngle(armSimulator.getArmAngle());
-        elevatorMechanism.setCoralInScorer(coralScorerSimulator.isCoralLoaded());
-        aKitLog.record("FieldSimulation/ElevatorMechanism", elevatorMechanism.getMechanism());
+    void updateSuperstructureMechanism() {
+        superstructureMechanism.setElevatorHeight(elevatorSimulator.getCurrentHeight());
+        superstructureMechanism.setArmAngle(armSimulator.getArmAngle());
+        superstructureMechanism.setCoralInScorer(coralScorerSimulator.isCoralLoaded());
+        aKitLog.record("FieldSimulation/SuperstructureMechanism", superstructureMechanism.getMechanism());
     }
 
     protected void updateCoralScorerSensor() {
