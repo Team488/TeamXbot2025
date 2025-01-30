@@ -4,7 +4,6 @@ import javax.inject.Inject;
 
 import competition.simulation.SimulationConstants;
 import competition.subsystems.arm_pivot.ArmPivotSubsystem;
-import competition.subsystems.elevator.ElevatorMechanism;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
@@ -21,14 +20,12 @@ public class ArmSimulator {
     final DCMotor motor = DCMotor.getKrakenX60(1);
     final SingleJointedArmSim armSim;
 
-    final ElevatorMechanism elevatorMechanism;
     final ArmPivotSubsystem armPivotSubsystem;
     final MockCANMotorController armMotor;
 
 
     @Inject
-    public ArmSimulator(ElevatorMechanism elevatorMechanism, ArmPivotSubsystem armPivotSubsystem) {
-        this.elevatorMechanism = elevatorMechanism;
+    public ArmSimulator(ArmPivotSubsystem armPivotSubsystem) {
         this.armPivotSubsystem = armPivotSubsystem;
         this.armMotor = (MockCANMotorController)armPivotSubsystem.armMotor;
 
@@ -56,10 +53,6 @@ public class ArmSimulator {
 
         var armMotorRotations = armRelativeAngle.in(Radians) / ArmSimConstants.armEncoderAnglePerRotation.in(Radians);
         armMotor.setPosition(Rotations.of(armMotorRotations));
-
-
-        // correct for frame of reference for the arm pivot in the mechanism vs sim model
-        elevatorMechanism.armAngle = armRelativeAngle;
     }
 
     public Angle getArmAngle() {
