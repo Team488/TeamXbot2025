@@ -9,6 +9,7 @@ import javax.inject.Singleton;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
 
+import competition.subsystems.coral_scorer.CoralScorerSubsystem;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -26,14 +27,14 @@ public class ElevatorMechanism extends BaseSubsystem {
     final LoggedMechanismLigament2d armLigament;
     final LoggedMechanismLigament2d coralLigament;
 
+    final CoralScorerSubsystem coralScorerSubsystem;
     // TODO: these will be replaced by reading from the subsystem(s) when they exist and can be simulated    
     public Distance elevatorHeight = Meters.zero();
     public Angle armAngle = Degrees.zero();
-    public boolean coralInScorer = true;
 
     // these constants define the mechanism geometry rendering at zero height and zero angle
     // all tuned by trial and error
-    final double elevatorLigamentBaseLengthMeters = 0.7;
+    public final double elevatorLigamentBaseLengthMeters = 0.7;
     final double armLigamentBaseAngleDegrees = 145;
     final double armLengthMeters = 0.47;
     final double scorerLengthMeters = 0.6;
@@ -43,7 +44,9 @@ public class ElevatorMechanism extends BaseSubsystem {
     final Translation2d elevatorBasePositionMeters = new Translation2d(0.57, 0.05);
 
     @Inject
-    public ElevatorMechanism(/* TODO: Inject references to the Elevator + Arm + Scorer subsystems when they exist */ ) {
+    public ElevatorMechanism(CoralScorerSubsystem coralScorerSubsystem) {
+        this.coralScorerSubsystem = coralScorerSubsystem;
+
         this.mech2d = new LoggedMechanism2d(1, 2);
         var root = mech2d.getRoot("ElevatorRoot", elevatorBasePositionMeters.getX(), elevatorBasePositionMeters.getY());
         this.elevatorLigament = new LoggedMechanismLigament2d("elevator", elevatorLigamentBaseLengthMeters, 90, 6, new Color8Bit(Color.kBrown));
@@ -60,10 +63,15 @@ public class ElevatorMechanism extends BaseSubsystem {
     }
 
     public void periodic() {
+        // read from subsystems
+        var coralInScorer = coralScorerSubsystem.hasCoral();
+
         // update mechanism based on current elevatorHeight and armAngle
         elevatorLigament.setLength(elevatorLigamentBaseLengthMeters + elevatorHeight.in(Units.Meters));
-        armLigament.setAngle(armLigamentBaseAngleDegrees + armAngle.in(Degrees));
-        coralLigament.setLength(this.coralInScorer ? coralLengthMeters : 0.0);
+        armLigament.setAngle(armLigamentBaseAngleDegrees - armAngle.in(Degrees));
+        // fake showing/hiding coral by changing the segment length between 0 and full length
+        coralLigament.setLength(coralInScorer ? coralLengthMeters : 0.0);
+
         aKitLog.record("Mech2d", mech2d);
 
         // Record the robot relevative positive of the Elevator so AdvantageScope can render it correctly

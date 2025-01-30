@@ -6,6 +6,7 @@ import xbot.common.advantage.DataFrameRefreshable;
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
 import xbot.common.properties.DoubleProperty;
+import xbot.common.controls.sensors.XDigitalInput;
 import xbot.common.properties.PropertyFactory;
 
 import javax.inject.Inject;
@@ -18,7 +19,7 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Rotations;
 
 @Singleton
-public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implements DataFrameRefreshable {
+public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     public enum ElevatorGoals{
         ScoreL1,
@@ -49,8 +50,12 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
     public final Distance humanLoadHeight;
     public final Distance returnToBaseHeight;
 
+    public final XDigitalInput bottomSensor;
+
+
     @Inject
-    public ElevatorSubsystem(XCANMotorController.XCANMotorControllerFactory motorFactory, PropertyFactory pf, ElectricalContract contract){
+    public ElevatorSubsystem(XCANMotorController.XCANMotorControllerFactory motorFactory, PropertyFactory pf,
+                             ElectricalContract contract, XDigitalInput.XDigitalInputFactory xDigitalInputFactory){
 
         this.contract = contract;
 
@@ -71,8 +76,15 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
 
         if(contract.isElevatorReady()){
             this.masterMotor = motorFactory.create(contract.getElevatorMotor(), this.getPrefix(), "ElevatorMotor");
+            this.registerDataFrameRefreshable(masterMotor);
+        }
+        if (contract.isElevatorBottomSensorReady()){
+            this.bottomSensor= xDigitalInputFactory.create(contract.getElevatorBottomSensor(), "Elevator Bottom Sensor0");
+        }else{
+            this.bottomSensor=null;
         }
     }
+
 
     //will implement logic later
     @Override
@@ -113,6 +125,15 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
         }
     }
 
+    public boolean isTouchingBottom(){
+        if (contract.isElevatorBottomSensorReady()){
+            return this.bottomSensor.get();
+        }
+        return false;
+    }
+
+
+
     @Override
     public boolean isCalibrated() {
         return isCalibrated;
@@ -123,17 +144,14 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> implement
         return target1.isEquivalent(target2);
     }
 
-    @Override
-    public void refreshDataFrame() {
-        if(contract.isElevatorReady()){
-            masterMotor.refreshDataFrame();
-        }
-    }
-
     public void periodic(){
-        masterMotor.periodic();
+        if (contract.isElevatorReady()){
+            masterMotor.periodic();
+        }
         aKitLog.record("ElevatorTargetHeight",elevatorTargetHeight);
+        Elevator-Function-in-Advantage-Scope
         aKitLog.record("ElevatorCurrentHeight",getCurrentValue().in(Meters));
+        aKitLog.record("ElevatorBottomSensor",this.isTouchingBottom());
     }
 
 

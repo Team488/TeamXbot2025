@@ -1,11 +1,9 @@
 package competition.subsystems.coral_scorer;
 
 import competition.electrical_contract.ElectricalContract;
-import xbot.common.advantage.DataFrameRefreshable;
 import xbot.common.command.BaseSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
 import xbot.common.controls.sensors.XDigitalInput;
-import xbot.common.properties.BooleanProperty;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 
@@ -13,7 +11,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
-public class CoralScorerSubsystem extends BaseSubsystem implements DataFrameRefreshable {
+public class CoralScorerSubsystem extends BaseSubsystem {
     public final XCANMotorController motor;
     public final DoubleProperty intakePower;
     public final DoubleProperty scorePower;
@@ -28,6 +26,7 @@ public class CoralScorerSubsystem extends BaseSubsystem implements DataFrameRefr
         if (electricalContract.isCoralCollectionMotorReady()) {
             this.motor = xcanMotorControllerFactory.create(electricalContract.getCoralCollectionMotor(),
                     getPrefix(), "CoralScorer");
+            this.registerDataFrameRefreshable(motor);
         } else {
             this.motor = null;
         }
@@ -35,6 +34,7 @@ public class CoralScorerSubsystem extends BaseSubsystem implements DataFrameRefr
         if (electricalContract.isCoralSensorReady()) {
             this.coralSensor = xDigitalInputFactory.create(electricalContract.getCoralSensor(),
                     "CoralSensor");
+            this.registerDataFrameRefreshable(coralSensor);
         } else {
             this.coralSensor = null;
         }
@@ -69,10 +69,6 @@ public class CoralScorerSubsystem extends BaseSubsystem implements DataFrameRefr
 
     public void periodic() {
         aKitLog.record("coralPresent", this.hasCoral());
-    }
-    @Override
-    public void refreshDataFrame() {
-        coralSensor.refreshDataFrame();
     }
 }
 
