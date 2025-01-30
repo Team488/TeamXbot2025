@@ -6,6 +6,7 @@ import competition.subsystems.SubsystemDefaultCommandMap;
 import competition.subsystems.arm_pivot.ArmPivotSubsystem;
 import competition.subsystems.coral_scorer.CoralScorerSubsystem;
 import competition.subsystems.elevator.ElevatorSubsystem;
+import competition.subsystems.elevator_mechanism.ElevatorMechanismSubsystem;
 import competition.subsystems.vision.VisionSubsystem;
 import xbot.common.injection.components.BaseComponent;
 import xbot.common.injection.swerve.SwerveComponentHolder;
@@ -32,5 +33,7 @@ public abstract class BaseRobotComponent extends BaseComponent {
     public abstract ElevatorSubsystem elevatorSubsystem();
 
     public abstract CoralScorerSubsystem coralScorerSubsystem();
+
+    public abstract ElevatorMechanismSubsystem elevatorMechanismSubsystem();
 
 }
