@@ -43,14 +43,14 @@ public class Landmarks {
 
     // Coral Stations
     // Left Coral Station
-    public static Pose2d BlueLeftCoralStationClose = new Pose2d(0.765, 6.804, Rotation2d.fromDegrees(125.988));
-    public static Pose2d BlueLeftCoralStationMid = new Pose2d(1.093, 7.043, Rotation2d.fromDegrees(125.988));
-    public static Pose2d BlueLeftCoralStationFar = new Pose2d(1.442, 7.282, Rotation2d.fromDegrees(125.988));
+    public static Pose2d BlueLeftCoralStationClose = new Pose2d(0.765, 6.804, Rotation2d.fromDegrees(-54.012));
+    public static Pose2d BlueLeftCoralStationMid = new Pose2d(1.093, 7.043, Rotation2d.fromDegrees(-54.012));
+    public static Pose2d BlueLeftCoralStationFar = new Pose2d(1.442, 7.282, Rotation2d.fromDegrees(-54.012));
 
     // Right Coral Station
-    public static Pose2d BlueRightCoralStationClose = new Pose2d(0.764, 1.247, Rotation2d.fromDegrees(-125.988));
-    public static Pose2d BlueRightCoralStationMid = new Pose2d(1.093, 1.009, Rotation2d.fromDegrees(-125.988));
-    public static Pose2d BlueRightCoralStationFar = new Pose2d(1.422, 0.770, Rotation2d.fromDegrees(-125.988));
+    public static Pose2d BlueRightCoralStationClose = new Pose2d(0.764, 1.247, Rotation2d.fromDegrees(54.012));
+    public static Pose2d BlueRightCoralStationMid = new Pose2d(1.093, 1.009, Rotation2d.fromDegrees(54.012));
+    public static Pose2d BlueRightCoralStationFar = new Pose2d(1.422, 0.770, Rotation2d.fromDegrees(54.012));
 
 
 
