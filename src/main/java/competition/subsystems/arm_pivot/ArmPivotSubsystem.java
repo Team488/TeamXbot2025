@@ -2,7 +2,6 @@ package competition.subsystems.arm_pivot;
 
 import competition.electrical_contract.ElectricalContract;
 import edu.wpi.first.units.measure.Angle;
-import xbot.common.advantage.DataFrameRefreshable;
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
 import xbot.common.properties.DoubleProperty;
@@ -44,8 +43,19 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
 
     @Override
     public Angle getCurrentValue() {
-        double currentAngle = (this.armMotor.getPosition().in(Rotations) - rotationsAtZero) * degreesPerRotations.get();
+        double currentAngle = getMotorPositionFromZeroOffset().in(Rotations) * degreesPerRotations.get();
         return Degrees.of(currentAngle);
+    }
+
+    private Angle getMotorPositionFromZeroOffset() {
+        return getMotorPosition().minus(Rotations.of(rotationsAtZero));
+    }
+
+    private Angle getMotorPosition() {
+        if (electricalContract.isArmPivotMotorReady()) {
+            return this.armMotor.getPosition();
+        }
+        return Rotations.of(0);
     }
 
     @Override
@@ -60,6 +70,9 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
 
     @Override
     public void setPower(double power) {
+        if (getMotorPositionFromZeroOffset().in(Rotations) < 0 && power < 0) {
+                power = 0;
+        }
         if (electricalContract.isArmPivotMotorReady()) {
             this.armMotor.setPower(power);
         }
