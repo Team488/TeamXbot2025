@@ -14,6 +14,7 @@ import competition.subsystems.coral_scorer.commands.StopCoralCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.elevator.ElevatorSubsystem;
+import competition.subsystems.elevator.commands.ForceElevatorCalibratedCommand;
 import competition.subsystems.elevator.commands.SetElevatorTargetHeightCommand;
 import xbot.common.controls.sensors.XXboxController;
 import xbot.common.subsystems.drive.swerve.commands.ChangeActiveSwerveModuleCommand;
@@ -52,7 +53,8 @@ public class OperatorCommandMap {
             AlgaeCollectionIntakeCommand algaeCollectionIntakeCommand,
             AlgaeCollectionOutputCommand algaeCollectionOutputCommand,
             AlgaeCollectionStopCommand algaeCollectionStopCommand,
-            Provider<SetElevatorTargetHeightCommand> setElevatorTargetHeightCommandProvider) {
+            Provider<SetElevatorTargetHeightCommand> setElevatorTargetHeightCommandProvider,
+            ForceElevatorCalibratedCommand forceElevatorCalibratedCommand) {
 
         var riseToL1 = setElevatorTargetHeightCommandProvider.get();
         riseToL1.setHeight(ElevatorSubsystem.ElevatorGoals.ScoreL1);
@@ -70,6 +72,7 @@ public class OperatorCommandMap {
         oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeCoralCommand);
         oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreCoralCommand);
 
+        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).onTrue(forceElevatorCalibratedCommand);
         oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(riseToL2);
         oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(riseToL3);
         oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(riseToL4);
