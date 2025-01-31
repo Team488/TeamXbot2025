@@ -26,10 +26,10 @@ jobs:
         publishJUnitResults: true
         testResultsFiles: '**/TEST-*.xml'
         tasks: 'build'
-        options: '--info'
+        options: '--warn'
         # checkStyleRunAnalysis: true
         # pmdRunAnalysis: true
-    - task: PublishCodeCoverageResults@1
+    - task: PublishCodeCoverageResults@2
       inputs:
         codeCoverageTool: 'JaCoCo'
         summaryFileLocation: 'build/reports/jacoco/test/jacocoTestReport.xml'
