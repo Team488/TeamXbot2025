@@ -1,8 +1,7 @@
-package competition.subsystems.arm_pivot;
+package competition.subsystems.coral_arm_pivot;
 
 import competition.electrical_contract.ElectricalContract;
 import edu.wpi.first.units.measure.Angle;
-import xbot.common.advantage.DataFrameRefreshable;
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
 import xbot.common.properties.DoubleProperty;
@@ -11,11 +10,22 @@ import xbot.common.properties.PropertyFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import java.util.Objects;
+
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Rotations;
 
 @Singleton
-public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
+public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
+
+    public enum ArmGoals {
+        Score,
+        HumanLoad
+    }
+
+    public final DoubleProperty scoreAngle;
+    public final DoubleProperty humanLoadAngle;
+
     public final XCANMotorController armMotor;
     Angle targetAngle = Degrees.of(0);
     ElectricalContract electricalContract;
@@ -24,10 +34,10 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
     boolean isCalibrated = false;
 
     @Inject
-    public ArmPivotSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
-                             ElectricalContract electricalContract, PropertyFactory propertyFactory) {
-
+    public CoralArmPivotSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
+                                  ElectricalContract electricalContract, PropertyFactory propertyFactory) {
         propertyFactory.setPrefix(this);
+
         this.electricalContract = electricalContract;
         if (electricalContract.isArmPivotMotorReady()) {
             this.armMotor = xcanMotorControllerFactory.create(electricalContract.getArmPivotMotor(),
@@ -38,14 +48,29 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
         }
 
         this.degreesPerRotations = propertyFactory.createPersistentProperty("Degrees Per Rotations", 1);
+
+        this.scoreAngle = propertyFactory.createPersistentProperty("Scoring Angle", -125);
+        this.humanLoadAngle = propertyFactory.createPersistentProperty("Human Loading Angle", 0);
+
     }
 
 
 
     @Override
     public Angle getCurrentValue() {
-        double currentAngle = (this.armMotor.getPosition().in(Rotations) - rotationsAtZero) * degreesPerRotations.get();
+        double currentAngle = getMotorPositionFromZeroOffset().in(Rotations) * degreesPerRotations.get();
         return Degrees.of(currentAngle);
+    }
+
+    private Angle getMotorPositionFromZeroOffset() {
+        return getMotorPosition().minus(Rotations.of(rotationsAtZero));
+    }
+
+    private Angle getMotorPosition() {
+        if (electricalContract.isArmPivotMotorReady()) {
+            return this.armMotor.getPosition();
+        }
+        return Rotations.of(0);
     }
 
     @Override
@@ -58,8 +83,19 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
         targetAngle = value;
     }
 
+    public void setTargetAngle(ArmGoals value) {
+        if (Objects.requireNonNull(value) == ArmGoals.Score) {
+            setTargetValue(Degrees.of(scoreAngle.get()));
+        } else {
+            setTargetValue(Degrees.of(humanLoadAngle.get()));
+        }
+    }
+
     @Override
     public void setPower(double power) {
+        if (getMotorPositionFromZeroOffset().in(Rotations) < 0 && power < 0) {
+                power = 0;
+        }
         if (electricalContract.isArmPivotMotorReady()) {
             this.armMotor.setPower(power);
         }
