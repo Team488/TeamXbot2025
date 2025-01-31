@@ -19,14 +19,15 @@ public class SuperstructureMechanismSubsystem extends BaseSubsystem {
     final SuperstructureMechanism superstructureMechanism;
 
     @Inject
-    public SuperstructureMechanismSubsystem(ElevatorSubsystem elevatorSubsystem, ArmPivotSubsystem armPivotSubsystem, CoralScorerSubsystem coralScorerSubsystem) {
+    public SuperstructureMechanismSubsystem(ElevatorSubsystem elevatorSubsystem,
+            ArmPivotSubsystem armPivotSubsystem, CoralScorerSubsystem coralScorerSubsystem) {
         this.elevatorSubsystem = elevatorSubsystem;
         this.armPivotSubsystem = armPivotSubsystem;
         this.coralScorerSubsystem = coralScorerSubsystem;
 
         superstructureMechanism = new SuperstructureMechanism();
     }
-    
+
     @Override
     public void periodic() {
         superstructureMechanism.setElevatorHeight(elevatorSubsystem.getCurrentValue());
