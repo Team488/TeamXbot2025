@@ -3,7 +3,7 @@ package competition.injection.components;
 import competition.operator_interface.OperatorCommandMap;
 import competition.simulation.BaseSimulator;
 import competition.subsystems.SubsystemDefaultCommandMap;
-import competition.subsystems.arm_pivot.ArmPivotSubsystem;
+import competition.subsystems.coral_arm_pivot.CoralArmPivotSubsystem;
 import competition.subsystems.coral_scorer.CoralScorerSubsystem;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import competition.subsystems.elevator_mechanism.SuperstructureMechanismSubsystem;
@@ -28,7 +28,7 @@ public abstract class BaseRobotComponent extends BaseComponent {
 
     public abstract BaseSimulator simulator();
 
-    public abstract ArmPivotSubsystem armPivotSubsystem();
+    public abstract CoralArmPivotSubsystem armPivotSubsystem();
 
     public abstract ElevatorSubsystem elevatorSubsystem();
 

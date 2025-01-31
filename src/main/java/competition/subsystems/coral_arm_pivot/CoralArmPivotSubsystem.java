@@ -1,4 +1,4 @@
-package competition.subsystems.arm_pivot;
+package competition.subsystems.coral_arm_pivot;
 
 import competition.electrical_contract.ElectricalContract;
 import edu.wpi.first.units.measure.Angle;
@@ -12,11 +12,22 @@ import xbot.common.properties.PropertyFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import java.util.Objects;
+
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Rotations;
 
 @Singleton
-public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
+public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
+
+    public enum ArmGoals {
+        Score,
+        HumanLoad
+    }
+
+    public final DoubleProperty scoreAngle;
+    public final DoubleProperty humanLoadAngle;
+
     public final XCANMotorController armMotor;
     public final XAbsoluteEncoder armAbsoluteEncoder;
     public final XDigitalInput lowSensor;
@@ -30,12 +41,12 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
     final DoubleProperty maxArmPosition;
 
     @Inject
-    public ArmPivotSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
-                             ElectricalContract electricalContract, PropertyFactory propertyFactory,
-                             XAbsoluteEncoder.XAbsoluteEncoderFactory xAbsoluteEncoderFactory,
-                             XDigitalInput.XDigitalInputFactory xDigitalInputFactory) {
-
+    public CoralArmPivotSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
+                                  ElectricalContract electricalContract, PropertyFactory propertyFactory,
+                                  XAbsoluteEncoder.XAbsoluteEncoderFactory xAbsoluteEncoderFactory,
+                                  XDigitalInput.XDigitalInputFactory xDigitalInputFactory) {
         propertyFactory.setPrefix(this);
+
         this.electricalContract = electricalContract;
 
         if (electricalContract.isArmPivotReady()) {
@@ -59,6 +70,9 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
         this.rangeOfMotionDegrees = propertyFactory.createPersistentProperty("Range of Motion in Degrees", 125);
         this.minArmPosition = propertyFactory.createPersistentProperty("Min AbsEncoder Position in Degrees", 90);
         this.maxArmPosition = propertyFactory.createPersistentProperty("Max AbsEncoder Position in Degrees", 100);
+        this.scoreAngle = propertyFactory.createPersistentProperty("Scoring Angle", -125);
+        this.humanLoadAngle = propertyFactory.createPersistentProperty("Human Loading Angle", 0);
+
     }
 
 
@@ -89,6 +103,14 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
     @Override
     public void setTargetValue(Angle value) {
         targetAngle = value;
+    }
+
+    public void setTargetAngle(ArmGoals value) {
+        if (Objects.requireNonNull(value) == ArmGoals.Score) {
+            setTargetValue(Degrees.of(scoreAngle.get()));
+        } else {
+            setTargetValue(Degrees.of(humanLoadAngle.get()));
+        }
     }
 
     @Override
