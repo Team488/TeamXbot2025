@@ -7,9 +7,13 @@ public class UnitTestContract2025 extends Contract2025 {
     @Inject
     public UnitTestContract2025() {}
 
+
+
     public boolean isAlgaeCollectionReady() { return true; }
 
     public boolean isCoralCollectionMotorReady() { return true; }
+
+    public boolean isCoralSensorReady() { return true;}
 
     public boolean isArmPivotMotorReady() { return true; }
 
@@ -18,4 +22,6 @@ public class UnitTestContract2025 extends Contract2025 {
     public boolean isDriveReady() { return true;}
 
     public boolean areCanCodersReady() { return true; }
+
+    public boolean isElevatorBottomSensorReady() { return true; }
 }
