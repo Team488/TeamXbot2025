@@ -19,7 +19,8 @@ import static edu.wpi.first.units.Units.Rotations;
 public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
 
     public enum ArmGoals {
-        Score
+        Score,
+        HumanLoad
     }
 
     public final DoubleProperty scoreAngle;
