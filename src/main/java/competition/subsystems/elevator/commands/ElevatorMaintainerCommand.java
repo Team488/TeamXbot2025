@@ -3,6 +3,7 @@ package competition.subsystems.elevator.commands;
 import competition.operator_interface.OperatorInterface;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.Timer;
 import xbot.common.command.BaseMaintainerCommand;
 import xbot.common.logic.HumanVsMachineDecider;
 import xbot.common.math.MathUtils;
@@ -31,6 +32,9 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     ElevatorSubsystem elevator;
 
+    double giveUpCalibratingTime;
+    final DoubleProperty elevatorCalibrationAttemptTimeMS;
+
     final DoubleProperty humanMaxPowerGoingUp;
     final DoubleProperty humanMaxPowerGoingDown;
 
@@ -45,15 +49,42 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         this.oi = oi;
         positionPID = pidf.create(getPrefix() + "positionPID", 0.00, 0, 0.0);
 
-        humanMaxPowerGoingUp = pf.createPersistentProperty("maxPowerGoingUp", 1);
-        humanMaxPowerGoingDown = pf.createPersistentProperty("maxPowerGoingDown", -0.2);
+        this.elevatorCalibrationAttemptTimeMS = pf.createPersistentProperty("Calibration Attempt Time (MS)", 4000);
+        this.giveUpCalibratingTime = Timer.getFPGATimestamp() + elevatorCalibrationAttemptTimeMS.get();
+
+        this.humanMaxPowerGoingUp = pf.createPersistentProperty("maxPowerGoingUp", 1);
+        this.humanMaxPowerGoingDown = pf.createPersistentProperty("maxPowerGoingDown", -0.2);
     }
 
     @Override
     public void initialize() {
         log.info("initializing");
-        //initializeMachineControlAction();
+    }
 
+    @Override
+    public void execute() {
+        MaintainerMode currentMode = MaintainerMode.Calibrating;
+
+        if(elevator.isCalibrated()){
+            currentMode = MaintainerMode.Calibrated;
+        }
+        else if(Timer.getFPGATimestamp() < giveUpCalibratingTime){
+            currentMode = MaintainerMode.Calibrating;
+        }
+        else{
+            currentMode = MaintainerMode.GaveUp;
+        }
+
+        if (currentMode == MaintainerMode.Calibrated){
+            maintain();
+            elevator.setMaintainerIsAtGoal(isMaintainerAtGoal());
+        }
+        else if (currentMode == MaintainerMode.Calibrating){
+            elevator.calibrateHere();
+        }
+        else if (currentMode == MaintainerMode.GaveUp){
+            humanControlAction();
+        }
     }
 
     @Override
@@ -66,8 +97,6 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         double power = positionPID.calculate(
                 elevator.getTargetValue().in(Meters),
                 elevator.getCurrentValue().in(Meters));
-//        double power = (elevator.getTargetValue().in(Meters) - elevator.getCurrentValue().in(Meters)) * 0.5;
-//        power = MathUtils.constrainDouble(power,-0.8, 1);
         elevator.setPower(power);
 
     }
@@ -75,7 +104,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     @Override
     protected void uncalibratedMachineControlAction() {
         //this is just a placeholder for now until we have something to calibrate
-        humanControlAction();
+        calibratedMachineControlAction();
     }
 
     @Override

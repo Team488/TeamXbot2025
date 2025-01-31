@@ -64,10 +64,7 @@ public class OperatorCommandMap {
             AlgaeCollectionStopCommand algaeCollectionStopCommand,
             Provider<SetElevatorTargetHeightCommand> setElevatorTargetHeightCommandProvider,
             ForceElevatorCalibratedCommand forceElevatorCalibratedCommand ) {
-            
 
-        var riseToL1 = setElevatorTargetHeightCommandProvider.get();
-        riseToL1.setHeight(ElevatorSubsystem.ElevatorGoals.ScoreL1);
         var riseToL2 = setElevatorTargetHeightCommandProvider.get();
         riseToL2.setHeight(ElevatorSubsystem.ElevatorGoals.ScoreL2);
         var riseToL3 = setElevatorTargetHeightCommandProvider.get();
@@ -95,7 +92,6 @@ public class OperatorCommandMap {
         oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(riseToL2);
         oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(riseToL3);
         oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(riseToL4);
-        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(riseToL1);
 
 //        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(algaeCollectionIntakeCommand);
 //        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(algaeCollectionOutputCommand);
