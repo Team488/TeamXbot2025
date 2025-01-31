@@ -4,7 +4,7 @@ import javax.inject.Inject;
 
 import competition.simulation.MotorInternalPIDHelper;
 import competition.simulation.SimulationConstants;
-import competition.subsystems.arm_pivot.ArmPivotSubsystem;
+import competition.subsystems.coral_arm_pivot.CoralArmPivotSubsystem;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
@@ -24,11 +24,11 @@ public class ArmSimulator {
     final SingleJointedArmSim armSim;
     final PIDManager pidManager;
 
-    final ArmPivotSubsystem armPivotSubsystem;
+    final CoralArmPivotSubsystem armPivotSubsystem;
     final MockCANMotorController armMotor;
 
     @Inject
-    public ArmSimulator( ArmPivotSubsystem armPivotSubsystem, PIDManager.PIDManagerFactory pidManagerFactory, PropertyFactory pf) {
+    public ArmSimulator(CoralArmPivotSubsystem armPivotSubsystem, PIDManager.PIDManagerFactory pidManagerFactory, PropertyFactory pf) {
         pf.setPrefix("ArmSimulator");
         this.pidManager = pidManagerFactory.create("ArmSimulationPositionalPID", 0.01, 0.001, 0.0, 0.0, 1.0, -1.0);
         this.armPivotSubsystem = armPivotSubsystem;
