@@ -6,6 +6,7 @@ import competition.simulation.elevator.ElevatorSimulator;
 import competition.simulation.reef.ReefSimulator;
 import competition.subsystems.coral_scorer.CoralScorerSubsystem;
 import competition.subsystems.drive.DriveSubsystem;
+import competition.subsystems.elevator.SuperstructureMechanism;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -34,6 +35,8 @@ public class MapleSimulator implements BaseSimulator {
 
     protected final AKitLogger aKitLog;
 
+    final SuperstructureMechanism superstructureMechanism;
+
     // sub simulators ----------------------------
     final ElevatorSimulator elevatorSimulator;
     final ArmSimulator armSimulator;
@@ -56,6 +59,7 @@ public class MapleSimulator implements BaseSimulator {
         this.armSimulator = armSimulator;
         this.reefSimulator = reefSimulator;
         this.coralScorerSimulator = coralScorerSimulator;
+        this.superstructureMechanism = new SuperstructureMechanism();
 
         aKitLog = new AKitLogger("Simulator/");
 
@@ -91,6 +95,14 @@ public class MapleSimulator implements BaseSimulator {
         reefSimulator.update();
         this.updateCoralLoadFromHumanPlayer();
         this.updateCoralScorerSensor();
+        this.updateSuperstructureMechanism();
+    }
+    
+    void updateSuperstructureMechanism() {
+        superstructureMechanism.setElevatorHeight(elevatorSimulator.getCurrentHeight());
+        superstructureMechanism.setArmAngle(armSimulator.getArmAngle());
+        superstructureMechanism.setCoralInScorer(coralScorerSimulator.isCoralLoaded());
+        aKitLog.record("FieldSimulation/SuperstructureMechanism", superstructureMechanism.getMechanism());
     }
 
     protected void updateCoralScorerSensor() {

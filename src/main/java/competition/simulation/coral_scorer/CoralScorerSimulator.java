@@ -28,6 +28,10 @@ public class CoralScorerSimulator {
         return coralSensor.get() && coralScorerMotor.getPower() < 0;
     }
 
+    public boolean isCoralLoaded() {
+        return coralSensor.get();
+    }
+
     public void simulateCoralLoad() {
         coralSensor.setValue(true);
     }
