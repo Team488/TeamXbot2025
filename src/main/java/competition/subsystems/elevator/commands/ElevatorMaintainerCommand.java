@@ -11,6 +11,9 @@ import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meter;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Rotations;
 
 import javax.inject.Inject;
 
@@ -23,6 +26,8 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     }
 
     private final OperatorInterface oi;
+
+    private final PIDManager positionPID;
 
     ElevatorSubsystem elevator;
 
@@ -38,14 +43,16 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         this.elevator = elevator;
 
         this.oi = oi;
+        positionPID = pidf.create(getPrefix() + "positionPID", 0.00, 0, 0.0);
 
         humanMaxPowerGoingUp = pf.createPersistentProperty("maxPowerGoingUp", 1);
-        humanMaxPowerGoingDown = pf.createPersistentProperty("maxPowerGoingDown", -0.01);
+        humanMaxPowerGoingDown = pf.createPersistentProperty("maxPowerGoingDown", -0.2);
     }
 
     @Override
     public void initialize() {
         log.info("initializing");
+        //initializeMachineControlAction();
 
     }
 
@@ -56,6 +63,12 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     @Override
     protected void calibratedMachineControlAction() {
+        double power = positionPID.calculate(
+                elevator.getTargetValue().in(Meters),
+                elevator.getCurrentValue().in(Meters));
+//        double power = (elevator.getTargetValue().in(Meters) - elevator.getCurrentValue().in(Meters)) * 0.5;
+//        power = MathUtils.constrainDouble(power,-0.8, 1);
+        elevator.setPower(power);
 
     }
 
@@ -76,7 +89,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         var current = elevator.getCurrentValue();
         var target = elevator.getTargetValue();
 
-        return Math.abs(current.in(Inches)/target.in(Inches));
+        return Math.abs(target.in(Meters) - current.in(Meters));
     }
 
     @Override
