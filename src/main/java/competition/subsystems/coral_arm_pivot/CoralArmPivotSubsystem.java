@@ -1,4 +1,4 @@
-package competition.subsystems.arm_pivot;
+package competition.subsystems.coral_arm_pivot;
 
 import competition.electrical_contract.ElectricalContract;
 import edu.wpi.first.units.measure.Angle;
@@ -10,11 +10,22 @@ import xbot.common.properties.PropertyFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import java.util.Objects;
+
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Rotations;
 
 @Singleton
-public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
+public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
+
+    public enum ArmGoals {
+        Score,
+        HumanLoad
+    }
+
+    public final Angle scoreAngle;
+    public final Angle humanLoadAngle;
+
     public final XCANMotorController armMotor;
     Angle targetAngle = Degrees.of(0);
     ElectricalContract electricalContract;
@@ -23,10 +34,14 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
     boolean isCalibrated = false;
 
     @Inject
-    public ArmPivotSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
-                             ElectricalContract electricalContract, PropertyFactory propertyFactory) {
+    public CoralArmPivotSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
+                                  ElectricalContract electricalContract, PropertyFactory propertyFactory) {
+
+        scoreAngle = Degrees.of(-125);
+        humanLoadAngle = Degrees.of(0);
 
         propertyFactory.setPrefix(this);
+
         this.electricalContract = electricalContract;
         if (electricalContract.isArmPivotMotorReady()) {
             this.armMotor = xcanMotorControllerFactory.create(electricalContract.getArmPivotMotor(),
@@ -66,6 +81,14 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
     @Override
     public void setTargetValue(Angle value) {
         targetAngle = value;
+    }
+
+    public void setTargetAngle(ArmGoals value) {
+        if (Objects.requireNonNull(value) == ArmGoals.Score) {
+            setTargetValue(scoreAngle);
+        } else {
+            setTargetValue(humanLoadAngle);
+        }
     }
 
     @Override
