@@ -34,7 +34,6 @@ public class ArmSimulator {
             PIDManager.PIDManagerFactory pidManagerFactory, PropertyFactory pf) {
         pf.setPrefix("ArmSimulator");
         this.pidManager = pidManagerFactory.create("ArmSimulationPositionalPID", 0.01, 0.001, 0.0, 0.0, 1.0, -1.0);
-        this.elevatorMechanism = elevatorMechanism;
         this.armPivotSubsystem = armPivotSubsystem;
         this.armMotor = (MockCANMotorController) armPivotSubsystem.armMotor;
 
@@ -63,10 +62,6 @@ public class ArmSimulator {
 
         var armMotorRotations = armRelativeAngle.in(Radians) / ArmSimConstants.armEncoderAnglePerRotation.in(Radians);
         armMotor.setPosition(Rotations.of(armMotorRotations));
-
-        // correct for frame of reference for the arm pivot in the mechanism vs sim
-        // model
-        elevatorMechanism.armAngle = armRelativeAngle;
     }
 
     public Angle getArmAngle() {

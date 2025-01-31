@@ -10,12 +10,16 @@ import competition.subsystems.algae_collection.commands.AlgaeCollectionStopComma
 import competition.subsystems.coral_scorer.commands.IntakeCoralCommand;
 import competition.subsystems.coral_scorer.commands.ScoreCoralCommand;
 import competition.subsystems.coral_scorer.commands.StopCoralCommand;
+import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
-import edu.wpi.first.wpilibj2.command.button.POVButton;
+import edu.wpi.first.wpilibj2.command.DeferredCommand;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import xbot.common.controls.sensors.XXboxController;
 import xbot.common.subsystems.drive.swerve.commands.ChangeActiveSwerveModuleCommand;
 import xbot.common.subsystems.pose.commands.SetRobotHeadingCommand;
+
+import java.util.Set;
 
 /**
  * Maps operator interface buttons to commands
@@ -49,10 +53,20 @@ public class OperatorCommandMap {
             StopCoralCommand stopCoralCommand,
             AlgaeCollectionIntakeCommand algaeCollectionIntakeCommand,
             AlgaeCollectionOutputCommand algaeCollectionOutputCommand,
-            AlgaeCollectionStopCommand algaeCollectionStopCommand) {
+            AlgaeCollectionStopCommand algaeCollectionStopCommand,
+            DriveSubsystem drive) {
         oi.programmerGamepad.getPovIfAvailable(0).onTrue(changeActiveModule);
         oi.programmerGamepad.getPovIfAvailable(90).onTrue(debugModule);
         oi.programmerGamepad.getPovIfAvailable(180).onTrue(typicalSwerveDrive);
+
+        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper)
+                .whileTrue(new DeferredCommand(() -> drive.getActiveSwerveModuleSubsystem()
+                        .getSteeringSubsystem()
+                        .sysIdQuasistatic(SysIdRoutine.Direction.kForward), Set.of()));
+        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.RightBumper)
+                .whileTrue(new DeferredCommand(() -> drive.getActiveSwerveModuleSubsystem()
+                        .getSteeringSubsystem()
+                        .sysIdQuasistatic(SysIdRoutine.Direction.kReverse), Set.of()));
 
         oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeCoralCommand);
         oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreCoralCommand);
