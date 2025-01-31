@@ -129,7 +129,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         }
         return false;
     }
-    
+
     public void setCalibrated(boolean calibrated){
         isCalibrated = calibrated;
     }
