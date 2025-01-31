@@ -53,6 +53,7 @@ public class Contract2025 extends ElectricalContract {
     }
 
     public boolean isArmPivotReady() { return false; }
+    public boolean isArmPivotMotorReady() { return false; }
 
     public CANMotorControllerInfo getArmPivotMotor() {
         return new CANMotorControllerInfo("ArmPivotMotor",

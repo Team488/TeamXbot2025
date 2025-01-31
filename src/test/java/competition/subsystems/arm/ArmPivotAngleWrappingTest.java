@@ -32,6 +32,16 @@ public class ArmPivotAngleWrappingTest extends BaseCompetitionTest {
         assertEquals(Degrees.of( 62.5),
                 ArmPivotSubsystem.getArmAngle(0.75, 0.8,
                         Degrees.of(108), false, 125));
+
+        assertEquals(Degrees.of(37.5),
+                ArmPivotSubsystem.getArmAngle(0.99, 0.04,
+                        Degrees.of(90), false, 125));
+//        assertEquals(Degrees.of( 100),
+//                ArmPivotSubsystem.getArmAngle(0.75, 0.8,
+//                        Degrees.of(216), false, 125));
+//        assertEquals(Degrees.of( 62.5),
+//                ArmPivotSubsystem.getArmAngle(0.75, 0.8,
+//                        Degrees.of(108), false, 125));
     }
 
     @Test

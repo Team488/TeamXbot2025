@@ -66,8 +66,19 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
 
     @Override
     public Angle getCurrentValue() {
-        double currentAngle = (this.armMotor.getPosition().in(Rotations) - rotationsAtZero) * degreesPerRotations.get();
+        double currentAngle = getMotorPositionFromZeroOffset().in(Rotations) * degreesPerRotations.get();
         return Degrees.of(currentAngle);
+    }
+
+    private Angle getMotorPositionFromZeroOffset() {
+        return getMotorPosition().minus(Rotations.of(rotationsAtZero));
+    }
+
+    private Angle getMotorPosition() {
+        if (electricalContract.isArmPivotMotorReady()) {
+            return this.armMotor.getPosition();
+        }
+        return Rotations.of(0);
     }
 
     @Override
@@ -82,7 +93,10 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
 
     @Override
     public void setPower(double power) {
-        if (electricalContract.isArmPivotReady()) {
+        if (getMotorPositionFromZeroOffset().in(Rotations) < 0 && power < 0) {
+                power = 0;
+        }
+        if (electricalContract.isArmPivotMotorReady()) {
             this.armMotor.setPower(power);
         }
     }
@@ -110,19 +124,16 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
         double armPosition = 0;
         double absEncoderPosition = absEncoderAngle.in(Degrees) / 360;
 
-        if (absEncoderPosition < minPosition || absEncoderPosition > maxPosition) {
-            if (absEncoderPosition < minPosition) {
-                armPosition = (absEncoderPosition + 1 - maxPosition);
-            } else {
-                armPosition = (absEncoderPosition - minPosition);
-            }
-        } else if (absEncoderPosition > minPosition && absEncoderPosition < maxPosition) {
-            if (sensorHit) {
-                armPosition = (absEncoderPosition - minPosition);
-            } else {
-                armPosition = 1 - (maxPosition - absEncoderPosition);
-            }
+        double encoderLength;
+        if (maxPosition < minPosition) {
+            encoderLength = 1 + 1 - (maxPosition - minPosition);
         }
+        else {
+            encoderLength = maxPosition - minPosition + 1;
+        }
+
+
+
         // convert from [0,1] position to arm angle in degrees
         return Degrees.of(armPosition * rangeOfMotionDegrees);
     }
