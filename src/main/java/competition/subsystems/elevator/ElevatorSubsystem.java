@@ -30,7 +30,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     final ElectricalContract contract;
 
-    private boolean isCalibrated; //set to true just for testing purposes
+    private boolean isCalibrated;
     //TODO: Add a calibration routine
 
     public Distance elevatorTargetHeight;
@@ -40,8 +40,6 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     public XCANMotorController masterMotor;
 
-    //important heights
-    public final DoubleProperty l1Height;
     public final DoubleProperty l2Height;
     public final DoubleProperty l3Height;
     public final DoubleProperty l4Height;
@@ -65,12 +63,11 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         this.metersPerRotation = pf.createPersistentProperty("MetersPerRotation", 3);
 
         //these are not real measured heights yet, just placeholders
-        l1Height = pf.createPersistentProperty("l1Height", 1);
-        l2Height = pf.createPersistentProperty("l2Height", 2);
-        l3Height = pf.createPersistentProperty("l3Height", 3);
-        l4Height = pf.createPersistentProperty("l4Height", 4);
-        humanLoadHeight = pf.createPersistentProperty("humanLoadHeight", 2);
-        baseHeight = pf.createPersistentProperty("baseHeight", 0);
+        l2Height = pf.createPersistentProperty("l2Height-m", 1);
+        l3Height = pf.createPersistentProperty("l3Height-m", 1.5);
+        l4Height = pf.createPersistentProperty("l4Height-m", 2);
+        humanLoadHeight = pf.createPersistentProperty("humanLoadHeight-m", 1);
+        baseHeight = pf.createPersistentProperty("baseHeight-m", 0);
 
         if(contract.isElevatorReady()){
             this.masterMotor = motorFactory.create(contract.getElevatorMotor(), this.getPrefix(), "ElevatorMotor");
@@ -113,13 +110,12 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     public void setTargetHeight(ElevatorGoals value){
         switch (value){
-            case ScoreL1 -> setTargetValue(Feet.of(l1Height.get()));
-            case ScoreL2 -> setTargetValue(Feet.of(l2Height.get()));
-            case ScoreL3 -> setTargetValue(Feet.of(l3Height.get()));
-            case ScoreL4 -> setTargetValue(Feet.of(l4Height.get()));
-            case HumanLoad -> setTargetValue(Feet.of(humanLoadHeight.get()));
-            case ReturnToBase -> setTargetValue(Feet.of(baseHeight.get()));
-            default -> setTargetValue(Feet.of(baseHeight.get()));
+            case ScoreL2 -> setTargetValue(Meters.of(l2Height.get()));
+            case ScoreL3 -> setTargetValue(Meters.of(l3Height.get()));
+            case ScoreL4 -> setTargetValue(Meters.of(l4Height.get()));
+            case HumanLoad -> setTargetValue(Meters.of(humanLoadHeight.get()));
+            case ReturnToBase -> setTargetValue(Meters.of(baseHeight.get()));
+            default -> setTargetValue(Meters.of(baseHeight.get()));
         }
     }
 
@@ -151,6 +147,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         aKitLog.record("ElevatorTargetHeight-m",elevatorTargetHeight);
         aKitLog.record("ElevatorCurrentHeight-m",getCurrentValue().in(Meters));
         aKitLog.record("ElevatorBottomSensor",this.isTouchingBottom());
+        aKitLog.record("IsElevatorCalibrated", isCalibrated());
     }
 
 

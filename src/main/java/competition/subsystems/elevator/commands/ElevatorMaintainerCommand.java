@@ -52,8 +52,6 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     @Override
     public void initialize() {
         log.info("initializing");
-        //initializeMachineControlAction();
-
     }
 
     @Override
@@ -66,8 +64,6 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         double power = positionPID.calculate(
                 elevator.getTargetValue().in(Meters),
                 elevator.getCurrentValue().in(Meters));
-//        double power = (elevator.getTargetValue().in(Meters) - elevator.getCurrentValue().in(Meters)) * 0.5;
-//        power = MathUtils.constrainDouble(power,-0.8, 1);
         elevator.setPower(power);
 
     }
