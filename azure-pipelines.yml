@@ -19,13 +19,14 @@ jobs:
         versionSpec: '17'
         jdkArchitectureOption: 'x64'
         jdkSourceOption: 'PreInstalled'
-    - task: Gradle@2
+    - task: Gradle@3
       inputs:
         gradleWrapperFile: 'gradlew'
         gradleOptions: '-Xmx3072m'
         publishJUnitResults: true
         testResultsFiles: '**/TEST-*.xml'
-        tasks: 'build --info'
+        tasks: 'build'
+        options: '--info'
         # checkStyleRunAnalysis: true
         # pmdRunAnalysis: true
     - task: PublishCodeCoverageResults@1
