@@ -10,6 +10,9 @@ import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N1;
@@ -30,6 +33,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
     private final DriveSubsystem drive;
     private final AprilTagVisionSubsystem aprilTagVisionSubsystem;
     private final BooleanProperty useVisionAssistedPose;
+    private final BooleanProperty reportCameraPoses;
 
     // only used when simulating the robot
     protected Optional<SwerveModulePosition[]> simulatedModulePositions = Optional.empty();
@@ -45,6 +49,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
 
         propManager.setPrefix(this);
         useVisionAssistedPose = propManager.createPersistentProperty("UseVisionAssistedPose", true);
+        reportCameraPoses = propManager.createPersistentProperty("ReportCameraPoses", false);
     }
 
     @Override
@@ -102,6 +107,19 @@ public class PoseSubsystem extends BasePoseSubsystem {
 
         Pose2d robotPose = this.useVisionAssistedPose.get() ? visionEnhancedPosition : estimatedPosition;
         aKitLog.record("RobotPose", robotPose);
+
+        // Record the camera positions
+        if (reportCameraPoses.get()) {
+            var robotPose3d = new Pose3d(
+                    robotPose.getTranslation().getX(),
+                    robotPose.getTranslation().getY(),
+                    0,
+                    new Rotation3d(robotPose.getRotation()));
+            for (int i = 0; i < aprilTagVisionSubsystem.getCameraCount(); i++) {
+                var cameraPosition = aprilTagVisionSubsystem.getCameraPosition(i);
+                aKitLog.record("CameraPose/" + i, robotPose3d.transformBy(cameraPosition));
+            }
+        }
 
         totalDistanceX = robotPose.getX();
         totalDistanceY = robotPose.getY();
