@@ -35,10 +35,6 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
     @Inject
     public CoralArmPivotSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
                                   ElectricalContract electricalContract, PropertyFactory propertyFactory) {
-
-        this.scoreAngle = propertyFactory.createPersistentProperty("Scoring Angle", -125);
-        this.humanLoadAngle = propertyFactory.createPersistentProperty("Human Loading Angle", 0);
-
         propertyFactory.setPrefix(this);
 
         this.electricalContract = electricalContract;
@@ -51,6 +47,10 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
         }
 
         this.degreesPerRotations = propertyFactory.createPersistentProperty("Degrees Per Rotations", 1);
+
+        this.scoreAngle = propertyFactory.createPersistentProperty("Scoring Angle", -125);
+        this.humanLoadAngle = propertyFactory.createPersistentProperty("Human Loading Angle", 0);
+
     }
 
 
