@@ -26,7 +26,7 @@ public class Robot extends BaseRobot {
         getInjectorComponent().subsystemDefaultCommandMap();
         getInjectorComponent().operatorCommandMap();
         getInjectorComponent().swerveDefaultCommandMap();
-        getInjectorComponent().elevatorMechanism();
+        getInjectorComponent().superstructureMechanismSubsystem();
 
         if (BaseRobot.isSimulation()) {
             simulator = getInjectorComponent().simulator();
@@ -36,6 +36,9 @@ public class Robot extends BaseRobot {
         dataFrameRefreshables.add(getInjectorComponent().poseSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().visionSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().aprilTagVisionSubsystem());
+        dataFrameRefreshables.add(getInjectorComponent().armPivotSubsystem());
+        dataFrameRefreshables.add(getInjectorComponent().elevatorSubsystem());
+        dataFrameRefreshables.add(getInjectorComponent().coralScorerSubsystem());
     }
 
     protected BaseRobotComponent createDaggerComponent() {

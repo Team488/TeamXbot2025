@@ -14,6 +14,9 @@ public class ScoreCoralCommand extends BaseCommand {
         coral = coralScorerSubsystem;
         this.addRequirements(coral);
     }
+
     @Override
-    public void initialize() { coral.scorer(); }
+    public void initialize() {
+        coral.scorer();
+    }
 }

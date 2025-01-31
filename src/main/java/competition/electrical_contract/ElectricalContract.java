@@ -1,5 +1,6 @@
 package competition.electrical_contract;
 
+import xbot.common.controls.sensors.XDigitalInput;
 import xbot.common.injection.electrical_contract.CANMotorControllerInfo;
 import xbot.common.injection.electrical_contract.DeviceInfo;
 import xbot.common.injection.electrical_contract.XCameraElectricalContract;
@@ -32,4 +33,17 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
     public abstract boolean isCoralCollectionMotorReady();
 
     public abstract CANMotorControllerInfo getCoralCollectionMotor();
+
+    public abstract boolean isArmPivotMotorReady();
+
+    public abstract CANMotorControllerInfo getArmPivotMotor();
+
+    public abstract boolean isCoralSensorReady();
+
+    public abstract DeviceInfo getCoralSensor();
+
+    public abstract boolean isElevatorBottomSensorReady();
+
+    public abstract DeviceInfo getElevatorBottomSensor();
+
 }

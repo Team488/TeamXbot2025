@@ -44,7 +44,7 @@ public class Contract2025 extends ElectricalContract {
 
     public boolean isCoralCollectionMotorReady() { return false; }
 
-    public CANMotorControllerInfo getCoralCollectionMotor(){
+    public CANMotorControllerInfo getCoralCollectionMotor() {
         return new CANMotorControllerInfo("CoralCollectionMotor",
                 MotorControllerType.TalonFx,
                 CANBusId.DefaultCanivore,
@@ -52,6 +52,27 @@ public class Contract2025 extends ElectricalContract {
                 new CANMotorControllerOutputConfig());
     }
 
+    public boolean isArmPivotMotorReady() { return false; }
+
+    public CANMotorControllerInfo getArmPivotMotor() {
+        return new CANMotorControllerInfo("ArmPivotMotor",
+                MotorControllerType.TalonFx,
+                CANBusId.DefaultCanivore,
+                709,
+                new CANMotorControllerOutputConfig());
+    }
+
+    public boolean isCoralSensorReady() { return false; }
+
+    @Override
+    public DeviceInfo getCoralSensor() {
+        return new DeviceInfo("CoralSensor", 0);
+    }
+
+    public boolean isElevatorBottomSensorReady() { return false; }
+
+    @Override
+    public DeviceInfo getElevatorBottomSensor() { return new DeviceInfo("ElevatorBottomSensor",1); }
 
     @Override
     public boolean areCanCodersReady() {
@@ -65,8 +86,11 @@ public class Contract2025 extends ElectricalContract {
 
     @Override
     public CANMotorControllerInfo getElevatorMotor() {
-        return new CANMotorControllerInfo( //change deviceId later
-                "Master Elevator Motor", MotorControllerType.TalonFx, CANBusId.DefaultCanivore, 99, new CANMotorControllerOutputConfig());
+        return new CANMotorControllerInfo(
+                "ElevatorMotor",
+                MotorControllerType.TalonFx,
+                CANBusId.DefaultCanivore, 99, //change deviceId later
+                new CANMotorControllerOutputConfig());
     }
 
     protected String getDriveControllerName(SwerveInstance swerveInstance) {
