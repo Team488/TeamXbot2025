@@ -8,9 +8,12 @@ import javax.inject.Singleton;
 
 import competition.simulation.MotorInternalPIDHelper;
 import competition.simulation.SimulationConstants;
-import competition.subsystems.elevator.ElevatorMechanism;
 import competition.subsystems.elevator.ElevatorSubsystem;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import xbot.common.advantage.AKitLogger;
@@ -31,14 +34,11 @@ public class ElevatorSimulator {
     final ElevatorSubsystem elevatorSubsystem;
     final MockCANMotorController motor;
     final MockDigitalInput bottomSensor;
-    final ElevatorMechanism elevatorMechanism;
 
     @Inject
-    public ElevatorSimulator(ElevatorMechanism elevatorMechanism, ElevatorSubsystem elevatorSubsystem,
-            PIDManagerFactory pidManagerFactory, PropertyFactory pf) {
+    public ElevatorSimulator(ElevatorSubsystem elevatorSubsystem, PIDManagerFactory pidManagerFactory, PropertyFactory pf) {
         aKitLog = new AKitLogger("Simulator/");
         pf.setPrefix("ElevatorSimulator");
-        this.elevatorMechanism = elevatorMechanism;
         this.elevatorSubsystem = elevatorSubsystem;
         this.pidManager = pidManagerFactory.create("ElevatorSimulationPositionalPID", 0.01, 0.001, 0.0, 0.0, 1.0, -1.0);
         this.motor = (MockCANMotorController) elevatorSubsystem.masterMotor;
@@ -60,6 +60,10 @@ public class ElevatorSimulator {
                 0.0);
     }
 
+    public Distance getCurrentHeight() {
+        return Meters.of(this.elevatorSim.getPositionMeters());
+    }
+
     public void update() {
         MotorInternalPIDHelper.updateInternalPID(motor, pidManager);
 
@@ -68,8 +72,9 @@ public class ElevatorSimulator {
         this.elevatorSim.update(SimulationConstants.loopPeriodSec);
 
         // Read out the new elevator position for rendering
-        var elevatorCurrentHeight = Meters.of(this.elevatorSim.getPositionMeters());
-        this.elevatorMechanism.elevatorHeight = elevatorCurrentHeight;
+        var elevatorCurrentHeight = getCurrentHeight();
+        this.motor.setPosition(Rotations.of(elevatorCurrentHeight.in(Meters) * ElevatorSimConstants.rotationsPerMeterHeight));
+
         // update the motor encoder position based on the elevator height, add in the
         // random from zero offset
         this.motor.setPosition(
@@ -82,9 +87,12 @@ public class ElevatorSimulator {
         bottomSensor.setValue(elevatorIsAtBottom);
         aKitLog.record("FieldSimulation/ElevatorHeight-Meters", elevatorCurrentHeight.in(Meters));
         aKitLog.record("FieldSimulation/ElevatorBottomSensorTriggered", elevatorIsAtBottom);
+        // Record the robot relevative positive of the Elevator so AdvantageScope can render it correctly
+        // NOTE: getting the arm to rotate correctly at the end of the elevator in AdvantageScope is a bit tricky, so ignoring that for now.
+        aKitLog.record("FieldSimulation/ElevatorPose", new Pose3d(0, 0, elevatorCurrentHeight.in(Units.Meters), new Rotation3d()));
     }
 
     public boolean isAtCollectionHeight() {
-        return this.elevatorMechanism.elevatorHeight.isNear(Meters.of(0.0), 0.05);
-    }
+        return getCurrentHeight().isNear(Meters.of(0.0), 0.05);
+    }    
 }
