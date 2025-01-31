@@ -1,6 +1,7 @@
 package competition.subsystems.drive.commands;
 
 import competition.operator_interface.OperatorInterface;
+import edu.wpi.first.math.MathUtil;
 import xbot.common.command.BaseCommand;
 import xbot.common.subsystems.drive.BaseSwerveDriveSubsystem;
 
@@ -15,6 +16,7 @@ public class DebugSwerveModuleCommand extends BaseCommand {
     public DebugSwerveModuleCommand(BaseSwerveDriveSubsystem drive, OperatorInterface oi) {
         this.drive = drive;
         this.oi = oi;
+        this.addRequirements(drive);
     }
 
     @Override
@@ -24,8 +26,8 @@ public class DebugSwerveModuleCommand extends BaseCommand {
 
     @Override
     public void execute() {
-        double drivePower = oi.programmerGamepad.getLeftStickY();
-        double turnPower = oi.programmerGamepad.getRightStickX();
+        double drivePower = MathUtil.applyDeadband(oi.programmerGamepad.getLeftStickY(), oi.getDriverGamepadTypicalDeadband());
+        double turnPower = MathUtil.applyDeadband(oi.programmerGamepad.getRightStickX(), oi.getDriverGamepadTypicalDeadband());
 
         drive.controlOnlyActiveSwerveModuleSubsystem(drivePower, turnPower);
     }
