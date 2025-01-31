@@ -28,8 +28,6 @@ public abstract class BaseRobotComponent extends BaseComponent {
 
     public abstract BaseSimulator simulator();
 
-    public abstract ElevatorMechanism elevatorMechanism();
-
     public abstract CoralArmPivotSubsystem armPivotSubsystem();
 
     public abstract ElevatorSubsystem elevatorSubsystem();
