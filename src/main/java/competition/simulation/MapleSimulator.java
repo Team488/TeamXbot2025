@@ -2,6 +2,7 @@ package competition.simulation;
 
 import competition.simulation.arm.ArmSimulator;
 import competition.simulation.coral_scorer.CoralScorerSimulator;
+import competition.simulation.elevator.ElevatorSimulator;
 import competition.simulation.reef.ReefSimulator;
 import competition.subsystems.coral_scorer.CoralScorerSubsystem;
 import competition.subsystems.drive.DriveSubsystem;
