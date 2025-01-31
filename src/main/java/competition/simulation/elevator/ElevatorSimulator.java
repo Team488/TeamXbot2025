@@ -87,9 +87,9 @@ public class ElevatorSimulator {
         bottomSensor.setValue(elevatorIsAtBottom);
         aKitLog.record("FieldSimulation/ElevatorHeight-Meters", elevatorCurrentHeight.in(Meters));
         aKitLog.record("FieldSimulation/ElevatorBottomSensorTriggered", elevatorIsAtBottom);
-                // Record the robot relevative positive of the Elevator so AdvantageScope can render it correctly
+        // Record the robot relevative positive of the Elevator so AdvantageScope can render it correctly
         // NOTE: getting the arm to rotate correctly at the end of the elevator in AdvantageScope is a bit tricky, so ignoring that for now.
-        aKitLog.record("ElevatorPose", new Pose3d(0, 0, elevatorCurrentHeight.in(Units.Meters), new Rotation3d()));
+        aKitLog.record("FieldSimulation/ElevatorPose", new Pose3d(0, 0, elevatorCurrentHeight.in(Units.Meters), new Rotation3d()));
     }
 
     public boolean isAtCollectionHeight() {
