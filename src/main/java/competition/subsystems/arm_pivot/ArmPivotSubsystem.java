@@ -123,16 +123,45 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
                                     Angle absEncoderAngle, boolean sensorHit, double rangeOfMotionDegrees) {
         double armPosition = 0;
         double absEncoderPosition = absEncoderAngle.in(Degrees) / 360;
+        double tolerance;
 
-        double encoderLength;
+        // Check for the special case when maxPosition < minPosition
         if (maxPosition < minPosition) {
-            encoderLength = 1 + 1 - (maxPosition - minPosition);
+            tolerance = 1 - minPosition + maxPosition;
+            if (sensorHit) {
+                if (absEncoderPosition > minPosition) {
+                    armPosition = absEncoderPosition - minPosition;
+                }
+                else {
+                    armPosition = 1 - minPosition + absEncoderPosition;
+                }
+            }
+            else if (absEncoderPosition > minPosition) {
+                armPosition = 1 - tolerance + (absEncoderPosition - minPosition);
+            }
+            else if (absEncoderPosition < maxPosition) {
+                armPosition = 1 - maxPosition + absEncoderPosition;
+            }
+            else {
+                armPosition = 1 - minPosition + absEncoderPosition;
+            }
         }
+        // Use separate math when maxPosition > minPosition
         else {
-            encoderLength = maxPosition - minPosition + 1;
+            if (absEncoderPosition < minPosition || absEncoderPosition > maxPosition) {
+                if (absEncoderPosition < minPosition) {
+                    armPosition = (absEncoderPosition + 1 - maxPosition);
+                } else {
+                    armPosition = (absEncoderPosition - minPosition);
+                }
+            } else if (absEncoderPosition > minPosition && absEncoderPosition < maxPosition) {
+                if (sensorHit) {
+                    armPosition = (absEncoderPosition - minPosition);
+                } else {
+                    armPosition = 1 - (maxPosition - absEncoderPosition);
+                }
+            }
         }
-
-
 
         // convert from [0,1] position to arm angle in degrees
         return Degrees.of(armPosition * rangeOfMotionDegrees);
