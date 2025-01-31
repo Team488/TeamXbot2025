@@ -62,11 +62,11 @@ public class OperatorCommandMap {
         oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper)
                 .whileTrue(new DeferredCommand(() -> drive.getActiveSwerveModuleSubsystem()
                         .getSteeringSubsystem()
-                        .sysIdDynamic(SysIdRoutine.Direction.kForward), Set.of(drive)));
+                        .sysIdQuasistatic(SysIdRoutine.Direction.kForward), Set.of()));
         oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.RightBumper)
                 .whileTrue(new DeferredCommand(() -> drive.getActiveSwerveModuleSubsystem()
                         .getSteeringSubsystem()
-                        .sysIdDynamic(SysIdRoutine.Direction.kReverse), Set.of(drive)));
+                        .sysIdQuasistatic(SysIdRoutine.Direction.kReverse), Set.of()));
 
         oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeCoralCommand);
         oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreCoralCommand);
