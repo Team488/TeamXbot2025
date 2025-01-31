@@ -19,12 +19,11 @@ import static edu.wpi.first.units.Units.Rotations;
 public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
 
     public enum ArmGoals {
-        Score,
-        HumanLoad
+        Score
     }
 
-    public final Angle scoreAngle;
-    public final Angle humanLoadAngle;
+    public final DoubleProperty scoreAngle;
+    public final DoubleProperty humanLoadAngle;
 
     public final XCANMotorController armMotor;
     Angle targetAngle = Degrees.of(0);
@@ -37,8 +36,8 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
     public CoralArmPivotSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
                                   ElectricalContract electricalContract, PropertyFactory propertyFactory) {
 
-        scoreAngle = Degrees.of(-125);
-        humanLoadAngle = Degrees.of(0);
+        this.scoreAngle = propertyFactory.createPersistentProperty("Scoring Angle", -125);
+        this.humanLoadAngle = propertyFactory.createPersistentProperty("Human Loading Angle", 0);
 
         propertyFactory.setPrefix(this);
 
@@ -85,9 +84,9 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
 
     public void setTargetAngle(ArmGoals value) {
         if (Objects.requireNonNull(value) == ArmGoals.Score) {
-            setTargetValue(scoreAngle);
+            setTargetValue(Degrees.of(scoreAngle.get()));
         } else {
-            setTargetValue(humanLoadAngle);
+            setTargetValue(Degrees.of(humanLoadAngle.get()));
         }
     }
 
