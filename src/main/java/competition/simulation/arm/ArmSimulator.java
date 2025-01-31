@@ -5,7 +5,6 @@ import javax.inject.Inject;
 import competition.simulation.MotorInternalPIDHelper;
 import competition.simulation.SimulationConstants;
 import competition.subsystems.arm_pivot.ArmPivotSubsystem;
-import competition.subsystems.elevator.ElevatorMechanism;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
@@ -25,16 +24,13 @@ public class ArmSimulator {
     final SingleJointedArmSim armSim;
     final PIDManager pidManager;
 
-    final ElevatorMechanism elevatorMechanism;
     final ArmPivotSubsystem armPivotSubsystem;
     final MockCANMotorController armMotor;
 
     @Inject
-    public ArmSimulator(ElevatorMechanism elevatorMechanism, ArmPivotSubsystem armPivotSubsystem,
-            PIDManager.PIDManagerFactory pidManagerFactory, PropertyFactory pf) {
+    public ArmSimulator( ArmPivotSubsystem armPivotSubsystem, PIDManager.PIDManagerFactory pidManagerFactory, PropertyFactory pf) {
         pf.setPrefix("ArmSimulator");
         this.pidManager = pidManagerFactory.create("ArmSimulationPositionalPID", 0.01, 0.001, 0.0, 0.0, 1.0, -1.0);
-        this.elevatorMechanism = elevatorMechanism;
         this.armPivotSubsystem = armPivotSubsystem;
         this.armMotor = (MockCANMotorController) armPivotSubsystem.armMotor;
 
@@ -63,10 +59,6 @@ public class ArmSimulator {
 
         var armMotorRotations = armRelativeAngle.in(Radians) / ArmSimConstants.armEncoderAnglePerRotation.in(Radians);
         armMotor.setPosition(Rotations.of(armMotorRotations));
-
-        // correct for frame of reference for the arm pivot in the mechanism vs sim
-        // model
-        elevatorMechanism.armAngle = armRelativeAngle;
     }
 
     public Angle getArmAngle() {
