@@ -26,8 +26,8 @@ public class DebugSwerveModuleCommand extends BaseCommand {
 
     @Override
     public void execute() {
-        double drivePower = MathUtil.applyDeadband(oi.programmerGamepad.getLeftStickY(), oi.getDriverGamepadTypicalDeadband());
-        double turnPower = MathUtil.applyDeadband(oi.programmerGamepad.getRightStickX(), oi.getDriverGamepadTypicalDeadband());
+        double drivePower = MathUtil.applyDeadband(oi.superstructureGamepad.getLeftStickY(), oi.getDriverGamepadTypicalDeadband());
+        double turnPower = MathUtil.applyDeadband(oi.superstructureGamepad.getRightStickX(), oi.getDriverGamepadTypicalDeadband());
 
         drive.controlOnlyActiveSwerveModuleSubsystem(drivePower, turnPower);
     }
