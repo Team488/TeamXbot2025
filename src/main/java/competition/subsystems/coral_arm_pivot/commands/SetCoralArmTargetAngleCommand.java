@@ -1,20 +1,31 @@
 package competition.subsystems.coral_arm_pivot.commands;
 
+import competition.subsystems.coral_arm_pivot.CoralArmPivotSubsystem;
 import xbot.common.command.BaseSetpointCommand;
-import xbot.common.command.SupportsSetpointLock;
+
+import javax.inject.Inject;
 
 public class SetCoralArmTargetAngleCommand extends BaseSetpointCommand {
 
-    public SetCoralArmTargetAngleCommand(SupportsSetpointLock system, SupportsSetpointLock... additionalSystems) {
-        super(system, additionalSystems);
-    }
+    CoralArmPivotSubsystem.ArmGoals angle;
+    CoralArmPivotSubsystem coralArm;
 
-    public void setAngle() {
-
+    @Inject
+    public SetCoralArmTargetAngleCommand(CoralArmPivotSubsystem coralArm) {
+        super(coralArm);
+        this.coralArm = coralArm;
     }
 
     @Override
     public void initialize() {
+        log.info("Initializing");
+        coralArm.setTargetAngle(angle);
+    }
+
+    @Override
+    public void execute() {
 
     }
+
+    public void setAngle(CoralArmPivotSubsystem.ArmGoals angle) { this.angle = angle; }
 }
