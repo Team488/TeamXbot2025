@@ -2,6 +2,7 @@ package competition.subsystems.elevator;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Inches;
 
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
@@ -39,8 +40,8 @@ public class SuperstructureMechanism {
     final Translation2d elevatorBasePositionMeters = new Translation2d(0.57, 0.05);
 
     // where the base of the algae arm appears on the robot
-    final Translation2d algaeArmBasePositionMeters = new Translation2d(0.8, 0.5);
-    final double algaeArmLengthMeters = 0.47;
+    final Translation2d algaeArmBasePositionMeters = new Translation2d(0.65, Inches.of(28).in(Meters));
+    final double algaeArmLengthMeters = Inches.of(18.0).in(Meters);
     final double algaeArmBaseAngleDegrees = -90;
 
 
@@ -85,6 +86,12 @@ public class SuperstructureMechanism {
         // fake showing/hiding coral by changing the segment length between 0 and full length
         coralPresenceLigament.setLength(coralInScorer ? coralLengthMeters : 0.0);
 
+        algaeArmLigament.setAngle(algaeArmBaseAngleDegrees + algaeArmAngle.in(Degrees));
+
         return mech2d;
+    }
+
+    public void setAlgaeArmAngle(Angle armAngle) {
+        algaeArmAngle = armAngle;
     }
 }

@@ -59,14 +59,15 @@ public class AlgaeArmSimulator {
 
         var armMotorRotations = armRelativeAngle.in(Radians) / AlgaeArmSimConstants.armEncoderAnglePerRotation.in(Radians);
         armMotor.setPosition(Rotations.of(armMotorRotations));
+
+        // TODO: simulate lower limit sensor triggered when arm is at 0' in relative terms
     }
 
     public Angle getArmAngle() {
-        // convert from the armSim frame of reference to our actual arm frame of
-        // reference where the bottom is 0' and the top is 125'
+        // TODO: convert from global frame of reference to 0' being down
         var armSimAngle = Radians.of(armSim.getAngleRads());
 
-        return armSimAngle.minus(AlgaeArmSimConstants.maxAngleRads).times(-1);
+        return armSimAngle.minus(AlgaeArmSimConstants.maxAngleRads);
     }
 
     public boolean isAtCollectionAngle() {
