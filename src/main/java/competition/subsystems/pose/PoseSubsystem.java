@@ -1,5 +1,6 @@
 package competition.subsystems.pose;
 
+import java.util.HashMap;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -188,5 +189,39 @@ public class PoseSubsystem extends BasePoseSubsystem {
     // used by the physics simulator to mock what the swerve modules are doing currently for pose estimation
     public void ingestSimulatedSwerveModulePositions(SwerveModulePosition[] positions) {
         this.simulatedModulePositions = Optional.of(positions);
+    }
+
+    public Pose2d getClosestReefFacePose() {
+        Pose2d currentPose = getCurrentPose2d();
+
+        double closeDistance = convertBlueToRedIfNeeded(
+                Landmarks.BlueCloseAlgae).getTranslation().getDistance(currentPose.getTranslation());
+        double closeLeftDistance = PoseSubsystem.convertBlueToRedIfNeeded(
+                Landmarks.BlueCloseLeftAlgae).getTranslation().getDistance(currentPose.getTranslation());
+        double closeRightDistance = PoseSubsystem.convertBlueToRedIfNeeded(
+                Landmarks.BlueCloseRightAlgae).getTranslation().getDistance(currentPose.getTranslation());
+        double farLeftDistance = PoseSubsystem.convertBlueToRedIfNeeded(
+                Landmarks.BlueFarLeftAlgae).getTranslation().getDistance(currentPose.getTranslation());
+        double farDistance = PoseSubsystem.convertBlueToRedIfNeeded(
+                Landmarks.BlueFarAlgae).getTranslation().getDistance(currentPose.getTranslation());
+        double farRightDistance = PoseSubsystem.convertBlueToRedIfNeeded(
+                Landmarks.BlueFarRightAlgae).getTranslation().getDistance(currentPose.getTranslation());
+
+        HashMap<Double, Pose2d> hashMap = new HashMap<>();
+        hashMap.put(closeLeftDistance, PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueCloseLeftAlgae));
+        hashMap.put(closeDistance, PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueCloseAlgae));
+        hashMap.put(closeRightDistance, PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueCloseRightAlgae));
+        hashMap.put(farLeftDistance, PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueFarLeftAlgae));
+        hashMap.put(farDistance, PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueFarAlgae));
+        hashMap.put(farRightDistance, PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueFarRightAlgae));
+
+        double leastDistance = closeLeftDistance;
+
+        for (Double distance : hashMap.keySet()) {
+            if (distance < leastDistance) {
+                leastDistance = distance;
+            }
+        }
+        return hashMap.get(leastDistance);
     }
 }

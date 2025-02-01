@@ -6,6 +6,7 @@ import competition.subsystems.SubsystemDefaultCommandMap;
 import competition.subsystems.coral_arm_pivot.CoralArmPivotSubsystem;
 import competition.subsystems.coral_scorer.CoralScorerSubsystem;
 import competition.subsystems.elevator.ElevatorSubsystem;
+import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import competition.subsystems.elevator_mechanism.SuperstructureMechanismSubsystem;
 import competition.subsystems.vision.VisionSubsystem;
 import xbot.common.injection.components.BaseComponent;
@@ -24,7 +25,7 @@ public abstract class BaseRobotComponent extends BaseComponent {
 
     public abstract VisionSubsystem visionSubsystem();
 
-    public abstract AprilTagVisionSubsystem aprilTagVisionSubsystem();
+    public abstract AprilTagVisionSubsystemExtended aprilTagVisionSubsystemExtended();
 
     public abstract BaseSimulator simulator();
 
