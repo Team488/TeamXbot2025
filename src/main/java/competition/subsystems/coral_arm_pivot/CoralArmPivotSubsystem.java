@@ -109,7 +109,6 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
         switch (value) {
             case Score -> setTargetValue(Degrees.of(scoreAngle.get()));
             case HumanLoad -> setTargetValue(Degrees.of(humanLoadAngle.get()));
-            default -> setTargetValue(Degrees.of(humanLoadAngle.get()));
         }
     }
 
