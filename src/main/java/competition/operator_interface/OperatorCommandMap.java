@@ -8,6 +8,8 @@ import competition.simulation.commands.ResetSimulatedPose;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionIntakeCommand;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionOutputCommand;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionStopCommand;
+import competition.subsystems.coral_arm_pivot.CoralArmPivotSubsystem;
+import competition.subsystems.coral_arm_pivot.commands.SetCoralArmTargetAngleCommand;
 import competition.subsystems.coral_scorer.commands.IntakeCoralCommand;
 import competition.subsystems.coral_scorer.commands.ScoreCoralCommand;
 import competition.subsystems.coral_scorer.commands.StopCoralCommand;
@@ -61,6 +63,7 @@ public class OperatorCommandMap {
             AlgaeCollectionIntakeCommand algaeCollectionIntakeCommand,
             AlgaeCollectionOutputCommand algaeCollectionOutputCommand,
             AlgaeCollectionStopCommand algaeCollectionStopCommand,
+            Provider<SetCoralArmTargetAngleCommand> setArmTargetAngleCommandProvider,
             Provider<SetElevatorTargetHeightCommand> setElevatorTargetHeightCommandProvider,
             ForceElevatorCalibratedCommand forceElevatorCalibratedCommand ) {
 
@@ -71,6 +74,11 @@ public class OperatorCommandMap {
         var riseToL4 = setElevatorTargetHeightCommandProvider.get();
         riseToL4.setHeight(ElevatorSubsystem.ElevatorGoals.ScoreL4);
 
+        var riseToScore = setArmTargetAngleCommandProvider.get();
+        riseToScore.setAngle(CoralArmPivotSubsystem.ArmGoals.Score);
+        var lowerToHumanLoad = setArmTargetAngleCommandProvider.get();
+        lowerToHumanLoad.setAngle(CoralArmPivotSubsystem.ArmGoals.HumanLoad);
+      
         oi.superstructureGamepad.getPovIfAvailable(0).onTrue(changeActiveModule);
         oi.superstructureGamepad.getPovIfAvailable(90).onTrue(debugModule);
         oi.superstructureGamepad.getPovIfAvailable(180).onTrue(typicalSwerveDrive);
@@ -78,6 +86,9 @@ public class OperatorCommandMap {
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeCoralCommand);
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreCoralCommand);
 
+        //oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(lowerToHumanLoad);
+        //oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(riseToScore);
+      
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(forceElevatorCalibratedCommand);
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(riseToL2);
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(riseToL3);
