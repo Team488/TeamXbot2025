@@ -25,7 +25,7 @@ public class PrepCoralSystemCommandGroupFactory {
         var group = new SequentialCommandGroup();
 
         setElevatorTargetHeightCommand.setHeight(elevatorTargetHeight);
-        setCoralArmTargetAngleCommand.setAngle();
+        setCoralArmTargetAngleCommand.setAngle(); // TODO: Placeholder, so make sure to give angle argument
 
         group.addCommands(setElevatorTargetHeightCommand, setCoralArmTargetAngleCommand);
 
