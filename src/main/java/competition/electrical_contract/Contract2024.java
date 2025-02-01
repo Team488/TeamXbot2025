@@ -175,12 +175,8 @@ public class Contract2024 extends Contract2025 {
     public static String rearCenterNoteCameraName= "NoteRearCenter"; //TODO - one of these cameras
 
     public CameraInfo[] getCameraInfo() {
-        // 2024 was having issues due to PhotonLib version mismatch, so temporarily
-        // disabling all vision activities by declaring no cameras.
-        return new CameraInfo[] {};
-
-        /*
         return new CameraInfo[] {
+                /*
                 new CameraInfo("Apriltag_FrontLeft_Camera",
                         "AprilTagFrontLeft",
                         new Transform3d(new Translation3d(
@@ -196,7 +192,7 @@ public class Contract2024 extends Contract2025 {
                                 -aprilCameraYDisplacement,
                                 aprilCameraZDisplacement),
                                 new Rotation3d(0, aprilCameraPitch, -aprilCameraYaw)),
-                        EnumSet.of(CameraCapabilities.APRIL_TAG)),
+                        EnumSet.of(CameraCapabilities.APRIL_TAG)),*/
                 new CameraInfo("Apriltag_RearLeft_Camera",
                         "AprilTagRearLeft",
                         new Transform3d(new Translation3d(
@@ -212,7 +208,7 @@ public class Contract2024 extends Contract2025 {
                                 -aprilCameraYDisplacement,
                                 aprilCameraZDisplacement),
                                 new Rotation3d(0, aprilCameraPitch, Math.toRadians(180) + aprilCameraYaw)),
-                        EnumSet.of(CameraCapabilities.APRIL_TAG)),
+                        EnumSet.of(CameraCapabilities.APRIL_TAG))/*,
                 new CameraInfo("GamePiece_FrontLeft_Camera",
                         rearCenterNoteCameraName,
                         new Transform3d(new Translation3d(), new Rotation3d()),
@@ -228,8 +224,7 @@ public class Contract2024 extends Contract2025 {
                 new CameraInfo("GamePiece_RearRight_Camera",
                         rearRightNoteCameraName,
                         new Transform3d(new Translation3d(), new Rotation3d()),
-                        EnumSet.of(CameraCapabilities.GAME_SPECIFIC))
+                        EnumSet.of(CameraCapabilities.GAME_SPECIFIC))*/
         };
-         */
     }
 }
