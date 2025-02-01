@@ -8,6 +8,7 @@ import competition.simulation.BaseSimulator;
 import competition.simulation.MapleSimulator;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.PoseSubsystem;
+import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import dagger.Binds;
 import dagger.Module;
 import xbot.common.injection.electrical_contract.XCameraElectricalContract;
@@ -16,6 +17,7 @@ import xbot.common.subsystems.drive.BaseDriveSubsystem;
 import xbot.common.subsystems.drive.BaseSwerveDriveSubsystem;
 import xbot.common.subsystems.pose.BasePoseSubsystem;
 import xbot.common.subsystems.pose.SimulatedPositionSupplier;
+import xbot.common.subsystems.vision.AprilTagVisionSubsystem;
 
 @Module
 public abstract class SimulatedRobotModule {
@@ -50,4 +52,8 @@ public abstract class SimulatedRobotModule {
     @Binds
     @Singleton
     abstract SimulatedPositionSupplier getSimulatedPositionSupplier(BaseSimulator impl);
+
+    @Binds
+    @Singleton
+    public abstract AprilTagVisionSubsystem getVisionSubsystem(AprilTagVisionSubsystemExtended impl);
 }
