@@ -8,11 +8,10 @@ import competition.subsystems.coral_scorer.CoralScorerSubsystem;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import competition.subsystems.elevator_mechanism.SuperstructureMechanismSubsystem;
-import competition.subsystems.vision.VisionSubsystem;
+import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import xbot.common.injection.components.BaseComponent;
 import xbot.common.injection.swerve.SwerveComponentHolder;
 import xbot.common.subsystems.drive.swerve.SwerveDefaultCommandMap;
-import xbot.common.subsystems.vision.AprilTagVisionSubsystem;
 
 public abstract class BaseRobotComponent extends BaseComponent {
     public abstract SubsystemDefaultCommandMap subsystemDefaultCommandMap();
@@ -23,7 +22,7 @@ public abstract class BaseRobotComponent extends BaseComponent {
 
     public abstract SwerveComponentHolder swerveComponentHolder();
 
-    public abstract VisionSubsystem visionSubsystem();
+    public abstract CoprocessorCommunicationSubsystem visionSubsystem();
 
     public abstract AprilTagVisionSubsystemExtended aprilTagVisionSubsystemExtended();
 
