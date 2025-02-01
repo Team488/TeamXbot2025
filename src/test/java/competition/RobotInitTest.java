@@ -18,8 +18,9 @@ public class RobotInitTest extends BaseCompetitionTest {
     public void robotDataflowTest() {
         List<Subsystem> subsystems = List.of(
                 getInjectorComponent().driveSubsystem(),
-                getInjectorComponent().visionSubsystem(),
+                getInjectorComponent().coprocessorCommunicationSubsystem(),
                 getInjectorComponent().aprilTagVisionSubsystemExtended(),
+                getInjectorComponent().coprocessorCommunicationSubsystem(),
                 getInjectorComponent().elevatorSubsystem(),
                 getInjectorComponent().armPivotSubsystem(),
                 getInjectorComponent().coralScorerSubsystem(),

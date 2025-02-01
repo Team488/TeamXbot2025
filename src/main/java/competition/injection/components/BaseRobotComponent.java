@@ -22,7 +22,7 @@ public abstract class BaseRobotComponent extends BaseComponent {
 
     public abstract SwerveComponentHolder swerveComponentHolder();
 
-    public abstract CoprocessorCommunicationSubsystem visionSubsystem();
+    public abstract CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem();
 
     public abstract AprilTagVisionSubsystemExtended aprilTagVisionSubsystemExtended();
 
