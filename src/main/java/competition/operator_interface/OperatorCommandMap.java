@@ -32,7 +32,7 @@ public class OperatorCommandMap {
             SetRobotHeadingCommand resetHeading,
             Provider<SwerveSimpleTrajectoryCommand> swerveSimpleTrajectoryCommandProvider) {
         resetHeading.setHeadingToApply(0);
-        operatorInterface.gamepad.getifAvailable(1).onTrue(resetHeading);
+        operatorInterface.driverGamepad.getifAvailable(1).onTrue(resetHeading);
 
         // Below are for testing purposes only!!!
         SwervePointKinematics kinematicValuesForTesting = new SwervePointKinematics(0.5, 0, 0, 2);
@@ -57,8 +57,8 @@ public class OperatorCommandMap {
         command3.logic.setKeyPoints(points3);
         command3.logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
 
-        operatorInterface.gamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(command2); // 3 One thingy
-        operatorInterface.gamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(command3);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(command2); // 3 One thingy
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(command3);
     }
 
     @Inject
