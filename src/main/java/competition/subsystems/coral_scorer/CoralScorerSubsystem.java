@@ -70,6 +70,9 @@ public class CoralScorerSubsystem extends BaseSubsystem {
     }
     public void scorer() {
         setCoralScorerMotorPower(scorePower.get());
+        if (coralScorerState != CoralScorerState.SCORING) {
+            lastScoredTime = XTimer.getFPGATimestamp();
+        }
         coralScorerState = CoralScorerState.SCORING;
     }
     public void stop() {
@@ -82,14 +85,14 @@ public class CoralScorerSubsystem extends BaseSubsystem {
         }
         return false;
     }
-    public double getSecondsSinceScoring() {
-        if (coralScorerState == CoralScorerState.SCORING) {
+    public double getSecondsSinceScoringStarted() {
+        if (coralScorerState != CoralScorerState.SCORING) {
             return 0;
         }
         return XTimer.getFPGATimestamp() - lastScoredTime;
     }
     public boolean confidentlyHasScoredCoral() {
-        return getSecondsSinceScoring() > waitTimeAfterScoring.get();
+        return getSecondsSinceScoringStarted() > waitTimeAfterScoring.get();
     }
 
     public void periodic() {

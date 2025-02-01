@@ -21,6 +21,7 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
     DoubleProperty degreesPerRotations;
     double rotationsAtZero;
     boolean isCalibrated = false;
+    boolean isTargetPositionScoring;
 
     @Inject
     public ArmPivotSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
@@ -86,5 +87,8 @@ public class ArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
     @Override
     protected boolean areTwoTargetsEquivalent(Angle target1, Angle target2) {
         return target1.isEquivalent(target2);
+    }
+    public boolean getIsTargetPositionScoring() {
+        return this.isTargetPositionScoring;
     }
 }

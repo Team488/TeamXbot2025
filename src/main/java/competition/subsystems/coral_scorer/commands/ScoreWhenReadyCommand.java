@@ -28,8 +28,8 @@ public class ScoreWhenReadyCommand extends BaseCommand {
 
     @Override
     public void execute() {
-        if (coralScorerSubsystem.hasCoral() && armPivotSubsystem.isMaintainerAtGoal()
-                && elevatorSubsystem.isMaintainerAtGoal()) {
+        if (coralScorerSubsystem.hasCoral() && armPivotSubsystem.getIsTargetPositionScoring()
+                && armPivotSubsystem.isMaintainerAtGoal() && elevatorSubsystem.isMaintainerAtGoal()) {
             coralScorerSubsystem.scorer();
         }
     }
