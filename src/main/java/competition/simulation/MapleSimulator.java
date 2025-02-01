@@ -105,7 +105,7 @@ public class MapleSimulator implements BaseSimulator {
     
     void updateSuperstructureMechanism() {
         superstructureMechanism.setElevatorHeight(elevatorSimulator.getCurrentHeight());
-        superstructureMechanism.setArmAngle(coralArmSimulator.getArmAngle());
+        superstructureMechanism.setCoralArmAngle(coralArmSimulator.getArmAngle());
         superstructureMechanism.setCoralInScorer(coralScorerSimulator.isCoralLoaded());
         aKitLog.record("FieldSimulation/SuperstructureMechanism", superstructureMechanism.getMechanism());
     }
