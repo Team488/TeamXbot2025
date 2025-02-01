@@ -1,4 +1,4 @@
-package competition.simulation.arm;
+package competition.simulation.coral_arm;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Kilogram;
@@ -8,7 +8,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
 
-public class ArmSimConstants {
+public class CoralArmSimConstants {
     // TODO: this is all from the wpilib example but doesn't reflect our real math
     public static final double armReduction = 200;
     public static final Mass armMass = Kilogram.of(8.0); // Kilograms

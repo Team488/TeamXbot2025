@@ -187,11 +187,16 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
 
         // convert from [0,1] position to arm angle in degrees
         return Degrees.of(armPosition * rangeOfMotionDegrees);
+
     }
 
     @Override
     public void periodic() {
         aKitLog.record("Target Angle", this.getTargetValue().in(Degrees));
         aKitLog.record("Current Angle", this.getCurrentValue().in(Degrees));
+    }
+  
+    public boolean getIsTargetAngleScoring() {
+        return targetAngle == Degrees.of(scoreAngle.get());
     }
 }
