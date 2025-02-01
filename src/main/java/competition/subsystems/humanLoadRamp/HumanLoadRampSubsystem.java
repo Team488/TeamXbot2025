@@ -12,34 +12,39 @@ import javax.inject.Singleton;
 @Singleton
 
 public class HumanLoadRampSubsystem extends BaseSubsystem {
-    public final XServo motor;
-    public DoubleProperty extendedPower;
-    public DoubleProperty retractedPower;
-    public final ElectricalContract electricalContract;
+    public final XServo servo;
+    public DoubleProperty extendedPosition;
+    public DoubleProperty retractedPosition;
+    final ElectricalContract electricalContract;
+    boolean retracted;
     @Inject
     public HumanLoadRampSubsystem (XServo.XServoFactory xServoFactory, ElectricalContract electricalContract,
-                                   PropertyFactory propertyFactory){
-
-        if(electricalContract.isHumanLoadRampReady()){
-            this.motor = xServoFactory.create( 1, "humanLoadRamp");
-            this.registerDataFrameRefreshable(motor);
+                                   PropertyFactory propertyFactory) {
+        this.electricalContract=electricalContract;
+        if (electricalContract.isHumanLoadRampReady()) {
+            this.servo = xServoFactory.create(1, "humanLoadRamp");
+            this.registerDataFrameRefreshable(servo);
+        } else {
+            this.servo = null;
         }
-        else {
-            this.motor = null;
-
-
-        }
-        this.extendedPower= propertyFactory.createPersistentProperty("ExtendingPower",1);
-        this.retractedPower=propertyFactory.createPersistentProperty("RetractingPower",1);
+        this.extendedPosition = propertyFactory.createPersistentProperty("ExtendingPosition", 1);
+        this.retractedPosition = propertyFactory.createPersistentProperty("RetractingPosition", 0);
+        retracted = true;
     }
 
-    @Override
-    public void Extend(){
-        if (motor !=null){
-            motor.set(extendedPower.get());
-        }
 
+    public void extend(){
+        retracted=false;
+        servo.set(extendedPosition.get());
+    }
 
+    public void retract(){
+        retracted=true;
+        servo.set(retractedPosition.get());
+    }
+
+    public boolean getItRetracted(){
+        return retracted;
     }
 
 
