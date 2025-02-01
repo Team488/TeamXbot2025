@@ -15,6 +15,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import xbot.common.advantage.AKitLogger;
 import xbot.common.controls.actuators.mock_adapters.MockCANMotorController;
 import xbot.common.math.PIDManager;
 import xbot.common.properties.PropertyFactory;
@@ -27,9 +28,12 @@ public class AlgaeArmSimulator {
     final AlgaeArmSubsystem armPivotSubsystem;
     final MockCANMotorController armMotor;
 
+    final AKitLogger aKitLog;
+
     @Inject
     public AlgaeArmSimulator(AlgaeArmSubsystem armPivotSubsystem, PIDManager.PIDManagerFactory pidManagerFactory, PropertyFactory pf) {
-        pf.setPrefix("CoralArmSimulator");
+        pf.setPrefix("Simulator/AlgaeArm");
+        aKitLog = new AKitLogger("Simulator/AlgaeArm/");
         this.pidManager = pidManagerFactory.create(pf.getPrefix() + "/CANMotorPositionalPID", 0.01, 0.001, 0.0, 0.0, 1.0, -1.0);
         this.armPivotSubsystem = armPivotSubsystem;
         this.armMotor = (MockCANMotorController) armPivotSubsystem.armMotor;
@@ -56,6 +60,8 @@ public class AlgaeArmSimulator {
 
         // Read out the new arm position for rendering
         var armRelativeAngle = getArmAngle();
+        aKitLog.record("armRawSimAngleDegrees",  Radians.of(armSim.getAngleRads()).in(Degrees));
+        aKitLog.record("armRelativeAngleDegrees", armRelativeAngle.in(Degrees));
 
         var armMotorRotations = armRelativeAngle.in(Radians) / AlgaeArmSimConstants.armEncoderAnglePerRotation.in(Radians);
         armMotor.setPosition(Rotations.of(armMotorRotations));
@@ -67,7 +73,7 @@ public class AlgaeArmSimulator {
         // TODO: convert from global frame of reference to 0' being down
         var armSimAngle = Radians.of(armSim.getAngleRads());
 
-        return armSimAngle.minus(AlgaeArmSimConstants.maxAngleRads);
+        return armSimAngle.minus(AlgaeArmSimConstants.startingAngle);
     }
 
     public boolean isAtCollectionAngle() {
