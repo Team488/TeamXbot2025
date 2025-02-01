@@ -26,24 +26,21 @@ public class AprilTagVisionSubsystemExtended extends AprilTagVisionSubsystem {
                                            AprilTagVisionIOFactory visionIOFactory) {
         super(pf, fieldLayout, contract, visionIOFactory);
 
-        // Note: flipped april tag IDs across the y-midpoint of the field
-        // map Red Alliance sided April Tags
-        if (DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red) {
-            aprilTagIDHashMap.put(PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueCloseLeftAlgae), 8);
-            aprilTagIDHashMap.put(PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueCloseAlgae), 7);
-            aprilTagIDHashMap.put(PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueCloseRightAlgae), 6);
-            aprilTagIDHashMap.put(PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueFarLeftAlgae), 9);
-            aprilTagIDHashMap.put(PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueFarAlgae), 10);
-            aprilTagIDHashMap.put(PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueFarRightAlgae), 11);
-        }
-        else { // map Blue Alliance sided April Tags
+        // Note: flipped april tag IDs across the y-midpoint of the field for blue alliance
+        // map both blue and red alliance poses
+            aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueCloseLeftAlgae), 8);
+            aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueCloseAlgae), 7);
+            aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueCloseRightAlgae), 6);
+            aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueFarLeftAlgae), 9);
+            aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueFarAlgae), 10);
+            aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueFarRightAlgae), 11);
             aprilTagIDHashMap.put(Landmarks.BlueCloseLeftAlgae, 19);
             aprilTagIDHashMap.put(Landmarks.BlueCloseAlgae, 18);
             aprilTagIDHashMap.put(Landmarks.BlueCloseRightAlgae, 17);
             aprilTagIDHashMap.put(Landmarks.BlueFarLeftAlgae, 20);
             aprilTagIDHashMap.put(Landmarks.BlueFarAlgae, 21);
             aprilTagIDHashMap.put(Landmarks.BlueFarRightAlgae, 22);
-        }
+
     }
 
     public Translation2d getReefAprilTagCameraData() {
