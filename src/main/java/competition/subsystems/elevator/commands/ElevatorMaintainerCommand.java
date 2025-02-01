@@ -71,6 +71,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     @Override
     public void initialize() {
         log.info("initializing");
+        calibrationDecider.reset();
     }
 
     @Override
