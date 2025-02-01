@@ -1,4 +1,4 @@
-package competition.subsystems.humanLoadRamp;
+package competition.subsystems.humanloadramp;
 
 import competition.electrical_contract.ElectricalContract;
 import xbot.common.command.BaseSubsystem;

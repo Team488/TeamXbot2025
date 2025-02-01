@@ -1,6 +1,6 @@
-package competition.subsystems.humanLoadRamp.commands;
+package competition.subsystems.humanloadramp.commands;
 
-import competition.subsystems.humanLoadRamp.HumanLoadRampSubsystem;
+import competition.subsystems.humanloadramp.HumanLoadRampSubsystem;
 import xbot.common.command.BaseCommand;
 
 import javax.inject.Inject;
