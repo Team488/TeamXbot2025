@@ -15,7 +15,7 @@ public class SetElevatorTargetHeightCommand extends BaseSetpointCommand {
     @Inject
     public SetElevatorTargetHeightCommand(ElevatorSubsystem elevator){
         super(elevator);
-        addRequirements(elevator);
+        this.elevator = elevator;
     }
 
     @Override

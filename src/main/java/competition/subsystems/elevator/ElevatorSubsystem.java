@@ -2,9 +2,10 @@ package competition.subsystems.elevator;
 
 import competition.electrical_contract.ElectricalContract;
 import edu.wpi.first.units.measure.Distance;
-import xbot.common.advantage.DataFrameRefreshable;
+import edu.wpi.first.units.measure.LinearVelocity;
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
+import xbot.common.properties.DoubleProperty;
 import xbot.common.controls.sensors.XDigitalInput;
 import xbot.common.properties.PropertyFactory;
 
@@ -13,6 +14,10 @@ import javax.inject.Singleton;
 
 import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 @Singleton
 public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
@@ -23,27 +28,29 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         ScoreL3,
         ScoreL4,
         HumanLoad,
-        ReturnToBase
+        ReturnToBase,
     }
 
     final ElectricalContract contract;
 
+    // elevator starts uncalibrated because it could be in the middle of it's range and we have no idea where that is
     private boolean isCalibrated;
+    //TODO: Add a calibration routine
 
     public Distance elevatorTargetHeight;
     final Distance distanceFromTargetHeight;
-    final Distance currentHeight;
 
-    //assuming we'll have a master and follower motors
+    final DoubleProperty metersPerRotation;
+
     public XCANMotorController masterMotor;
 
     //important heights
-    public final Distance l1Height;
-    public final Distance l2Height;
-    public final Distance l3Height;
-    public final Distance l4Height;
-    public final Distance humanLoadHeight;
-    public final Distance returnToBaseHeight;
+    public final DoubleProperty l1Height;
+    public final DoubleProperty l2Height;
+    public final DoubleProperty l3Height;
+    public final DoubleProperty l4Height;
+    public final DoubleProperty humanLoadHeight;
+    public final DoubleProperty baseHeight;
 
     public final XDigitalInput bottomSensor;
 
@@ -54,19 +61,20 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
         this.contract = contract;
 
-        this.elevatorTargetHeight = Feet.of(0);
+        this.elevatorTargetHeight = Inches.of(0);
         this.distanceFromTargetHeight = Feet.of(0);
-        this.currentHeight = Inches.of(0);
 
         pf.setPrefix(this);
+        //to be tuned
+        this.metersPerRotation = pf.createPersistentProperty("MetersPerRotation", 3);
 
         //these are not real measured heights yet, just placeholders
-        l1Height = Feet.of(3);
-        l2Height = Feet.of(4);
-        l3Height = Feet.of(5);
-        l4Height = Feet.of(6);
-        humanLoadHeight = Feet.of(3);
-        returnToBaseHeight = Feet.of(2);
+        l1Height = pf.createPersistentProperty("l1Height", 1);
+        l2Height = pf.createPersistentProperty("l2Height", 2);
+        l3Height = pf.createPersistentProperty("l3Height", 3);
+        l4Height = pf.createPersistentProperty("l4Height", 4);
+        humanLoadHeight = pf.createPersistentProperty("humanLoadHeight", 2);
+        baseHeight = pf.createPersistentProperty("baseHeight", 0);
 
         if(contract.isElevatorReady()){
             this.masterMotor = motorFactory.create(contract.getElevatorMotor(), this.getPrefix(), "ElevatorMotor");
@@ -76,6 +84,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
             this.bottomSensor= xDigitalInputFactory.create(contract.getElevatorBottomSensor(), "Elevator Bottom Sensor0");
         }else{
             this.bottomSensor=null;
+
         }
     }
 
@@ -90,7 +99,15 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     @Override
     public Distance getCurrentValue() {
+        Distance currentHeight = Inches.of(0);
+        if (contract.isElevatorReady()){
+            currentHeight = Meters.of(this.masterMotor.getPosition().in(Rotations) * metersPerRotation.get()); //hastily written code will clean up later
+        }
         return currentHeight;
+    }
+
+    public LinearVelocity getCurrentVelocity() {
+        return MetersPerSecond.of(masterMotor.getVelocity().in(RotationsPerSecond) * metersPerRotation.get());
     }
 
     @Override
@@ -105,13 +122,13 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     public void setTargetHeight(ElevatorGoals value){
         switch (value){
-            case ScoreL1 -> setTargetValue(l1Height);
-            case ScoreL2 -> setTargetValue(l2Height);
-            case ScoreL3 -> setTargetValue(l3Height);
-            case ScoreL4 -> setTargetValue(l4Height);
-            case HumanLoad -> setTargetValue(humanLoadHeight);
-            case ReturnToBase -> setTargetValue(returnToBaseHeight);
-            default -> setTargetValue(returnToBaseHeight);
+            case ScoreL1 -> setTargetValue(Feet.of(l1Height.get()));
+            case ScoreL2 -> setTargetValue(Feet.of(l2Height.get()));
+            case ScoreL3 -> setTargetValue(Feet.of(l3Height.get()));
+            case ScoreL4 -> setTargetValue(Feet.of(l4Height.get()));
+            case HumanLoad -> setTargetValue(Feet.of(humanLoadHeight.get()));
+            case ReturnToBase -> setTargetValue(Feet.of(baseHeight.get()));
+            default -> setTargetValue(Feet.of(baseHeight.get()));
         }
     }
 
@@ -122,7 +139,9 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         return false;
     }
 
-
+    public void setCalibrated(boolean calibrated){
+        isCalibrated = calibrated;
+    }
 
     @Override
     public boolean isCalibrated() {
@@ -135,8 +154,11 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     }
 
     public void periodic(){
-        masterMotor.periodic();
-        aKitLog.record("ElevatorTargetHeight",elevatorTargetHeight);
+        if (contract.isElevatorReady()){
+            masterMotor.periodic();
+        }
+        aKitLog.record("ElevatorTargetHeight-m",elevatorTargetHeight);
+        aKitLog.record("ElevatorCurrentHeight-m",getCurrentValue().in(Meters));
         aKitLog.record("ElevatorBottomSensor",this.isTouchingBottom());
     }
 
