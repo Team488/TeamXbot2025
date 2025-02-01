@@ -1,6 +1,7 @@
 package competition.subsystems.elevator;
 
 import competition.electrical_contract.ElectricalContract;
+import competition.simulation.elevator.ElevatorSimConstants;
 import edu.wpi.first.units.measure.Distance;
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
@@ -39,13 +40,14 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     final ElectricalContract contract;
 
     private boolean isCalibrated;
-    private double calibrationOffset;
+    private double elevatorPositionOffset;
+    private double elevatorScalingOffset;
     //TODO: Add a calibration routine
 
     public Distance elevatorTargetHeight;
     final Distance distanceFromTargetHeight;
 
-    final DoubleProperty metersPerRotation;
+    final DoubleProperty rotationsPerMeter;
     public final DoubleProperty maxPowerWhenUncalibrated;
 
     public XCANMotorController masterMotor;
@@ -66,20 +68,20 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
         this.contract = contract;
 
-        this.calibrationOffset = 0.0;
+        this.elevatorPositionOffset = 0.0;
 
         this.elevatorTargetHeight = Inches.of(0);
         this.distanceFromTargetHeight = Feet.of(0);
 
         pf.setPrefix(this);
         //to be tuned
-        this.metersPerRotation = pf.createPersistentProperty("MetersPerRotation", 1);
-        this.maxPowerWhenUncalibrated = pf.createPersistentProperty("maxPowerWhenUncalibrated", -0.01);
+        this.rotationsPerMeter = pf.createPersistentProperty("RotationsPerMeter", 1923);
+        this.maxPowerWhenUncalibrated = pf.createPersistentProperty("maxPowerWhenUncalibrated", -0.05);
 
         //these are not real measured heights yet, just placeholders
-        l2Height = pf.createPersistentProperty("l2Height-m", 1);
-        l3Height = pf.createPersistentProperty("l3Height-m", 1.5);
-        l4Height = pf.createPersistentProperty("l4Height-m", 2);
+        l2Height = pf.createPersistentProperty("l2Height-m", 0.5);
+        l3Height = pf.createPersistentProperty("l3Height-m", 0.75);
+        l4Height = pf.createPersistentProperty("l4Height-m", 1);
         humanLoadHeight = pf.createPersistentProperty("humanLoadHeight-m", 1);
         baseHeight = pf.createPersistentProperty("baseHeight-m", 0);
 
@@ -108,27 +110,17 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         }
     }
 
-    public void calibrateHere(){
-        calibrateAt(masterMotor.getPosition().in(Rotations));
-    }
-
-    public void calibrateAt(double lowestPosition){
-        log.info("calibrating elevator with lowest position of " + lowestPosition);
-        calibrationOffset = lowestPosition;
-
-        masterMotor.setPower(maxPowerWhenUncalibrated.get());
-
-        if(isTouchingBottom()){
-            isCalibrated = true;
-        }
+    public void markElevatorAsCalibratedAgainstLowerLimit(){
+        isCalibrated = true;
+        elevatorPositionOffset = this.masterMotor.getPosition().in(Rotations);
     }
 
     @Override
     public Distance getCurrentValue() {
-        Distance currentHeight = Inches.of(0);
+        Distance currentHeight = Meters.of(0);
         if (contract.isElevatorReady()){
             currentHeight = Meters.of(
-                    (this.masterMotor.getPosition().in(Rotations) - calibrationOffset)* metersPerRotation.get()); //hastily written code will clean up later
+                    (this.masterMotor.getPosition().in(Rotations) - elevatorPositionOffset) / rotationsPerMeter.get());
         }
         return currentHeight;
     }
@@ -156,7 +148,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     public boolean isTouchingBottom(){
         if (contract.isElevatorBottomSensorReady()){
-            return true;
+            return getCurrentValue()
+                    .in(Meters) <= ElevatorSimConstants.elevatorBottomSensorTriggerHeight;
         }
         return false;
     }

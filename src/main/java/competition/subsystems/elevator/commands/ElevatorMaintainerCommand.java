@@ -5,16 +5,15 @@ import competition.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.Timer;
 import xbot.common.command.BaseMaintainerCommand;
+import xbot.common.controls.sensors.XTimer;
 import xbot.common.logic.HumanVsMachineDecider;
+import xbot.common.logic.TimeStableValidator;
 import xbot.common.math.MathUtils;
 import xbot.common.math.PIDManager;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Rotations;
 
 import javax.inject.Inject;
 
@@ -30,10 +29,14 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     private final PIDManager positionPID;
 
-    ElevatorSubsystem elevator;
+    private final ElevatorSubsystem elevator;
 
+    boolean startedCalibration = false;
+    boolean givenUpOnCalibration = false;
+    double calibrationStartTime = 0;
     double giveUpCalibratingTime;
-    final DoubleProperty elevatorCalibrationAttemptTimeMS;
+    final double calibrationMaxDuration = 5;
+    TimeStableValidator calibrationValidator;
 
     final DoubleProperty humanMaxPowerGoingUp;
     final DoubleProperty humanMaxPowerGoingDown;
@@ -47,10 +50,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         this.elevator = elevator;
 
         this.oi = oi;
-        positionPID = pidf.create(getPrefix() + "positionPID", 0.00, 0, 0.0);
-
-        this.elevatorCalibrationAttemptTimeMS = pf.createPersistentProperty("Calibration Attempt Time (MS)", 4000);
-        this.giveUpCalibratingTime = Timer.getFPGATimestamp() + elevatorCalibrationAttemptTimeMS.get();
+        positionPID = pidf.create(getPrefix() + "positionPID", 0.1, 0, 0.5);
 
         this.humanMaxPowerGoingUp = pf.createPersistentProperty("maxPowerGoingUp", 1);
         this.humanMaxPowerGoingDown = pf.createPersistentProperty("maxPowerGoingDown", -0.2);
@@ -62,49 +62,50 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     }
 
     @Override
-    public void execute() {
-        MaintainerMode currentMode = MaintainerMode.Calibrating;
-
-        if(elevator.isCalibrated()){
-            currentMode = MaintainerMode.Calibrated;
-        }
-        else if(Timer.getFPGATimestamp() < giveUpCalibratingTime){
-            currentMode = MaintainerMode.Calibrating;
-        }
-        else{
-            currentMode = MaintainerMode.GaveUp;
-        }
-
-        if (currentMode == MaintainerMode.Calibrated){
-            maintain();
-            elevator.setMaintainerIsAtGoal(isMaintainerAtGoal());
-        }
-        else if (currentMode == MaintainerMode.Calibrating){
-            elevator.calibrateHere();
-        }
-        else if (currentMode == MaintainerMode.GaveUp){
-            humanControlAction();
-        }
-    }
-
-    @Override
     protected void coastAction() {
         elevator.setPower(0);
     }
 
     @Override
     protected void calibratedMachineControlAction() {
-        double power = positionPID.calculate(
-                elevator.getTargetValue().in(Meters),
-                elevator.getCurrentValue().in(Meters));
+        double power;
+//        if (elevator.isMaintainerAtGoal()){
+//            power = 0;
+//        }
+ //       else {
+            power = positionPID.calculate(
+                    elevator.getTargetValue().in(Meters),
+                    elevator.getCurrentValue().in(Meters));
+        //}
         elevator.setPower(power);
 
     }
 
     @Override
     protected void uncalibratedMachineControlAction() {
-        //this is just a placeholder for now until we have something to calibrate
-        calibratedMachineControlAction();
+        aKitLog.record("Started on calibration", startedCalibration);
+        aKitLog.record("Given up on calibration", givenUpOnCalibration);
+
+        if (!startedCalibration){
+            calibrationStartTime = XTimer.getFPGATimestamp();
+            startedCalibration = true;
+        }
+
+        if (calibrationStartTime + calibrationMaxDuration < XTimer.getFPGATimestamp()){
+            givenUpOnCalibration = true;
+        }
+
+        if (!givenUpOnCalibration){
+            elevator.setPower(elevator.maxPowerWhenUncalibrated.get());
+
+            if (elevator.isTouchingBottom()){
+                elevator.markElevatorAsCalibratedAgainstLowerLimit();
+                elevator.setTargetValue(elevator.getCurrentValue());
+            }
+        }
+        else{
+            humanControlAction();
+        }
     }
 
     @Override

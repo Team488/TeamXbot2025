@@ -13,6 +13,7 @@ public class ElevatorSimConstants {
     public static final double maxElevatorHeightMeters = 1.25;
     public static final double elevatorBottomSensorTriggerHeight = 0.01;
     public static final double rotationsPerMeterHeight = 1923; // arbitrary big number
+    public static final double startingHeightMeters = 0.5;
     // this is random to mimic the motor not being zeroed when the robot turns on so the
     // code will have to handle the calibration thereof
     //public static final Angle rotationsAtZero = Rotations.of(Math.random() * 1000);

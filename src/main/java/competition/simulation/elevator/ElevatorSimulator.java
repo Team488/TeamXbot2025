@@ -55,7 +55,7 @@ public class ElevatorSimulator {
                 ElevatorSimConstants.minElevatorHeightMeters,
                 ElevatorSimConstants.maxElevatorHeightMeters,
                 true,
-                0,
+                ElevatorSimConstants.startingHeightMeters,
                 0.0,
                 0.0);
     }
