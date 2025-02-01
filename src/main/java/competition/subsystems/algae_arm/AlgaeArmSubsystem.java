@@ -29,7 +29,9 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
     @Inject
     public AlgaeArmSubsystem(ElectricalContract electricalContract,
-                             XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory, PropertyFactory propertyFactory, XDigitalInput.XDigitalInputFactory xDigitalInputFactory) {
+                             XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
+                             PropertyFactory propertyFactory,
+                             XDigitalInput.XDigitalInputFactory xDigitalInputFactory) {
         propertyFactory.setPrefix(this);
         this.electricalContract = electricalContract;
         if (electricalContract.isAlgaeArmPivotMotorReady()) {
