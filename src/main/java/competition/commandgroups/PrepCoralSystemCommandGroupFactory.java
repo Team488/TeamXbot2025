@@ -7,24 +7,27 @@ import competition.subsystems.elevator.commands.SetElevatorTargetHeightCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 public class PrepCoralSystemCommandGroupFactory {
 
-    SetElevatorTargetHeightCommand setElevatorTargetHeightCommand;
-    SetCoralArmTargetAngleCommand setCoralArmTargetAngleCommand;
+    Provider<SetElevatorTargetHeightCommand> setElevatorTargetHeightCommandProvider;
+    Provider<SetCoralArmTargetAngleCommand> setCoralArmTargetAngleCommandProvider;
 
 
     @Inject
-    public PrepCoralSystemCommandGroupFactory(SetElevatorTargetHeightCommand setElevatorTargetHeightCommand,
-                                              SetCoralArmTargetAngleCommand setCoralArmTargetAngleCommand) {
-        this.setElevatorTargetHeightCommand = setElevatorTargetHeightCommand;
-        this.setCoralArmTargetAngleCommand = setCoralArmTargetAngleCommand;
+    public PrepCoralSystemCommandGroupFactory(Provider<SetElevatorTargetHeightCommand> setElevatorTargetHeightCommandProvider,
+                                              Provider<SetCoralArmTargetAngleCommand> setCoralArmTargetAngleCommandProvider) {
+        this.setElevatorTargetHeightCommandProvider = setElevatorTargetHeightCommandProvider;
+        this.setCoralArmTargetAngleCommandProvider = setCoralArmTargetAngleCommandProvider;
     }
 
     public SequentialCommandGroup create(ElevatorSubsystem.ElevatorGoals elevatorTargetHeight, CoralArmPivotSubsystem.ArmGoals armGoal) {
         var group = new SequentialCommandGroup();
 
+        var setElevatorTargetHeightCommand = setElevatorTargetHeightCommandProvider.get();
         setElevatorTargetHeightCommand.setHeight(elevatorTargetHeight);
+        var setCoralArmTargetAngleCommand = setCoralArmTargetAngleCommandProvider.get();
         setCoralArmTargetAngleCommand.setAngle(); // TODO: Placeholder, so make sure to give angle argument
 
         group.addCommands(setElevatorTargetHeightCommand, setCoralArmTargetAngleCommand);
