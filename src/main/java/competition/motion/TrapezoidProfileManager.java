@@ -31,7 +31,7 @@ public class TrapezoidProfileManager {
         goalState = new TrapezoidProfile.State(initialPosition, 0);
     }
 
-    public void setTargetValue(double targetValue, double currentValue, double currentVelocity) {
+    public void setTargetPosition(double targetValue, double currentValue, double currentVelocity) {
         // if the profile's constraints properties have changed, recompute the profile
         // there's maybe a better place to do this but this should be fine since setTarget will be called
         // over and over again
@@ -50,7 +50,7 @@ public class TrapezoidProfileManager {
     }
 
     // currently only doing position, but in theory this goal has a velocity associated with it too we could use
-    public double getCurrentPositionSetpoint() {
+    public double getRecommendedPositionForTime() {
         var setpoint = profile.calculate(XTimer.getFPGATimestampTime().minus(profileStartTime).in(Seconds), initialState, goalState);
         return setpoint.position;
     }
