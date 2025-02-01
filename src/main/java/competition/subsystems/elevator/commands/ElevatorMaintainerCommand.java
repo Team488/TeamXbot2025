@@ -98,7 +98,6 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     @Override
     protected void uncalibratedMachineControlAction() {
-        calibrationDecider.reset();
         var mode = calibrationDecider.decideMode(elevator.isCalibrated());
 
         switch (mode){
@@ -146,5 +145,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     protected double getHumanInputMagnitude() {
         return Math.abs(getHumanInput());
     }
+
+
 
 }

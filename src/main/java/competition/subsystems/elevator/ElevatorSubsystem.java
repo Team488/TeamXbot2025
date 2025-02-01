@@ -49,10 +49,11 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     public Distance elevatorTargetHeight;
 
-    public final DoubleProperty rotationsPerMeter;
+    public final DoubleProperty metersPerRotation;
     public final DoubleProperty calibrationNegativePower;
     public final DoubleProperty nearUpperLimitThreshold;
     public final DoubleProperty nearLowerLimitThreshold;
+
 
     public XCANMotorController masterMotor;
 
@@ -78,7 +79,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
         pf.setPrefix(this);
         //to be tuned
-        this.rotationsPerMeter = pf.createPersistentProperty("RotationsPerMeter", 1923);
+        this.metersPerRotation = pf.createPersistentProperty("MetersPerRotation", 1.0/1923.0);
         this.calibrationNegativePower = pf.createPersistentProperty("calibrationNegativePower", -0.05);
         this.nearUpperLimitThreshold = pf.createPersistentProperty("nearUpperLimitThreshold", 1.0);
         this.nearLowerLimitThreshold = pf.createPersistentProperty("nearLowerLimitThreshold", 0.25);
@@ -136,13 +137,13 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         Distance currentHeight = Meters.of(0);
         if (contract.isElevatorReady()){
             currentHeight = Meters.of(
-                    (this.masterMotor.getPosition().in(Rotations) - elevatorPositionOffset) / rotationsPerMeter.get());
+                    (this.masterMotor.getPosition().in(Rotations) - elevatorPositionOffset) * metersPerRotation.get());
         }
         return currentHeight;
     }
 
     public LinearVelocity getCurrentVelocity() {
-        return MetersPerSecond.of(masterMotor.getVelocity().in(RotationsPerSecond) * rotationsPerMeter.get());
+        return MetersPerSecond.of(masterMotor.getVelocity().in(RotationsPerSecond) * metersPerRotation.get());
     }
 
     @Override
