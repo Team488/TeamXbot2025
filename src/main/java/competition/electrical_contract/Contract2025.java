@@ -81,6 +81,13 @@ public class Contract2025 extends ElectricalContract {
     }
 
     @Override
+    public boolean isHumanLoadRampReady() {
+        return false;
+    }
+
+
+
+    @Override
     public CANMotorControllerInfo getAlgaeArmPivotMotor() {
         return new CANMotorControllerInfo("AlgaeArmPivotMotor",
                 MotorControllerType.TalonFx,
