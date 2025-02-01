@@ -70,8 +70,8 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
         this.rangeOfMotionDegrees = propertyFactory.createPersistentProperty("Range of Motion in Degrees", 125);
         this.minArmPosition = propertyFactory.createPersistentProperty("Min AbsEncoder Position in Degrees", 90);
         this.maxArmPosition = propertyFactory.createPersistentProperty("Max AbsEncoder Position in Degrees", 100);
-        this.scoreAngle = propertyFactory.createPersistentProperty("Scoring Angle", -125);
-        this.humanLoadAngle = propertyFactory.createPersistentProperty("Human Loading Angle", 0);
+        this.scoreAngle = propertyFactory.createPersistentProperty("Scoring Angle in Degrees", 125);
+        this.humanLoadAngle = propertyFactory.createPersistentProperty("Human Loading Angle in Degrees", 0);
 
     }
 
@@ -106,10 +106,10 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
     }
 
     public void setTargetAngle(ArmGoals value) {
-        if (Objects.requireNonNull(value) == ArmGoals.Score) {
-            setTargetValue(Degrees.of(scoreAngle.get()));
-        } else {
-            setTargetValue(Degrees.of(humanLoadAngle.get()));
+        switch (value) {
+            case Score -> setTargetValue(Degrees.of(scoreAngle.get()));
+            case HumanLoad -> setTargetValue(Degrees.of(humanLoadAngle.get()));
+            default -> setTargetValue(Degrees.of(humanLoadAngle.get()));
         }
     }
 
