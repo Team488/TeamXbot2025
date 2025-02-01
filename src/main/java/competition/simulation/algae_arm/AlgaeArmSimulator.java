@@ -1,11 +1,10 @@
-package competition.simulation.arm;
+package competition.simulation.algae_arm;
 
 import javax.inject.Inject;
 
 import competition.simulation.MotorInternalPIDHelper;
 import competition.simulation.SimulationConstants;
-import competition.subsystems.arm_pivot.ArmPivotSubsystem;
-import competition.subsystems.elevator.ElevatorMechanism;
+import competition.subsystems.algae_arm.AlgaeArmSubsystem;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
@@ -16,38 +15,39 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import xbot.common.advantage.AKitLogger;
 import xbot.common.controls.actuators.mock_adapters.MockCANMotorController;
 import xbot.common.math.PIDManager;
 import xbot.common.properties.PropertyFactory;
 
-public class ArmSimulator {
+public class AlgaeArmSimulator {
     final DCMotor motor = DCMotor.getKrakenX60(1);
     final SingleJointedArmSim armSim;
     final PIDManager pidManager;
 
-    final ElevatorMechanism elevatorMechanism;
-    final ArmPivotSubsystem armPivotSubsystem;
+    final AlgaeArmSubsystem armPivotSubsystem;
     final MockCANMotorController armMotor;
 
+    final AKitLogger aKitLog;
+
     @Inject
-    public ArmSimulator(ElevatorMechanism elevatorMechanism, ArmPivotSubsystem armPivotSubsystem,
-            PIDManager.PIDManagerFactory pidManagerFactory, PropertyFactory pf) {
-        pf.setPrefix("ArmSimulator");
-        this.pidManager = pidManagerFactory.create("ArmSimulationPositionalPID", 0.01, 0.001, 0.0, 0.0, 1.0, -1.0);
-        this.elevatorMechanism = elevatorMechanism;
+    public AlgaeArmSimulator(AlgaeArmSubsystem armPivotSubsystem, PIDManager.PIDManagerFactory pidManagerFactory, PropertyFactory pf) {
+        pf.setPrefix("Simulator/AlgaeArm");
+        aKitLog = new AKitLogger("Simulator/AlgaeArm/");
+        this.pidManager = pidManagerFactory.create(pf.getPrefix() + "/CANMotorPositionalPID", 0.01, 0.001, 0.0, 0.0, 1.0, -1.0);
         this.armPivotSubsystem = armPivotSubsystem;
         this.armMotor = (MockCANMotorController) armPivotSubsystem.armMotor;
 
         this.armSim = new SingleJointedArmSim(
                 motor,
-                ArmSimConstants.armReduction,
-                SingleJointedArmSim.estimateMOI(ArmSimConstants.armLength.in(Meters),
-                        ArmSimConstants.armMass.in(Kilograms)),
-                ArmSimConstants.armLength.in(Meters),
-                ArmSimConstants.minAngleRads.in(Radians),
-                ArmSimConstants.maxAngleRads.in(Radians),
+                AlgaeArmSimConstants.armReduction,
+                SingleJointedArmSim.estimateMOI(AlgaeArmSimConstants.armLength.in(Meters),
+                        AlgaeArmSimConstants.armMass.in(Kilograms)),
+                AlgaeArmSimConstants.armLength.in(Meters),
+                AlgaeArmSimConstants.minAngleRads.in(Radians),
+                AlgaeArmSimConstants.maxAngleRads.in(Radians),
                 true,
-                ArmSimConstants.startingAngle.in(Radians));
+                AlgaeArmSimConstants.startingAngle.in(Radians));
     }
 
     public void update() {
@@ -60,21 +60,20 @@ public class ArmSimulator {
 
         // Read out the new arm position for rendering
         var armRelativeAngle = getArmAngle();
+        aKitLog.record("armRawSimAngleDegrees",  Radians.of(armSim.getAngleRads()).in(Degrees));
+        aKitLog.record("armRelativeAngleDegrees", armRelativeAngle.in(Degrees));
 
-        var armMotorRotations = armRelativeAngle.in(Radians) / ArmSimConstants.armEncoderAnglePerRotation.in(Radians);
+        var armMotorRotations = armRelativeAngle.in(Radians) / AlgaeArmSimConstants.armEncoderAnglePerRotation.in(Radians);
         armMotor.setPosition(Rotations.of(armMotorRotations));
 
-        // correct for frame of reference for the arm pivot in the mechanism vs sim
-        // model
-        elevatorMechanism.armAngle = armRelativeAngle;
+        // TODO: simulate lower limit sensor triggered when arm is at 0' in relative terms
     }
 
     public Angle getArmAngle() {
-        // convert from the armSim frame of reference to our actual arm frame of
-        // reference where the bottom is 0' and the top is 125'
+        // TODO: convert from global frame of reference to 0' being down
         var armSimAngle = Radians.of(armSim.getAngleRads());
 
-        return armSimAngle.minus(ArmSimConstants.maxAngleRads).times(-1);
+        return armSimAngle.plus(Degrees.of(90));
     }
 
     public boolean isAtCollectionAngle() {

@@ -52,6 +52,7 @@ public class Contract2025 extends ElectricalContract {
                 new CANMotorControllerOutputConfig());
     }
 
+    public boolean isArmPivotReady() { return false; }
     public boolean isArmPivotMotorReady() { return false; }
 
     public CANMotorControllerInfo getArmPivotMotor() {
@@ -75,9 +76,36 @@ public class Contract2025 extends ElectricalContract {
     public DeviceInfo getElevatorBottomSensor() { return new DeviceInfo("ElevatorBottomSensor",1); }
 
     @Override
+    public boolean isAlgaeArmPivotMotorReady() {
+        return false;
+    }
+
+    @Override
+    public CANMotorControllerInfo getAlgaeArmPivotMotor() {
+        return new CANMotorControllerInfo("AlgaeArmPivotMotor",
+                MotorControllerType.TalonFx,
+                CANBusId.DefaultCanivore,
+                884,
+                new CANMotorControllerOutputConfig());
+    }
+
+
+
+    @Override
     public boolean areCanCodersReady() {
         return true;
     }
+    // change channels
+    public DeviceInfo getArmPivotAbsoluteEncoder() {
+        return new DeviceInfo("ArmPivotAbsoluteEncoder", 100);
+    }
+
+    public boolean isArmPivotAbsoluteEncoderReady() { return false; }
+
+    public DeviceInfo getArmPivotLowSensor() {
+        return new DeviceInfo("ArmPivotLowSensor", 101);
+    }
+    public boolean isArmPivotLowSensorReady() { return false; }
 
     @Override
     public boolean isElevatorReady() {
@@ -91,6 +119,16 @@ public class Contract2025 extends ElectricalContract {
                 MotorControllerType.TalonFx,
                 CANBusId.DefaultCanivore, 99, //change deviceId later
                 new CANMotorControllerOutputConfig());
+    }
+
+    @Override
+    public boolean isElevatorDistanceSensorReady() {
+        return false;
+    }
+
+    @Override
+    public DeviceInfo getElevatorDistanceSensor() {
+        return new DeviceInfo("ElevatorDistanceSensor", 5);
     }
 
     protected String getDriveControllerName(SwerveInstance swerveInstance) {
