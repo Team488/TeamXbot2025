@@ -19,6 +19,7 @@ public class HumanLoadRampSubsystem extends BaseSubsystem {
     @Inject
     public HumanLoadRampSubsystem (XServo.XServoFactory xServoFactory, ElectricalContract electricalContract,
                                    PropertyFactory propertyFactory) {
+        propertyFactory.setPrefix(this);
         this.electricalContract=electricalContract;
         if (electricalContract.isHumanLoadRampReady()) {
             this.servo = xServoFactory.create(1, "humanLoadRamp");
