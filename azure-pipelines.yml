@@ -19,16 +19,17 @@ jobs:
         versionSpec: '17'
         jdkArchitectureOption: 'x64'
         jdkSourceOption: 'PreInstalled'
-    - task: Gradle@2
+    - task: Gradle@3
       inputs:
         gradleWrapperFile: 'gradlew'
         gradleOptions: '-Xmx3072m'
         publishJUnitResults: true
         testResultsFiles: '**/TEST-*.xml'
-        tasks: 'build --stacktrace --info'
+        tasks: 'build'
+        options: '--warn'
         # checkStyleRunAnalysis: true
         # pmdRunAnalysis: true
-    - task: PublishCodeCoverageResults@1
+    - task: PublishCodeCoverageResults@2
       inputs:
         codeCoverageTool: 'JaCoCo'
         summaryFileLocation: 'build/reports/jacoco/test/jacocoTestReport.xml'

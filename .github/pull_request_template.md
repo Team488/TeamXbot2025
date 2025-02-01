@@ -7,8 +7,11 @@ Asana task URL:
 # Questions/notes for reviewers
 
 # How this was tested
-- [ ] unit tests added
 - [ ] tested on robot
+- [ ] tested in simulator
+- [ ] unit tests added
+
+## Video/screenshots (from simulator or live robot)
 
 -----
 

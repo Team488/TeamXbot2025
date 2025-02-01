@@ -3,6 +3,8 @@ package competition.subsystems.elevator;
 import competition.electrical_contract.ElectricalContract;
 import competition.simulation.elevator.ElevatorSimConstants;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
+
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
 import xbot.common.properties.DoubleProperty;
@@ -15,7 +17,9 @@ import javax.inject.Singleton;
 import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 @Singleton
 public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
@@ -39,13 +43,12 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     final ElectricalContract contract;
 
+    // elevator starts uncalibrated because it could be in the middle of it's range and we have no idea where that is
     private boolean isCalibrated;
     private double elevatorPositionOffset;
-    private double elevatorScalingOffset;
     //TODO: Add a calibration routine
 
     public Distance elevatorTargetHeight;
-    final Distance distanceFromTargetHeight;
 
     final DoubleProperty rotationsPerMeter;
     public final DoubleProperty maxPowerWhenUncalibrated;
@@ -94,6 +97,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
             this.registerDataFrameRefreshable(bottomSensor);
         }else{
             this.bottomSensor=null;
+
         }
 
         setCalibrated(false);
@@ -124,6 +128,10 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
                     (this.masterMotor.getPosition().in(Rotations) - elevatorPositionOffset) / rotationsPerMeter.get());
         }
         return currentHeight;
+    }
+
+    public LinearVelocity getCurrentVelocity() {
+        return MetersPerSecond.of(masterMotor.getVelocity().in(RotationsPerSecond) * metersPerRotation.get());
     }
 
     @Override
