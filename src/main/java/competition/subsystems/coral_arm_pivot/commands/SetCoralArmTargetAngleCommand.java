@@ -9,6 +9,10 @@ public class SetCoralArmTargetAngleCommand extends BaseSetpointCommand {
         super(system, additionalSystems);
     }
 
+    public void setAngle() {
+
+    }
+
     @Override
     public void initialize() {
 
