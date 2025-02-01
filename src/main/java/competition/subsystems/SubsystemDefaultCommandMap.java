@@ -13,8 +13,8 @@ import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import competition.subsystems.elevator.commands.ElevatorMaintainerCommand;
-import competition.subsystems.humanLoadRamp.commands.HumanLoadRampRetractCommand;
-import competition.subsystems.humanLoadRamp.HumanLoadRampSubsystem;
+import competition.subsystems.humanloadramp.commands.HumanLoadRampRetractCommand;
+import competition.subsystems.humanloadramp.HumanLoadRampSubsystem;
 
 /**
  * For setting the default commands on subsystems
