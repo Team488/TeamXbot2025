@@ -34,8 +34,8 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
     Angle targetAngle = Degrees.of(0);
     ElectricalContract electricalContract;
     DoubleProperty degreesPerRotations;
-    double rotationsAtZero;
-    boolean isCalibrated = false;
+    double rotationsAtZero = 0;
+    boolean isCalibrated = true;
     final DoubleProperty rangeOfMotionDegrees;
     final DoubleProperty minArmPosition;
     final DoubleProperty maxArmPosition;
@@ -65,7 +65,7 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
             this.lowSensor = null;
         }
 
-        this.degreesPerRotations = propertyFactory.createPersistentProperty("Degrees Per Rotations", 1);
+        this.degreesPerRotations = propertyFactory.createPersistentProperty("Degrees Per Rotations", 0.1);
 
         this.rangeOfMotionDegrees = propertyFactory.createPersistentProperty("Range of Motion in Degrees", 125);
         this.minArmPosition = propertyFactory.createPersistentProperty("Min AbsEncoder Position in Degrees", 90);
@@ -187,5 +187,11 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
 
         // convert from [0,1] position to arm angle in degrees
         return Degrees.of(armPosition * rangeOfMotionDegrees);
+    }
+
+    @Override
+    public void periodic() {
+        aKitLog.record("Target Angle", this.getTargetValue().in(Degrees));
+        aKitLog.record("Current Angle", this.getCurrentValue().in(Degrees));
     }
 }
