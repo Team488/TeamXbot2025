@@ -45,7 +45,6 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     // elevator starts uncalibrated because it could be in the middle of it's range and we have no idea where that is
     private boolean isCalibrated;
     private double elevatorPositionOffset;
-    //TODO: Add a calibration routine
 
     public Distance elevatorTargetHeight;
 
@@ -53,6 +52,9 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     public final DoubleProperty calibrationNegativePower;
     public final DoubleProperty nearUpperLimitThreshold;
     public final DoubleProperty nearLowerLimitThreshold;
+    public final DoubleProperty powerNearLowerLimitThreshold;
+    public final DoubleProperty powerNearUpperLimitThreshold;
+    public final DoubleProperty powerWhenBottomSensorHit;
 
 
     public XCANMotorController masterMotor;
@@ -83,6 +85,9 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         this.calibrationNegativePower = pf.createPersistentProperty("calibrationNegativePower", -0.05);
         this.nearUpperLimitThreshold = pf.createPersistentProperty("nearUpperLimitThreshold", 1.0);
         this.nearLowerLimitThreshold = pf.createPersistentProperty("nearLowerLimitThreshold", 0.25);
+        this.powerNearUpperLimitThreshold = pf.createPersistentProperty("powerNearUpperLimit", 0.1);
+        this.powerNearLowerLimitThreshold = pf.createPersistentProperty("powerNearLowerLimit", -0.1);
+        this.powerWhenBottomSensorHit = pf.createPersistentProperty("powerWhenBottomSensorHit", -0.01);
 
         //these are not real measured heights yet, just placeholders
         l2Height = pf.createPersistentProperty("l2Height-m", 0.5);
@@ -112,13 +117,13 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     public void setPower(double power) {
         if(contract.isElevatorReady()){
             if (isTouchingBottom()){
-                power = MathUtils.constrainDouble(power,-0.01,1);
+                power = MathUtils.constrainDouble(power,powerWhenBottomSensorHit.get(),1);
             }
             if (isNearLowerLimit()){
-                power = MathUtils.constrainDouble(power,-0.1, 1);
+                power = MathUtils.constrainDouble(power,powerNearLowerLimitThreshold.get(), 1);
             }
             if (isNearUpperLimit()){
-                power = MathUtils.constrainDouble(power, -1, 0.1);
+                power = MathUtils.constrainDouble(power, -1, powerNearUpperLimitThreshold.get());
             }
             if (!isCalibrated){
                 power = MathUtils.constrainDouble(power,calibrationNegativePower.get(),0);
