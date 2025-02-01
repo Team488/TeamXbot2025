@@ -73,7 +73,7 @@ public class AlgaeArmSimulator {
         // TODO: convert from global frame of reference to 0' being down
         var armSimAngle = Radians.of(armSim.getAngleRads());
 
-        return armSimAngle.minus(AlgaeArmSimConstants.startingAngle);
+        return armSimAngle.plus(Degrees.of(90));
     }
 
     public boolean isAtCollectionAngle() {

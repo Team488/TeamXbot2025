@@ -17,6 +17,6 @@ public class AlgaeArmSimConstants {
     // so we have 225 as the starting angle which is 0' in arm relative terms
     public static final Angle minAngleRads = Degrees.of(-90);
     public static final Angle maxAngleRads = Degrees.of(90);
-    public static final Angle startingAngle = minAngleRads;
+    public static final Angle startingAngle =  Degrees.of(-90);
     public static final Angle armEncoderAnglePerRotation = Degrees.of(0.1);
 }
