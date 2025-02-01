@@ -91,6 +91,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         }
         if (contract.isElevatorBottomSensorReady()){
             this.bottomSensor= xDigitalInputFactory.create(contract.getElevatorBottomSensor(), "Elevator Bottom Sensor0");
+            this.registerDataFrameRefreshable(bottomSensor);
         }else{
             this.bottomSensor=null;
         }
@@ -148,8 +149,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     public boolean isTouchingBottom(){
         if (contract.isElevatorBottomSensorReady()){
-            return getCurrentValue()
-                    .in(Meters) <= ElevatorSimConstants.elevatorBottomSensorTriggerHeight;
+            return this.bottomSensor.get();
         }
         return false;
     }

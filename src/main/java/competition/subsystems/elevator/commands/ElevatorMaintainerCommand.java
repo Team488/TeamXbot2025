@@ -34,7 +34,6 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     boolean startedCalibration = false;
     boolean givenUpOnCalibration = false;
     double calibrationStartTime = 0;
-    double giveUpCalibratingTime;
     final double calibrationMaxDuration = 5;
     TimeStableValidator calibrationValidator;
 
