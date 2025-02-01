@@ -13,14 +13,13 @@ import xbot.common.properties.PropertyFactory;
 
 import javax.inject.Inject;
 
-
 import static edu.wpi.first.units.Units.Degrees;
 
-public class AlgaeArmMaintainerCommand extends BaseMaintainerCommand <Angle> {
-    AlgaeArmSubsystem algaeArmSubsystem;
-    OperatorInterface oi;
-    final DoubleProperty minPower;
-    final DoubleProperty maxPower;
+public class AlgaeArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
+    final DoubleProperty humanMinPower;
+    final DoubleProperty humanMaxPower;
+    final AlgaeArmSubsystem algaeArmSubsystem;
+    final OperatorInterface oi;
 
     @Inject
     public AlgaeArmMaintainerCommand(AlgaeArmSubsystem algaeArmSubsystem, PropertyFactory pf,
@@ -32,44 +31,50 @@ public class AlgaeArmMaintainerCommand extends BaseMaintainerCommand <Angle> {
         this.oi = oi;
         pf.setPrefix(this);
         pf.setDefaultLevel(Property.PropertyLevel.Important);
-        maxPower = pf.createPersistentProperty("MaxPower", 1);
-        minPower = pf.createPersistentProperty("MinPower", -.1);
+        humanMaxPower = pf.createPersistentProperty("HumanMaxPowerProperty", 1);
+        humanMinPower = pf.createPersistentProperty("HumanMinPowerProperty", -.1);
     }
 
 
-        @Override
-        public void initialize(){
-            log.info("Initializing");
-        }
-        @Override
-        protected void coastAction(){}
-
-        @Override
-        protected void  calibratedMachineControlAction(){
-
-        }
-
-        @Override
-        protected double getErrorMagnitude(){
-            Angle errorMagnitude= algaeArmSubsystem.getCurrentValue().minus(algaeArmSubsystem.getTargetValue());
-
-            return errorMagnitude.in(Degrees);
-
-        }
-
-        @Override
-        protected double getHumanInput() {
-            return MathUtils.constrainDouble(
-                    MathUtils.deadband(
-                            oi.programmerGamepad.getRightStickY(),
-                            oi.getOperatorGamepadTypicalDeadband(),
-                            (a) -> (a)),
-                    minPower.get(), maxPower.get());
-        }
     @Override
-    protected double getHumanInputMagnitude(){return getHumanInput();}
+    public void initialize() {
+        log.info("Initializing");
+    }
+
+    @Override
+    protected void coastAction() {
+    }
+
+    @Override
+    protected void calibratedMachineControlAction() {
 
     }
+
+    @Override
+    protected double getErrorMagnitude() {
+        Angle errorMagnitude = algaeArmSubsystem.getCurrentValue().minus(algaeArmSubsystem.getTargetValue());
+
+
+        return errorMagnitude.in(Degrees);
+
+    }
+
+    @Override
+    protected double getHumanInput() {
+        return MathUtils.constrainDouble(
+                MathUtils.deadband(
+                        oi.algaeArmGamepad.getRightStickY(),
+                        oi.getAlgaeArmGamepadTypicalDeadband(),
+                        (a) -> (a)),
+                humanMinPower.get(), humanMaxPower.get());
+    }
+
+    @Override
+    protected double getHumanInputMagnitude() {
+        return getHumanInput();
+    }
+
+}
 
 
 
