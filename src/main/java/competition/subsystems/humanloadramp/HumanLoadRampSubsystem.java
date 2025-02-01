@@ -15,7 +15,7 @@ public class HumanLoadRampSubsystem extends BaseSubsystem {
     public DoubleProperty extendedPosition;
     public DoubleProperty retractedPosition;
     final ElectricalContract electricalContract;
-    boolean retracted;
+    boolean retracted = true;
     @Inject
     public HumanLoadRampSubsystem (XServo.XServoFactory xServoFactory, ElectricalContract electricalContract,
                                    PropertyFactory propertyFactory) {
@@ -28,7 +28,7 @@ public class HumanLoadRampSubsystem extends BaseSubsystem {
         }
         this.extendedPosition = propertyFactory.createPersistentProperty("ExtendingPosition", 1);
         this.retractedPosition = propertyFactory.createPersistentProperty("RetractingPosition", 0);
-        retracted = true;
+
     }
 
 
@@ -42,7 +42,7 @@ public class HumanLoadRampSubsystem extends BaseSubsystem {
         servo.set(retractedPosition.get());
     }
 
-    public boolean getItRetracted(){
+    public boolean isRetracted(){
         return retracted;
     }
 
