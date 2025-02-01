@@ -15,12 +15,16 @@ import xbot.common.properties.PropertyFactory;
  */
 @Singleton
 public class OperatorInterface {
-    public XXboxController gamepad;
-    public XXboxController programmerGamepad;
-    public XXboxController sysIdGamepad;
+    public final XXboxController gamepad;
+    public final XXboxController programmerGamepad;
+    public final XXboxController algaeArmGamepad;
+    public final XXboxController sysIdGamepad;
 
     final DoubleProperty driverDeadband;
     final DoubleProperty operatorDeadband;
+    final DoubleProperty algaeArmDeadband;
+
+
 
     @Inject
     public OperatorInterface(XXboxControllerFactory controllerFactory, RobotAssertionManager assertionManager, PropertyFactory pf) {
@@ -32,13 +36,18 @@ public class OperatorInterface {
         programmerGamepad.setLeftInversion(false, true);
         programmerGamepad.setRightInversion(true, true);
 
-        sysIdGamepad = controllerFactory.create(5);
+        algaeArmGamepad=controllerFactory.create(5);
+        algaeArmGamepad.setLeftInversion(false,true);
+        algaeArmGamepad.setRightInversion(true,true);
+
+        sysIdGamepad = controllerFactory.create(6);
         sysIdGamepad.setLeftInversion(false, true);
         sysIdGamepad.setRightInversion(true, true);
 
         pf.setPrefix("OperatorInterface");
         driverDeadband = pf.createPersistentProperty("Driver Deadband", 0.12);
         operatorDeadband = pf.createPersistentProperty("Operator Deadband", 0.15);
+        algaeArmDeadband= pf.createPersistentProperty("Algae Arm Deadband", .18);
     }
 
     public double getDriverGamepadTypicalDeadband() {
@@ -47,5 +56,8 @@ public class OperatorInterface {
 
     public double getOperatorGamepadTypicalDeadband() {
         return operatorDeadband.get();
+    }
+    public double getAlgaeArmGamepadTypicalDeadband(){
+        return algaeArmDeadband.get();
     }
 }
