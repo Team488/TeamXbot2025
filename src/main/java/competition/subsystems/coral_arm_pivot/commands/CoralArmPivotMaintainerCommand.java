@@ -1,9 +1,7 @@
-package competition.subsystems.arm_pivot.commands;
+package competition.subsystems.coral_arm_pivot.commands;
 
-import com.fasterxml.jackson.databind.annotation.JsonAppend;
-import competition.Main;
 import competition.operator_interface.OperatorInterface;
-import competition.subsystems.arm_pivot.ArmPivotSubsystem;
+import competition.subsystems.coral_arm_pivot.CoralArmPivotSubsystem;
 import edu.wpi.first.units.measure.Angle;
 import xbot.common.command.BaseMaintainerCommand;
 import xbot.common.logic.HumanVsMachineDecider;
@@ -18,18 +16,18 @@ import javax.inject.Inject;
 import static edu.wpi.first.units.Units.Degrees;
 
 
-public class ArmPivotMaintainerCommand extends BaseMaintainerCommand<Angle> {
+public class CoralArmPivotMaintainerCommand extends BaseMaintainerCommand<Angle> {
 
-   ArmPivotSubsystem armPivotSubsystem;
+   CoralArmPivotSubsystem armPivotSubsystem;
    OperatorInterface oi;
    final DoubleProperty humanMaxPower;
    final DoubleProperty humanMinPower;
 
    @Inject
-   public ArmPivotMaintainerCommand(ArmPivotSubsystem armPivotSubsystem, PropertyFactory pf,
-                                    HumanVsMachineDecider.HumanVsMachineDeciderFactory hvmFactory,
-                                    PIDManager.PIDManagerFactory pidf,
-                                    OperatorInterface oi) {
+   public CoralArmPivotMaintainerCommand(CoralArmPivotSubsystem armPivotSubsystem, PropertyFactory pf,
+                                         HumanVsMachineDecider.HumanVsMachineDeciderFactory hvmFactory,
+                                         PIDManager.PIDManagerFactory pidf,
+                                         OperatorInterface oi) {
 
        super(armPivotSubsystem, pf, hvmFactory, 1,1);
        this.armPivotSubsystem = armPivotSubsystem;

@@ -1,6 +1,6 @@
 package competition.subsystems.coral_scorer.commands;
 
-import competition.subsystems.arm_pivot.ArmPivotSubsystem;
+import competition.subsystems.coral_arm_pivot.CoralArmPivotSubsystem;
 import competition.subsystems.coral_scorer.CoralScorerSubsystem;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import xbot.common.command.BaseCommand;
@@ -9,11 +9,11 @@ import javax.inject.Inject;
 
 public class ScoreWhenReadyCommand extends BaseCommand {
     CoralScorerSubsystem coralScorerSubsystem;
-    ArmPivotSubsystem armPivotSubsystem;
+    CoralArmPivotSubsystem armPivotSubsystem;
     ElevatorSubsystem elevatorSubsystem;
 
     @Inject
-    public ScoreWhenReadyCommand(CoralScorerSubsystem coralScorerSubsystem, ArmPivotSubsystem armPivotSubsystem,
+    public ScoreWhenReadyCommand(CoralScorerSubsystem coralScorerSubsystem, CoralArmPivotSubsystem armPivotSubsystem,
                                  ElevatorSubsystem elevatorSubsystem) {
         this.coralScorerSubsystem = coralScorerSubsystem;
         this.armPivotSubsystem = armPivotSubsystem;
@@ -28,7 +28,7 @@ public class ScoreWhenReadyCommand extends BaseCommand {
 
     @Override
     public void execute() {
-        if (coralScorerSubsystem.hasCoral() && armPivotSubsystem.getIsTargetPositionScoring()
+        if (coralScorerSubsystem.hasCoral() && armPivotSubsystem.getIsTargetAngleScoring()
                 && armPivotSubsystem.isMaintainerAtGoal() && elevatorSubsystem.isMaintainerAtGoal()) {
             coralScorerSubsystem.scorer();
         }
