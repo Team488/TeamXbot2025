@@ -5,6 +5,7 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
+import xbot.common.controls.sensors.XLaserCAN;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.controls.sensors.XDigitalInput;
 import xbot.common.properties.PropertyFactory;
@@ -14,6 +15,7 @@ import javax.inject.Singleton;
 
 import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
@@ -54,10 +56,13 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     public final XDigitalInput bottomSensor;
 
+    public final XLaserCAN distanceSensor;
+
 
     @Inject
     public ElevatorSubsystem(XCANMotorController.XCANMotorControllerFactory motorFactory, PropertyFactory pf,
-                             ElectricalContract contract, XDigitalInput.XDigitalInputFactory xDigitalInputFactory){
+                             ElectricalContract contract, XDigitalInput.XDigitalInputFactory xDigitalInputFactory,
+                             XLaserCAN.XLaserCANFactory xLaserCANFactory) {
 
         this.contract = contract;
 
@@ -81,10 +86,16 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
             this.registerDataFrameRefreshable(masterMotor);
         }
         if (contract.isElevatorBottomSensorReady()){
-            this.bottomSensor= xDigitalInputFactory.create(contract.getElevatorBottomSensor(), "Elevator Bottom Sensor0");
+            this.bottomSensor= xDigitalInputFactory.create(contract.getElevatorBottomSensor(), this.getPrefix());
         }else{
             this.bottomSensor=null;
+        }
 
+        if (contract.isElevatorDistanceSensorReady()) {
+            this.distanceSensor = xLaserCANFactory.create(contract.getElevatorDistanceSensor(), this.getPrefix());
+            registerDataFrameRefreshable(distanceSensor);
+        } else {
+            this.distanceSensor = null;
         }
     }
 
@@ -148,6 +159,14 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         return isCalibrated;
     }
 
+    private Distance getRawDistance() {
+        if (contract.isElevatorDistanceSensorReady()) {
+            return distanceSensor.getDistance();
+        } else {
+            return Meter.of(0);
+        }
+    }
+
     @Override
     protected boolean areTwoTargetsEquivalent(Distance target1, Distance target2) {
         return target1.isEquivalent(target2);
@@ -160,6 +179,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         aKitLog.record("ElevatorTargetHeight-m",elevatorTargetHeight);
         aKitLog.record("ElevatorCurrentHeight-m",getCurrentValue().in(Meters));
         aKitLog.record("ElevatorBottomSensor",this.isTouchingBottom());
+        aKitLog.record("ElevatorDistanceSensor-m",getRawDistance().in(Meters));
     }
 
 
