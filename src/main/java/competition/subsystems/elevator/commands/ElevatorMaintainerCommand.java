@@ -3,21 +3,16 @@ package competition.subsystems.elevator.commands;
 import competition.motion.TrapezoidProfileManager;
 import competition.operator_interface.OperatorInterface;
 import competition.subsystems.elevator.ElevatorSubsystem;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.Distance;
 import xbot.common.command.BaseMaintainerCommand;
-import xbot.common.controls.sensors.XTimer;
 import xbot.common.logic.HumanVsMachineDecider;
 import xbot.common.math.MathUtils;
 import xbot.common.math.PIDManager;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Rotations;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -50,7 +45,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         var pf = pfProvider.get();
         pf.setPrefix(this);
         this.elevator = elevator;
-        profileManager = new TrapezoidProfileManager(getPrefix() + "/trapezoidMotion", pfProvider.get(), 1, 1, elevator.getCurrentValue().in(Meters));
+        profileManager = new TrapezoidProfileManager(getPrefix() + "trapezoidMotion", pfProvider.get(), 1, 1, elevator.getCurrentValue().in(Meters));
 
         this.oi = oi;
         positionPID = pidf.create(getPrefix() + "positionPID", 0.00, 0, 0.0);
@@ -74,6 +69,8 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
         profileManager.setTargetValue(elevator.getTargetValue().in(Meters), elevator.getCurrentValue().in(Meters), elevator.getCurrentVelocity().in(MetersPerSecond));
         var setpoint = profileManager.getCurrentPositionSetpoint();
+
+        // it's helpful to log this to know where the robot is actually trying to get to in the moment
         aKitLog.record("elevatorProfileTarget", setpoint);
 
         double power = positionPID.calculate(

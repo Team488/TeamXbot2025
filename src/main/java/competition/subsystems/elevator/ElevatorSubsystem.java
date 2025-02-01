@@ -33,7 +33,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     final ElectricalContract contract;
 
-    private boolean isCalibrated = true; //set to true just for testing purposes
+    // elevator starts uncalibrated because it could be in the middle of it's range and we have no idea where that is
+    private boolean isCalibrated;
     //TODO: Add a calibration routine
 
     public Distance elevatorTargetHeight;
