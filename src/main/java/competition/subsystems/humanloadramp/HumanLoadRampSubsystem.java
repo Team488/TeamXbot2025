@@ -10,7 +10,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
-
 public class HumanLoadRampSubsystem extends BaseSubsystem {
     public final XServo servo;
     public DoubleProperty extendedPosition;
