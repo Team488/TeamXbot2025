@@ -1,5 +1,6 @@
 package competition.subsystems.elevator.commands;
 
+import competition.motion.TrapezoidProfileManager;
 import competition.operator_interface.OperatorInterface;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.units.measure.Distance;
@@ -10,12 +11,11 @@ import xbot.common.math.PIDManager;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
@@ -34,13 +34,18 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     final DoubleProperty humanMaxPowerGoingUp;
     final DoubleProperty humanMaxPowerGoingDown;
 
+    final TrapezoidProfileManager profileManager;
+
     @Inject
-    public ElevatorMaintainerCommand(ElevatorSubsystem elevator, PropertyFactory pf,
+    public ElevatorMaintainerCommand(ElevatorSubsystem elevator, Provider<PropertyFactory> pfProvider,
                                      HumanVsMachineDecider.HumanVsMachineDeciderFactory hvmFactory,
                                      PIDManager.PIDManagerFactory pidf,
                                      OperatorInterface oi){
-        super(elevator,pf,hvmFactory, 1, 0.2);
+        super(elevator, pfProvider.get(),hvmFactory, 1, 0.2);
+        var pf = pfProvider.get();
+        pf.setPrefix(this);
         this.elevator = elevator;
+        profileManager = new TrapezoidProfileManager(getPrefix() + "trapezoidMotion", pfProvider.get(), 1, 1, elevator.getCurrentValue().in(Meters));
 
         this.oi = oi;
         positionPID = pidf.create(getPrefix() + "positionPID", 0.00, 0, 0.0);
@@ -52,8 +57,6 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     @Override
     public void initialize() {
         log.info("initializing");
-        //initializeMachineControlAction();
-
     }
 
     @Override
@@ -63,8 +66,19 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     @Override
     protected void calibratedMachineControlAction() {
+
+        profileManager.setTargetPosition(
+            elevator.getTargetValue().in(Meters),
+            elevator.getCurrentValue().in(Meters),
+            elevator.getCurrentVelocity().in(MetersPerSecond)
+        );
+        var setpoint = profileManager.getRecommendedPositionForTime();
+
+        // it's helpful to log this to know where the robot is actually trying to get to in the moment
+        aKitLog.record("elevatorProfileTarget", setpoint);
+
         double power = positionPID.calculate(
-                elevator.getTargetValue().in(Meters),
+                setpoint,
                 elevator.getCurrentValue().in(Meters));
 //        double power = (elevator.getTargetValue().in(Meters) - elevator.getCurrentValue().in(Meters)) * 0.5;
 //        power = MathUtils.constrainDouble(power,-0.8, 1);
