@@ -67,7 +67,7 @@ public class VisionSubsystem extends BaseSubsystem implements DataFrameRefreshab
         // we need to handle cases like not having the AprilTag data loaded.
 
         try {
-            aprilTagFieldLayout = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2024Crescendo.m_resourceFile);
+            aprilTagFieldLayout = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2025Reefscape.m_resourceFile);
             aprilTagsLoaded = true;
             log.info("Successfully loaded AprilTagFieldLayout");
         } catch (IOException e) {
