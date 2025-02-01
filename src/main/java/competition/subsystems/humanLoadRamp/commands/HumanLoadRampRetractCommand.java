@@ -1,19 +1,20 @@
-package competition.subsystems.humanLoadRamp.Commands;
+package competition.subsystems.humanLoadRamp.commands;
 
 import competition.subsystems.humanLoadRamp.HumanLoadRampSubsystem;
 import xbot.common.command.BaseCommand;
 
 import javax.inject.Inject;
 
-public class HumanLoadRampExtendCommand extends BaseCommand {
+public class HumanLoadRampRetractCommand extends BaseCommand {
     HumanLoadRampSubsystem ramp;
 
     @Inject
-    public HumanLoadRampExtendCommand (HumanLoadRampSubsystem humanLoadRampSubsystem){
+    public HumanLoadRampRetractCommand (HumanLoadRampSubsystem humanLoadRampSubsystem){
         ramp = humanLoadRampSubsystem;
         this.addRequirements(ramp);
+
     }
     public void initialize(){
-        ramp.extend();
+        ramp.retract();
     }
 }

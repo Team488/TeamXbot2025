@@ -13,8 +13,7 @@ import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import competition.subsystems.elevator.commands.ElevatorMaintainerCommand;
-import competition.subsystems.elevator.commands.SetElevatorTargetHeightCommand;
-import competition.subsystems.humanLoadRamp.Commands.HumanLoadRampRetractCommand;
+import competition.subsystems.humanLoadRamp.commands.HumanLoadRampRetractCommand;
 import competition.subsystems.humanLoadRamp.HumanLoadRampSubsystem;
 
 /**
@@ -55,4 +54,6 @@ public class SubsystemDefaultCommandMap {
     public void setupHumanLoadRampSubSystem(HumanLoadRampSubsystem humanLoadRampSubsystem, HumanLoadRampRetractCommand command){
         humanLoadRampSubsystem.setDefaultCommand(command);
     }
+
+
 }
