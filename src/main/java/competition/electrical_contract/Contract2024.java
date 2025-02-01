@@ -182,9 +182,9 @@ public class Contract2024 extends Contract2025 {
     public CameraInfo[] getCameraInfo() {
         // 2024 was having issues due to PhotonLib version mismatch, so temporarily
         // disabling all vision activities by declaring no cameras.
-        return new CameraInfo[] {};
+//        return new CameraInfo[] {};
 
-        /*
+
         return new CameraInfo[] {
                 new CameraInfo("Apriltag_FrontLeft_Camera",
                         "AprilTagFrontLeft",
@@ -208,7 +208,7 @@ public class Contract2024 extends Contract2025 {
                                 -rearAprilCameraXDisplacement,
                                 rearAprilCameraYDisplacement,
                                 rearAprilCameraZDisplacement),
-                                new Rotation3d(0, 0, Math.toRadians(180))),
+                                new Rotation3d(0, rearAprilCameraPitch, rearAprilCameraYaw)),
                         EnumSet.of(CameraCapabilities.APRIL_TAG)),
                 new CameraInfo("Apriltag_RearRight_Camera",
                         "AprilTagRearRight",
@@ -216,25 +216,24 @@ public class Contract2024 extends Contract2025 {
                                 -rearAprilCameraXDisplacement,
                                 -rearAprilCameraYDisplacement,
                                 rearAprilCameraZDisplacement),
-                                new Rotation3d(0, 0, Math.toRadians(180))),
-                        EnumSet.of(CameraCapabilities.APRIL_TAG)),
-                new CameraInfo("GamePiece_FrontLeft_Camera",
-                        rearCenterNoteCameraName,
-                        new Transform3d(new Translation3d(), new Rotation3d()),
-                        EnumSet.of(CameraCapabilities.GAME_SPECIFIC)),
-                new CameraInfo("GamePiece_FrontRight_Camera",
-                        "NoteFrontRight",
-                        new Transform3d(new Translation3d(), new Rotation3d()),
-                        EnumSet.of(CameraCapabilities.GAME_SPECIFIC)),
-                new CameraInfo("GamePiece_RearLeft_Camera",
-                        rearLeftNoteCameraName,
-                        new Transform3d(new Translation3d(), new Rotation3d()),
-                        EnumSet.of(CameraCapabilities.GAME_SPECIFIC)),
-                new CameraInfo("GamePiece_RearRight_Camera",
-                        rearRightNoteCameraName,
-                        new Transform3d(new Translation3d(), new Rotation3d()),
-                        EnumSet.of(CameraCapabilities.GAME_SPECIFIC))
+                                new Rotation3d(0, rearAprilCameraPitch, rearAprilCameraYaw)),
+                        EnumSet.of(CameraCapabilities.APRIL_TAG))
+//                , new CameraInfo("GamePiece_FrontLeft_Camera",
+//                        rearCenterNoteCameraName,
+//                        new Transform3d(new Translation3d(), new Rotation3d()),
+//                        EnumSet.of(CameraCapabilities.GAME_SPECIFIC)),
+//                new CameraInfo("GamePiece_FrontRight_Camera",
+//                        "NoteFrontRight",
+//                        new Transform3d(new Translation3d(), new Rotation3d()),
+//                        EnumSet.of(CameraCapabilities.GAME_SPECIFIC)),
+//                new CameraInfo("GamePiece_RearLeft_Camera",
+//                        rearLeftNoteCameraName,
+//                        new Transform3d(new Translation3d(), new Rotation3d()),
+//                        EnumSet.of(CameraCapabilities.GAME_SPECIFIC)),
+//                new CameraInfo("GamePiece_RearRight_Camera",
+//                        rearRightNoteCameraName,
+//                        new Transform3d(new Translation3d(), new Rotation3d()),
+//                        EnumSet.of(CameraCapabilities.GAME_SPECIFIC))
         };
-         */
     }
 }
