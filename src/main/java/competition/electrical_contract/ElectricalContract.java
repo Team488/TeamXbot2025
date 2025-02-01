@@ -26,6 +26,10 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
 
     public abstract CANMotorControllerInfo getElevatorMotor();
 
+    public abstract boolean isElevatorDistanceSensorReady();
+
+    public abstract DeviceInfo getElevatorDistanceSensor();
+
     public abstract boolean isAlgaeCollectionReady();
 
     public abstract CANMotorControllerInfo getAlgaeCollectionMotor();

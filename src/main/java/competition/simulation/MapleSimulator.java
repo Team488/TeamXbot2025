@@ -1,5 +1,6 @@
 package competition.simulation;
 
+import competition.simulation.algae_arm.AlgaeArmSimulator;
 import competition.simulation.coral_arm.CoralArmSimulator;
 import competition.simulation.coral_scorer.CoralScorerSimulator;
 import competition.simulation.elevator.ElevatorSimulator;
@@ -39,9 +40,10 @@ public class MapleSimulator implements BaseSimulator {
 
     // sub simulators ----------------------------
     final ElevatorSimulator elevatorSimulator;
-    final CoralArmSimulator armSimulator;
+    final CoralArmSimulator coralArmSimulator;
     final ReefSimulator reefSimulator;
     final CoralScorerSimulator coralScorerSimulator;
+    final AlgaeArmSimulator algaeArmSimulator;
 
     final Distance humanLoadingDistanceThreshold = Meters.of(0.5);
 
@@ -52,13 +54,15 @@ public class MapleSimulator implements BaseSimulator {
 
     @Inject
     public MapleSimulator(PoseSubsystem pose, DriveSubsystem drive, ElevatorSimulator elevatorSimulator,
-                          CoralArmSimulator armSimulator, ReefSimulator reefSimulator, CoralScorerSimulator coralScorerSimulator) {
+                          CoralArmSimulator armSimulator, ReefSimulator reefSimulator, 
+                          CoralScorerSimulator coralScorerSimulator, AlgaeArmSimulator algaeArmSimulator) {
         this.pose = pose;
         this.drive = drive;
         this.elevatorSimulator = elevatorSimulator;
-        this.armSimulator = armSimulator;
+        this.coralArmSimulator = armSimulator;
         this.reefSimulator = reefSimulator;
         this.coralScorerSimulator = coralScorerSimulator;
+        this.algaeArmSimulator = algaeArmSimulator;
         this.superstructureMechanism = new SuperstructureMechanism();
 
         aKitLog = new AKitLogger("Simulator/");
@@ -91,8 +95,9 @@ public class MapleSimulator implements BaseSimulator {
     public void update() {
         this.updateDriveSimulation();
         elevatorSimulator.update();
-        armSimulator.update();
+        coralArmSimulator.update();
         reefSimulator.update();
+        algaeArmSimulator.update();
         this.updateCoralLoadFromHumanPlayer();
         this.updateCoralScorerSensor();
         this.updateSuperstructureMechanism();
@@ -100,8 +105,9 @@ public class MapleSimulator implements BaseSimulator {
     
     void updateSuperstructureMechanism() {
         superstructureMechanism.setElevatorHeight(elevatorSimulator.getCurrentHeight());
-        superstructureMechanism.setArmAngle(armSimulator.getArmAngle());
+        superstructureMechanism.setCoralArmAngle(coralArmSimulator.getArmAngle());
         superstructureMechanism.setCoralInScorer(coralScorerSimulator.isCoralLoaded());
+        superstructureMechanism.setAlgaeArmAngle(algaeArmSimulator.getArmAngle());
         aKitLog.record("FieldSimulation/SuperstructureMechanism", superstructureMechanism.getMechanism());
     }
 
@@ -125,7 +131,7 @@ public class MapleSimulator implements BaseSimulator {
 
     protected void updateCoralLoadFromHumanPlayer() {
         var elevatorAtCollectionHeight = elevatorSimulator.isAtCollectionHeight();
-        var armAtCollectionAngle = armSimulator.isAtCollectionAngle();
+        var armAtCollectionAngle = coralArmSimulator.isAtCollectionAngle();
         var coralScorerIsIntaking = coralScorerSimulator.isIntaking();
         Pose2d[] coralStations = {Landmarks.BlueLeftCoralStationMid, Landmarks.BlueRightCoralStationMid};
         var currentPose = this.getGroundTruthPose();
