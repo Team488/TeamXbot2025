@@ -74,7 +74,6 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         this.elevatorPositionOffset = 0.0;
 
         this.elevatorTargetHeight = Inches.of(0);
-        this.distanceFromTargetHeight = Feet.of(0);
 
         pf.setPrefix(this);
         //to be tuned
@@ -131,7 +130,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     }
 
     public LinearVelocity getCurrentVelocity() {
-        return MetersPerSecond.of(masterMotor.getVelocity().in(RotationsPerSecond) * metersPerRotation.get());
+        return MetersPerSecond.of(masterMotor.getVelocity().in(RotationsPerSecond) * rotationsPerMeter.get());
     }
 
     @Override
