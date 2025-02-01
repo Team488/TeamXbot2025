@@ -2,8 +2,10 @@ package competition.subsystems.algae_arm;
 
 import competition.electrical_contract.ElectricalContract;
 import edu.wpi.first.units.measure.Angle;
+import xbot.common.advantage.AKitLogger;
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
+import xbot.common.controls.sensors.XDigitalInput;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 
@@ -23,10 +25,11 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
     final DoubleProperty degreesPerRotation;
     double rotationsAtZero;
     final boolean isCalibrated = false;
+    public final XDigitalInput bottomSensor;
 
     @Inject
     public AlgaeArmSubsystem(ElectricalContract electricalContract,
-                             XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory, PropertyFactory propertyFactory) {
+                             XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory, PropertyFactory propertyFactory, XDigitalInput.XDigitalInputFactory xDigitalInputFactory) {
         propertyFactory.setPrefix(this);
         this.electricalContract = electricalContract;
         if (electricalContract.isAlgaeArmPivotMotorReady()) {
@@ -35,6 +38,12 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
             this.registerDataFrameRefreshable(this.armMotor);
         } else{
             this.armMotor=null;
+        }
+
+        if (electricalContract.isAlgaeArmBottomSensorReady()){
+            this.bottomSensor= xDigitalInputFactory.create(electricalContract.getElevatorBottomSensor(), "ElevatorBottomSensor");
+        } else{
+            this.bottomSensor=null;
         }
         this.degreesPerRotation = propertyFactory.createPersistentProperty("DegreesPerRotation", 1);
     }
@@ -72,6 +81,13 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
     }
 
+    public boolean isTouchingBottom(){
+        if (electricalContract.isAlgaeArmBottomSensorReady()){
+            return this.bottomSensor.get();
+        }
+        return false;
+    }
+
     @Override
     public boolean isCalibrated() {
         return isCalibrated;
@@ -81,6 +97,7 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
     protected boolean areTwoTargetsEquivalent(Angle targetAngle1, Angle targetAngle2) {
         return targetAngle1.isEquivalent(targetAngle2);
     }
+        
 
 
 }

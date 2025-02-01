@@ -81,7 +81,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
             this.registerDataFrameRefreshable(masterMotor);
         }
         if (contract.isElevatorBottomSensorReady()){
-            this.bottomSensor= xDigitalInputFactory.create(contract.getElevatorBottomSensor(), "Elevator Bottom Sensor0");
+            this.bottomSensor= xDigitalInputFactory.create(contract.getElevatorBottomSensor(), "Elevator Bottom Sensor");
         }else{
             this.bottomSensor=null;
 

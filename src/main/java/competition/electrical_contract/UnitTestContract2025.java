@@ -28,4 +28,6 @@ public class UnitTestContract2025 extends Contract2025 {
     public boolean areCanCodersReady() { return true; }
 
     public boolean isElevatorBottomSensorReady() { return true; }
+
+    public boolean isAlgaeArmBottomSensorReady() { return true; }
 }

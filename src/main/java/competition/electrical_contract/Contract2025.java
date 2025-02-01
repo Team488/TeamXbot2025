@@ -80,6 +80,8 @@ public class Contract2025 extends ElectricalContract {
         return false;
     }
 
+    public DeviceInfo getAlgaeArmBottomSensor() {return new DeviceInfo("AlgaeArmBottomSensor",1); }
+
     @Override
     public CANMotorControllerInfo getAlgaeArmPivotMotor() {
         return new CANMotorControllerInfo("AlgaeArmPivotMotor",
