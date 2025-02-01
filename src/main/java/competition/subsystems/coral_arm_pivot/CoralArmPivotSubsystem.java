@@ -49,7 +49,7 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
 
         this.electricalContract = electricalContract;
 
-        if (electricalContract.isArmPivotReady()) {
+        if (electricalContract.isArmPivotMotorReady()) {
             this.armMotor = xcanMotorControllerFactory.create(electricalContract.getArmPivotMotor(),
                     getPrefix(), "ArmPivotMotor");
             this.armAbsoluteEncoder = xAbsoluteEncoderFactory.create(electricalContract.getArmPivotAbsoluteEncoder(),
