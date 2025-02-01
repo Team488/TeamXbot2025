@@ -20,6 +20,7 @@ import edu.wpi.first.math.numbers.N3;
 import xbot.common.controls.sensors.XGyro.XGyroFactory;
 import xbot.common.math.WrappedRotation2d;
 import xbot.common.properties.BooleanProperty;
+import xbot.common.properties.Property;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.pose.BasePoseSubsystem;
 import xbot.common.subsystems.vision.AprilTagVisionSubsystem;
@@ -48,6 +49,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
         fullSwerveOdometry = initializeSwerveOdometry();
 
         propManager.setPrefix(this);
+        propManager.setDefaultLevel(Property.PropertyLevel.Important);
         useVisionAssistedPose = propManager.createPersistentProperty("UseVisionAssistedPose", true);
         reportCameraPoses = propManager.createPersistentProperty("ReportCameraPoses", false);
     }
