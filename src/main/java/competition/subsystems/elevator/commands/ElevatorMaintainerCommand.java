@@ -6,6 +6,7 @@ import competition.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.units.measure.Distance;
 import xbot.common.command.BaseMaintainerCommand;
 import xbot.common.controls.sensors.XTimer;
+import xbot.common.logic.CalibrationDecider;
 import xbot.common.logic.HumanVsMachineDecider;
 import xbot.common.logic.TimeStableValidator;
 import xbot.common.math.MathUtils;
@@ -37,7 +38,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     boolean givenUpOnCalibration = false;
     double calibrationStartTime = 0;
     final double calibrationMaxDuration = 5;
-    TimeStableValidator calibrationValidator;
+    CalibrationDecider calibrationDecider;
 
     final DoubleProperty humanMaxPowerGoingUp;
     final DoubleProperty humanMaxPowerGoingDown;
@@ -47,6 +48,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     @Inject
     public ElevatorMaintainerCommand(ElevatorSubsystem elevator, Provider<PropertyFactory> pfProvider,
                                      HumanVsMachineDecider.HumanVsMachineDeciderFactory hvmFactory,
+                                     CalibrationDecider.CalibrationDeciderFactory calibrationDeciderFactory,
                                      PIDManager.PIDManagerFactory pidf,
                                      OperatorInterface oi){
         super(elevator, pfProvider.get(),hvmFactory, 1, 0.2);
@@ -56,7 +58,10 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         profileManager = new TrapezoidProfileManager(getPrefix() + "trapezoidMotion", pfProvider.get(), 1, 1, elevator.getCurrentValue().in(Meters));
 
         this.oi = oi;
-      
+
+        calibrationDecider = calibrationDeciderFactory.create("calibrationDecider");
+        calibrationDecider.reset();
+
         positionPID = pidf.create(getPrefix() + "positionPID", 0.1, 0, 0.5);
 
         this.humanMaxPowerGoingUp = pf.createPersistentProperty("maxPowerGoingUp", 1);
@@ -93,25 +98,23 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     @Override
     protected void uncalibratedMachineControlAction() {
-        if (!startedCalibration){
-            calibrationStartTime = XTimer.getFPGATimestamp();
-            startedCalibration = true;
-        }
+        calibrationDecider.reset();
+        var mode = calibrationDecider.decideMode(elevator.isCalibrated());
 
-        if (calibrationStartTime + calibrationMaxDuration < XTimer.getFPGATimestamp()){
-            givenUpOnCalibration = true;
+        switch (mode){
+            case Calibrated -> calibratedMachineControlAction();
+            case Attempting -> attemptCalibration();
+            case GaveUp -> humanControlAction();
+            default -> humanControlAction();
         }
+    }
 
-        if (!givenUpOnCalibration){
-            elevator.setPower(elevator.calibrationNegativePower.get());
+    private void attemptCalibration(){
+        elevator.setPower(elevator.calibrationNegativePower.get());
 
-            if (elevator.isTouchingBottom()){
-                elevator.markElevatorAsCalibratedAgainstLowerLimit();
-                elevator.setTargetValue(elevator.getCurrentValue());
-            }
-        }
-        else{
-            humanControlAction();
+        if (elevator.isTouchingBottom()){
+            elevator.markElevatorAsCalibratedAgainstLowerLimit();
+            elevator.setTargetValue(elevator.getCurrentValue());
         }
     }
 

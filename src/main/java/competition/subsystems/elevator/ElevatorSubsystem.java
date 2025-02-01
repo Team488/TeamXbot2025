@@ -6,6 +6,7 @@ import edu.wpi.first.units.measure.LinearVelocity;
 
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
+import xbot.common.math.MathUtils;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.controls.sensors.XDigitalInput;
 import xbot.common.properties.PropertyFactory;
@@ -48,8 +49,10 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     public Distance elevatorTargetHeight;
 
-    final DoubleProperty rotationsPerMeter;
+    public final DoubleProperty rotationsPerMeter;
     public final DoubleProperty calibrationNegativePower;
+    public final DoubleProperty nearUpperLimitThreshold;
+    public final DoubleProperty nearLowerLimitThreshold;
 
     public XCANMotorController masterMotor;
 
@@ -77,6 +80,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         //to be tuned
         this.rotationsPerMeter = pf.createPersistentProperty("RotationsPerMeter", 1923);
         this.calibrationNegativePower = pf.createPersistentProperty("calibrationNegativePower", -0.05);
+        this.nearUpperLimitThreshold = pf.createPersistentProperty("nearUpperLimitThreshold", 1.0);
+        this.nearLowerLimitThreshold = pf.createPersistentProperty("nearLowerLimitThreshold", 0.25);
 
         //these are not real measured heights yet, just placeholders
         l2Height = pf.createPersistentProperty("l2Height-m", 0.5);
@@ -105,8 +110,17 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     @Override
     public void setPower(double power) {
         if(contract.isElevatorReady()){
+            if (isTouchingBottom()){
+                power = MathUtils.constrainDouble(power,-0.01,1);
+            }
+            if (isNearLowerLimit()){
+                power = MathUtils.constrainDouble(power,-0.1, 1);
+            }
+            if (isNearUpperLimit()){
+                power = MathUtils.constrainDouble(power, -1, 0.1);
+            }
             if (!isCalibrated){
-                power = calibrationNegativePower.get();
+                power = MathUtils.constrainDouble(power,calibrationNegativePower.get(),0);
             }
             masterMotor.setPower(power);
         }
@@ -157,6 +171,14 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
             return this.bottomSensor.get();
         }
         return false;
+    }
+
+    public boolean isNearUpperLimit(){
+        return getCurrentValue().in(Meters) > nearUpperLimitThreshold.get();
+    }
+
+    public boolean isNearLowerLimit(){
+        return getCurrentValue().in(Meters) < nearLowerLimitThreshold.get();
     }
 
     public void setCalibrated(boolean calibrated){
