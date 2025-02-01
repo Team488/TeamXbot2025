@@ -1,6 +1,7 @@
 
 package competition;
 
+import au.grapplerobotics.CanBridge;
 import competition.injection.components.BaseRobotComponent;
 import competition.injection.components.DaggerRobotComponent2023;
 import competition.injection.components.DaggerRobotComponent2024;
@@ -34,11 +35,12 @@ public class Robot extends BaseRobot {
 
         dataFrameRefreshables.add((DriveSubsystem)getInjectorComponent().driveSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().poseSubsystem());
-        dataFrameRefreshables.add(getInjectorComponent().visionSubsystem());
-        dataFrameRefreshables.add(getInjectorComponent().aprilTagVisionSubsystem());
+        dataFrameRefreshables.add(getInjectorComponent().coprocessorCommunicationSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().armPivotSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().elevatorSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().coralScorerSubsystem());
+
+        CanBridge.runTCP();
     }
 
     protected BaseRobotComponent createDaggerComponent() {

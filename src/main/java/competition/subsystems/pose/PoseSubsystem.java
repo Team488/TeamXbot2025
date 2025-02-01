@@ -1,5 +1,6 @@
 package competition.subsystems.pose;
 
+import java.util.HashMap;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -20,6 +21,7 @@ import edu.wpi.first.math.numbers.N3;
 import xbot.common.controls.sensors.XGyro.XGyroFactory;
 import xbot.common.math.WrappedRotation2d;
 import xbot.common.properties.BooleanProperty;
+import xbot.common.properties.Property;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.pose.BasePoseSubsystem;
 import xbot.common.subsystems.vision.AprilTagVisionSubsystem;
@@ -48,6 +50,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
         fullSwerveOdometry = initializeSwerveOdometry();
 
         propManager.setPrefix(this);
+        propManager.setDefaultLevel(Property.PropertyLevel.Important);
         useVisionAssistedPose = propManager.createPersistentProperty("UseVisionAssistedPose", true);
         reportCameraPoses = propManager.createPersistentProperty("ReportCameraPoses", false);
     }
@@ -186,5 +189,39 @@ public class PoseSubsystem extends BasePoseSubsystem {
     // used by the physics simulator to mock what the swerve modules are doing currently for pose estimation
     public void ingestSimulatedSwerveModulePositions(SwerveModulePosition[] positions) {
         this.simulatedModulePositions = Optional.of(positions);
+    }
+
+    public Pose2d getClosestReefFacePose() {
+        Pose2d currentPose = getCurrentPose2d();
+
+        double closeDistance = convertBlueToRedIfNeeded(
+                Landmarks.BlueCloseAlgae).getTranslation().getDistance(currentPose.getTranslation());
+        double closeLeftDistance = PoseSubsystem.convertBlueToRedIfNeeded(
+                Landmarks.BlueCloseLeftAlgae).getTranslation().getDistance(currentPose.getTranslation());
+        double closeRightDistance = PoseSubsystem.convertBlueToRedIfNeeded(
+                Landmarks.BlueCloseRightAlgae).getTranslation().getDistance(currentPose.getTranslation());
+        double farLeftDistance = PoseSubsystem.convertBlueToRedIfNeeded(
+                Landmarks.BlueFarLeftAlgae).getTranslation().getDistance(currentPose.getTranslation());
+        double farDistance = PoseSubsystem.convertBlueToRedIfNeeded(
+                Landmarks.BlueFarAlgae).getTranslation().getDistance(currentPose.getTranslation());
+        double farRightDistance = PoseSubsystem.convertBlueToRedIfNeeded(
+                Landmarks.BlueFarRightAlgae).getTranslation().getDistance(currentPose.getTranslation());
+
+        HashMap<Double, Pose2d> hashMap = new HashMap<>();
+        hashMap.put(closeLeftDistance, PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueCloseLeftAlgae));
+        hashMap.put(closeDistance, PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueCloseAlgae));
+        hashMap.put(closeRightDistance, PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueCloseRightAlgae));
+        hashMap.put(farLeftDistance, PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueFarLeftAlgae));
+        hashMap.put(farDistance, PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueFarAlgae));
+        hashMap.put(farRightDistance, PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueFarRightAlgae));
+
+        double leastDistance = closeLeftDistance;
+
+        for (Double distance : hashMap.keySet()) {
+            if (distance < leastDistance) {
+                leastDistance = distance;
+            }
+        }
+        return hashMap.get(leastDistance);
     }
 }

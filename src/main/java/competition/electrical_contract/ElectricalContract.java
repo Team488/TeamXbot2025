@@ -26,6 +26,10 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
 
     public abstract CANMotorControllerInfo getElevatorMotor();
 
+    public abstract boolean isElevatorDistanceSensorReady();
+
+    public abstract DeviceInfo getElevatorDistanceSensor();
+
     public abstract boolean isAlgaeCollectionReady();
 
     public abstract CANMotorControllerInfo getAlgaeCollectionMotor();
@@ -38,6 +42,14 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
 
     public abstract CANMotorControllerInfo getArmPivotMotor();
 
+    public abstract boolean isArmPivotAbsoluteEncoderReady();
+
+    public abstract DeviceInfo getArmPivotAbsoluteEncoder();
+
+    public abstract boolean isArmPivotLowSensorReady();
+
+    public abstract DeviceInfo getArmPivotLowSensor();
+
     public abstract boolean isCoralSensorReady();
 
     public abstract DeviceInfo getCoralSensor();
@@ -45,5 +57,11 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
     public abstract boolean isElevatorBottomSensorReady();
 
     public abstract DeviceInfo getElevatorBottomSensor();
+
+    public abstract boolean isHumanLoadRampReady();
+
+    public abstract CANMotorControllerInfo getAlgaeArmPivotMotor();
+
+    public abstract boolean isAlgaeArmPivotMotorReady();
 
 }

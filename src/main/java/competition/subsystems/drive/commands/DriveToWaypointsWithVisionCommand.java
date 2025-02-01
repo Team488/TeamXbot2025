@@ -51,10 +51,9 @@ public class DriveToWaypointsWithVisionCommand extends SwerveSimpleTrajectoryCom
 
         this.logic.setKeyPoints(swervePoints);
         this.logic.setAimAtGoalDuringFinalLeg(true);
-        this.logic.setDriveBackwards(true);
+//        this.logic.setDriveBackwards(true);
         this.logic.setEnableConstantVelocity(true);
 
-        log.info("Ingested waypoints, now driving.");
         this.logic.setConstantVelocity(this.drive.getDriveToWaypointsSpeed());
 
         reset();
@@ -65,11 +64,15 @@ public class DriveToWaypointsWithVisionCommand extends SwerveSimpleTrajectoryCom
         XTablesClient xclient = this.vision.getXTablesClient();
 
         // both potentialy null. Will not do anything if coordinates is null, but can proceed if heading is null
-        List<XTableValues.Coordinate> coordinates = xclient.getCoordinates(this.vision.getXtablesCoordinateLocation());
+//        List<XTableValues.Coordinate> coordinates = xclient.getCoordinates(this.vision.getXtablesCoordinateLocation());
+        List<XTableValues.Coordinate> coordinates = xclient.getCoordinates("target_waypoints");
         if(coordinates == null){
             // fail
+            log.warn("No coordinates found in vision.");
+            this.prepareToDriveWithWaypoints(new Translation2d[]{},Rotation2d.fromDegrees(0));
             return;
         }
+        log.info("Ingested waypoints, preparing to drive.");
         Translation2d[] waypoints = new Translation2d[coordinates.size()];
         for (int i = 0;i<coordinates.size();i++) {
             XTableValues.Coordinate coordinate = coordinates.get(i);

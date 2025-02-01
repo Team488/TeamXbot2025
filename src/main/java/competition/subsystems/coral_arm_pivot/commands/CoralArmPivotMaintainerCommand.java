@@ -1,9 +1,7 @@
-package competition.subsystems.arm_pivot.commands;
+package competition.subsystems.coral_arm_pivot.commands;
 
-import com.fasterxml.jackson.databind.annotation.JsonAppend;
-import competition.Main;
 import competition.operator_interface.OperatorInterface;
-import competition.subsystems.arm_pivot.ArmPivotSubsystem;
+import competition.subsystems.coral_arm_pivot.CoralArmPivotSubsystem;
 import edu.wpi.first.units.measure.Angle;
 import xbot.common.command.BaseMaintainerCommand;
 import xbot.common.logic.HumanVsMachineDecider;
@@ -18,27 +16,29 @@ import javax.inject.Inject;
 import static edu.wpi.first.units.Units.Degrees;
 
 
-public class ArmPivotMaintainerCommand extends BaseMaintainerCommand<Angle> {
+public class CoralArmPivotMaintainerCommand extends BaseMaintainerCommand<Angle> {
 
-   ArmPivotSubsystem armPivotSubsystem;
+   CoralArmPivotSubsystem armPivotSubsystem;
    OperatorInterface oi;
    final DoubleProperty humanMaxPower;
    final DoubleProperty humanMinPower;
+   PIDManager positionalPID;
 
    @Inject
-   public ArmPivotMaintainerCommand(ArmPivotSubsystem armPivotSubsystem, PropertyFactory pf,
-                                    HumanVsMachineDecider.HumanVsMachineDeciderFactory hvmFactory,
-                                    PIDManager.PIDManagerFactory pidf,
-                                    OperatorInterface oi) {
+   public CoralArmPivotMaintainerCommand(CoralArmPivotSubsystem armPivotSubsystem, PropertyFactory pf,
+                                         HumanVsMachineDecider.HumanVsMachineDeciderFactory hvmFactory,
+                                         PIDManager.PIDManagerFactory pidf,
+                                         OperatorInterface oi) {
 
        super(armPivotSubsystem, pf, hvmFactory, 1,1);
        this.armPivotSubsystem = armPivotSubsystem;
        this.oi = oi;
        pf.setPrefix(this);
        pf.setDefaultLevel(Property.PropertyLevel.Important);
+       positionalPID = pidf.create(getPrefix() + "PositionalPID", 0,0,0);
 
-       humanMaxPower = pf.createPersistentProperty("HumanMaxPower", .1);
-       humanMinPower = pf.createPersistentProperty("HumanMinPower", -.1);
+       humanMaxPower = pf.createPersistentProperty("HumanMaxPower", .11);
+       humanMinPower = pf.createPersistentProperty("HumanMinPower", -.11);
    }
 
     @Override
@@ -48,12 +48,19 @@ public class ArmPivotMaintainerCommand extends BaseMaintainerCommand<Angle> {
 
     @Override
     protected void coastAction() { //rest when no human control and before pid
-
+        armPivotSubsystem.setPower(0);
     }
+
 
     @Override
     protected void calibratedMachineControlAction() { //manages and runs pid
+        double power = positionalPID.calculate(armPivotSubsystem.getTargetValue().in(Degrees),
+                armPivotSubsystem.getCurrentValue().in(Degrees));
 
+        armPivotSubsystem.setPower(power);
+        aKitLog.record("Target Angle", armPivotSubsystem.getTargetValue().in(Degrees));
+        aKitLog.record("Current Angle", armPivotSubsystem.getCurrentValue().in(Degrees));
+        aKitLog.record("Power", power);
     }
 
     @Override
@@ -69,7 +76,7 @@ public class ArmPivotMaintainerCommand extends BaseMaintainerCommand<Angle> {
     protected double getHumanInput() { //gamepad controls: Left joy stick up/down & Left bumper to switch between elevator/arm
        return MathUtils.constrainDouble(
                MathUtils.deadband(
-                       oi.programmerGamepad.getRightStickY(),
+                       oi.superstructureGamepad.getRightStickY(),
                        oi.getOperatorGamepadTypicalDeadband(),
                        (a) -> (a)),
                humanMinPower.get(), humanMaxPower.get());
