@@ -18,6 +18,7 @@ public class OperatorInterface {
     public final XXboxController gamepad;
     public final XXboxController programmerGamepad;
     public final XXboxController algaeArmGamepad;
+    public final XXboxController sysIdGamepad;
 
     final DoubleProperty driverDeadband;
     final DoubleProperty operatorDeadband;
@@ -38,6 +39,10 @@ public class OperatorInterface {
         algaeArmGamepad=controllerFactory.create(5);
         algaeArmGamepad.setLeftInversion(false,true);
         algaeArmGamepad.setRightInversion(true,true);
+
+        sysIdGamepad = controllerFactory.create(6);
+        sysIdGamepad.setLeftInversion(false, true);
+        sysIdGamepad.setRightInversion(true, true);
 
         pf.setPrefix("OperatorInterface");
         driverDeadband = pf.createPersistentProperty("Driver Deadband", 0.12);

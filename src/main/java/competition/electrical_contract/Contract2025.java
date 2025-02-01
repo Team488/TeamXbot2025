@@ -52,6 +52,7 @@ public class Contract2025 extends ElectricalContract {
                 new CANMotorControllerOutputConfig());
     }
 
+    public boolean isArmPivotReady() { return false; }
     public boolean isArmPivotMotorReady() { return false; }
 
     public CANMotorControllerInfo getArmPivotMotor() {
@@ -94,6 +95,17 @@ public class Contract2025 extends ElectricalContract {
     public boolean areCanCodersReady() {
         return true;
     }
+    // change channels
+    public DeviceInfo getArmPivotAbsoluteEncoder() {
+        return new DeviceInfo("ArmPivotAbsoluteEncoder", 100);
+    }
+
+    public boolean isArmPivotAbsoluteEncoderReady() { return false; }
+
+    public DeviceInfo getArmPivotLowSensor() {
+        return new DeviceInfo("ArmPivotLowSensor", 101);
+    }
+    public boolean isArmPivotLowSensorReady() { return false; }
 
     @Override
     public boolean isElevatorReady() {
