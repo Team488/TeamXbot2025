@@ -2,6 +2,7 @@ package competition.simulation.elevator;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.Seconds;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -77,9 +78,12 @@ public class ElevatorSimulator {
 
         // update the motor encoder position based on the elevator height, add in the
         // random from zero offset
+        var prevPosition = this.motor.getPosition();
         this.motor.setPosition(
                 Rotations.of(elevatorCurrentHeight.in(Meters) * ElevatorSimConstants.rotationsPerMeterHeight)
                         .plus(ElevatorSimConstants.rotationsAtZero));
+        // set the motors velocity based on change in position and the control loop time
+        this.motor.setVelocity(prevPosition.minus(this.motor.getPosition()).div(Seconds.of(SimulationConstants.loopPeriodSec)));
 
         // this would be used to simulate the bottom position sensor being triggered
         var elevatorIsAtBottom = elevatorCurrentHeight

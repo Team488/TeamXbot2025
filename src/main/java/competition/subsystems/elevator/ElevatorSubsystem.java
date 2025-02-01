@@ -2,6 +2,7 @@ package competition.subsystems.elevator;
 
 import competition.electrical_contract.ElectricalContract;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
 import xbot.common.properties.DoubleProperty;
@@ -14,7 +15,9 @@ import javax.inject.Singleton;
 import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 @Singleton
 public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
@@ -30,7 +33,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     final ElectricalContract contract;
 
-    private boolean isCalibrated; //set to true just for testing purposes
+    private boolean isCalibrated = true; //set to true just for testing purposes
     //TODO: Add a calibration routine
 
     public Distance elevatorTargetHeight;
@@ -100,6 +103,10 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
             currentHeight = Meters.of(this.masterMotor.getPosition().in(Rotations) * metersPerRotation.get()); //hastily written code will clean up later
         }
         return currentHeight;
+    }
+
+    public LinearVelocity getCurrentVelocity() {
+        return MetersPerSecond.of(masterMotor.getVelocity().in(RotationsPerSecond) * metersPerRotation.get());
     }
 
     @Override
