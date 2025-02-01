@@ -31,7 +31,7 @@ public class SuperstructureMechanismSubsystem extends BaseSubsystem {
     @Override
     public void periodic() {
         superstructureMechanism.setElevatorHeight(elevatorSubsystem.getCurrentValue());
-        superstructureMechanism.setArmAngle(armPivotSubsystem.getCurrentValue());
+        superstructureMechanism.setCoralArmAngle(armPivotSubsystem.getCurrentValue());
         superstructureMechanism.setCoralInScorer(coralScorerSubsystem.hasCoral());
 
         aKitLog.record("SuperstructureMechanism", superstructureMechanism.getMechanism());

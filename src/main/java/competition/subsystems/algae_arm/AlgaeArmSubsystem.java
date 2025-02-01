@@ -30,7 +30,7 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
         propertyFactory.setPrefix(this);
         this.electricalContract = electricalContract;
         if (electricalContract.isAlgaeArmPivotMotorReady()) {
-            this.armMotor = xcanMotorControllerFactory.create(electricalContract.getArmPivotMotor(),
+            this.armMotor = xcanMotorControllerFactory.create(electricalContract.getAlgaeArmPivotMotor(),
                     getPrefix(), "AlgaeArmPivotMotor");
             this.registerDataFrameRefreshable(this.armMotor);
         } else{

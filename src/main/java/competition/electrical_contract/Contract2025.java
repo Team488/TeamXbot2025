@@ -121,6 +121,16 @@ public class Contract2025 extends ElectricalContract {
                 new CANMotorControllerOutputConfig());
     }
 
+    @Override
+    public boolean isElevatorDistanceSensorReady() {
+        return false;
+    }
+
+    @Override
+    public DeviceInfo getElevatorDistanceSensor() {
+        return new DeviceInfo("ElevatorDistanceSensor", 5);
+    }
+
     protected String getDriveControllerName(SwerveInstance swerveInstance) {
         return "DriveSubsystem/" + swerveInstance.label() + "/Drive";
     }

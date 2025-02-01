@@ -3,6 +3,8 @@ package competition.subsystems;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import competition.subsystems.algae_arm.AlgaeArmSubsystem;
+import competition.subsystems.algae_arm.commands.AlgaeArmMaintainerCommand;
 import competition.subsystems.algae_collection.AlgaeCollectionSubsystem;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionStopCommand;
 import competition.subsystems.coral_arm_pivot.CoralArmPivotSubsystem;
@@ -46,5 +48,10 @@ public class SubsystemDefaultCommandMap {
     @Inject
     public void setupArmPivotSubsystem(CoralArmPivotSubsystem armPivotSubsystem, CoralArmPivotMaintainerCommand command) {
         armPivotSubsystem.setDefaultCommand(command);
+    }
+
+    @Inject
+    public void setupAlgaeArmSubsystem(AlgaeArmSubsystem algaeArmSubsystem, AlgaeArmMaintainerCommand commands){
+        algaeArmSubsystem.setDefaultCommand(commands);
     }
 }
