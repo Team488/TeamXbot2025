@@ -73,7 +73,7 @@ public class Contract2025 extends ElectricalContract {
     public boolean isElevatorBottomSensorReady() { return false; }
 
     @Override
-    public DeviceInfo getElevatorBottomSensor() { return new DeviceInfo("ElevatorBottomSensor",1,true); }
+    public DeviceInfo getElevatorBottomSensor() { return new DeviceInfo("ElevatorBottomSensor",1); }
 
     @Override
     public boolean areCanCodersReady() {

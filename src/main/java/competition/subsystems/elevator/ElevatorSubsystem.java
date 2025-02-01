@@ -1,7 +1,6 @@
 package competition.subsystems.elevator;
 
 import competition.electrical_contract.ElectricalContract;
-import competition.simulation.elevator.ElevatorSimConstants;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 
@@ -14,7 +13,6 @@ import xbot.common.properties.PropertyFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
@@ -51,7 +49,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     public Distance elevatorTargetHeight;
 
     final DoubleProperty rotationsPerMeter;
-    public final DoubleProperty maxPowerWhenUncalibrated;
+    public final DoubleProperty calibrationNegativePower;
 
     public XCANMotorController masterMotor;
 
@@ -78,7 +76,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         pf.setPrefix(this);
         //to be tuned
         this.rotationsPerMeter = pf.createPersistentProperty("RotationsPerMeter", 1923);
-        this.maxPowerWhenUncalibrated = pf.createPersistentProperty("maxPowerWhenUncalibrated", -0.05);
+        this.calibrationNegativePower = pf.createPersistentProperty("calibrationNegativePower", -0.05);
 
         //these are not real measured heights yet, just placeholders
         l2Height = pf.createPersistentProperty("l2Height-m", 0.5);
@@ -108,7 +106,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     public void setPower(double power) {
         if(contract.isElevatorReady()){
             if (!isCalibrated){
-                power = maxPowerWhenUncalibrated.get();
+                power = calibrationNegativePower.get();
             }
             masterMotor.setPower(power);
         }

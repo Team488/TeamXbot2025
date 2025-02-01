@@ -4,7 +4,6 @@ import competition.motion.TrapezoidProfileManager;
 import competition.operator_interface.OperatorInterface;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.wpilibj.Timer;
 import xbot.common.command.BaseMaintainerCommand;
 import xbot.common.controls.sensors.XTimer;
 import xbot.common.logic.HumanVsMachineDecider;
@@ -94,9 +93,6 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     @Override
     protected void uncalibratedMachineControlAction() {
-        aKitLog.record("Started on calibration", startedCalibration);
-        aKitLog.record("Given up on calibration", givenUpOnCalibration);
-
         if (!startedCalibration){
             calibrationStartTime = XTimer.getFPGATimestamp();
             startedCalibration = true;
@@ -107,7 +103,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         }
 
         if (!givenUpOnCalibration){
-            elevator.setPower(elevator.maxPowerWhenUncalibrated.get());
+            elevator.setPower(elevator.calibrationNegativePower.get());
 
             if (elevator.isTouchingBottom()){
                 elevator.markElevatorAsCalibratedAgainstLowerLimit();
