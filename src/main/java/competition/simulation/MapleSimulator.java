@@ -1,6 +1,6 @@
 package competition.simulation;
 
-import competition.simulation.arm.ArmSimulator;
+import competition.simulation.coral_arm.CoralArmSimulator;
 import competition.simulation.coral_scorer.CoralScorerSimulator;
 import competition.simulation.elevator.ElevatorSimulator;
 import competition.simulation.reef.ReefSimulator;
@@ -39,7 +39,7 @@ public class MapleSimulator implements BaseSimulator {
 
     // sub simulators ----------------------------
     final ElevatorSimulator elevatorSimulator;
-    final ArmSimulator armSimulator;
+    final CoralArmSimulator armSimulator;
     final ReefSimulator reefSimulator;
     final CoralScorerSimulator coralScorerSimulator;
 
@@ -52,7 +52,7 @@ public class MapleSimulator implements BaseSimulator {
 
     @Inject
     public MapleSimulator(PoseSubsystem pose, DriveSubsystem drive, ElevatorSimulator elevatorSimulator,
-                          ArmSimulator armSimulator, ReefSimulator reefSimulator, CoralScorerSimulator coralScorerSimulator) {
+                          CoralArmSimulator armSimulator, ReefSimulator reefSimulator, CoralScorerSimulator coralScorerSimulator) {
         this.pose = pose;
         this.drive = drive;
         this.elevatorSimulator = elevatorSimulator;

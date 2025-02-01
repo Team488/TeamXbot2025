@@ -1,4 +1,4 @@
-package competition.simulation.arm;
+package competition.simulation.coral_arm;
 
 import javax.inject.Inject;
 
@@ -19,7 +19,7 @@ import xbot.common.controls.actuators.mock_adapters.MockCANMotorController;
 import xbot.common.math.PIDManager;
 import xbot.common.properties.PropertyFactory;
 
-public class ArmSimulator {
+public class CoralArmSimulator {
     final DCMotor motor = DCMotor.getKrakenX60(1);
     final SingleJointedArmSim armSim;
     final PIDManager pidManager;
@@ -28,7 +28,7 @@ public class ArmSimulator {
     final MockCANMotorController armMotor;
 
     @Inject
-    public ArmSimulator(CoralArmPivotSubsystem armPivotSubsystem, PIDManager.PIDManagerFactory pidManagerFactory, PropertyFactory pf) {
+    public CoralArmSimulator(CoralArmPivotSubsystem armPivotSubsystem, PIDManager.PIDManagerFactory pidManagerFactory, PropertyFactory pf) {
         pf.setPrefix("ArmSimulator");
         this.pidManager = pidManagerFactory.create("ArmSimulationPositionalPID", 0.01, 0.001, 0.0, 0.0, 1.0, -1.0);
         this.armPivotSubsystem = armPivotSubsystem;
@@ -36,14 +36,14 @@ public class ArmSimulator {
 
         this.armSim = new SingleJointedArmSim(
                 motor,
-                ArmSimConstants.armReduction,
-                SingleJointedArmSim.estimateMOI(ArmSimConstants.armLength.in(Meters),
-                        ArmSimConstants.armMass.in(Kilograms)),
-                ArmSimConstants.armLength.in(Meters),
-                ArmSimConstants.minAngleRads.in(Radians),
-                ArmSimConstants.maxAngleRads.in(Radians),
+                CoralArmSimConstants.armReduction,
+                SingleJointedArmSim.estimateMOI(CoralArmSimConstants.armLength.in(Meters),
+                        CoralArmSimConstants.armMass.in(Kilograms)),
+                CoralArmSimConstants.armLength.in(Meters),
+                CoralArmSimConstants.minAngleRads.in(Radians),
+                CoralArmSimConstants.maxAngleRads.in(Radians),
                 true,
-                ArmSimConstants.startingAngle.in(Radians));
+                CoralArmSimConstants.startingAngle.in(Radians));
     }
 
     public void update() {
@@ -57,7 +57,7 @@ public class ArmSimulator {
         // Read out the new arm position for rendering
         var armRelativeAngle = getArmAngle();
 
-        var armMotorRotations = armRelativeAngle.in(Radians) / ArmSimConstants.armEncoderAnglePerRotation.in(Radians);
+        var armMotorRotations = armRelativeAngle.in(Radians) / CoralArmSimConstants.armEncoderAnglePerRotation.in(Radians);
         armMotor.setPosition(Rotations.of(armMotorRotations));
     }
 
@@ -66,7 +66,7 @@ public class ArmSimulator {
         // reference where the bottom is 0' and the top is 125'
         var armSimAngle = Radians.of(armSim.getAngleRads());
 
-        return armSimAngle.minus(ArmSimConstants.maxAngleRads).times(-1);
+        return armSimAngle.minus(CoralArmSimConstants.maxAngleRads).times(-1);
     }
 
     public boolean isAtCollectionAngle() {
