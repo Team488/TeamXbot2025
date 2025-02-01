@@ -136,7 +136,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     protected double getHumanInput() {
         return MathUtils.constrainDouble(
                 MathUtils.deadband(
-                    oi.programmerGamepad.getLeftVector().getY(),
+                    oi.superstructureGamepad.getLeftVector().getY(),
                     oi.getOperatorGamepadTypicalDeadband(),
                     (a) -> (a)),
                 humanMaxPowerGoingDown.get(), humanMaxPowerGoingUp.get());
