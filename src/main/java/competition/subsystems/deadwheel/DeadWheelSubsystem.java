@@ -1,4 +1,6 @@
-public class DeadwheelSubsystem extends BaseSubsystem {
+
+@Singleton
+public class DeadWheelSubsystem extends BaseSubsystem {
 
     private final XEncoder leftEncoder;
     private final XEncoder rightEncoder;
@@ -15,7 +17,7 @@ public class DeadwheelSubsystem extends BaseSubsystem {
     private double prevFrontDistance = 0;
 
     @Inject
-    public DeadwheelSubsystem(XEncoderFactory encoderFactory, PropertyFactory propFactory, 
+    public DeadWheelSubsystem(XEncoderFactory encoderFactory, PropertyFactory propFactory,
                               @Named("TrackWidth") double trackWidth, 
                               @Named("WheelDiameterMeters") double wheelDiameterMeters, 
                               @Named("PulsesPerRevolution") int pulsesPerRevolution) {

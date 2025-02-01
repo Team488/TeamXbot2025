@@ -12,7 +12,8 @@ import xbot.common.math.WrappedRotation2d;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.pose.BasePoseSubsystem;
 import xbot.common.subsystems.vision.AprilTagVisionSubsystem;
-import competition.subsystems.deadwheel.DeadwheelSubsystem;
+import competition.subsystems.deadwheel.DeadWheelSubsystem;
+
 
 @Singleton
 public class PoseSubsystem extends BasePoseSubsystem {
@@ -25,7 +26,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
 
     private final DriveSubsystem drive;
     private final AprilTagVisionSubsystem aprilTagVisionSubsystem;
-    private final DeadwheelSubsystem deadwheelSubsystem;
+    private final DeadWheelSubsystem deadwheelSubsystem;
 
     protected Optional<SwerveModulePosition[]> simulatedModulePositions = Optional.empty();
 
