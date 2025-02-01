@@ -34,5 +34,5 @@ public class UnitTestContract2025 extends Contract2025 {
 
     public boolean isAlgaeArmPivotMotorReady() { return true; }
 
-
+    public boolean isElevatorDistanceSensorReady() { return true ; }
 }
