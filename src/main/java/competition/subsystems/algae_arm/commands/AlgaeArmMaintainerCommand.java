@@ -63,8 +63,8 @@ public class AlgaeArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
     protected double getHumanInput() {
         return MathUtils.constrainDouble(
                 MathUtils.deadband(
-                        oi.algaeArmGamepad.getRightStickY(),
-                        oi.getAlgaeArmGamepadTypicalDeadband(),
+                        oi.algaeAndSysIdGamepad.getRightStickY(),
+                        oi.getOperatorGamepadTypicalDeadband(),
                         (a) -> (a)),
                 humanMinPower.get(), humanMaxPower.get());
     }
