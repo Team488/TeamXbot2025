@@ -1,5 +1,6 @@
 package competition.subsystems.elevator.commands;
 
+import competition.motion.TrapezoidProfileManager;
 import competition.operator_interface.OperatorInterface;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -19,6 +20,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
@@ -36,23 +38,19 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     final DoubleProperty humanMaxPowerGoingUp;
     final DoubleProperty humanMaxPowerGoingDown;
-    // Creates a new TrapezoidProfile
-    final TrapezoidProfile profile = new TrapezoidProfile(new TrapezoidProfile.Constraints(2, 1));
-    double profileStartTime;
-    Distance previousTarget;
-    TrapezoidProfile.State initialState;
-    TrapezoidProfile.State goalState;
+
+    final TrapezoidProfileManager profileManager;
 
     @Inject
-    public ElevatorMaintainerCommand(ElevatorSubsystem elevator, PropertyFactory pf,
+    public ElevatorMaintainerCommand(ElevatorSubsystem elevator, Provider<PropertyFactory> pfProvider,
                                      HumanVsMachineDecider.HumanVsMachineDeciderFactory hvmFactory,
                                      PIDManager.PIDManagerFactory pidf,
                                      OperatorInterface oi){
-        super(elevator,pf,hvmFactory, 1, 0.2);
+        super(elevator, pfProvider.get(),hvmFactory, 1, 0.2);
+        var pf = pfProvider.get();
+        pf.setPrefix(this);
         this.elevator = elevator;
-        previousTarget = elevator.getTargetValue();
-        initialState = new TrapezoidProfile.State(elevator.getCurrentValue().in(Meters), elevator.getCurrentVelocity().in(MetersPerSecond));
-        goalState = new TrapezoidProfile.State(elevator.getTargetValue().in(Meters), 0);
+        profileManager = new TrapezoidProfileManager(getPrefix() + "/trapezoidMotion", pfProvider.get(), 1, 1, elevator.getCurrentValue().in(Meters));
 
         this.oi = oi;
         positionPID = pidf.create(getPrefix() + "positionPID", 0.00, 0, 0.0);
@@ -72,28 +70,14 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     }
 
     @Override
-    protected void initializeMachineControlAction() {
-        profileStartTime = XTimer.getFPGATimestamp();
-    }
-
-    @Override
     protected void calibratedMachineControlAction() {
-        // if the target has changed, reset the profile
-        if (!previousTarget.equals(elevator.getTargetValue())) {
-            previousTarget = elevator.getTargetValue();
-            profileStartTime = XTimer.getFPGATimestamp();
-            initialState = new TrapezoidProfile.State(elevator.getCurrentValue().in(Meters), elevator.getCurrentVelocity().in(MetersPerSecond));
-            goalState = new TrapezoidProfile.State(elevator.getTargetValue().in(Meters), 0);
-        }
 
-        // determine setpoint from the profile
-        var elapsedTime = XTimer.getFPGATimestamp() - profileStartTime;
-        aKitLog.record("elapsedTime", elapsedTime);
-        var setpoint = profile.calculate(elapsedTime, initialState, goalState);
-        aKitLog.record("elevatorProfileTarget", setpoint.position);
+        profileManager.setTargetValue(elevator.getTargetValue().in(Meters), elevator.getCurrentValue().in(Meters), elevator.getCurrentVelocity().in(MetersPerSecond));
+        var setpoint = profileManager.getCurrentPositionSetpoint();
+        aKitLog.record("elevatorProfileTarget", setpoint);
 
         double power = positionPID.calculate(
-                setpoint.position,
+                setpoint,
                 elevator.getCurrentValue().in(Meters));
 //        double power = (elevator.getTargetValue().in(Meters) - elevator.getCurrentValue().in(Meters)) * 0.5;
 //        power = MathUtils.constrainDouble(power,-0.8, 1);
