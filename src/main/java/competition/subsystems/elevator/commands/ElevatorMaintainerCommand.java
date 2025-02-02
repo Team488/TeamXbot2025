@@ -62,7 +62,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         calibrationDecider = calibrationDeciderFactory.create("calibrationDecider");
         calibrationDecider.reset();
 
-        positionPID = pidf.create(getPrefix() + "positionPID", 10.0, 0, 0.5);
+        positionPID = pidf.create(getPrefix() + "positionPID", 5.0, 0, 0.5);
 
         this.humanMaxPowerGoingUp = pf.createPersistentProperty("maxPowerGoingUp", 1);
         this.humanMaxPowerGoingDown = pf.createPersistentProperty("maxPowerGoingDown", -0.2);
