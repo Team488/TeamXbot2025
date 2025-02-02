@@ -10,6 +10,7 @@ import xbot.common.controls.actuators.XCANMotorController;
 import xbot.common.injection.BaseWPITest;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +19,42 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.fail;
 
 public class GenericSubsystemTest extends BaseCompetitionTest {
+
+    @Test
+    public void testAllSubsystemPeriodic() throws Exception {
+        // Find all subsystem implementations via reflection
+        List<Object> subsystems = new ArrayList<>();
+        for (var injectorMethod : getInjectorComponent().getClass().getMethods()) {
+            if (injectorMethod.getParameterCount() != 0) {
+                continue;
+            }
+            if (BaseSubsystem.class.isAssignableFrom(injectorMethod.getReturnType())) {
+                injectorMethod.setAccessible(true);
+                subsystems.add(injectorMethod.invoke(getInjectorComponent()));
+            }
+        }
+        assertNotEquals(0, subsystems.size());
+
+        for (Object subsystem : subsystems) {
+            // Run each subsystem refreshDataFrame method
+            Method refreshDataFrameMethod = subsystem.getClass().getMethod("refreshDataFrame");
+            refreshDataFrameMethod.setAccessible(true);
+            try {
+                refreshDataFrameMethod.invoke(subsystem);
+            } catch (Exception e) {
+                fail("Subsystem " + subsystem.getClass().getName() + " failed to call refreshDataFrame:\n" + e);
+            }
+
+            // Run each subsystem periodic method
+            Method periodicMethod = subsystem.getClass().getMethod("periodic");
+            periodicMethod.setAccessible(true);
+            try {
+                periodicMethod.invoke(subsystem);
+            } catch (Exception e) {
+                fail("Subsystem " + subsystem.getClass().getName() + " failed to call periodic:\n" + e);
+            }
+        }
+    }
 
     @Test
     public void testAllSubsystemsCallPeriodicOnMotorControllers() throws Exception {
