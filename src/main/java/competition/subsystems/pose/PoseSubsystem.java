@@ -128,6 +128,10 @@ public class PoseSubsystem extends BasePoseSubsystem {
         this.totalVelocity = (Math.sqrt(Math.pow(velocityX, 2.0) + Math.pow(velocityY, 2.0))); // Unnecessary?
     }
 
+    public double getAbsoluteVelocity() {
+        return this.totalVelocity;
+    }
+
     private SwerveModulePosition[] getSwerveModulePositions() {
         // if we have simulated data, return that directly instead of asking the
         // modules

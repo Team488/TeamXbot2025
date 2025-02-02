@@ -80,7 +80,8 @@ public class Landmarks {
         B
     }
 
-    public enum BranchLevel {
+    public enum CoralLevel {
+        COLLECTING,
         ONE,
         TWO,
         THREE,

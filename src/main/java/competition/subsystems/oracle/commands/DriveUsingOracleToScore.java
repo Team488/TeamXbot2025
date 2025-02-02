@@ -1,4 +1,4 @@
-package competition.subsystems.drive.commands;
+package competition.subsystems.oracle.commands;
 
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.oracle.OracleSubsystem;

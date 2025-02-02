@@ -1,10 +1,10 @@
 {
   "hubs": [
     {
-      "x": 217,
-      "y": 106,
-      "width": 1105,
-      "height": 654,
+      "x": 318,
+      "y": 1432,
+      "width": 1936,
+      "height": 1048,
       "state": {
         "sidebar": {
           "width": 443,
@@ -17,22 +17,30 @@
             "/Preferences/ElevatorMaintainerCommand/positionPID",
             "/Preferences/CoralArmPivotMaintainerCommand/PositionalPID",
             "/AdvantageKit/RealOutputs",
-            "/AdvantageKit/RealOutputs/Simulator",
             "/AdvantageKit/RealOutputs/AprilTagVisionSubsystemExtended/Cameras",
             "/AdvantageKit/RealOutputs/AprilTagVisionSubsystemExtended/Cameras/AprilTagFrontLeft",
             "/AdvantageKit/RealOutputs/AlignToReefWithAprilTagCommand",
             "/AdvantageKit/RealOutputs/AlignToReefWithAprilTagCommand/TargetReefFace",
-            "/AdvantageKit/RealOutputs/PoseSubsystem",
             "/AdvantageKit/RealOutputs/AlignToReefWithAprilTagCommand/ChosenTag/translation",
             "/Preferences",
-            "/Preferences/PoseSubsystem",
             "/AdvantageKit/RealOutputs/PoseSubsystem/CameraPose",
+            "/Preferences/DriveSubsystem/PositionPID",
             "/Preferences/DriveSubsystem",
-            "/Preferences/DriveSubsystem/PositionPID"
+            "/Preferences/DriveSubsystem/HeadingPID",
+            "/AdvantageKit/RealOutputs/PoseSubsystem",
+            "/AdvantageKit/RealOutputs/OracleSubsystem",
+            "/AdvantageKit/RealOutputs/DriveUsingOracleToScore",
+            "/AdvantageKit/RealOutputs/DriveUsingOracleToScore/Powers",
+            "/AdvantageKit/RealOutputs/DriveUsingOracleToPickup",
+            "/AdvantageKit/RealOutputs/DriveUsingOracleToPickup/Powers",
+            "/AdvantageKit/RealOutputs/SimpleTimeInterpolator",
+            "/AdvantageKit/RealOutputs/SimpleTimeInterpolator/chasePoint",
+            "/AdvantageKit/RealOutputs/SimpleTimeInterpolator/chasePoint/rotation",
+            "/Preferences/PoseSubsystem"
           ]
         },
         "tabs": {
-          "selected": 6,
+          "selected": 4,
           "tabs": [
             {
               "type": 0,
@@ -104,15 +112,63 @@
             },
             {
               "type": 2,
-              "title": "Odometry",
+              "title": "Pathing",
               "controller": {
                 "sources": [
                   {
                     "type": "robot",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/PoseSubsystem/RobotPose",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Simulator/FieldSimulation/Robot",
                     "logType": "Pose2d",
                     "visible": true,
                     "options": {}
+                  },
+                  {
+                    "type": "trajectory",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/OracleSubsystem/BlueCollisionCircle",
+                    "logType": "Trajectory",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "trajectory",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/OracleSubsystem/BlueRoutingCircle",
+                    "logType": "Trajectory",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/SimpleTimeInterpolator/chasePoint",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff8c00"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/PoseSubsystem/RobotPose",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00"
+                    }
+                  },
+                  {
+                    "type": "trajectory",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/OracleSubsystem/RecommendedRoute",
+                    "logType": "Trajectory",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00",
+                      "size": "normal"
+                    }
                   }
                 ],
                 "game": "2025 Field",
@@ -122,6 +178,41 @@
                 "size": 30
               },
               "controllerUUID": "icj9qq9dlv43tplcxoxfazr6gi5tdgwy",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 1,
+              "title": "Line Graph",
+              "controller": {
+                "leftSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/SimpleTimeInterpolator/accumulatedProductiveSeconds",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "rightSources": [],
+                "discreteSources": [],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "rightUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "rl97pxgunyqzi7mo7yd6g1vkl5i2jv16",
               "renderer": null,
               "controlsHeight": 200
             },
@@ -201,14 +292,14 @@
                 "cameraIndex": -1,
                 "orbitFov": 50,
                 "cameraPosition": [
-                  3.0998100133699418,
-                  5.712845950191182,
-                  -4.661779497670283
+                  4.461012170511777,
+                  6.234524143352009,
+                  -0.4293645827143037
                 ],
                 "cameraTarget": [
-                  3.475609487104665,
-                  2.5943025727072935,
-                  -2.8220354041203217
+                  4.461011842167764,
+                  2.594304868164506,
+                  -0.4293609573334161
                 ]
               },
               "controlsHeight": 239
@@ -282,14 +373,14 @@
                 "cameraIndex": -1,
                 "orbitFov": 50,
                 "cameraPosition": [
-                  -5.143714262722786,
-                  10.85803080794912,
-                  0.059490751354837224
+                  -4.513017174747362,
+                  10.448976267264374,
+                  0.1578757859229014
                 ],
                 "cameraTarget": [
-                  -5.143704513665937,
-                  1.0712298103919229,
-                  0.059491614997902204
+                  -4.513007797662575,
+                  1.071691704141297,
+                  0.1578757247128194
                 ]
               },
               "controlsHeight": 200
