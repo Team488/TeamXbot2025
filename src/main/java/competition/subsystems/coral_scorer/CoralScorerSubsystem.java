@@ -96,7 +96,12 @@ public class CoralScorerSubsystem extends BaseSubsystem {
     }
 
     public void periodic() {
-        aKitLog.record("coralPresent", this.hasCoral());
+        if (electricalContract.isCoralCollectionMotorReady()) {
+            motor.periodic();
+        }
+
+        aKitLog.record("coralPresent", this.hasCoral()
+        );
     }
 }
 

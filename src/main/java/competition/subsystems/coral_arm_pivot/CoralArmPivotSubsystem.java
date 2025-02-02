@@ -197,6 +197,6 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
     }
   
     public boolean getIsTargetAngleScoring() {
-        return targetAngle == Degrees.of(scoreAngle.get());
+        return Degrees.of(scoreAngle.get()).isNear(targetAngle, Degrees.of(10));
     }
 }

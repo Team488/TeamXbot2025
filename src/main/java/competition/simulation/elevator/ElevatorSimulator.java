@@ -2,6 +2,7 @@ package competition.simulation.elevator;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 
 import javax.inject.Inject;
@@ -74,7 +75,6 @@ public class ElevatorSimulator {
 
         // Read out the new elevator position for rendering
         var elevatorCurrentHeight = getCurrentHeight();
-        this.motor.setPosition(Rotations.of(elevatorCurrentHeight.in(Meters) * ElevatorSimConstants.rotationsPerMeterHeight));
 
         // update the motor encoder position based on the elevator height, add in the
         // random from zero offset
@@ -83,7 +83,7 @@ public class ElevatorSimulator {
                 Rotations.of(elevatorCurrentHeight.in(Meters) * ElevatorSimConstants.rotationsPerMeterHeight)
                         .plus(ElevatorSimConstants.rotationsAtZero));
         // set the motors velocity based on change in position and the control loop time
-        this.motor.setVelocity(prevPosition.minus(this.motor.getPosition()).div(Seconds.of(SimulationConstants.loopPeriodSec)));
+        this.motor.setVelocity(prevPosition.minus(this.motor.getPosition()).per(Second).times(SimulationConstants.loopPeriodSec));
 
         // this would be used to simulate the bottom position sensor being triggered
         var elevatorIsAtBottom = elevatorCurrentHeight
@@ -97,6 +97,6 @@ public class ElevatorSimulator {
     }
 
     public boolean isAtCollectionHeight() {
-        return getCurrentHeight().isNear(Meters.of(0.0), 0.05);
+        return getCurrentHeight().isNear(Meters.of(0.0), Meters.of(0.05));
     }    
 }
