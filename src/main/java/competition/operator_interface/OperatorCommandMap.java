@@ -53,7 +53,7 @@ public class OperatorCommandMap {
     @Inject
     public void setUpOperatorCommands(OperatorInterface oi,
                                       PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
-                                      ScoreWhenReadyCommand scoreWhenReadyCommand) {
+                                      ScoreCoralCommand scoreCoralCommand, IntakeCoralCommand intakeCoralCommand) {
         var prepL4 = prepCoralSystemCommandGroupFactory.create(ElevatorSubsystem.ElevatorGoals.ScoreL4,
                 CoralArmPivotSubsystem.ArmGoals.Score);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
@@ -63,7 +63,8 @@ public class OperatorCommandMap {
         var homed = prepCoralSystemCommandGroupFactory.create(ElevatorSubsystem.ElevatorGoals.HumanLoad,
                 CoralArmPivotSubsystem.ArmGoals.HumanLoad);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
-        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).onTrue(scoreWhenReadyCommand);
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).onTrue(scoreCoralCommand);
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(intakeCoralCommand);
     }
 
     // Programmer commands are only meant to be used to debug or test the robot. They should not be used in competition,
