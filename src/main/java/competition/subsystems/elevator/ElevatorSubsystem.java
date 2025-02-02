@@ -99,10 +99,10 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         this.powerWhenBottomSensorHit = pf.createPersistentProperty("powerWhenBottomSensorHit", -0.01);
 
         //these are not real measured heights yet, just placeholders
-        l2Height = pf.createPersistentProperty("l2Height-m", 0.5);
-        l3Height = pf.createPersistentProperty("l3Height-m", 0.75);
-        l4Height = pf.createPersistentProperty("l4Height-m", 1);
-        humanLoadHeight = pf.createPersistentProperty("humanLoadHeight-m", 1);
+        l2Height = pf.createPersistentProperty("l2Height-m", Inches.of(1).in(Meters));
+        l3Height = pf.createPersistentProperty("l3Height-m", Inches.of(15.875).in(Meters));
+        l4Height = pf.createPersistentProperty("l4Height-m", Inches.of(40.651).in(Meters));
+        humanLoadHeight = pf.createPersistentProperty("humanLoadHeight-m", Inches.of(1).in(Meters));
         baseHeight = pf.createPersistentProperty("baseHeight-m", 0);
 
         this.sysId = new SysIdRoutine(

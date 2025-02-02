@@ -97,6 +97,6 @@ public class ElevatorSimulator {
     }
 
     public boolean isAtCollectionHeight() {
-        return getCurrentHeight().isNear(Meters.of(0.0), 0.05);
+        return getCurrentHeight().isNear(Meters.of(0.0), Meters.of(0.05));
     }    
 }
