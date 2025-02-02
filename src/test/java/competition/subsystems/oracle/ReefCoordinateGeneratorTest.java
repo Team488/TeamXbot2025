@@ -36,10 +36,14 @@ public class ReefCoordinateGeneratorTest extends BaseCompetitionTest {
         assertEquals(Landmarks.BlueCenterOfReef.getY() - Landmarks.reefBranchHorizontalOffsetForBranchTypeA.in(Meters) - 2, pose.getY(), 0.001);
     }
 
-    @Test
+    // Not an active test, just a way of quickly checking hardcoded values against the generated values to see if they are in the
+    // same ballpark.
+    //@Test
     public void compareHardcodedToGenerated() {
         ReefCoordinateGenerator generator = new ReefCoordinateGenerator();
+        double robotWithInMeters = getInjectorComponent().electricalContract().getDistanceFromCenterToOuterBumperX().in(Meters);
 
-        var pose = generator.getPoseRelativeToReefFaceAndBranch(DriverStation.Alliance.Blue, Landmarks.ReefFace.CLOSE, Landmarks.Branch.A, Meters.of(4), Meters.zero());
+        var pose = generator.getPoseRelativeToReefFaceAndBranch(DriverStation.Alliance.Blue, Landmarks.ReefFace.CLOSE, Landmarks.Branch.A, Meters.of(robotWithInMeters), Meters.zero()).getTranslation();
+        var actual = Landmarks.BlueCloseBranchA.getTranslation();
     }
 }

@@ -3,26 +3,23 @@ package competition.subsystems.drive.commands;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.oracle.OracleSubsystem;
 import competition.subsystems.pose.PoseSubsystem;
-import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import xbot.common.logging.RobotAssertionManager;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.drive.SwervePointKinematics;
 import xbot.common.subsystems.drive.SwerveSimpleTrajectoryCommand;
 import xbot.common.subsystems.drive.SwerveSimpleTrajectoryMode;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
-import xbot.common.trajectory.XbotSwervePoint;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
 
-public class DriveToOracleTarget extends SwerveSimpleTrajectoryCommand {
+public class DriveUsingOracleToScore extends SwerveSimpleTrajectoryCommand {
 
     OracleSubsystem oracle;
 
     @Inject
-    public DriveToOracleTarget(OracleSubsystem oracle, DriveSubsystem drive, PoseSubsystem pose, PropertyFactory pf,
-                                         HeadingModule.HeadingModuleFactory headingModuleFactory,
-                                         RobotAssertionManager robotAssertionManager) {
+    public DriveUsingOracleToScore(OracleSubsystem oracle, DriveSubsystem drive, PoseSubsystem pose, PropertyFactory pf,
+                                   HeadingModule.HeadingModuleFactory headingModuleFactory,
+                                   RobotAssertionManager robotAssertionManager) {
         super(drive, pose, pf, headingModuleFactory, robotAssertionManager);
         this.drive = drive;
         this.pose = pose;
@@ -35,7 +32,7 @@ public class DriveToOracleTarget extends SwerveSimpleTrajectoryCommand {
 
         SwervePointKinematics sampleKinematics = new SwervePointKinematics(2, 0, 0, 4.5);
 
-        logic.setKeyPoints(oracle.getRecommendedScoringTrajectory());
+        logic.setKeyPoints(oracle.getRecommendedCoralPickupTrajectory());
         this.logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
         this.logic.setGlobalKinematicValues(sampleKinematics);
 

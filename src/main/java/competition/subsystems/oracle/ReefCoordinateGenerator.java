@@ -25,18 +25,18 @@ public class ReefCoordinateGenerator {
         redReefAngleMapping = new HashMap<>();
 
         blueReefAngleMapping.put(Landmarks.ReefFace.FAR, Degrees.of(60 * 0));
-        blueReefAngleMapping.put(Landmarks.ReefFace.FAR_RIGHT, Degrees.of(60 * 1));
-        blueReefAngleMapping.put(Landmarks.ReefFace.CLOSE_RIGHT, Degrees.of(60 * 2));
+        blueReefAngleMapping.put(Landmarks.ReefFace.FAR_LEFT, Degrees.of(60 * 1));
+        blueReefAngleMapping.put(Landmarks.ReefFace.CLOSE_LEFT, Degrees.of(60 * 2));
         blueReefAngleMapping.put(Landmarks.ReefFace.CLOSE, Degrees.of(60 * 3));
-        blueReefAngleMapping.put(Landmarks.ReefFace.CLOSE_LEFT, Degrees.of(60 * 4));
-        blueReefAngleMapping.put(Landmarks.ReefFace.FAR_LEFT, Degrees.of(60 * 5));
+        blueReefAngleMapping.put(Landmarks.ReefFace.CLOSE_RIGHT, Degrees.of(60 * 4));
+        blueReefAngleMapping.put(Landmarks.ReefFace.FAR_RIGHT, Degrees.of(60 * 5));
 
         redReefAngleMapping.put(Landmarks.ReefFace.CLOSE, Degrees.of(60 * 0));
-        redReefAngleMapping.put(Landmarks.ReefFace.CLOSE_LEFT, Degrees.of(60 * 1));
-        redReefAngleMapping.put(Landmarks.ReefFace.FAR_LEFT, Degrees.of(60 * 2));
+        redReefAngleMapping.put(Landmarks.ReefFace.CLOSE_RIGHT, Degrees.of(60 * 1));
+        redReefAngleMapping.put(Landmarks.ReefFace.FAR_RIGHT, Degrees.of(60 * 2));
         redReefAngleMapping.put(Landmarks.ReefFace.FAR, Degrees.of(60 * 3));
-        redReefAngleMapping.put(Landmarks.ReefFace.FAR_RIGHT, Degrees.of(60 * 4));
-        redReefAngleMapping.put(Landmarks.ReefFace.CLOSE_RIGHT, Degrees.of(60 * 5));
+        redReefAngleMapping.put(Landmarks.ReefFace.FAR_LEFT, Degrees.of(60 * 4));
+        redReefAngleMapping.put(Landmarks.ReefFace.CLOSE_LEFT, Degrees.of(60 * 5));
     }
 
     public Pose2d getPoseRelativeToReefCenter(DriverStation.Alliance alliance, Landmarks.ReefFace reefFace, Distance distanceFromCenterX, Distance distanceFromCenterY) {

@@ -49,24 +49,30 @@ public class ReefRoutingCircle {
         Translation2d start = startingPose.getTranslation();
         Translation2d end = endingPose.getTranslation();
 
+        // If there's no intersection between the starting point and the collision circle, just proceed
+        // directly to the ending point.
         if (!collisionCircle.doesLineIntersect(start, end)) {
-            // No reason to add starting point for trajectories.
-            //swervePoints.add(new XbotSwervePoint(startingPose, 0));
             swervePoints.add(new XbotSwervePoint(endingPose, 0));
             return swervePoints;
         }
 
-        // No reason to add starting point for trajectories.
-        //swervePoints.add(new XbotSwervePoint(startingPose, 0));
-
-        Translation2d tangentPoint = findClosestTangentPoint(start, end);
-        swervePoints.add(new XbotSwervePoint(new Pose2d(tangentPoint, endingPose.getRotation()), 0));
+        Translation2d tangentPoint = null;
+        if (center.getDistance(start) < radius) {
+            // If we're inside the routing circle and there is a collision, we need to first back out to the routing circle.
+            Translation2d direction = start.minus(center);
+            tangentPoint = center.plus(direction.times(radius / direction.getNorm()));
+            swervePoints.add(new XbotSwervePoint(new Pose2d(tangentPoint, startingPose.getRotation()), 10));
+        } else {
+            // otherwise, we're outside the routing circle, and we need to first move to the tangent point.
+            tangentPoint = findClosestTangentPoint(start, end);
+            swervePoints.add(new XbotSwervePoint(new Pose2d(tangentPoint, endingPose.getRotation()), 0));
+        }
 
         int escape = 0;
         while (collisionCircle.doesLineIntersect(tangentPoint, end)) {
             escape++;
             tangentPoint = moveAlongCircumference(tangentPoint, end, 0.25);
-            swervePoints.add(new XbotSwervePoint(new Pose2d(tangentPoint, endingPose.getRotation()), 0));
+            swervePoints.add(new XbotSwervePoint(new Pose2d(tangentPoint, endingPose.getRotation()), 10));
             if (escape > 100) {
                 log.warn("Infinite loop detected in generateSwervePoints, breaking out!");
                 break;
@@ -137,7 +143,14 @@ public class ReefRoutingCircle {
         double angleCurrent = Math.atan2(currentPoint.getY() - center.getY(), currentPoint.getX() - center.getX());
         double angleStep = distance / radius;
 
-        double newAngle = angleCurrent + (angleToTarget > angleCurrent ? angleStep : -angleStep);
+        double angleDifference = angleToTarget - angleCurrent;
+        if (angleDifference > Math.PI) {
+            angleDifference -= 2 * Math.PI;
+        } else if (angleDifference < -Math.PI) {
+            angleDifference += 2 * Math.PI;
+        }
+
+        double newAngle = angleCurrent + (angleDifference > 0 ? angleStep : -angleStep);
         return new Translation2d(center.getX() + radius * Math.cos(newAngle), center.getY() + radius * Math.sin(newAngle));
     }
 
