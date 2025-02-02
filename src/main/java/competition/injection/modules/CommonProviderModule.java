@@ -1,7 +1,5 @@
 package competition.injection.modules;
 
-import competition.subsystems.pose.PoseSubsystem;
-import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -12,13 +10,16 @@ import xbot.common.injection.swerve.RearLeftDrive;
 import xbot.common.injection.swerve.RearRightDrive;
 import xbot.common.injection.swerve.SwerveComponent;
 import xbot.common.injection.swerve.SwerveInstance;
-import xbot.common.subsystems.pose.BasePoseSubsystem;
-import xbot.common.subsystems.vision.AprilTagVisionSubsystem;
 
 import javax.inject.Singleton;
 
+/**
+ * This module defines providers that apply to all robot configurations.
+ * @implNote Bindings and providers cannot be defined in the same class.
+ * @see CommonBinderModule Equivalent module for bindings instead of providers.
+ */
 @Module(subcomponents = { SwerveComponent.class })
-public class CommonModule {
+public class CommonProviderModule {
     @Provides
     @Singleton
     public @FrontLeftDrive SwerveComponent frontLeftSwerveComponent(SwerveComponent.Builder builder) {
