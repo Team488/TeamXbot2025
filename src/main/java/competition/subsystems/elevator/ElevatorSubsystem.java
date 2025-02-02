@@ -3,13 +3,15 @@ package competition.subsystems.elevator;
 import competition.electrical_contract.ElectricalContract;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
-
+import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
-import xbot.common.math.MathUtils;
-import xbot.common.controls.sensors.XLaserCAN;
-import xbot.common.properties.DoubleProperty;
 import xbot.common.controls.sensors.XDigitalInput;
+import xbot.common.controls.sensors.XLaserCAN;
+import xbot.common.math.MathUtils;
+import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 
 import javax.inject.Inject;
@@ -21,6 +23,8 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
 
 @Singleton
 public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
@@ -71,9 +75,9 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     public final DoubleProperty baseHeight;
 
     public final XDigitalInput bottomSensor;
-
     public final XLaserCAN distanceSensor;
 
+    private final SysIdRoutine sysId;
 
     @Inject
     public ElevatorSubsystem(XCANMotorController.XCANMotorControllerFactory motorFactory, PropertyFactory pf,
@@ -97,11 +101,23 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         this.powerWhenBottomSensorHit = pf.createPersistentProperty("powerWhenBottomSensorHit", -0.01);
 
         //these are not real measured heights yet, just placeholders
-        l2Height = pf.createPersistentProperty("l2Height-m", 0.5);
-        l3Height = pf.createPersistentProperty("l3Height-m", 0.75);
-        l4Height = pf.createPersistentProperty("l4Height-m", 1);
-        humanLoadHeight = pf.createPersistentProperty("humanLoadHeight-m", 1);
+        l2Height = pf.createPersistentProperty("l2Height-m", Inches.of(1).in(Meters));
+        l3Height = pf.createPersistentProperty("l3Height-m", Inches.of(15.875).in(Meters));
+        l4Height = pf.createPersistentProperty("l4Height-m", Inches.of(40.651).in(Meters));
+        humanLoadHeight = pf.createPersistentProperty("humanLoadHeight-m", Inches.of(1).in(Meters));
         baseHeight = pf.createPersistentProperty("baseHeight-m", 0);
+
+        this.sysId = new SysIdRoutine(
+                new SysIdRoutine.Config(
+                        null, null,
+                        Seconds.of(8),
+                        (state) -> org.littletonrobotics.junction.Logger.recordOutput(this.getPrefix() + "/SysIdState", state.toString())),
+                new SysIdRoutine.Mechanism(
+                        (Voltage volts) -> setPower(volts.in(Volts) / 12.0),
+                        null,
+                        this
+                )
+        );
 
         if(contract.isElevatorReady()){
             this.masterMotor = motorFactory.create(contract.getElevatorMotor(), this.getPrefix(), "ElevatorMotor");
@@ -124,8 +140,6 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         setCalibrated(false);
     }
 
-
-    //will implement logic later
     @Override
     public void setPower(double power) {
         if(contract.isElevatorReady()){
@@ -141,7 +155,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
             if (!isCalibrated){
                 power = MathUtils.constrainDouble(power,calibrationNegativePower.get(),0);
             }
-            masterMotor.setPower(power);
+            masterMotor.setVoltage(Volts.of(power*12));
         }
     }
 
@@ -222,6 +236,25 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         return target1.isEquivalent(target2);
     }
 
+    /**
+     * Gets a command to run the SysId routine in the quasistatic mode.
+     * @param direction The direction to run the SysId routine.
+     * @return The command to run the SysId routine.
+     */
+    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+        return sysId.quasistatic(direction);
+    }
+
+    /**
+     * Gets a command to run the SysId routine in the dynamic mode.
+     * @param direction The direction to run the SysId routine.
+     * @return The command to run the SysId routine.
+     */
+    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+        return sysId.dynamic(direction);
+    }
+
+    @Override
     public void periodic(){
         if (contract.isElevatorReady()){
             masterMotor.periodic();

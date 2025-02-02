@@ -35,7 +35,7 @@ public class CoralArmPivotMaintainerCommand extends BaseMaintainerCommand<Angle>
        this.oi = oi;
        pf.setPrefix(this);
        pf.setDefaultLevel(Property.PropertyLevel.Important);
-       positionalPID = pidf.create(getPrefix() + "PositionalPID", 0,0,0);
+       positionalPID = pidf.create(getPrefix() + "PositionalPID", 0.05,0,0);
 
        humanMaxPower = pf.createPersistentProperty("HumanMaxPower", .11);
        humanMinPower = pf.createPersistentProperty("HumanMinPower", -.11);
