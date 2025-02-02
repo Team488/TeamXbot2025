@@ -124,7 +124,7 @@ public class MapleSimulator implements BaseSimulator {
             coralScorerSimulator.simulateCoralUnload();
             var currentTranslation2d = this.getGroundTruthPose().getTranslation();
             // TODO: more math around where the arm actually is in space and the orientation of the robot
-            var aproxElevatorTranslation3d = new Translation3d(currentTranslation2d.getX(), currentTranslation2d.getY(), 0.0);
+            var aproxElevatorTranslation3d = new Translation3d(currentTranslation2d.getX(), currentTranslation2d.getY(), elevatorSimulator.getCurrentHeight().in(Meters));
             reefSimulator.scoreCoralNearestTo(aproxElevatorTranslation3d);
         }
     }
