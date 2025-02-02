@@ -27,33 +27,9 @@ public abstract class SimulatedRobotModule {
 
     @Binds
     @Singleton
-    public abstract XSwerveDriveElectricalContract getSwerveContract(ElectricalContract impl);
-
-    @Binds
-    @Singleton
-    public abstract XCameraElectricalContract getCameraContract(ElectricalContract impl);
-
-    @Binds
-    @Singleton
-    public abstract BasePoseSubsystem getPoseSubsystem(PoseSubsystem impl);
-
-    @Binds
-    @Singleton
-    public abstract BaseSwerveDriveSubsystem getSwerveDriveSubsystem(DriveSubsystem impl);
-
-    @Binds
-    @Singleton
-    public abstract BaseDriveSubsystem getDriveSubsystem(BaseSwerveDriveSubsystem impl);
-
-    @Binds
-    @Singleton
     public abstract BaseSimulator getSimulator(MapleSimulator impl);
     
     @Binds
     @Singleton
     abstract SimulatedPositionSupplier getSimulatedPositionSupplier(BaseSimulator impl);
-
-    @Binds
-    @Singleton
-    public abstract AprilTagVisionSubsystem getVisionSubsystem(AprilTagVisionSubsystemExtended impl);
 }
