@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.struct.Transform2dStruct;
 import org.kobe.xbot.JClient.XTablesClient;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 public class WPIXTablesClient {
     private final XTablesClient xTablesClient;
@@ -23,6 +24,7 @@ public class WPIXTablesClient {
 
     public void putPose2d(String prefix, String table, Pose2d pose){
         ByteBuffer bb = ByteBuffer.allocate(pose2dStruct.getSize());
+        bb.order(ByteOrder.LITTLE_ENDIAN);
         pose2dStruct.pack(bb,pose);
         byte[] barr = new byte[bb.capacity()];
         bb.rewind();
