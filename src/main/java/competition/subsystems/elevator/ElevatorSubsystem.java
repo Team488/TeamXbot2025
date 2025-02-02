@@ -42,6 +42,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         ReturnToBase,
     }
 
+    private double periodicTickCounter;
+
     final ElectricalContract contract;
 
     // elevator starts uncalibrated because it could be in the middle of it's range and we have no idea where that is
@@ -224,11 +226,16 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         if (contract.isElevatorReady()){
             masterMotor.periodic();
         }
+        if (this.isTouchingBottom() && periodicTickCounter >= 3){ //bandage case: isTouchingBottom flashes true for one tick on startup
+            markElevatorAsCalibratedAgainstLowerLimit();
+        }
         aKitLog.record("ElevatorTargetHeight-m",elevatorTargetHeight);
         aKitLog.record("ElevatorCurrentHeight-m",getCurrentValue().in(Meters));
         aKitLog.record("ElevatorBottomSensor",this.isTouchingBottom());
         aKitLog.record("isElevatorCalibrated", isCalibrated());
         aKitLog.record("ElevatorDistanceSensor-m",getRawDistance().in(Meters));
+
+        periodicTickCounter++;
     }
 
 
