@@ -3,6 +3,7 @@ package competition.simulation;
 import competition.simulation.algae_arm.AlgaeArmSimulator;
 import competition.simulation.coral_arm.CoralArmSimulator;
 import competition.simulation.coral_scorer.CoralScorerSimulator;
+import competition.simulation.elevator.ElevatorSimConstants;
 import competition.simulation.elevator.ElevatorSimulator;
 import competition.simulation.reef.ReefSimulator;
 import competition.subsystems.coral_scorer.CoralScorerSubsystem;
@@ -124,7 +125,12 @@ public class MapleSimulator implements BaseSimulator {
             coralScorerSimulator.simulateCoralUnload();
             var currentTranslation2d = this.getGroundTruthPose().getTranslation();
             // TODO: more math around where the arm actually is in space and the orientation of the robot
-            var aproxElevatorTranslation3d = new Translation3d(currentTranslation2d.getX(), currentTranslation2d.getY(), 0.0);
+            var elevatorBaseHeightM = 0.57;
+            var aproxElevatorTranslation3d = new Translation3d(
+                currentTranslation2d.getX(), 
+                currentTranslation2d.getY(), 
+                elevatorSimulator.getCurrentHeight().in(Meters) + elevatorBaseHeightM
+            );
             reefSimulator.scoreCoralNearestTo(aproxElevatorTranslation3d);
         }
     }
