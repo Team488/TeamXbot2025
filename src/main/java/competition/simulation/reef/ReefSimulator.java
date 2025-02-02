@@ -12,6 +12,7 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -41,8 +42,8 @@ public class ReefSimulator {
     }
 
     final AKitLogger aKitLog;
-    final Translation2d reefCenter = new Translation2d(4.4785, 4.0132);
-    final Translation2d reefCenterToFar = new Translation2d(0.665, 0);
+    public static final Translation2d reefCenter = Landmarks.BlueCenterOfReef.getTranslation();
+    public static final Translation2d reefCenterToFar = new Translation2d(Landmarks.reefCenterToFace.in(Meters), 0);
     final double faceAngleDeltaDeg = 60;
 
     Set<ReefAlgaeKey> reefAlgaeLocations = new HashSet<>();

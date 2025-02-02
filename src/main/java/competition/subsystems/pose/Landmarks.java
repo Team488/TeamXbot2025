@@ -2,6 +2,10 @@ package competition.subsystems.pose;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.units.measure.Distance;
+
+import static edu.wpi.first.units.Units.Meters;
 
 public class Landmarks {
 
@@ -51,6 +55,10 @@ public class Landmarks {
     public static Pose2d BlueRightCoralStationClose = new Pose2d(0.764, 1.247, Rotation2d.fromDegrees(54.012));
     public static Pose2d BlueRightCoralStationMid = new Pose2d(1.093, 1.009, Rotation2d.fromDegrees(54.012));
     public static Pose2d BlueRightCoralStationFar = new Pose2d(1.422, 0.770, Rotation2d.fromDegrees(54.012));
+
+    public static Pose2d BlueCenterOfReef = new Pose2d(new Translation2d(4.4785, 4.0132), new Rotation2d());
+    public static final Distance reefCenterToFace = Meters.of(0.665);
+    public static final Distance reefBranchHorizontalOffsetForBranchTypeA = Meters.of(-0.15);
 
 
     public enum ReefFace {

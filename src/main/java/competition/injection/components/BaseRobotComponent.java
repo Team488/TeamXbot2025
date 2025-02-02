@@ -1,11 +1,13 @@
 package competition.injection.components;
 
+import competition.electrical_contract.ElectricalContract;
 import competition.operator_interface.OperatorCommandMap;
 import competition.simulation.BaseSimulator;
 import competition.subsystems.SubsystemDefaultCommandMap;
 import competition.subsystems.coral_arm_pivot.CoralArmPivotSubsystem;
 import competition.subsystems.coral_scorer.CoralScorerSubsystem;
 import competition.subsystems.elevator.ElevatorSubsystem;
+import competition.subsystems.oracle.OracleSubsystem;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import competition.subsystems.elevator_mechanism.SuperstructureMechanismSubsystem;
 import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
@@ -35,5 +37,9 @@ public abstract class BaseRobotComponent extends BaseComponent {
     public abstract CoralScorerSubsystem coralScorerSubsystem();
 
     public abstract SuperstructureMechanismSubsystem superstructureMechanismSubsystem();
+
+    public abstract OracleSubsystem oracleSubsystem();
+
+    public abstract ElectricalContract electricalContract();
 
 }
