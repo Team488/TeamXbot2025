@@ -32,33 +32,52 @@ public class OperatorCommandMap {
             SetRobotHeadingCommand resetHeading,
             Provider<SwerveSimpleTrajectoryCommand> swerveSimpleTrajectoryCommandProvider) {
         resetHeading.setHeadingToApply(0);
-        operatorInterface.driverGamepad.getifAvailable(1).onTrue(resetHeading);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(resetHeading);
 
         // Below are for testing purposes only!!!
-        SwervePointKinematics kinematicValuesForTesting = new SwervePointKinematics(0.5, 0, 0, 2);
+        SwervePointKinematics kinematicValuesForTesting = new SwervePointKinematics(2, 0, 0, 4.5);
 
+        // Command 1: 5 meter route
+        var command1 = swerveSimpleTrajectoryCommandProvider.get();
+        List<XbotSwervePoint> points1 = new ArrayList<>();
+        XbotSwervePoint command1Point1 = XbotSwervePoint.createPotentiallyFilppedXbotSwervePoint(new Translation2d(9, 0), new Rotation2d(0), 10);
+        points1.add(command1Point1);
+        command1.logic.setGlobalKinematicValues(kinematicValuesForTesting);
+        command1.logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
+        command1.logic.setKeyPoints(points1);
+
+        // Command 2: to origin
         var command2 = swerveSimpleTrajectoryCommandProvider.get();
         List<XbotSwervePoint> points2 = new ArrayList<>();
-
-        XbotSwervePoint p4 = XbotSwervePoint.createPotentiallyFilppedXbotSwervePoint(new Translation2d(2.5, 0), new Rotation2d(0), 10);
-
-        points2.add(p4);
+        XbotSwervePoint command2Point1 = XbotSwervePoint.createPotentiallyFilppedXbotSwervePoint(new Translation2d(0, 0), new Rotation2d(0), 10);
+        points2.add(command2Point1);
         command2.logic.setGlobalKinematicValues(kinematicValuesForTesting);
-        command2.logic.setKeyPoints(points2);
         command2.logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
+        command2.logic.setKeyPoints(points2);
 
+        // Command 3: 8 meter route
         var command3 = swerveSimpleTrajectoryCommandProvider.get();
         List<XbotSwervePoint> points3 = new ArrayList<>();
-
-        XbotSwervePoint p5 = XbotSwervePoint.createPotentiallyFilppedXbotSwervePoint(new Translation2d(0, 0), Rotation2d.fromDegrees(45), 10);
-
-        points3.add(p5);
+        XbotSwervePoint command3Point1 = XbotSwervePoint.createPotentiallyFilppedXbotSwervePoint(new Translation2d(8, 0), new Rotation2d(0), 10);
+        points3.add(command3Point1);
         command3.logic.setGlobalKinematicValues(kinematicValuesForTesting);
-        command3.logic.setKeyPoints(points3);
         command3.logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
+        command3.logic.setKeyPoints(points3);
 
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(command2); // 3 One thingy
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(command3);
+        // Command 4: the multi-point
+        var command4 = swerveSimpleTrajectoryCommandProvider.get();
+        List<XbotSwervePoint> points4 = new ArrayList<>();
+        XbotSwervePoint command4Point1 = XbotSwervePoint.createPotentiallyFilppedXbotSwervePoint(new Translation2d(1.5, 0), new Rotation2d(0), 10);
+        XbotSwervePoint command4Point2 = XbotSwervePoint.createPotentiallyFilppedXbotSwervePoint(new Translation2d(3, -1.5), new Rotation2d(45), 10);
+        points4.add(command4Point1);
+        points4.add(command4Point2);
+        command4.logic.setGlobalKinematicValues(kinematicValuesForTesting);
+        command4.logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
+        command4.logic.setKeyPoints(points4);
+
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(command1); // THE 5 METER
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(command2); // TO ORIGIN
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(command4); // MULTI-POINT
     }
 
     @Inject
@@ -67,4 +86,5 @@ public class OperatorCommandMap {
     ) {
         resetPose.includeOnSmartDashboard();
     }
+
 }
