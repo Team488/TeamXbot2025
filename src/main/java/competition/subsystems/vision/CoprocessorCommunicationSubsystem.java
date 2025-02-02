@@ -35,6 +35,7 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
 
         xtablesCoordinateLocation = pf.createPersistentProperty("Xtables Coordinate Location", "target_waypoints");
         xtablesHeadingLocation = pf.createPersistentProperty("Xtables Heading Location", "target_heading");
+
         xclient = new XTablesClient();
         wxclient = new WPIXTablesClient(xclient);
     }
