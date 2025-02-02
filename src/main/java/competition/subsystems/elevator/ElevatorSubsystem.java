@@ -226,7 +226,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         if (contract.isElevatorReady()){
             masterMotor.periodic();
         }
-        //bandage case: isTouchingBottom flashes true for one tick on startup
+        //bandage case: isTouchingBottom flashes true for one tick on startup, investigate later?
         if (this.isTouchingBottom() && periodicTickCounter >= 3){
             markElevatorAsCalibratedAgainstLowerLimit();
         }
