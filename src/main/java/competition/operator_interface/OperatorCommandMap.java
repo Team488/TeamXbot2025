@@ -53,17 +53,21 @@ public class OperatorCommandMap {
     @Inject
     public void setUpOperatorCommands(OperatorInterface oi,
                                       PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
-                                      ScoreCoralCommand scoreCoralCommand, IntakeCoralCommand intakeCoralCommand) {
+                                      ScoreCoralCommand scoreCoralCommand, IntakeCoralCommand intakeCoralCommand,
+                                      ScoreWhenReadyCommand scoreWhenReadyCommand) {
         var prepL4 = prepCoralSystemCommandGroupFactory.create(ElevatorSubsystem.ElevatorGoals.ScoreL4,
                 CoralArmPivotSubsystem.ArmGoals.Score);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
+
         var prepL2 = prepCoralSystemCommandGroupFactory.create(ElevatorSubsystem.ElevatorGoals.ScoreL2,
                 CoralArmPivotSubsystem.ArmGoals.Score);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(prepL2);
+
         var homed = prepCoralSystemCommandGroupFactory.create(ElevatorSubsystem.ElevatorGoals.HumanLoad,
                 CoralArmPivotSubsystem.ArmGoals.HumanLoad);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
-        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).onTrue(scoreCoralCommand);
+
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).onTrue(scoreWhenReadyCommand);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(intakeCoralCommand);
     }
 
