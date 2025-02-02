@@ -43,7 +43,7 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
         }
 
         if (electricalContract.isAlgaeArmBottomSensorReady()){
-            this.bottomSensor= xDigitalInputFactory.create(electricalContract.getElevatorBottomSensor(), "ElevatorBottomSensor");
+            this.bottomSensor= xDigitalInputFactory.create(electricalContract.getAlgaeArmBottomSensor(), this.getPrefix());
         } else{
             this.bottomSensor=null;
         }
