@@ -43,8 +43,6 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     final DoubleProperty humanMaxPowerGoingUp;
     final DoubleProperty humanMaxPowerGoingDown;
 
-    final DoubleProperty counteractGravityPower;
-
     final TrapezoidProfileManager profileManager;
 
     @Inject
@@ -68,8 +66,6 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
         this.humanMaxPowerGoingUp = pf.createPersistentProperty("maxPowerGoingUp", 1);
         this.humanMaxPowerGoingDown = pf.createPersistentProperty("maxPowerGoingDown", -0.2);
-
-        this.counteractGravityPower = pf.createPersistentProperty("counteractGravityPower", 0.02);
     }
 
     @Override
@@ -98,8 +94,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         double power = positionPID.calculate(
                 setpoint,
                 elevator.getCurrentValue().in(Meters));
-        //no need to counteract gravity when moving downwards
-        elevator.setPower(power < 0 ? power : power + counteractGravityPower.get());
+        elevator.setPower(power);
     }
 
     @Override
