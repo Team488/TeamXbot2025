@@ -6,6 +6,8 @@ import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -17,6 +19,7 @@ import xbot.common.subsystems.drive.control_logic.HeadingModule;
 import javax.inject.Inject;
 import java.util.HashMap;
 
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 
 public class AlignToReefWithAprilTagCommand extends BaseCommand {
@@ -26,6 +29,8 @@ public class AlignToReefWithAprilTagCommand extends BaseCommand {
     PoseSubsystem pose;
     public Distance cameraXOffset;
     public Pose2d targetReefFacePose;
+
+    private final Translation2d alignmentPointOffset;
 
     @Inject
     public AlignToReefWithAprilTagCommand(AprilTagVisionSubsystemExtended aprilTagVisionSubsystem, DriveSubsystem drive,
@@ -37,11 +42,18 @@ public class AlignToReefWithAprilTagCommand extends BaseCommand {
         this.pose = pose;
         addRequirements(drive);
         CameraInfo[] cameraInfos = electricalContract.getCameraInfo();
-        this.cameraXOffset = cameraInfos[0].position().getMeasureX();
+
+        this.alignmentPointOffset = new Translation2d(
+                electricalContract.getDistanceFromCenterToOuterBumperX()
+                        .minus(cameraInfos[0].position().getMeasureX()),
+                Meters.zero()
+        );
+
     }
 
     @Override
     public void initialize() {
+        log.info("Initializing");
         drive.getPositionalPid().reset();
 
         targetReefFacePose = pose.getClosestReefFacePose();
@@ -54,13 +66,9 @@ public class AlignToReefWithAprilTagCommand extends BaseCommand {
 
         double omega = headingModule.calculateHeadingPower(targetReefFacePose.getRotation().getDegrees());
 
-        drive.move(new XYPair(-driveValues.getX(), -driveValues.getY()), omega);
-
-        aKitLog.record("dx power", driveValues.getX());
-        aKitLog.record("dy power", driveValues.getY());
+        aKitLog.record("PowerVector", driveValues);
         aKitLog.record("omega", omega);
-
-        aKitLog.record("camera count", aprilTagVisionSubsystem.getCameraCount());
+        drive.move(new XYPair(driveValues.getX(), driveValues.getY()), omega);
     }
 
     @Override
@@ -74,13 +82,15 @@ public class AlignToReefWithAprilTagCommand extends BaseCommand {
                 aprilTagVisionSubsystem.getTargetAprilTagID(targetReefFacePose))) {
             Translation2d aprilTagData = aprilTagVisionSubsystem.getReefAprilTagCameraData();
 
-            double dx = drive.getPositionalPid().calculate(cameraXOffset.in(Meters), aprilTagData.getX());
-            double dy = drive.getPositionalPid().calculate(0, aprilTagData.getY());
+            Translation2d goalVector = aprilTagData.minus(alignmentPointOffset);
+            Translation2d powerVector = drive.getPowerForRelativePositionChange(goalVector);
 
             aKitLog.record("AprilTag X", aprilTagData.getX());
             aKitLog.record("AprilTag Y", aprilTagData.getY());
-            return new Translation2d(dx, dy);
+            return powerVector;
         }
+
+        log.info("April tag not in sight, cancelling");
         cancel();
         return new Translation2d(0,0);
     }
