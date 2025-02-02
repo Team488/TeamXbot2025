@@ -1,19 +1,17 @@
 package competition.subsystems;
 
 import competition.BaseCompetitionTest;
-import competition.subsystems.drive.DriveSubsystem;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.junit.Test;
 import org.mockito.Mockito;
 import xbot.common.command.BaseSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
-import xbot.common.injection.BaseWPITest;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.fail;
@@ -44,7 +42,9 @@ public class GenericSubsystemTest extends BaseCompetitionTest {
             } catch (Exception e) {
                 fail("Subsystem " + subsystem.getClass().getName() + " failed to call refreshDataFrame:\n" + e);
             }
+        }
 
+        for (Object subsystem : subsystems) {
             // Run each subsystem periodic method
             Method periodicMethod = subsystem.getClass().getMethod("periodic");
             periodicMethod.setAccessible(true);
@@ -71,6 +71,8 @@ public class GenericSubsystemTest extends BaseCompetitionTest {
         }
         assertNotEquals(0, subsystems.size());
 
+        Map<Object, List<Object>> subsystemMotorControllerMap = new HashMap<>();
+
         // For each subsystem, find all the motor controllers
         for (Object subsystem : subsystems) {
             List<Object> motorControllers = new ArrayList<>();
@@ -82,12 +84,11 @@ public class GenericSubsystemTest extends BaseCompetitionTest {
                     motorControllers.add(field.get(subsystem));
                 }
             }
+            subsystemMotorControllerMap.put(subsystem, motorControllers);
+        }
 
-            if (motorControllers.isEmpty()) {
-                continue;
-            }
-
-            // Run each subsystem refreshDataFrame method
+        // Run each subsystem refreshDataFrame method
+        for (Object subsystem : subsystems) {
             Method refreshDataFrameMethod = subsystem.getClass().getMethod("refreshDataFrame");
             refreshDataFrameMethod.setAccessible(true);
             try {
@@ -95,8 +96,10 @@ public class GenericSubsystemTest extends BaseCompetitionTest {
             } catch (Exception e) {
                 fail("Subsystem " + subsystem.getClass().getName() + " failed to call refreshDataFrame:\n" + e);
             }
+        }
 
-            // Run each subsystem periodic method
+        // Run each subsystem periodic method
+        for (Object subsystem : subsystems) {
             Method periodicMethod = subsystem.getClass().getMethod("periodic");
             periodicMethod.setAccessible(true);
             try {
@@ -104,9 +107,11 @@ public class GenericSubsystemTest extends BaseCompetitionTest {
             } catch (Exception e) {
                 fail("Subsystem " + subsystem.getClass().getName() + " failed to call periodic:\n" + e);
             }
+        }
 
-            // Check that each motor controller periodic method was called
-            for (Object motorController : motorControllers) {
+        // Check that each motor controller periodic method was called
+        for (Object subsystem : subsystems) {
+            for (Object motorController : subsystemMotorControllerMap.get(subsystem)) {
                     Mockito.verify((XCANMotorController)motorController, Mockito.times(1)
                             .description("Subsystem " + subsystem.getClass().getName() + " did not call periodic on a motor controller.")).periodic();
             }
