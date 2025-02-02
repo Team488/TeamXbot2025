@@ -41,7 +41,6 @@ public class DriveToNearestReefFaceCommand extends SwerveSimpleTrajectoryCommand
         ArrayList<XbotSwervePoint> swervePoints = new ArrayList<>();
         swervePoints.add(new XbotSwervePoint(targetReefFacePose, 10));
         this.logic.setKeyPoints(swervePoints);
-        this.logic.setEnableConstantVelocity(true);
         this.logic.setConstantVelocity(drive.getMaxTargetSpeedMetersPerSecond());
         super.initialize();
     }

@@ -52,8 +52,6 @@ public class DriveToWaypointsWithVisionCommand extends SwerveSimpleTrajectoryCom
         this.logic.setKeyPoints(swervePoints);
         this.logic.setAimAtGoalDuringFinalLeg(true);
 //        this.logic.setDriveBackwards(true);
-        this.logic.setEnableConstantVelocity(true);
-
         this.logic.setConstantVelocity(this.drive.getDriveToWaypointsSpeed());
 
         reset();
