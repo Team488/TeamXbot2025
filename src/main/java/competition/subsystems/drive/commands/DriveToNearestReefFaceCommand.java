@@ -6,6 +6,7 @@ import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import xbot.common.logging.RobotAssertionManager;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.drive.SwerveSimpleTrajectoryCommand;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
@@ -25,8 +26,8 @@ public class DriveToNearestReefFaceCommand extends SwerveSimpleTrajectoryCommand
     @Inject
     public DriveToNearestReefFaceCommand(DriveSubsystem drive, PoseSubsystem pose, PropertyFactory pf,
                                          HeadingModule.HeadingModuleFactory headingModuleFactory,
-                                         AprilTagVisionSubsystemExtended aprilTagVisionSubsystem) {
-        super(drive, pose, pf, headingModuleFactory);
+                                         AprilTagVisionSubsystemExtended aprilTagVisionSubsystem, RobotAssertionManager assertionManager) {
+        super(drive, pose, pf, headingModuleFactory, assertionManager);
         this.drive = drive;
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
         this.pose = pose;

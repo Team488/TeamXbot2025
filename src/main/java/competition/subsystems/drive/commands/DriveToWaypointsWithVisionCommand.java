@@ -6,6 +6,7 @@ import competition.subsystems.vision.VisionSubsystem;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.kobe.xbot.Utilities.Entities.XTableValues;
+import xbot.common.logging.RobotAssertionManager;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.properties.StringProperty;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
@@ -27,8 +28,9 @@ public class DriveToWaypointsWithVisionCommand extends SwerveSimpleTrajectoryCom
 
     @Inject
     DriveToWaypointsWithVisionCommand(PoseSubsystem pose, DriveSubsystem drive, VisionSubsystem vision,
-                                      PropertyFactory pf, HeadingModule.HeadingModuleFactory headingModuleFactory) {
-        super(drive, pose, pf, headingModuleFactory);
+                                      PropertyFactory pf, HeadingModule.HeadingModuleFactory headingModuleFactory,
+                                      RobotAssertionManager assertionManager) {
+        super(drive, pose, pf, headingModuleFactory, assertionManager);
         this.pose = pose;
         this.drive = drive;
         this.vision = vision;
