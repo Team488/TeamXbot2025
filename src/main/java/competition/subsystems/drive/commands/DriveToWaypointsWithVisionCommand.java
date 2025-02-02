@@ -3,7 +3,6 @@ package competition.subsystems.drive.commands;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
-import competition.subsystems.vision.VisionSubsystem;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.kobe.xbot.Utilities.Entities.XTableValues;

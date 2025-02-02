@@ -25,6 +25,7 @@ public class WPIXTablesClient {
         ByteBuffer bb = ByteBuffer.allocate(pose2dStruct.getSize());
         pose2dStruct.pack(bb,pose);
         byte[] barr = new byte[bb.capacity()];
+        bb.rewind();
         bb.get(barr);
         this.xTablesClient.putUnknownBytes(String.format("%s.%s", prefix, table), barr);
     }
