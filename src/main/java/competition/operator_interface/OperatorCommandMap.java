@@ -4,6 +4,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
+import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
 import competition.simulation.commands.ResetSimulatedPose;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionIntakeCommand;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionOutputCommand;
@@ -12,6 +13,7 @@ import competition.subsystems.coral_arm_pivot.CoralArmPivotSubsystem;
 import competition.subsystems.coral_arm_pivot.commands.SetCoralArmTargetAngleCommand;
 import competition.subsystems.coral_scorer.commands.IntakeCoralCommand;
 import competition.subsystems.coral_scorer.commands.ScoreCoralCommand;
+import competition.subsystems.coral_scorer.commands.ScoreWhenReadyCommand;
 import competition.subsystems.coral_scorer.commands.StopCoralCommand;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
@@ -46,6 +48,22 @@ public class OperatorCommandMap {
             SetRobotHeadingCommand resetHeading) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(1).onTrue(resetHeading);
+    }
+
+    @Inject
+    public void setUpOperatorCommands(OperatorInterface oi,
+                                      PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
+                                      ScoreWhenReadyCommand scoreWhenReadyCommand) {
+        var prepL4 = prepCoralSystemCommandGroupFactory.create(ElevatorSubsystem.ElevatorGoals.ScoreL4,
+                CoralArmPivotSubsystem.ArmGoals.Score);
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
+        var prepL2 = prepCoralSystemCommandGroupFactory.create(ElevatorSubsystem.ElevatorGoals.ScoreL2,
+                CoralArmPivotSubsystem.ArmGoals.Score);
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(prepL2);
+        var homed = prepCoralSystemCommandGroupFactory.create(ElevatorSubsystem.ElevatorGoals.HumanLoad,
+                CoralArmPivotSubsystem.ArmGoals.HumanLoad);
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).onTrue(scoreWhenReadyCommand);
     }
 
     // Programmer commands are only meant to be used to debug or test the robot. They should not be used in competition,
@@ -86,13 +104,13 @@ public class OperatorCommandMap {
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeCoralCommand);
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreCoralCommand);
 
-        //oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(lowerToHumanLoad);
-        //oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(riseToScore);
+        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(lowerToHumanLoad);
+        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(riseToScore);
       
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(forceElevatorCalibratedCommand);
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(riseToL2);
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(riseToL3);
-        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(riseToL4);
+//        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(riseToL4);
 
 //        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(algaeCollectionIntakeCommand);
 //        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(algaeCollectionOutputCommand);

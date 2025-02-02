@@ -102,7 +102,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         l2Height = pf.createPersistentProperty("l2Height-m", 0.5);
         l3Height = pf.createPersistentProperty("l3Height-m", 0.75);
         l4Height = pf.createPersistentProperty("l4Height-m", 1);
-        humanLoadHeight = pf.createPersistentProperty("humanLoadHeight-m", 1);
+        humanLoadHeight = pf.createPersistentProperty("humanLoadHeight-m", 0.5);
         baseHeight = pf.createPersistentProperty("baseHeight-m", 0);
 
         this.sysId = new SysIdRoutine(
