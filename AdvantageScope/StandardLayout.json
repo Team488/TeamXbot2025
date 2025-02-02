@@ -1,33 +1,38 @@
 {
   "hubs": [
     {
-      "x": -8,
-      "y": -8,
-      "width": 1552,
-      "height": 832,
+      "x": 217,
+      "y": 106,
+      "width": 1105,
+      "height": 654,
       "state": {
         "sidebar": {
           "width": 443,
           "expanded": [
             "/SwerveDriveSubsystem/DrivePID",
             "/SwerveSteeringSubsystem/SteeringPID",
-            "/Preferences/SwerveSteeringSubsystem",
             "/Preferences/SwerveSteeringSubsystem/SteeringPID",
             "/AdvantageKit",
             "/AdvantageKit/RealOutputs/Simulator/FieldSimulation",
-            "/AdvantageKit/RealOutputs",
-            "/AdvantageKit/RealOutputs/ElevatorSubsystem",
-            "/AdvantageKit/RealOutputs/CoralArmPivotSubsystem",
-            "/AdvantageKit/RealOutputs/ElevatorMaintainerCommand",
-            "/AdvantageKit/RealOutputs/CoralScorerSubsystem",
             "/Preferences/ElevatorMaintainerCommand/positionPID",
+            "/Preferences/CoralArmPivotMaintainerCommand/PositionalPID",
+            "/AdvantageKit/RealOutputs",
+            "/AdvantageKit/RealOutputs/Simulator",
+            "/AdvantageKit/RealOutputs/AprilTagVisionSubsystemExtended/Cameras",
+            "/AdvantageKit/RealOutputs/AprilTagVisionSubsystemExtended/Cameras/AprilTagFrontLeft",
+            "/AdvantageKit/RealOutputs/AlignToReefWithAprilTagCommand",
+            "/AdvantageKit/RealOutputs/AlignToReefWithAprilTagCommand/TargetReefFace",
+            "/AdvantageKit/RealOutputs/PoseSubsystem",
+            "/AdvantageKit/RealOutputs/AlignToReefWithAprilTagCommand/ChosenTag/translation",
             "/Preferences",
-            "/Preferences/CoralArmPivotMaintainerCommand",
-            "/Preferences/CoralArmPivotMaintainerCommand/PositionalPID"
+            "/Preferences/PoseSubsystem",
+            "/AdvantageKit/RealOutputs/PoseSubsystem/CameraPose",
+            "/Preferences/DriveSubsystem",
+            "/Preferences/DriveSubsystem/PositionPID"
           ]
         },
         "tabs": {
-          "selected": 5,
+          "selected": 6,
           "tabs": [
             {
               "type": 0,
@@ -122,7 +127,7 @@
             },
             {
               "type": 3,
-              "title": "3D Field",
+              "title": "3D Standard",
               "controller": {
                 "sources": [
                   {
@@ -196,17 +201,98 @@
                 "cameraIndex": -1,
                 "orbitFov": 50,
                 "cameraPosition": [
-                  0.8464417407104681,
-                  2.23804178132486,
-                  -2.571713741513319
+                  3.0998100133699418,
+                  5.712845950191182,
+                  -4.661779497670283
                 ],
                 "cameraTarget": [
-                  2.231296817334594,
-                  1.2143698728438446,
-                  -0.4936931411141769
+                  3.475609487104665,
+                  2.5943025727072935,
+                  -2.8220354041203217
                 ]
               },
               "controlsHeight": 239
+            },
+            {
+              "type": 3,
+              "title": "3D Vision",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "robot",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Simulator/FieldSimulation/Robot",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {
+                      "model": "Xbot 2025"
+                    }
+                  },
+                  {
+                    "type": "vision",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/AlignToReefWithAprilTagCommand/TargetReefFace",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ffff",
+                      "size": "bold"
+                    }
+                  },
+                  {
+                    "type": "mechanism",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Simulator/FieldSimulation/SuperstructureMechanism",
+                    "logType": "Mechanism2d",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/PoseSubsystem/RobotPose",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {
+                      "model": "Xbot 2025",
+                      "color": "#00ff00"
+                    }
+                  },
+                  {
+                    "type": "robot",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/PoseSubsystem/CameraPose/0",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {
+                      "model": "Camera"
+                    }
+                  },
+                  {
+                    "type": "vision",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/AprilTagVisionSubsystemExtended/Cameras/AprilTagFrontLeft/TagPoses",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "game": "2025 Field",
+                "origin": "blue"
+              },
+              "controllerUUID": "zzauzu00k05es4ph6rmnpywc2uk1s4qv",
+              "renderer": {
+                "cameraIndex": -1,
+                "orbitFov": 50,
+                "cameraPosition": [
+                  -5.143714262722786,
+                  10.85803080794912,
+                  0.059490751354837224
+                ],
+                "cameraTarget": [
+                  -5.143704513665937,
+                  1.0712298103919229,
+                  0.059491614997902204
+                ]
+              },
+              "controlsHeight": 200
             },
             {
               "type": 10,
