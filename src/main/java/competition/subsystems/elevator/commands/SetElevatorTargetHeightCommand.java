@@ -6,11 +6,12 @@ import xbot.common.command.BaseCommand;
 import xbot.common.command.BaseSetpointCommand;
 
 import javax.inject.Inject;
+import java.util.function.Supplier;
 
 public class SetElevatorTargetHeightCommand extends BaseSetpointCommand {
 
-    ElevatorSubsystem.ElevatorGoals height;
     ElevatorSubsystem elevator;
+    private Supplier<ElevatorSubsystem.ElevatorGoals> heightSupplier;
 
     @Inject
     public SetElevatorTargetHeightCommand(ElevatorSubsystem elevator){
@@ -18,18 +19,22 @@ public class SetElevatorTargetHeightCommand extends BaseSetpointCommand {
         this.elevator = elevator;
     }
 
+    public void setHeightSupplier(Supplier<ElevatorSubsystem.ElevatorGoals> heightSupplier) {
+        this.heightSupplier = heightSupplier;
+    }
+
+    public void setHeight(ElevatorSubsystem.ElevatorGoals height) {
+        setHeightSupplier(() -> height);
+    }
+
     @Override
     public void initialize() {
         log.info("initializing");
-        elevator.setTargetHeight(height);
+        elevator.setTargetHeight(this.heightSupplier.get());
     }
 
     @Override
     public void execute() {
-        elevator.setTargetHeight(height);
-    }
-
-    public void setHeight(ElevatorSubsystem.ElevatorGoals height) {
-        this.height = height;
+        // No-op, wait for arms to get to the target
     }
 }

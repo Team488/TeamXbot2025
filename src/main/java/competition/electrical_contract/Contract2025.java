@@ -81,6 +81,13 @@ public class Contract2025 extends ElectricalContract {
     }
 
     @Override
+    public boolean isHumanLoadRampReady() {
+        return false;
+    }
+
+
+
+    @Override
     public CANMotorControllerInfo getAlgaeArmPivotMotor() {
         return new CANMotorControllerInfo("AlgaeArmPivotMotor",
                 MotorControllerType.TalonFx,
@@ -119,6 +126,16 @@ public class Contract2025 extends ElectricalContract {
                 MotorControllerType.TalonFx,
                 CANBusId.DefaultCanivore, 99, //change deviceId later
                 new CANMotorControllerOutputConfig());
+    }
+
+    @Override
+    public boolean isElevatorDistanceSensorReady() {
+        return false;
+    }
+
+    @Override
+    public DeviceInfo getElevatorDistanceSensor() {
+        return new DeviceInfo("ElevatorDistanceSensor", 5);
     }
 
     protected String getDriveControllerName(SwerveInstance swerveInstance) {

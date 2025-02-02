@@ -3,6 +3,8 @@ package competition.subsystems;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import competition.subsystems.algae_arm.AlgaeArmSubsystem;
+import competition.subsystems.algae_arm.commands.AlgaeArmMaintainerCommand;
 import competition.subsystems.algae_collection.AlgaeCollectionSubsystem;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionStopCommand;
 import competition.subsystems.coral_arm_pivot.CoralArmPivotSubsystem;
@@ -13,6 +15,8 @@ import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import competition.subsystems.elevator.commands.ElevatorMaintainerCommand;
+import competition.subsystems.humanloadramp.commands.HumanLoadRampRetractCommand;
+import competition.subsystems.humanloadramp.HumanLoadRampSubsystem;
 
 /**
  * For setting the default commands on subsystems
@@ -44,7 +48,17 @@ public class SubsystemDefaultCommandMap {
     }
 
     @Inject
-    public void setupArmPivotSubsystem(CoralArmPivotSubsystem armPivotSubsystem, CoralArmPivotMaintainerCommand command) {
-        armPivotSubsystem.setDefaultCommand(command);
+    public void setupCoralArmPivotSubsystem(CoralArmPivotSubsystem coralArmPivotSubsystem, CoralArmPivotMaintainerCommand command){
+        coralArmPivotSubsystem.setDefaultCommand(command);
+    }
+
+    @Inject
+    public void setupHumanLoadRampSubSystem(HumanLoadRampSubsystem humanLoadRampSubsystem, HumanLoadRampRetractCommand command){
+        humanLoadRampSubsystem.setDefaultCommand(command);
+    }
+
+    @Inject
+    public void setupAlgaeArmSubsystem(AlgaeArmSubsystem algaeArmSubsystem, AlgaeArmMaintainerCommand commands){
+        algaeArmSubsystem.setDefaultCommand(commands);
     }
 }
