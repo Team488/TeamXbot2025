@@ -15,6 +15,7 @@ import competition.subsystems.coral_scorer.commands.ScoreCoralCommand;
 import competition.subsystems.coral_scorer.commands.StopCoralCommand;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
+import competition.subsystems.drive.commands.DriveToWaypointsWithVisionCommand;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 
 import competition.subsystems.elevator.ElevatorSubsystem;
@@ -43,9 +44,10 @@ public class OperatorCommandMap {
     @Inject
     public void setupMyCommands(
             OperatorInterface operatorInterface,
-            SetRobotHeadingCommand resetHeading) {
+            SetRobotHeadingCommand resetHeading, DriveToWaypointsWithVisionCommand driveWaypoints) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(1).onTrue(resetHeading);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).onTrue(driveWaypoints);
     }
 
     // Programmer commands are only meant to be used to debug or test the robot. They should not be used in competition,
