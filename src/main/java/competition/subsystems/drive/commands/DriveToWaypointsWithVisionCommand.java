@@ -2,6 +2,7 @@ package competition.subsystems.drive.commands;
 
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.PoseSubsystem;
+import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import competition.subsystems.vision.VisionSubsystem;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -23,17 +24,17 @@ public class DriveToWaypointsWithVisionCommand extends SwerveSimpleTrajectoryCom
     
     DriveSubsystem drive;
     PoseSubsystem pose;
-    VisionSubsystem vision;
+    CoprocessorCommunicationSubsystem coprocessorComms;
 
 
     @Inject
-    DriveToWaypointsWithVisionCommand(PoseSubsystem pose, DriveSubsystem drive, VisionSubsystem vision,
+    DriveToWaypointsWithVisionCommand(PoseSubsystem pose, DriveSubsystem drive, CoprocessorCommunicationSubsystem coprocessorComms,
                                       PropertyFactory pf, HeadingModule.HeadingModuleFactory headingModuleFactory,
                                       RobotAssertionManager assertionManager) {
         super(drive, pose, pf, headingModuleFactory, assertionManager);
         this.pose = pose;
         this.drive = drive;
-        this.vision = vision;
+        this.coprocessorComms = coprocessorComms;
 
     }
 
@@ -61,11 +62,10 @@ public class DriveToWaypointsWithVisionCommand extends SwerveSimpleTrajectoryCom
 
     //allows for driving not in a straight line
     public void retrieveWaypointsFromVision() {
-        XTablesClient xclient = this.vision.getXTablesClient();
+        XTablesClient xclient = this.coprocessorComms.getXTablesClient();
 
         // both potentialy null. Will not do anything if coordinates is null, but can proceed if heading is null
-//        List<XTableValues.Coordinate> coordinates = xclient.getCoordinates(this.vision.getXtablesCoordinateLocation());
-        List<XTableValues.Coordinate> coordinates = xclient.getCoordinates("target_waypoints");
+        List<XTableValues.Coordinate> coordinates = xclient.getCoordinates(this.coprocessorComms.getXtablesCoordinateLocation());
         if(coordinates == null){
             // fail
             log.warn("No coordinates found in vision.");
@@ -79,7 +79,7 @@ public class DriveToWaypointsWithVisionCommand extends SwerveSimpleTrajectoryCom
             waypoints[i] = new Translation2d(coordinate.getX(), coordinate.getY());
         }
         
-        Double heading = xclient.getDouble(this.vision.getXtablesHeadingLocation());
+        Double heading = xclient.getDouble(this.coprocessorComms.getXtablesHeadingLocation());
         Rotation2d rotation = null;
         if(heading != null){
             rotation = Rotation2d.fromRadians(heading);

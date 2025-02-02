@@ -1,5 +1,6 @@
 package competition.subsystems.pose;
 
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Optional;
 
@@ -7,6 +8,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import competition.subsystems.drive.DriveSubsystem;
+import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
+import competition.subsystems.vision.WPIXTablesClient;
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -15,9 +18,11 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.struct.Pose2dStruct;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import org.kobe.xbot.JClient.XTablesClient;
 import xbot.common.controls.sensors.XGyro.XGyroFactory;
 import xbot.common.math.WrappedRotation2d;
 import xbot.common.properties.BooleanProperty;
@@ -33,6 +38,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
     final SwerveDrivePoseEstimator fullSwerveOdometry;
 
     private final DriveSubsystem drive;
+    private final CoprocessorCommunicationSubsystem coprocessorComms;
     private final AprilTagVisionSubsystem aprilTagVisionSubsystem;
     private final BooleanProperty useVisionAssistedPose;
     private final BooleanProperty reportCameraPoses;
@@ -41,9 +47,10 @@ public class PoseSubsystem extends BasePoseSubsystem {
     protected Optional<SwerveModulePosition[]> simulatedModulePositions = Optional.empty();
 
     @Inject
-    public PoseSubsystem(XGyroFactory gyroFactory, PropertyFactory propManager, DriveSubsystem drive, AprilTagVisionSubsystem aprilTagVisionSubsystem) {
+    public PoseSubsystem(XGyroFactory gyroFactory, PropertyFactory propManager, DriveSubsystem drive, AprilTagVisionSubsystem aprilTagVisionSubsystem, CoprocessorCommunicationSubsystem coprocessorComms) {
         super(gyroFactory, propManager);
         this.drive = drive;
+        this.coprocessorComms = coprocessorComms;
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
 
         onlyWheelsGyroSwerveOdometry = initializeSwerveOdometry();
@@ -76,13 +83,15 @@ public class PoseSubsystem extends BasePoseSubsystem {
 
     @Override
     protected void updateOdometry() {
+        WPIXTablesClient wxclient = this.coprocessorComms.getWPIXTablesClient();
+        String xtablesPrefix = "PoseSubsystem";
         // Update pose estimators
         onlyWheelsGyroSwerveOdometry.update(
                 this.getCurrentHeading(),
                 getSwerveModulePositions()
         );
         aKitLog.record("WheelsOnlyEstimate", onlyWheelsGyroSwerveOdometry.getEstimatedPosition());
-
+        wxclient.putPose2d(xtablesPrefix,"WheelsOnlyEstimate",onlyWheelsGyroSwerveOdometry.getEstimatedPosition());
         fullSwerveOdometry.update(
                 this.getCurrentHeading(),
                 getSwerveModulePositions()
@@ -101,15 +110,18 @@ public class PoseSubsystem extends BasePoseSubsystem {
                 getCurrentHeading()
         );
         aKitLog.record("OdometryOnlyRobotPose", estimatedPosition);
+        wxclient.putPose2d(xtablesPrefix,"OdometryOnlyRobotPose",estimatedPosition);
 
         Pose2d visionEnhancedPosition = new Pose2d(
                 fullSwerveOdometry.getEstimatedPosition().getTranslation(),
                 fullSwerveOdometry.getEstimatedPosition().getRotation()
         );
         aKitLog.record("VisionEnhancedPose", visionEnhancedPosition);
+        wxclient.putPose2d(xtablesPrefix,"VisionEnhancedPose",visionEnhancedPosition);
 
         Pose2d robotPose = this.useVisionAssistedPose.get() ? visionEnhancedPosition : estimatedPosition;
         aKitLog.record("RobotPose", robotPose);
+        wxclient.putPose2d(xtablesPrefix,"RobotPose",robotPose);
 
         // Record the camera positions
         if (reportCameraPoses.get()) {
