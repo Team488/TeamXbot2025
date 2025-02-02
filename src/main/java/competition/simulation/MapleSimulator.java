@@ -144,8 +144,12 @@ public class MapleSimulator implements BaseSimulator {
         var robotNearHumanLoading = false; 
         for (Pose2d station : coralStations) {
             if (currentPose.getTranslation().getDistance(station.getTranslation()) < humanLoadingDistanceThreshold.in(Meters)) {
-                robotNearHumanLoading = true;
-                break;
+                // verify robot angle aligns with the station
+                var angleThresholdDegrees = 10;
+                if(Math.abs(currentPose.getRotation().getDegrees() - station.getRotation().getDegrees()) < angleThresholdDegrees) {
+                    robotNearHumanLoading = true;
+                    break;
+                }
             }
         }
 
