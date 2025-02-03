@@ -88,7 +88,7 @@ public class AlignToReefWithAprilTagCommand extends BaseCommand {
     }
 
     public void setXOffset(Landmarks.BranchLevel branchLevel) {
-        // TODO: add switch case to set offset depending on branch level
+        // TODO: add switch case to set offset depending on branch level, this is only needed if level scoring positions are different
     }
 
     public void setYOFFset(Landmarks.Branch branch) {

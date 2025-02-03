@@ -1,7 +1,8 @@
 package competition.commandgroups;
 
-import competition.subsystems.drive.commands.DriveToReefFaceCommand;
-import edu.wpi.first.math.geometry.Pose2d;
+import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
+import competition.subsystems.drive.commands.DriveToReefFaceUntilDetectionCommand;
+import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
 import javax.inject.Inject;
@@ -9,25 +10,26 @@ import javax.inject.Provider;
 
 public class DriveToReefFaceThenAlignCommandGroupFactory {
 
-    Provider<DriveToReefFaceCommand> driveToReefFaceCommandProvider;
-    Provider<DriveToNearestReefThenAlignCommandGroup> driveToNearestReefCommandGroupProvider;
+    Provider<DriveToReefFaceUntilDetectionCommand> driveToReefFaceCommandProvider;
+    Provider<AlignToReefWithAprilTagCommand> alignToReefWithAprilTagCommandProvider;
 
     @Inject
-    public DriveToReefFaceThenAlignCommandGroupFactory(Provider<DriveToReefFaceCommand> driveToReefFaceCommandProvider,
-                                                       Provider<DriveToNearestReefThenAlignCommandGroup> driveToNearestReefCommandGroupProvider) {
+    public DriveToReefFaceThenAlignCommandGroupFactory(Provider<DriveToReefFaceUntilDetectionCommand> driveToReefFaceCommandProvider,
+                                                       Provider<AlignToReefWithAprilTagCommand> alignToReefWithAprilTagCommandProvider) {
         this.driveToReefFaceCommandProvider = driveToReefFaceCommandProvider;
-        this.driveToNearestReefCommandGroupProvider = driveToNearestReefCommandGroupProvider;
+        this.alignToReefWithAprilTagCommandProvider = alignToReefWithAprilTagCommandProvider;
     }
 
     // TODO: make this ask for Landmarks enum instead of Pose2d
-    public SequentialCommandGroup create(Pose2d targetReefFacePose) {
+    public SequentialCommandGroup create(Landmarks.ReefFace targetReefFace, Landmarks.Branch branch) {
         var group = new SequentialCommandGroup();
 
         var driveToReefFace = driveToReefFaceCommandProvider.get();
-        driveToReefFace.setTargetReefFacePose(targetReefFacePose);
-        var driveToNearestFaceCommand = driveToNearestReefCommandGroupProvider.get();
+        driveToReefFace.setTargetReefFacePose(targetReefFace);
+        var alignToReefWithAprilTag = alignToReefWithAprilTagCommandProvider.get();
+        alignToReefWithAprilTag.setYOFFset(branch);
 
-        group.addCommands(driveToReefFace, driveToNearestFaceCommand);
+        group.addCommands(driveToReefFace, alignToReefWithAprilTag);
 
         return group;
     }

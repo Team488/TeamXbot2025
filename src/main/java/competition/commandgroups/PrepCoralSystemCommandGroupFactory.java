@@ -22,11 +22,11 @@ public class PrepCoralSystemCommandGroupFactory {
         this.setCoralArmTargetAngleCommandProvider = setCoralArmTargetAngleCommandProvider;
     }
 
-    public SequentialCommandGroup create(ElevatorSubsystem.ElevatorGoals elevatorTargetHeight, CoralArmPivotSubsystem.ArmGoals armGoal) {
+    public SequentialCommandGroup create(ElevatorSubsystem.ElevatorGoals elevatorGoal, CoralArmPivotSubsystem.ArmGoals armGoal) {
         var group = new SequentialCommandGroup();
 
         var setElevatorTargetHeightCommand = setElevatorTargetHeightCommandProvider.get();
-        setElevatorTargetHeightCommand.setHeight(elevatorTargetHeight);
+        setElevatorTargetHeightCommand.setHeight(elevatorGoal);
         var setCoralArmTargetAngleCommand = setCoralArmTargetAngleCommandProvider.get();
         setCoralArmTargetAngleCommand.setAngle(armGoal);
 
