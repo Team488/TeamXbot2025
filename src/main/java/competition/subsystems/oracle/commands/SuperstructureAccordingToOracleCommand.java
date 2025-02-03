@@ -19,7 +19,8 @@ public class SuperstructureAccordingToOracleCommand extends BaseCommand {
     OracleSuperstructureAdvice advice;
 
     @Inject
-    public SuperstructureAccordingToOracleCommand(OracleSubsystem oracle, ElevatorSubsystem elevator, CoralArmPivotSubsystem coralArm, CoralScorerSubsystem coralScorer) {
+    public SuperstructureAccordingToOracleCommand(OracleSubsystem oracle, ElevatorSubsystem elevator,
+                                                  CoralArmPivotSubsystem coralArm, CoralScorerSubsystem coralScorer) {
         this.oracle = oracle;
         this.elevator = elevator;
         this.coralArm = coralArm;

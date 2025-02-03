@@ -50,7 +50,11 @@ public class ReefCoordinateGenerator {
         redReefAngleMapping.put(Landmarks.ReefFace.CLOSE_LEFT, Degrees.of(60 * 5));
     }
 
-    public Pose2d getPoseRelativeToReefCenter(DriverStation.Alliance alliance, Landmarks.ReefFace reefFace, Distance distanceFromCenterX, Distance distanceFromCenterY) {
+    public Pose2d getPoseRelativeToReefCenter(
+            DriverStation.Alliance alliance,
+            Landmarks.ReefFace reefFace,
+            Distance distanceFromCenterX,
+            Distance distanceFromCenterY) {
         var reefAngleMapping = alliance == DriverStation.Alliance.Blue ? blueReefAngleMapping : redReefAngleMapping;
         var reefCenter = Landmarks.BlueCenterOfReef.getTranslation();
         if (alliance == DriverStation.Alliance.Red) {
@@ -64,11 +68,20 @@ public class ReefCoordinateGenerator {
         return new Pose2d(reefCenter.plus(rotatedVector), Rotation2d.fromRadians(reefRayDirection.in(Radians)).rotateBy(Rotation2d.fromDegrees(180)));
     }
 
-    public Pose2d getPoseRelativeToReefFace(DriverStation.Alliance alliance, Landmarks.ReefFace reefFace, Distance distanceFromFaceX, Distance distanceFromFaceY) {
+    public Pose2d getPoseRelativeToReefFace(
+            DriverStation.Alliance alliance,
+            Landmarks.ReefFace reefFace,
+            Distance distanceFromFaceX,
+            Distance distanceFromFaceY) {
         return getPoseRelativeToReefCenter(alliance, reefFace, distanceFromFaceX.plus(Landmarks.reefCenterToFace), distanceFromFaceY);
     }
 
-    public Pose2d getPoseRelativeToReefFaceAndBranch(DriverStation.Alliance alliance, Landmarks.ReefFace reefFace, Landmarks.Branch branch, Distance distanceFromFaceX, Distance distanceFromBranchY) {
+    public Pose2d getPoseRelativeToReefFaceAndBranch(
+            DriverStation.Alliance alliance,
+            Landmarks.ReefFace reefFace,
+            Landmarks.Branch branch,
+            Distance distanceFromFaceX,
+            Distance distanceFromBranchY) {
         var horizontalOffset = Landmarks.reefBranchHorizontalOffsetForBranchTypeA;
         if (branch == Landmarks.Branch.B) {
             horizontalOffset = horizontalOffset.times(-1);
@@ -77,7 +90,11 @@ public class ReefCoordinateGenerator {
         return getPoseRelativeToReefFace(alliance, reefFace, distanceFromFaceX, distanceFromBranchY.plus(horizontalOffset));
     }
 
-    public Pose2d getTypicalScoringLocationForFaceBranchLevel(DriverStation.Alliance alliance, Landmarks.ReefFace reefFace, Landmarks.Branch branch, Landmarks.CoralLevel level) {
+    public Pose2d getTypicalScoringLocationForFaceBranchLevel(
+            DriverStation.Alliance alliance,
+            Landmarks.ReefFace reefFace,
+            Landmarks.Branch branch,
+            Landmarks.CoralLevel level) {
 
         String key = alliance.toString() + reefFace.toString() + branch.toString() + level.toString();
         Translation2d offset = new Translation2d(0, 0);
