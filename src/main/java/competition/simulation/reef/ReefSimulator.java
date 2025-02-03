@@ -72,7 +72,7 @@ public class ReefSimulator {
         }
     }
 
-    public void scoreCoralNearestTo(Translation3d scorerPose) {
+    public ReefCoralKey findNearestCoral(Translation3d scorerPose) {
         var coralDistanceMap = new HashMap<ReefCoralKey, Distance>();
         for (ReefFace face : ReefFace.values()) {
             for (ReefLevel level : ReefLevel.values()) {
@@ -91,7 +91,20 @@ public class ReefSimulator {
             .min(Map.Entry.comparingByValue())
             .map(Map.Entry::getKey)
             .orElseThrow(() -> new IllegalStateException("No corals found"));
-        System.out.println("Found closest coral: " + closestCoral);
+        return closestCoral;
+    }
+
+    public void scoreCoral(ReefCoralKey coral) {
+        reefCoralLocations.add(coral);
+    }
+
+    public boolean isCoralScored(ReefCoralKey coral) {
+        return reefCoralLocations.contains(coral);
+    }
+
+    public void scoreCoralNearestTo(Translation3d scorerPose) {
+        var closestCoral = findNearestCoral(scorerPose);
+        
         reefCoralLocations.add(closestCoral);
     }
 
@@ -111,6 +124,10 @@ public class ReefSimulator {
         return reefCoralLocations.stream()
                 .map(coralLocation -> getCoralPose(coralLocation.face(), coralLocation.level(), coralLocation.post()))
                 .toArray(Pose3d[]::new);
+    }
+
+    public Pose3d getCoralPose(ReefCoralKey key) {
+        return getCoralPose(key.face, key.level, key.post);
     }
 
     public Pose3d getCoralPose(ReefFace face, ReefLevel level, ReefPost post) {
