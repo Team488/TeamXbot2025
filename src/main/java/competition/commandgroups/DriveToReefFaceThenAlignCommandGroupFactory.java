@@ -1,6 +1,5 @@
 package competition.commandgroups;
 
-import competition.subsystems.drive.commands.DriveToNearestReefFaceCommand;
 import competition.subsystems.drive.commands.DriveToReefFaceCommand;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -11,15 +10,16 @@ import javax.inject.Provider;
 public class DriveToReefFaceThenAlignCommandGroupFactory {
 
     Provider<DriveToReefFaceCommand> driveToReefFaceCommandProvider;
-    Provider<DriveToNearestReefCommandGroup> driveToNearestReefCommandGroupProvider;
+    Provider<DriveToNearestReefThenAlignCommandGroup> driveToNearestReefCommandGroupProvider;
 
     @Inject
     public DriveToReefFaceThenAlignCommandGroupFactory(Provider<DriveToReefFaceCommand> driveToReefFaceCommandProvider,
-                                                       Provider<DriveToNearestReefCommandGroup> driveToNearestReefCommandGroupProvider) {
+                                                       Provider<DriveToNearestReefThenAlignCommandGroup> driveToNearestReefCommandGroupProvider) {
         this.driveToReefFaceCommandProvider = driveToReefFaceCommandProvider;
         this.driveToNearestReefCommandGroupProvider = driveToNearestReefCommandGroupProvider;
     }
 
+    // TODO: make this ask for Landmarks enum instead of Pose2d
     public SequentialCommandGroup create(Pose2d targetReefFacePose) {
         var group = new SequentialCommandGroup();
 

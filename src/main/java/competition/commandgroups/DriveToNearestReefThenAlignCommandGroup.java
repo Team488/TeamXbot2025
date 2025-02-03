@@ -6,11 +6,11 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
 import javax.inject.Inject;
 
-public class DriveToNearestReefCommandGroup extends SequentialCommandGroup {
+public class DriveToNearestReefThenAlignCommandGroup extends SequentialCommandGroup {
 
     @Inject
-    public DriveToNearestReefCommandGroup(DriveToNearestReefFaceCommand driveToNearestReefFaceCommand,
-                                          AlignToReefWithAprilTagCommand alignToReefWithAprilTagCommand) {
+    public DriveToNearestReefThenAlignCommandGroup(DriveToNearestReefFaceCommand driveToNearestReefFaceCommand,
+                                                   AlignToReefWithAprilTagCommand alignToReefWithAprilTagCommand) {
 
         this.addCommands(driveToNearestReefFaceCommand);
         this.addCommands(alignToReefWithAprilTagCommand);
