@@ -6,6 +6,7 @@ import competition.simulation.BaseSimulator;
 import competition.simulation.MapleSimulator;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.PoseSubsystem;
+import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import dagger.Binds;
 import dagger.Module;
 import xbot.common.injection.electrical_contract.XCameraElectricalContract;
@@ -13,6 +14,7 @@ import xbot.common.injection.electrical_contract.XSwerveDriveElectricalContract;
 import xbot.common.subsystems.drive.BaseDriveSubsystem;
 import xbot.common.subsystems.drive.BaseSwerveDriveSubsystem;
 import xbot.common.subsystems.pose.BasePoseSubsystem;
+import xbot.common.subsystems.vision.AprilTagVisionSubsystem;
 
 import javax.inject.Singleton;
 
@@ -21,26 +23,6 @@ public abstract class UnitTestRobotModule {
     @Binds
     @Singleton
     public abstract ElectricalContract getElectricalContract(UnitTestContract2025 impl);
-
-    @Binds
-    @Singleton
-    public abstract XSwerveDriveElectricalContract getSwerveContract(ElectricalContract impl);
-
-    @Binds
-    @Singleton
-    public abstract XCameraElectricalContract getCameraContract(ElectricalContract impl);
-
-    @Binds
-    @Singleton
-    public abstract BasePoseSubsystem getPoseSubsystem(PoseSubsystem impl);
-
-    @Binds
-    @Singleton
-    public abstract BaseSwerveDriveSubsystem getSwerveDriveSubsystem(DriveSubsystem impl);
-
-    @Binds
-    @Singleton
-    public abstract BaseDriveSubsystem getDriveSubsystem(BaseSwerveDriveSubsystem impl);
 
     @Binds
     @Singleton

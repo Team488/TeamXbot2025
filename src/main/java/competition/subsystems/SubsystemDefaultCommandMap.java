@@ -15,6 +15,8 @@ import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import competition.subsystems.elevator.commands.ElevatorMaintainerCommand;
+import competition.subsystems.humanloadramp.commands.HumanLoadRampRetractCommand;
+import competition.subsystems.humanloadramp.HumanLoadRampSubsystem;
 
 /**
  * For setting the default commands on subsystems
@@ -46,8 +48,13 @@ public class SubsystemDefaultCommandMap {
     }
 
     @Inject
-    public void setupArmPivotSubsystem(CoralArmPivotSubsystem armPivotSubsystem, CoralArmPivotMaintainerCommand command) {
-        armPivotSubsystem.setDefaultCommand(command);
+    public void setupCoralArmPivotSubsystem(CoralArmPivotSubsystem coralArmPivotSubsystem, CoralArmPivotMaintainerCommand command){
+        coralArmPivotSubsystem.setDefaultCommand(command);
+    }
+
+    @Inject
+    public void setupHumanLoadRampSubSystem(HumanLoadRampSubsystem humanLoadRampSubsystem, HumanLoadRampRetractCommand command){
+        humanLoadRampSubsystem.setDefaultCommand(command);
     }
 
     @Inject
