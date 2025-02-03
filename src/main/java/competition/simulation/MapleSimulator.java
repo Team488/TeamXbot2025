@@ -3,10 +3,8 @@ package competition.simulation;
 import competition.simulation.algae_arm.AlgaeArmSimulator;
 import competition.simulation.coral_arm.CoralArmSimulator;
 import competition.simulation.coral_scorer.CoralScorerSimulator;
-import competition.simulation.elevator.ElevatorSimConstants;
 import competition.simulation.elevator.ElevatorSimulator;
 import competition.simulation.reef.ReefSimulator;
-import competition.subsystems.coral_scorer.CoralScorerSubsystem;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.elevator.SuperstructureMechanism;
 import competition.subsystems.pose.Landmarks;
@@ -20,6 +18,7 @@ import edu.wpi.first.units.measure.Distance;
 import xbot.common.advantage.AKitLogger;
 import xbot.common.controls.sensors.mock_adapters.MockGyro;
 
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 
 import javax.inject.Inject;
@@ -29,6 +28,7 @@ import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SelfControlledSwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
+import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoral;
 
 @Singleton
 public class MapleSimulator implements BaseSimulator {
@@ -123,15 +123,37 @@ public class MapleSimulator implements BaseSimulator {
         // for now this is just some quick hacky logic, whenever we outtake just score coral to closest spot on reef
         if(coralScorerSimulator.isScoring()) {
             coralScorerSimulator.simulateCoralUnload();
-            var currentTranslation2d = this.getGroundTruthPose().getTranslation();
+            // get the front center of the robot as a proxy for where the stinger is in space
+            var currentPose = this.getGroundTruthPose();
+            var frontOfRobotOffset = new Translation2d(Inches.of(18).in(Meters), currentPose.getRotation());
+            var frontOfRobot = currentPose.getTranslation().plus(frontOfRobotOffset);
+
             // TODO: more math around where the arm actually is in space and the orientation of the robot
             var elevatorBaseHeightM = 0.57;
-            var aproxElevatorTranslation3d = new Translation3d(
-                currentTranslation2d.getX(), 
-                currentTranslation2d.getY(), 
+            var aproxScorerTranslation3d = new Translation3d(
+                frontOfRobot.getX(), 
+                frontOfRobot.getY(), 
                 elevatorSimulator.getCurrentHeight().in(Meters) + elevatorBaseHeightM
             );
-            reefSimulator.scoreCoralNearestTo(aproxElevatorTranslation3d);
+
+            var closetCoralKey = reefSimulator.findNearestCoral(aproxScorerTranslation3d);
+            var closetCoralPose = reefSimulator.getCoralPose(closetCoralKey);
+            var coralAlreadyScored = reefSimulator.isCoralScored(closetCoralKey);
+
+            double distanceToReef = aproxScorerTranslation3d.getDistance(closetCoralPose.getTranslation());
+
+            System.out.println("Distance from closest reef: " + distanceToReef);
+            if(distanceToReef > 0.15 || coralAlreadyScored) {
+                // we fail to score the coral, drop it on the ground
+                System.out.println("Failed to score coral, dropping on ground");
+                ReefscapeCoral coral = new ReefscapeCoral(new Pose2d(frontOfRobot, currentPose.getRotation()));
+                System.out.println("coral position: " + coral.getPoseOnField());
+                arena.addGamePiece(coral);
+            } else {
+                reefSimulator.scoreCoral(closetCoralKey);
+            }
+
+            
         }
     }
 
