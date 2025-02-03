@@ -51,7 +51,7 @@ public class OperatorCommandMap {
             ScoreCoralCommand scoreCoralCommand,
             AlignToReefWithAprilTagCommand alignToReefWithAprilTagCommand) {
         resetHeading.setHeadingToApply(0);
-        operatorInterface.driverGamepad.getifAvailable(1).onTrue(resetHeading);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(resetHeading);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(alignToReefWithAprilTagCommand);
 
         // since there are a lot of free buttons on the driver gamepad currently, let's map some
