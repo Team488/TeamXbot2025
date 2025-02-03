@@ -85,7 +85,9 @@ public class AlignToReefWithAprilTagCommand extends BaseCommand {
             Translation2d aprilTagData = aprilTagVisionSubsystem.getReefAprilTagCameraData();
 
             Translation2d goalVector = aprilTagData.minus(alignmentPointOffset);
-            Translation2d powerVector = drive.getPowerForRelativePositionChange(goalVector);
+            Translation2d goalVectorWithOffsets = new Translation2d(goalVector.getX() + xOffset,
+                    goalVector.getY() + yOffset);
+            Translation2d powerVector = drive.getPowerForRelativePositionChange(goalVectorWithOffsets);
 
             aKitLog.record("AprilTag X", aprilTagData.getX());
             aKitLog.record("AprilTag Y", aprilTagData.getY());
