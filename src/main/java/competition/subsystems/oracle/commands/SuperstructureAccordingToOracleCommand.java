@@ -46,6 +46,16 @@ public class SuperstructureAccordingToOracleCommand extends BaseCommand {
 
         elevator.setTargetHeight(advice.coralLevelToAchieve);
         coralArm.setTargetAngle(advice.coralLevelToAchieve);
-        coralScorer.setPowerForState(advice.desiredScorerState);
+
+        if (advice.desiredScorerState == CoralScorerSubsystem.CoralScorerState.SCORING) {
+            // don't run the scorer until we're at height!
+            if (elevator.isMaintainerAtGoal()) {
+                coralScorer.setPowerForState(CoralScorerSubsystem.CoralScorerState.SCORING);
+            } else {
+                coralScorer.setPowerForState(CoralScorerSubsystem.CoralScorerState.STOPPED);
+            }
+        } else {
+            coralScorer.setPowerForState(advice.desiredScorerState);
+        }
     }
 }

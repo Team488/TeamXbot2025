@@ -51,8 +51,8 @@ public class OracleSubsystem extends BaseSubsystem {
     private PrimaryActivity currentActivity = ScoreCoral;
     private ScoringSubstage currentScoringSubstage = ScoringSubstage.Travel;
 
-    private boolean firstRunInNewGoal;
-    private boolean reevaluationRequested;
+    private boolean firstRunInNewGoal = true;
+    private boolean reevaluationRequested = false;
 
     private int instructionNumber;
     private OracleDriveAdvice currentDriveAdvice;
@@ -153,6 +153,7 @@ public class OracleSubsystem extends BaseSubsystem {
             case Travel:
                 if (firstRunInScoringSubstage) {
                     setSuperstructureAdvice(Landmarks.CoralLevel.COLLECTING, CoralScorerSubsystem.CoralScorerState.STOPPED);
+                    firstRunInScoringSubstage = false;
                 }
 
                 // Check if we're close enough to the goal to start scoring
@@ -164,6 +165,7 @@ public class OracleSubsystem extends BaseSubsystem {
             case Approach:
                 if (firstRunInScoringSubstage) {
                     setSuperstructureAdvice(Landmarks.CoralLevel.FOUR, CoralScorerSubsystem.CoralScorerState.STOPPED);
+                    firstRunInScoringSubstage = false;
                 }
 
                 // Check if we're at the scoring position
@@ -175,12 +177,7 @@ public class OracleSubsystem extends BaseSubsystem {
             case Scoring:
                 if (firstRunInScoringSubstage) {
                     setSuperstructureAdvice(Landmarks.CoralLevel.FOUR, CoralScorerSubsystem.CoralScorerState.SCORING);
-                }
-
-                // Check if we've scored
-                if (coralInfoSource.confidentlyHasCoral()) {
-                    currentScoringSubstage = ScoringSubstage.Travel;
-                    firstRunInScoringSubstage = true;
+                    firstRunInScoringSubstage = false;
                 }
                 break;
             default:
@@ -247,9 +244,13 @@ public class OracleSubsystem extends BaseSubsystem {
                     setCurrentDriveAdvice(newDriveAdvice);
                     goalPose = newDriveAdvice.path.get(newDriveAdvice.path.size() - 1).keyPose;
 
+
+                    firstRunInScoringSubstage = true;
                     firstRunInNewGoal=false;
                     reevaluationRequested=false;
                 }
+
+                evaluateScoringSubstage();
 
                 // Check if it's time to switch activities
                 if (!coralInfoSource.confidentlyHasCoral()) {
