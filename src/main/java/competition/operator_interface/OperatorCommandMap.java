@@ -41,17 +41,34 @@ public class OperatorCommandMap {
 
     @Inject
     public OperatorCommandMap() {}
-    
-    // Example for setting up a command to fire when a button is pressed:
+
     @Inject
     public void setupDriveCommands(
             OperatorInterface operatorInterface,
             SetRobotHeadingCommand resetHeading,
+            PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
+            IntakeCoralCommand intakeCoralCommand,
+            ScoreCoralCommand scoreCoralCommand,
             AlignToReefWithAprilTagCommand alignToReefWithAprilTagCommand) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(resetHeading);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(alignToReefWithAprilTagCommand);
+
+        // since there are a lot of free buttons on the driver gamepad currently, let's map some
+        // for basic scoring control to make it easier to demo solo. These can all be removed later.
+        var prepL4 = prepCoralSystemCommandGroupFactory.create(ElevatorSubsystem.ElevatorGoals.ScoreL4,
+                CoralArmPivotSubsystem.ArmGoals.Score);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
+
+        var homed = prepCoralSystemCommandGroupFactory.create(ElevatorSubsystem.ElevatorGoals.HumanLoad,
+                CoralArmPivotSubsystem.ArmGoals.HumanLoad);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
+
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(intakeCoralCommand);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(scoreCoralCommand);
     }
+
+
 
     @Inject
     public void setUpOperatorCommands(OperatorInterface oi,
