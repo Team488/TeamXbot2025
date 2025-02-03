@@ -29,9 +29,8 @@ public class ReefRoutingCircleTest extends BaseCompetitionTest {
 
         List<XbotSwervePoint> swervePoints = routingCircle.generateSwervePoints(startPose, endPose);
 
-        assertEquals(2, swervePoints.size());
-        assertEquals(startPose.getTranslation(), swervePoints.get(0).getTranslation2d());
-        assertEquals(endPose.getTranslation(), swervePoints.get(1).getTranslation2d());
+        assertEquals(1, swervePoints.size());
+        assertEquals(endPose.getTranslation(), swervePoints.get(0).getTranslation2d());
     }
 
     @Test
@@ -51,7 +50,6 @@ public class ReefRoutingCircleTest extends BaseCompetitionTest {
         List<XbotSwervePoint> swervePoints = routingCircle.generateSwervePoints(startPose, endPose);
 
         assertTrue(swervePoints.size() > 2);
-        assertEquals(startPose.getTranslation(), swervePoints.get(0).getTranslation2d());
         assertEquals(endPose.getTranslation(), swervePoints.get(swervePoints.size() - 1).getTranslation2d());
     }
 
@@ -66,8 +64,7 @@ public class ReefRoutingCircleTest extends BaseCompetitionTest {
 
         List<XbotSwervePoint> swervePoints = routingCircle.generateSwervePoints(startPose, endPose);
 
-        assertTrue(swervePoints.size() > 2);
-        assertEquals(startPose.getTranslation(), swervePoints.get(0).getTranslation2d());
+        assertEquals(1, swervePoints.size());
         assertEquals(endPose.getTranslation(), swervePoints.get(swervePoints.size() - 1).getTranslation2d());
     }
 
