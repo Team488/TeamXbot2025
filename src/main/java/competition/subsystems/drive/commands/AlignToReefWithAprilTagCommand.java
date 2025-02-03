@@ -26,6 +26,8 @@ public class AlignToReefWithAprilTagCommand extends BaseCommand {
     PoseSubsystem pose;
     public Distance cameraXOffset;
     public Pose2d targetReefFacePose;
+    double xOffset;
+    double yOffset;
 
     @Inject
     public AlignToReefWithAprilTagCommand(AprilTagVisionSubsystemExtended aprilTagVisionSubsystem, DriveSubsystem drive,
@@ -74,8 +76,8 @@ public class AlignToReefWithAprilTagCommand extends BaseCommand {
                 aprilTagVisionSubsystem.getTargetAprilTagID(targetReefFacePose))) {
             Translation2d aprilTagData = aprilTagVisionSubsystem.getReefAprilTagCameraData();
 
-            double dx = drive.getPositionalPid().calculate(cameraXOffset.in(Meters), aprilTagData.getX());
-            double dy = drive.getPositionalPid().calculate(0, aprilTagData.getY());
+            double dx = drive.getPositionalPid().calculate(cameraXOffset.in(Meters) + xOffset, aprilTagData.getX());
+            double dy = drive.getPositionalPid().calculate(0 + yOffset, aprilTagData.getY());
 
             aKitLog.record("AprilTag X", aprilTagData.getX());
             aKitLog.record("AprilTag Y", aprilTagData.getY());
@@ -83,5 +85,13 @@ public class AlignToReefWithAprilTagCommand extends BaseCommand {
         }
         cancel();
         return new Translation2d(0,0);
+    }
+
+    public void setXOffset(Landmarks.BranchLevel branchLevel) {
+        // TODO: add switch case to set offset depending on branch level
+    }
+
+    public void setYOFFset(Landmarks.Branch branch) {
+        // TODO: add if else to set y offset depending on branch
     }
 }
