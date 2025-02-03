@@ -8,6 +8,7 @@ import competition.subsystems.coral_arm_pivot.CoralArmPivotSubsystem;
 import competition.subsystems.coral_scorer.CoralScorerSubsystem;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import competition.subsystems.oracle.OracleSubsystem;
+import competition.subsystems.oracle.ReefCoordinateGenerator;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import competition.subsystems.elevator_mechanism.SuperstructureMechanismSubsystem;
 import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
@@ -41,5 +42,7 @@ public abstract class BaseRobotComponent extends BaseComponent {
     public abstract OracleSubsystem oracleSubsystem();
 
     public abstract ElectricalContract electricalContract();
+
+    public abstract ReefCoordinateGenerator reefCoordinateGenerator();
 
 }

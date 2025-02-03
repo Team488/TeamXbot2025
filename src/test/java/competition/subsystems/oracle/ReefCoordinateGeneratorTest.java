@@ -12,7 +12,7 @@ public class ReefCoordinateGeneratorTest extends BaseCompetitionTest {
 
     @Test
     public void testEasyCases() {
-        ReefCoordinateGenerator generator = new ReefCoordinateGenerator();
+        ReefCoordinateGenerator generator = getInjectorComponent().reefCoordinateGenerator();
 
         var pose = generator.getPoseRelativeToReefCenter(DriverStation.Alliance.Blue, Landmarks.ReefFace.FAR, Meters.of(4), Meters.of(2));
         assertEquals(Landmarks.BlueCenterOfReef.getX() + 4, pose.getX(), 0.001);
@@ -25,7 +25,7 @@ public class ReefCoordinateGeneratorTest extends BaseCompetitionTest {
 
     @Test
     public void testEasyBranchAndFaceCases() {
-        ReefCoordinateGenerator generator = new ReefCoordinateGenerator();
+        ReefCoordinateGenerator generator = getInjectorComponent().reefCoordinateGenerator();
 
         var pose = generator.getPoseRelativeToReefFaceAndBranch(DriverStation.Alliance.Blue, Landmarks.ReefFace.FAR, Landmarks.Branch.A, Meters.of(4), Meters.of(2));
         assertEquals(Landmarks.BlueCenterOfReef.getX() + Landmarks.reefCenterToFace.in(Meters) + 4, pose.getX(), 0.001);
@@ -40,7 +40,7 @@ public class ReefCoordinateGeneratorTest extends BaseCompetitionTest {
     // same ballpark.
     //@Test
     public void compareHardcodedToGenerated() {
-        ReefCoordinateGenerator generator = new ReefCoordinateGenerator();
+        ReefCoordinateGenerator generator = getInjectorComponent().reefCoordinateGenerator();
         double robotWithInMeters = getInjectorComponent().electricalContract().getDistanceFromCenterToOuterBumperX().in(Meters);
 
         var pose = generator.getPoseRelativeToReefFaceAndBranch(DriverStation.Alliance.Blue, Landmarks.ReefFace.CLOSE, Landmarks.Branch.A, Meters.of(robotWithInMeters), Meters.zero()).getTranslation();

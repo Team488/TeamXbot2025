@@ -37,6 +37,7 @@ public class OracleSubsystem extends BaseSubsystem {
 
     final PoseSubsystem pose;
     final ReefCoordinateGenerator reefCoordinateGenerator;
+    final ScoringQueue scoringQueue;
 
     final ReefRoutingCircle blueReefRoutingCircle;
     final ReefRoutingCircle redReefRoutingCircle;
@@ -65,15 +66,16 @@ public class OracleSubsystem extends BaseSubsystem {
     final DoubleProperty scoringActivationDistance;
 
     @Inject
-    public OracleSubsystem(PoseSubsystem pose, CoralCollectionInfoSource coralInfoSource, PropertyFactory pf) {
+    public OracleSubsystem(PoseSubsystem pose, CoralCollectionInfoSource coralInfoSource,
+                           ScoringQueue scoringQueue, ReefCoordinateGenerator generator, PropertyFactory pf) {
         this.pose = pose;
         this.coralInfoSource = coralInfoSource;
+        this.scoringQueue = scoringQueue;
+        this.reefCoordinateGenerator = generator;
         pf.setPrefix(this);
 
         elevatorActivationDistance = pf.createPersistentProperty("ElevatorActivationDistance", 1);
         scoringActivationDistance = pf.createPersistentProperty("ScoringActivationDistance", 0.05);
-
-        reefCoordinateGenerator = new ReefCoordinateGenerator();
 
         blueReefRoutingCircle =
                 new ReefRoutingCircle(
@@ -91,15 +93,20 @@ public class OracleSubsystem extends BaseSubsystem {
     }
 
     public List<XbotSwervePoint> getRecommendedScoringTrajectory() {
-        // TODO: go to more than one location.
+
+        ScoringTask activeScoringTask = scoringQueue.getActiveTask();
 
         var penultimateWaypoint = reefCoordinateGenerator.getPoseRelativeToReefFaceAndBranch(
                 DriverStation.Alliance.Blue,
-                Landmarks.ReefFace.FAR_RIGHT,
-                Landmarks.Branch.A,
+                activeScoringTask.reefFace,
+                activeScoringTask.branch,
                 Meters.of(1),
                 Meters.of(0));
-        var finalWaypoint = Landmarks.BlueFarRightBranchA;
+        var finalWaypoint = reefCoordinateGenerator.getTypicalScoringLocationForFaceBranchLevel(
+                DriverStation.Alliance.Blue,
+                activeScoringTask.reefFace,
+                activeScoringTask.branch,
+                activeScoringTask.coralLevel);
 
         var route = blueReefRoutingCircle.generateSwervePoints(pose.getCurrentPose2d(), penultimateWaypoint);
         route.add(new XbotSwervePoint(finalWaypoint, 10));
@@ -148,7 +155,9 @@ public class OracleSubsystem extends BaseSubsystem {
     // -In the travel stage, we approach the goal but keep the elevator low.
     // -In the approach stage, we raise the elevator and arm to scoring position
     // -In the scoring stage, we run the scorer until we've confidently scored
-    private void evaluateScoringSubstage() {
+    private boolean evaluateScoringSubstage() {
+        boolean scoringComplete = false;
+
         switch (currentScoringSubstage) {
             case Travel:
                 if (firstRunInScoringSubstage) {
@@ -164,7 +173,7 @@ public class OracleSubsystem extends BaseSubsystem {
                 break;
             case Approach:
                 if (firstRunInScoringSubstage) {
-                    setSuperstructureAdvice(Landmarks.CoralLevel.FOUR, CoralScorerSubsystem.CoralScorerState.STOPPED);
+                    setSuperstructureAdvice(scoringQueue.getActiveTask().coralLevel, CoralScorerSubsystem.CoralScorerState.STOPPED);
                     firstRunInScoringSubstage = false;
                 }
 
@@ -176,9 +185,19 @@ public class OracleSubsystem extends BaseSubsystem {
                 break;
             case Scoring:
                 if (firstRunInScoringSubstage) {
-                    setSuperstructureAdvice(Landmarks.CoralLevel.FOUR, CoralScorerSubsystem.CoralScorerState.SCORING);
+                    setSuperstructureAdvice(scoringQueue.getActiveTask().coralLevel, CoralScorerSubsystem.CoralScorerState.SCORING);
                     firstRunInScoringSubstage = false;
                 }
+
+                if (coralInfoSource.confidentlyHasScoredCoral()) {
+                    scoringComplete = true;
+                    currentActivity = CollectCoral;
+                    firstRunInNewGoal = true;
+                    // This is a critical line - it advances to the next goal in the queue.
+                    // TODO - we need a fallback or plan when the next goal is null.
+                    scoringQueue.advanceToNextScoringGoal();
+                }
+
                 break;
             default:
                 // How did you get here?
@@ -188,6 +207,8 @@ public class OracleSubsystem extends BaseSubsystem {
                 firstRunInScoringSubstage = true;
                 break;
         }
+
+        return scoringComplete;
     }
 
     private void setSuperstructureAdvice(Landmarks.CoralLevel coralLevelToAchieve, CoralScorerSubsystem.CoralScorerState desiredScorerState) {
@@ -234,6 +255,20 @@ public class OracleSubsystem extends BaseSubsystem {
                 }
                 break;
             case ScoreCoral:
+                // Need to check if we have an active scoring task. If not, we stall here until something happens.
+                if (scoringQueue.getActiveTask() == null) {
+                    if (scoringQueue.getQueueSize() == 0) {
+                        // No active task, and no more in the queue. We have to keep checking every loop to see if somebody
+                        // adds something to the queue.
+                        return;
+                    } else {
+                        // No active task, but there are more in the queue. Let's get the next one.
+                        scoringQueue.advanceToNextScoringGoal();
+                    }
+                }
+
+                aKitLog.record("ActiveScoringTask", scoringQueue.getActiveTask().toString());
+
                 // Check for first run or reevaluation
                 if (firstRunInNewGoal || reevaluationRequested) {
                     currentScoringSubstage = ScoringSubstage.Travel;
@@ -251,12 +286,6 @@ public class OracleSubsystem extends BaseSubsystem {
                 }
 
                 evaluateScoringSubstage();
-
-                // Check if it's time to switch activities
-                if (!coralInfoSource.confidentlyHasCoral()) {
-                    currentActivity = CollectCoral;
-                    firstRunInNewGoal = true;
-                }
                 break;
             default:
                 // How did you get here?

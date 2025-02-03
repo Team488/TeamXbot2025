@@ -1,5 +1,6 @@
 package competition.subsystems.oracle;
 
+import competition.electrical_contract.ElectricalContract;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -9,20 +10,30 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.HashMap;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 
+@Singleton
 public class ReefCoordinateGenerator {
 
-    private HashMap<Landmarks.ReefFace, Angle> blueReefAngleMapping;
-    private HashMap<Landmarks.ReefFace, Angle> redReefAngleMapping;
+    private final HashMap<Landmarks.ReefFace, Angle> blueReefAngleMapping;
+    private final HashMap<Landmarks.ReefFace, Angle> redReefAngleMapping;
+    private final ElectricalContract contract;
+    private final HashMap<String, Translation2d> handTunedOffsets;
 
-    public ReefCoordinateGenerator() {
+    @Inject
+    public ReefCoordinateGenerator(ElectricalContract contract) {
         blueReefAngleMapping = new HashMap<>();
         redReefAngleMapping = new HashMap<>();
+        handTunedOffsets = new HashMap<>();
+        this.contract = contract;
+
 
         blueReefAngleMapping.put(Landmarks.ReefFace.FAR, Degrees.of(60 * 0));
         blueReefAngleMapping.put(Landmarks.ReefFace.FAR_LEFT, Degrees.of(60 * 1));
@@ -64,5 +75,19 @@ public class ReefCoordinateGenerator {
         }
 
         return getPoseRelativeToReefFace(alliance, reefFace, distanceFromFaceX, distanceFromBranchY.plus(horizontalOffset));
+    }
+
+    public Pose2d getTypicalScoringLocationForFaceBranchLevel(DriverStation.Alliance alliance, Landmarks.ReefFace reefFace, Landmarks.Branch branch, Landmarks.CoralLevel level) {
+
+        String key = alliance.toString() + reefFace.toString() + branch.toString() + level.toString();
+        Translation2d offset = new Translation2d(0, 0);
+        if (handTunedOffsets.containsKey(key)) {
+            offset = handTunedOffsets.get(key);
+        }
+
+        Distance totalX = contract.getDistanceFromCenterToOuterBumperX().plus(Meters.of(offset.getX()));
+        Distance totalY = Meters.zero().plus(Meters.of(offset.getY()));
+
+        return getPoseRelativeToReefFaceAndBranch(alliance, reefFace, branch, totalX, totalY);
     }
 }
