@@ -66,7 +66,7 @@ public class OperatorCommandMap {
 
         var oracleSeesAll = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
 
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(oracleSeesAll);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).onTrue(oracleSeesAll);
     }
 
     @Inject
