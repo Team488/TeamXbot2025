@@ -16,6 +16,7 @@ import competition.subsystems.coral_scorer.commands.ScoreCoralCommand;
 import competition.subsystems.coral_scorer.commands.ScoreWhenReadyCommand;
 import competition.subsystems.coral_scorer.commands.StopCoralCommand;
 import competition.subsystems.drive.DriveSubsystem;
+import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 
@@ -43,11 +44,13 @@ public class OperatorCommandMap {
     
     // Example for setting up a command to fire when a button is pressed:
     @Inject
-    public void setupMyCommands(
+    public void setupDriveCommands(
             OperatorInterface operatorInterface,
-            SetRobotHeadingCommand resetHeading) {
+            SetRobotHeadingCommand resetHeading,
+            AlignToReefWithAprilTagCommand alignToReefWithAprilTagCommand) {
         resetHeading.setHeadingToApply(0);
-        operatorInterface.driverGamepad.getifAvailable(1).onTrue(resetHeading);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(resetHeading);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(alignToReefWithAprilTagCommand);
     }
 
     @Inject
