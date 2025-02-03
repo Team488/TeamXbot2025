@@ -5,6 +5,7 @@ import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import org.kobe.xbot.JClient.XTablesClientManager;
 import org.kobe.xbot.Utilities.Entities.XTableValues;
 import xbot.common.logging.RobotAssertionManager;
 import xbot.common.properties.PropertyFactory;
@@ -61,8 +62,12 @@ public class DriveToWaypointsWithVisionCommand extends SwerveSimpleTrajectoryCom
 
     //allows for driving not in a straight line
     public void retrieveWaypointsFromVision() {
-        XTablesClient xclient = this.coprocessorComms.getXTablesClient();
-
+        XTablesClientManager xTablesClientManager = this.coprocessorComms.getXTablesClient();
+        XTablesClient xclient = xTablesClientManager.getOrNull();
+        if (xclient == null) {
+            log.warn("ClientManager returned null from getXTablesClient. Client possibly waiting to find server...");
+            return;
+        }
         // both potentialy null. Will not do anything if coordinates is null, but can proceed if heading is null
         List<XTableValues.Coordinate> coordinates = xclient.getCoordinates(this.coprocessorComms.getXtablesCoordinateLocation());
         if(coordinates == null){

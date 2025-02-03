@@ -109,7 +109,7 @@ dependencies {
     testAnnotationProcessor 'com.google.dagger:dagger-compiler:2.44.2'
 
     // xtables
-    implementation "org.kobe.xbot:xtables:4.7.7"
+    implementation "org.kobe.xbot:xtables:4.8.0"
 
     def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
     annotationProcessor "org.littletonrobotics.akit:akit-autolog:$akitJson.version"
