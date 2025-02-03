@@ -5,7 +5,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 
 public class Landmarks {
 
-    EnumsToPose enumsToPose = new EnumsToPose();
+    public static EnumsToPose enumsToPose = new EnumsToPose();
 
     // Auto starting positions
     public static Pose2d BlueLeftStartingLine = new Pose2d(7.56, 7.262, Rotation2d.fromDegrees(180));
@@ -92,11 +92,15 @@ public class Landmarks {
         FAR
     }
 
-    public Pose2d getBranchPose(ReefFace reefFace, Branch branch) {
+    public static Pose2d getBranchPose(ReefFace reefFace, Branch branch) {
         return enumsToPose.getBranchPose(reefFace, branch);
     }
 
-    public Pose2d getReefFacePose(ReefFace reefFace) {
+    public static Pose2d getReefFacePose(ReefFace reefFace) {
         return enumsToPose.getReefFacePose(reefFace);
+    }
+
+    public static Pose2d getCoralStationSectionPose(CoralStation station, CoralStationSection section) {
+        return enumsToPose.getCoralStationPose(station, section);
     }
 }
