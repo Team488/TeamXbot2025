@@ -99,7 +99,7 @@ public class AlignToReefWithAprilTagCommand extends BaseCommand {
         return new Translation2d(0,0);
     }
 
-    public void setXOffset(Landmarks.BranchLevel branchLevel) {
+    public void setXOffset(Landmarks.CoralLevel branchLevel) {
         // TODO: add switch case to set offset depending on branch level, this is only needed if level scoring positions are different
     }
 

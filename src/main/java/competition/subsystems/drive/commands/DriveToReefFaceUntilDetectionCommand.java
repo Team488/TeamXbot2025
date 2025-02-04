@@ -5,6 +5,7 @@ import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import edu.wpi.first.math.geometry.Pose2d;
+import xbot.common.logging.RobotAssertionManager;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.drive.SwerveSimpleTrajectoryCommand;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
@@ -22,8 +23,9 @@ public class DriveToReefFaceUntilDetectionCommand extends SwerveSimpleTrajectory
     public DriveToReefFaceUntilDetectionCommand(DriveSubsystem drive, PoseSubsystem pose,
                                                 PropertyFactory pf,
                                                 HeadingModule.HeadingModuleFactory headingModuleFactory,
-                                                AprilTagVisionSubsystemExtended aprilTagVisionSubsystem) {
-        super(drive, pose, pf, headingModuleFactory);
+                                                AprilTagVisionSubsystemExtended aprilTagVisionSubsystem,
+                                                RobotAssertionManager robotAssertionManager) {
+        super(drive, pose, pf, headingModuleFactory, robotAssertionManager);
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
     }
 
@@ -38,7 +40,6 @@ public class DriveToReefFaceUntilDetectionCommand extends SwerveSimpleTrajectory
         ArrayList<XbotSwervePoint> swervePoints = new ArrayList<>();
         swervePoints.add(XbotSwervePoint.createPotentiallyFilppedXbotSwervePoint(targetReefFacePose, 10));
         this.logic.setKeyPoints(swervePoints);
-        this.logic.setEnableConstantVelocity(true);
         this.logic.setConstantVelocity(drive.getMaxTargetSpeedMetersPerSecond());
         super.initialize();
     }

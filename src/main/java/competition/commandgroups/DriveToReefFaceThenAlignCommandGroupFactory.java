@@ -20,7 +20,6 @@ public class DriveToReefFaceThenAlignCommandGroupFactory {
         this.alignToReefWithAprilTagCommandProvider = alignToReefWithAprilTagCommandProvider;
     }
 
-    // TODO: make this ask for Landmarks enum instead of Pose2d
     public SequentialCommandGroup create(Landmarks.ReefFace targetReefFace, Landmarks.Branch branch) {
         var group = new SequentialCommandGroup();
 
