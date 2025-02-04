@@ -30,8 +30,7 @@ public class WPIXTablesClient {
         bb.rewind();
         bb.get(barr);
         XTablesClient client = this.xTablesClient.getOrNull();
-        if (xTablesClient != null)
-            client.putBytes(String.format("%s.%s", prefix, table), barr);
+        if (client != null) client.putBytes(String.format("%s.%s", prefix, table), barr);
     }
 
 
