@@ -180,8 +180,8 @@ public class OracleSubsystem extends BaseSubsystem {
                 }
 
                 if (coralInfoSource.confidentlyHasScoredCoral()) {
-                    setNextPrimaryActivity(CollectCoral);
                     scoringQueue.advanceToNextScoringGoal();
+                    setPrimaryActivityCollection();
                 }
 
                 break;
@@ -241,6 +241,7 @@ public class OracleSubsystem extends BaseSubsystem {
         // TODO: refactor the common elements out of collecting and scoring
         switch (currentActivity) {
             case CollectCoral:
+
                 var result = collectionStateMachine.run();
                 if(result == CollectionStateMachine.Result.CORAL_ACQUIRED) {
                     setNextPrimaryActivity(ScoreCoral);
@@ -284,7 +285,7 @@ public class OracleSubsystem extends BaseSubsystem {
             default:
                 // How did you get here?
                 // When in doubt, go close to the drivers?
-                currentActivity = CollectCoral;
+                setPrimaryActivityCollection();
                 firstRunInPrimaryActivity = true;
                 break;
         }
