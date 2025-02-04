@@ -15,6 +15,7 @@ import xbot.common.trajectory.XbotSwervePoint;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import java.util.Collection;
 import java.util.List;
 
 import static competition.subsystems.oracle.OracleSubsystem.PrimaryActivity.CollectCoral;
@@ -46,6 +47,7 @@ public class OracleSubsystem extends BaseSubsystem {
     Distance reefRoutingRadius = Meters.of(2.0);
 
     final CoralCollectionInfoSource coralInfoSource;
+    CollectionStateMachine collectionStateMachine;
 
     // Always set to start scoring, since we should always start a match with a coral preloaded in
     // autonomous.
@@ -116,15 +118,7 @@ public class OracleSubsystem extends BaseSubsystem {
         return route;
     }
 
-    public List<XbotSwervePoint> getRecommendedCoralPickupTrajectory() {
-        // TODO: go to more than one location.
-        var finalWaypoint = Landmarks.BlueLeftCoralStationMid;
-        var route = blueReefRoutingCircle.generateSwervePoints(pose.getCurrentPose2d(), finalWaypoint);
-        aKitLog.record("RecommendedRoute", XbotSwervePoint.generateTrajectory(route));
-        return route;
-    }
-
-    private void setCurrentDriveAdvice(OracleDriveAdvice advice) {
+    public void setCurrentDriveAdvice(OracleDriveAdvice advice) {
         this.currentDriveAdvice = advice;
     }
 
@@ -132,7 +126,7 @@ public class OracleSubsystem extends BaseSubsystem {
         return this.currentDriveAdvice;
     }
 
-    private int getNextInstructionNumber() {
+    public int getNextInstructionNumber() {
         return this.instructionNumber++;
     }
 
@@ -214,6 +208,11 @@ public class OracleSubsystem extends BaseSubsystem {
         firstRunInPrimaryActivity = true;
     }
 
+    private void setPrimaryActivityCollection() {
+        setNextPrimaryActivity(CollectCoral);
+        collectionStateMachine.reset();
+    }
+
     private boolean isPrimaryActivityInitilizationRequired() {
         return firstRunInPrimaryActivity;
     }
@@ -242,24 +241,11 @@ public class OracleSubsystem extends BaseSubsystem {
         // TODO: refactor the common elements out of collecting and scoring
         switch (currentActivity) {
             case CollectCoral:
-                // Check for first run or reevaluation
-                if (isPrimaryActivityInitilizationRequired() || reevaluationRequested) {
-                    // Command the drive
-                    var newDriveAdvice = new OracleDriveAdvice(getNextInstructionNumber(), getRecommendedCoralPickupTrajectory());
-                    goalPose = newDriveAdvice.path().get(newDriveAdvice.path().size() - 1).keyPose;
-                    setCurrentDriveAdvice(newDriveAdvice);
-                    // Command the superstructure
-                    var newSuperstructureAdvice = new OracleSuperstructureAdvice(
-                            getNextInstructionNumber(), Landmarks.CoralLevel.COLLECTING, CoralScorerSubsystem.CoralScorerState.INTAKING);
-                    setSuperstructureAdvice(newSuperstructureAdvice);
-
-                    setPrimaryActivityInitializationFinished();
-                }
-
-                // Check if it's time to switch activities
-                if (coralInfoSource.confidentlyHasCoral()) {
+                var result = collectionStateMachine.run();
+                if(result == CollectionStateMachine.Result.CORAL_ACQUIRED) {
                     setNextPrimaryActivity(ScoreCoral);
                 }
+                // TODO: how do we want to handle failures?
                 break;
             case ScoreCoral:
                 // Need to check if we have an active scoring task. If not, we stall here until something happens.
