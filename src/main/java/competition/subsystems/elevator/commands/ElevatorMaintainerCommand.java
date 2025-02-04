@@ -12,6 +12,8 @@ import xbot.common.math.PIDManager;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
@@ -41,7 +43,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
                                      CalibrationDecider.CalibrationDeciderFactory calibrationDeciderFactory,
                                      PIDManager.PIDManagerFactory pidf,
                                      OperatorInterface oi){
-        super(elevator, pfProvider.get(),hvmFactory, 1, 0.2);
+        super(elevator, pfProvider.get(),hvmFactory, Inches.of(1).in(Meters), 0.2);
         var pf = pfProvider.get();
         pf.setPrefix(this);
         this.elevator = elevator;

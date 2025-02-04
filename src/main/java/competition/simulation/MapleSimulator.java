@@ -137,6 +137,7 @@ public class MapleSimulator implements BaseSimulator {
             );
 
             var closetCoralKey = reefSimulator.findNearestCoral(aproxScorerTranslation3d);
+            System.out.print("Closest coral key: " + closetCoralKey);
             var closetCoralPose = reefSimulator.getCoralPose(closetCoralKey);
             var coralAlreadyScored = reefSimulator.isCoralScored(closetCoralKey);
 
@@ -144,8 +145,12 @@ public class MapleSimulator implements BaseSimulator {
 
             System.out.println("Distance from closest reef: " + distanceToReef);
             if(distanceToReef > 0.15 || coralAlreadyScored) {
+                if (coralAlreadyScored) {
+                    System.out.println("Coral already scored, dropping on ground");
+                } else {
+                    System.out.println("Too far from reef, dropping on ground");
+                }
                 // we fail to score the coral, drop it on the ground
-                System.out.println("Failed to score coral, dropping on ground");
                 ReefscapeCoral coral = new ReefscapeCoral(new Pose2d(frontOfRobot, currentPose.getRotation()));
                 System.out.println("coral position: " + coral.getPoseOnField());
                 arena.addGamePiece(coral);

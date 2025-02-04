@@ -2,7 +2,17 @@ package competition.subsystems.pose;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.DriverStation;
 
+import javax.inject.Singleton;
+
+import java.util.HashMap;
+
+import static edu.wpi.first.units.Units.Meters;
+
+@Singleton
 public class Landmarks {
 
     // Auto starting positions
@@ -52,6 +62,28 @@ public class Landmarks {
     public static Pose2d BlueRightCoralStationMid = new Pose2d(1.093, 1.009, Rotation2d.fromDegrees(54.012));
     public static Pose2d BlueRightCoralStationFar = new Pose2d(1.422, 0.770, Rotation2d.fromDegrees(54.012));
 
+    public static Pose2d BlueCenterOfReef = new Pose2d(new Translation2d(4.4785, 4.0132), new Rotation2d());
+    public static final Distance reefCenterToFace = Meters.of(0.665);
+    public static final Distance reefBranchHorizontalOffsetForBranchTypeA = Meters.of(-0.15);
+
+    public HashMap<String, Pose2d> namesToLocations;
+
+    public Landmarks() {
+        namesToLocations = new HashMap<>();
+    }
+
+    private void addAllLevelsForBranch(DriverStation.Alliance alliance, ReefFace face, Branch branch, Pose2d location) {
+        addNamedLocation(alliance, face, branch, CoralLevel.ONE, location);
+        addNamedLocation(alliance, face, branch, CoralLevel.TWO, location);
+        addNamedLocation(alliance, face, branch, CoralLevel.THREE, location);
+        addNamedLocation(alliance, face, branch, CoralLevel.FOUR, location);
+    }
+
+    private void addNamedLocation(DriverStation.Alliance alliance, ReefFace face, Branch branch, CoralLevel level, Pose2d location) {
+        String name = alliance.toString() + face.toString() + branch.toString() + level.toString();
+        namesToLocations.put(name, location);
+    }
+
 
     public enum ReefFace {
         CLOSE,
@@ -72,7 +104,8 @@ public class Landmarks {
         B
     }
 
-    public enum BranchLevel {
+    public enum CoralLevel {
+        COLLECTING,
         ONE,
         TWO,
         THREE,
