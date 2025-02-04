@@ -50,18 +50,18 @@ public class DriveAccordingToOracleCommand extends BaseCommand {
 
     private void setNewInstruction() {
         OracleDriveAdvice advice = oracle.getDriveAdvice();
-        lastSeenInstructionNumber = advice.instructionNumber;
+        lastSeenInstructionNumber = advice.instructionNumber();
 
         logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
         logic.setGlobalKinematicValues(new SwervePointKinematics(2, 0, pose.getAbsoluteVelocity(), 4));
-        logic.setKeyPoints(advice.path);
+        logic.setKeyPoints(advice.path());
 
         logic.reset(pose.getCurrentPose2d());
     }
 
     @Override
     public void execute() {
-        if (oracle.getDriveAdvice().instructionNumber != lastSeenInstructionNumber) {
+        if (oracle.getDriveAdvice().instructionNumber() != lastSeenInstructionNumber) {
             setNewInstruction();
         }
 

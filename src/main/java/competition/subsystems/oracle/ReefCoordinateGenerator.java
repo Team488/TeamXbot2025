@@ -23,14 +23,12 @@ import static edu.wpi.first.units.Units.Radians;
 public class ReefCoordinateGenerator {
 
     private final HashMap<Landmarks.ReefFace, Angle> blueReefAngleMapping;
-    private final HashMap<Landmarks.ReefFace, Angle> redReefAngleMapping;
     private final ElectricalContract contract;
     private final HashMap<String, Translation2d> handTunedOffsets;
 
     @Inject
     public ReefCoordinateGenerator(ElectricalContract contract) {
         blueReefAngleMapping = new HashMap<>();
-        redReefAngleMapping = new HashMap<>();
         handTunedOffsets = new HashMap<>();
         this.contract = contract;
 
@@ -41,13 +39,15 @@ public class ReefCoordinateGenerator {
         blueReefAngleMapping.put(Landmarks.ReefFace.CLOSE, Degrees.of(60 * 3));
         blueReefAngleMapping.put(Landmarks.ReefFace.CLOSE_RIGHT, Degrees.of(60 * 4));
         blueReefAngleMapping.put(Landmarks.ReefFace.FAR_RIGHT, Degrees.of(60 * 5));
+    }
 
-        redReefAngleMapping.put(Landmarks.ReefFace.CLOSE, Degrees.of(60 * 0));
-        redReefAngleMapping.put(Landmarks.ReefFace.CLOSE_RIGHT, Degrees.of(60 * 1));
-        redReefAngleMapping.put(Landmarks.ReefFace.FAR_RIGHT, Degrees.of(60 * 2));
-        redReefAngleMapping.put(Landmarks.ReefFace.FAR, Degrees.of(60 * 3));
-        redReefAngleMapping.put(Landmarks.ReefFace.FAR_LEFT, Degrees.of(60 * 4));
-        redReefAngleMapping.put(Landmarks.ReefFace.CLOSE_LEFT, Degrees.of(60 * 5));
+    private Angle getReefRayDirection(DriverStation.Alliance alliance, Landmarks.ReefFace reefFace) {
+        var reefAngle = blueReefAngleMapping.get(reefFace);
+        if (alliance == DriverStation.Alliance.Red) {
+            reefAngle = reefAngle.plus(Degrees.of(180));
+        }
+
+        return reefAngle;
     }
 
     public Pose2d getPoseRelativeToReefCenter(
@@ -55,12 +55,11 @@ public class ReefCoordinateGenerator {
             Landmarks.ReefFace reefFace,
             Distance distanceFromCenterX,
             Distance distanceFromCenterY) {
-        var reefAngleMapping = alliance == DriverStation.Alliance.Blue ? blueReefAngleMapping : redReefAngleMapping;
         var reefCenter = Landmarks.BlueCenterOfReef.getTranslation();
         if (alliance == DriverStation.Alliance.Red) {
             reefCenter = PoseSubsystem.convertBlueToRed(reefCenter);
         }
-        var reefRayDirection = reefAngleMapping.get(reefFace);
+        var reefRayDirection = getReefRayDirection(alliance, reefFace);
 
         Translation2d offsetVector = new Translation2d(distanceFromCenterX.in(Meters), distanceFromCenterY.in(Meters));
         Translation2d rotatedVector = offsetVector.rotateBy(Rotation2d.fromRadians(reefRayDirection.in(Radians)));

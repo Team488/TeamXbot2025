@@ -52,7 +52,7 @@ public class OracleSubsystem extends BaseSubsystem {
     private PrimaryActivity currentActivity = ScoreCoral;
     private ScoringSubstage currentScoringSubstage = ScoringSubstage.Travel;
 
-    private boolean firstRunInNewGoal = true;
+    private boolean firstRunInPrimaryActivity = true;
     private boolean reevaluationRequested = false;
 
     private int instructionNumber;
@@ -62,8 +62,8 @@ public class OracleSubsystem extends BaseSubsystem {
     private Pose2d goalPose;
 
 
-    final DoubleProperty elevatorActivationDistance;
-    final DoubleProperty scoringActivationDistance;
+    final DoubleProperty rangeToStartMovingSuperstructureMeters;
+    final DoubleProperty rangeToActivateScorerMeters;
 
     @Inject
     public OracleSubsystem(PoseSubsystem pose, CoralCollectionInfoSource coralInfoSource,
@@ -74,8 +74,8 @@ public class OracleSubsystem extends BaseSubsystem {
         this.reefCoordinateGenerator = generator;
         pf.setPrefix(this);
 
-        elevatorActivationDistance = pf.createPersistentProperty("ElevatorActivationDistance", 1);
-        scoringActivationDistance = pf.createPersistentProperty("ScoringActivationDistance", 0.05);
+        rangeToStartMovingSuperstructureMeters = pf.createPersistentProperty("RangeToStartMovingSuperstructure-m", 1);
+        rangeToActivateScorerMeters = pf.createPersistentProperty("RangeToActivateScorerMeters-m", 0.05);
 
         blueReefRoutingCircle =
                 new ReefRoutingCircle(
@@ -98,15 +98,15 @@ public class OracleSubsystem extends BaseSubsystem {
 
         var penultimateWaypoint = reefCoordinateGenerator.getPoseRelativeToReefFaceAndBranch(
                 DriverStation.Alliance.Blue,
-                activeScoringTask.reefFace,
-                activeScoringTask.branch,
+                activeScoringTask.reefFace(),
+                activeScoringTask.branch(),
                 Meters.of(1),
                 Meters.of(0));
         var finalWaypoint = reefCoordinateGenerator.getTypicalScoringLocationForFaceBranchLevel(
                 DriverStation.Alliance.Blue,
-                activeScoringTask.reefFace,
-                activeScoringTask.branch,
-                activeScoringTask.coralLevel);
+                activeScoringTask.reefFace(),
+                activeScoringTask.branch(),
+                activeScoringTask.coralLevel());
 
         var route = blueReefRoutingCircle.generateSwervePoints(pose.getCurrentPose2d(), penultimateWaypoint);
         route.add(new XbotSwervePoint(finalWaypoint, 10));
@@ -155,46 +155,38 @@ public class OracleSubsystem extends BaseSubsystem {
     // -In the travel stage, we approach the goal but keep the elevator low.
     // -In the approach stage, we raise the elevator and arm to scoring position
     // -In the scoring stage, we run the scorer until we've confidently scored
-    private boolean evaluateScoringSubstage() {
-        boolean scoringComplete = false;
-
+    private void evaluateScoringSubstage() {
         switch (currentScoringSubstage) {
             case Travel:
-                if (firstRunInScoringSubstage) {
+                if (isScoringSubstageInitilizationRequired()) {
                     setSuperstructureAdvice(Landmarks.CoralLevel.COLLECTING, CoralScorerSubsystem.CoralScorerState.STOPPED);
-                    firstRunInScoringSubstage = false;
+                    setScoringSubstageInitilizationFinished();
                 }
 
                 // Check if we're close enough to the goal to start scoring
-                if (pose.getCurrentPose2d().getTranslation().getDistance(goalPose.getTranslation()) < elevatorActivationDistance.get()) {
-                    currentScoringSubstage = ScoringSubstage.Approach;
-                    firstRunInScoringSubstage = true;
+                if (pose.getCurrentPose2d().getTranslation().getDistance(goalPose.getTranslation()) < rangeToStartMovingSuperstructureMeters.get()) {
+                    setNextScoringSubstage(ScoringSubstage.Approach);
                 }
                 break;
             case Approach:
-                if (firstRunInScoringSubstage) {
-                    setSuperstructureAdvice(scoringQueue.getActiveTask().coralLevel, CoralScorerSubsystem.CoralScorerState.STOPPED);
-                    firstRunInScoringSubstage = false;
+                if (isScoringSubstageInitilizationRequired()) {
+                    setSuperstructureAdvice(scoringQueue.getActiveTask().coralLevel(), CoralScorerSubsystem.CoralScorerState.STOPPED);
+                    setScoringSubstageInitilizationFinished();
                 }
 
                 // Check if we're at the scoring position
-                if (pose.getCurrentPose2d().getTranslation().getDistance(goalPose.getTranslation()) < elevatorActivationDistance.get()) {
-                    currentScoringSubstage = ScoringSubstage.Scoring;
-                    firstRunInScoringSubstage = true;
+                if (pose.getCurrentPose2d().getTranslation().getDistance(goalPose.getTranslation()) < rangeToStartMovingSuperstructureMeters.get()) {
+                    setNextScoringSubstage(ScoringSubstage.Scoring);
                 }
                 break;
             case Scoring:
-                if (firstRunInScoringSubstage) {
-                    setSuperstructureAdvice(scoringQueue.getActiveTask().coralLevel, CoralScorerSubsystem.CoralScorerState.SCORING);
-                    firstRunInScoringSubstage = false;
+                if (isScoringSubstageInitilizationRequired()) {
+                    setSuperstructureAdvice(scoringQueue.getActiveTask().coralLevel(), CoralScorerSubsystem.CoralScorerState.SCORING);
+                    setScoringSubstageInitilizationFinished();
                 }
 
                 if (coralInfoSource.confidentlyHasScoredCoral()) {
-                    scoringComplete = true;
-                    currentActivity = CollectCoral;
-                    firstRunInNewGoal = true;
-                    // This is a critical line - it advances to the next goal in the queue.
-                    // TODO - we need a fallback or plan when the next goal is null.
+                    setNextPrimaryActivity(CollectCoral);
                     scoringQueue.advanceToNextScoringGoal();
                 }
 
@@ -207,20 +199,41 @@ public class OracleSubsystem extends BaseSubsystem {
                 firstRunInScoringSubstage = true;
                 break;
         }
-
-        return scoringComplete;
     }
 
     private void setSuperstructureAdvice(Landmarks.CoralLevel coralLevelToAchieve, CoralScorerSubsystem.CoralScorerState desiredScorerState) {
-        var newSuperstructureAdvice = new OracleSuperstructureAdvice();
-        newSuperstructureAdvice.instructionNumber = getNextInstructionNumber();
-        newSuperstructureAdvice.coralLevelToAchieve = coralLevelToAchieve;
-        newSuperstructureAdvice.desiredScorerState = desiredScorerState;
-        setSuperstructureAdvice(newSuperstructureAdvice);
+        setSuperstructureAdvice(new OracleSuperstructureAdvice(getNextInstructionNumber(), coralLevelToAchieve, desiredScorerState));
     }
 
     public void setSuperstructureAdvice(OracleSuperstructureAdvice advice) {
         this.currentSuperstructureAdvice = advice;
+    }
+
+    private void setNextPrimaryActivity(PrimaryActivity activity) {
+        this.currentActivity = activity;
+        firstRunInPrimaryActivity = true;
+    }
+
+    private boolean isPrimaryActivityInitilizationRequired() {
+        return firstRunInPrimaryActivity;
+    }
+
+    private void setPrimaryActivityInitializationFinished() {
+        firstRunInPrimaryActivity = false;
+        reevaluationRequested = false;
+    }
+
+    private void setNextScoringSubstage(ScoringSubstage substage) {
+        this.currentScoringSubstage = substage;
+        firstRunInScoringSubstage = true;
+    }
+
+    private boolean isScoringSubstageInitilizationRequired() {
+        return firstRunInScoringSubstage;
+    }
+
+    private void setScoringSubstageInitilizationFinished() {
+        firstRunInScoringSubstage = false;
     }
 
 
@@ -230,28 +243,22 @@ public class OracleSubsystem extends BaseSubsystem {
         switch (currentActivity) {
             case CollectCoral:
                 // Check for first run or reevaluation
-                if (firstRunInNewGoal || reevaluationRequested) {
-                    var newDriveAdvice = new OracleDriveAdvice();
-                    newDriveAdvice.instructionNumber = getNextInstructionNumber();
-                    newDriveAdvice.path = getRecommendedCoralPickupTrajectory();
-                    goalPose = newDriveAdvice.path.get(newDriveAdvice.path.size() - 1).keyPose;
-
+                if (isPrimaryActivityInitilizationRequired() || reevaluationRequested) {
+                    // Command the drive
+                    var newDriveAdvice = new OracleDriveAdvice(getNextInstructionNumber(), getRecommendedCoralPickupTrajectory());
+                    goalPose = newDriveAdvice.path().get(newDriveAdvice.path().size() - 1).keyPose;
                     setCurrentDriveAdvice(newDriveAdvice);
-
-                    var newSuperstructureAdvice = new OracleSuperstructureAdvice();
-                    newSuperstructureAdvice.instructionNumber = getNextInstructionNumber();
-                    newSuperstructureAdvice.coralLevelToAchieve = Landmarks.CoralLevel.COLLECTING;
-                    newSuperstructureAdvice.desiredScorerState = CoralScorerSubsystem.CoralScorerState.INTAKING;
+                    // Command the superstructure
+                    var newSuperstructureAdvice = new OracleSuperstructureAdvice(
+                            getNextInstructionNumber(), Landmarks.CoralLevel.COLLECTING, CoralScorerSubsystem.CoralScorerState.INTAKING);
                     setSuperstructureAdvice(newSuperstructureAdvice);
 
-                    firstRunInNewGoal=false;
-                    reevaluationRequested=false;
+                    setPrimaryActivityInitializationFinished();
                 }
 
                 // Check if it's time to switch activities
                 if (coralInfoSource.confidentlyHasCoral()) {
-                    currentActivity = ScoreCoral;
-                    firstRunInNewGoal = true;
+                    setNextPrimaryActivity(ScoreCoral);
                 }
                 break;
             case ScoreCoral:
@@ -260,29 +267,30 @@ public class OracleSubsystem extends BaseSubsystem {
                     if (scoringQueue.getQueueSize() == 0) {
                         // No active task, and no more in the queue. We have to keep checking every loop to see if somebody
                         // adds something to the queue.
+                        aKitLog.record("ActiveScoringTask", "No active scoring task");
                         return;
                     } else {
                         // No active task, but there are more in the queue. Let's get the next one.
                         scoringQueue.advanceToNextScoringGoal();
+                        if (scoringQueue.getActiveTask() == null) {
+                            // Somehow the queue is still empty!
+                            return;
+                        }
                     }
                 }
 
                 aKitLog.record("ActiveScoringTask", scoringQueue.getActiveTask().toString());
 
                 // Check for first run or reevaluation
-                if (firstRunInNewGoal || reevaluationRequested) {
+                if (isPrimaryActivityInitilizationRequired() || reevaluationRequested) {
                     currentScoringSubstage = ScoringSubstage.Travel;
-
-                    var newDriveAdvice = new OracleDriveAdvice();
-                    newDriveAdvice.instructionNumber = getNextInstructionNumber();
-                    newDriveAdvice.path = getRecommendedScoringTrajectory();
+                    // Command the drive
+                    var newDriveAdvice = new OracleDriveAdvice(getNextInstructionNumber(), getRecommendedScoringTrajectory());
                     setCurrentDriveAdvice(newDriveAdvice);
-                    goalPose = newDriveAdvice.path.get(newDriveAdvice.path.size() - 1).keyPose;
+                    goalPose = newDriveAdvice.path().get(newDriveAdvice.path().size() - 1).keyPose;
 
-
-                    firstRunInScoringSubstage = true;
-                    firstRunInNewGoal=false;
-                    reevaluationRequested=false;
+                    setPrimaryActivityInitializationFinished();
+                    setNextScoringSubstage(ScoringSubstage.Travel);
                 }
 
                 evaluateScoringSubstage();
@@ -291,7 +299,7 @@ public class OracleSubsystem extends BaseSubsystem {
                 // How did you get here?
                 // When in doubt, go close to the drivers?
                 currentActivity = CollectCoral;
-                firstRunInNewGoal = true;
+                firstRunInPrimaryActivity = true;
                 break;
         }
     }

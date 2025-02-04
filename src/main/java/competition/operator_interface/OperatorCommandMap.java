@@ -19,8 +19,6 @@ import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
 import competition.subsystems.oracle.commands.DriveAccordingToOracleCommand;
-import competition.subsystems.oracle.commands.DriveUsingOracleToPickup;
-import competition.subsystems.oracle.commands.DriveUsingOracleToScore;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 
 import competition.subsystems.elevator.ElevatorSubsystem;
@@ -53,20 +51,16 @@ public class OperatorCommandMap {
     public void setupDriverCommands(
             OperatorInterface operatorInterface,
             SetRobotHeadingCommand resetHeading,
-            DriveUsingOracleToScore driveUsingOracleToScore,
-            DriveUsingOracleToPickup driveUsingOracleToPickup,
             AlignToReefWithAprilTagCommand alignToReefWithAprilTag,
             DriveAccordingToOracleCommand driveAccordingToOracle,
             SuperstructureAccordingToOracleCommand superstructureAccordingToOracle) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(resetHeading);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(driveUsingOracleToScore);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(driveUsingOracleToPickup);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(alignToReefWithAprilTag);
 
-        var oracleSeesAll = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
+        var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
 
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(oracleSeesAll);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(oracleControlsRobot);
     }
 
     @Inject

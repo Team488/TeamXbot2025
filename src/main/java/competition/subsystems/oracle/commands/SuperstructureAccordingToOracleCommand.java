@@ -41,14 +41,14 @@ public class SuperstructureAccordingToOracleCommand extends BaseCommand {
 
     @Override
     public void execute() {
-        if (oracle.getSuperstructureAdvice().instructionNumber != advice.instructionNumber) {
+        if (oracle.getSuperstructureAdvice().instructionNumber() != advice.instructionNumber()) {
             setNewInstruction();
         }
 
-        elevator.setTargetHeight(advice.coralLevelToAchieve);
-        coralArm.setTargetAngle(advice.coralLevelToAchieve);
+        elevator.setTargetHeight(advice.coralLevelToAchieve());
+        coralArm.setTargetAngle(advice.coralLevelToAchieve());
 
-        if (advice.desiredScorerState == CoralScorerSubsystem.CoralScorerState.SCORING) {
+        if (advice.desiredScorerState() == CoralScorerSubsystem.CoralScorerState.SCORING) {
             // don't run the scorer until we're at height and the arm is in the right place!!
             if (elevator.isMaintainerAtGoal() && coralArm.isMaintainerAtGoal()) {
                 coralScorer.setPowerForState(CoralScorerSubsystem.CoralScorerState.SCORING);
@@ -56,7 +56,7 @@ public class SuperstructureAccordingToOracleCommand extends BaseCommand {
                 coralScorer.setPowerForState(CoralScorerSubsystem.CoralScorerState.STOPPED);
             }
         } else {
-            coralScorer.setPowerForState(advice.desiredScorerState);
+            coralScorer.setPowerForState(advice.desiredScorerState());
         }
     }
 }

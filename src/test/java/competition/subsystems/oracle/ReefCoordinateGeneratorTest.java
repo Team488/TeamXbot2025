@@ -3,6 +3,7 @@ package competition.subsystems.oracle;
 import competition.BaseCompetitionTest;
 import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.wpilibj.DriverStation;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static edu.wpi.first.units.Units.Meters;
@@ -38,9 +39,8 @@ public class ReefCoordinateGeneratorTest extends BaseCompetitionTest {
         assertEquals(Landmarks.BlueCenterOfReef.getY() - Landmarks.reefBranchHorizontalOffsetForBranchTypeA.in(Meters) - 2, pose.getY(), 0.001);
     }
 
-    // Not an active test, just a way of quickly checking hardcoded values against the generated values to see if they are in the
-    // same ballpark.
-    //@Test
+    @Test
+    @Ignore(" Not an active test, just a way of quickly checking hardcoded values against the generated values to see if they are in the same ballpark.")
     public void compareHardcodedToGenerated() {
         ReefCoordinateGenerator generator = getInjectorComponent().reefCoordinateGenerator();
         double robotWithInMeters = getInjectorComponent().electricalContract().getDistanceFromCenterToOuterBumperX().in(Meters);

@@ -4,7 +4,4 @@ import xbot.common.trajectory.XbotSwervePoint;
 
 import java.util.List;
 
-public class OracleDriveAdvice {
-    public int instructionNumber;
-    public List<XbotSwervePoint> path;
-}
+public record OracleDriveAdvice (int instructionNumber, List<XbotSwervePoint> path) {}

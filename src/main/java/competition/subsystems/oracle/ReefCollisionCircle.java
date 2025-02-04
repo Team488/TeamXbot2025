@@ -24,6 +24,7 @@ public class ReefCollisionCircle {
         }
     }
 
+    // Note - the math in this class is AI generated and has not been fully verified.
     public boolean doesLineIntersect(Translation2d point1, Translation2d point2) {
         if (!isValid || point1 == null || point2 == null || point1.equals(point2)) {
             return false;

@@ -83,6 +83,9 @@ public class ReefRoutingCircle {
         return swervePoints;
     }
 
+    // Note - the math in this class is AI generated and has not been fully verified.
+    // Some tests have been run, but it needs to be more hardened for robotics (e.g. protection against division by zero)
+    // TODO: additional protections
     private Translation2d findClosestTangentPoint(Translation2d point, Translation2d endPoint) {
         double cx = center.getX();
         double cy = center.getY();

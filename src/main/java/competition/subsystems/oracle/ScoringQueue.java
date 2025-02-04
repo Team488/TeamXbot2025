@@ -11,13 +11,13 @@ import java.util.Queue;
 public class ScoringQueue {
 
     private final Queue<ScoringTask> scoringTasks;
-    private ScoringTask activeTask;
 
     @Inject
     public ScoringQueue() {
         this.scoringTasks = new LinkedList<>();
 
-        // for now, cheating in some tasks. Later this should be set up during autonomous or during the match.
+        // TODO: set this up based on some commands invoked by the operator (before auto, or during the match)
+        // for now, cheating in some tasks.
         scoringTasks.add(new ScoringTask(Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR));
         scoringTasks.add(new ScoringTask(Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR));
         scoringTasks.add(new ScoringTask(Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.THREE));
@@ -32,13 +32,6 @@ public class ScoringQueue {
         scoringTasks.add(new ScoringTask(Landmarks.ReefFace.CLOSE, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR));
         scoringTasks.add(new ScoringTask(Landmarks.ReefFace.CLOSE, Landmarks.Branch.A, Landmarks.CoralLevel.THREE));
         scoringTasks.add(new ScoringTask(Landmarks.ReefFace.CLOSE, Landmarks.Branch.B, Landmarks.CoralLevel.THREE));
-
-
-
-
-
-        scoringTasks.add(new ScoringTask(Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.TWO));
-        scoringTasks.add(new ScoringTask(Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.TWO));
     }
 
     public void addScoringGoalToBottomOfQueue(ScoringTask scoringTask) {
@@ -46,11 +39,7 @@ public class ScoringQueue {
     }
 
     public void advanceToNextScoringGoal() {
-        if (scoringTasks.isEmpty()) {
-            this.activeTask = null;
-            return;
-        }
-        this.activeTask = scoringTasks.poll();
+        scoringTasks.poll();
     }
 
     public int getQueueSize() {
@@ -58,7 +47,7 @@ public class ScoringQueue {
     }
 
     public ScoringTask getActiveTask() {
-        return activeTask;
+        return scoringTasks.peek();
     }
 
     public void clearQueue() {
