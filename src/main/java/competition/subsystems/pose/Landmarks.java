@@ -98,7 +98,8 @@ public class Landmarks {
 
     public enum ReefAlgae {
         HIGH,
-        LOW
+        LOW,
+        NONE
     }
 
     public enum Branch {
