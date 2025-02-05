@@ -83,7 +83,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
 
         // Update pose estimators
         onlyWheelsGyroSwerveOdometry.update(
-                this.getCurrentHeading(),
+                this.getCurrentHeadingGyroOnly(),
                 getSwerveModulePositions()
         );
         aKitLog.record("WheelsOnlyEstimate", onlyWheelsGyroSwerveOdometry.getEstimatedPosition());
@@ -91,7 +91,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
 
         batchedPushRequests.putPose2d(xtablesPrefix + ".WheelsOnlyEstimate", onlyWheelsGyroSwerveOdometry.getEstimatedPosition());
         fullSwerveOdometry.update(
-                this.getCurrentHeading(),
+                this.getCurrentHeadingGyroOnly(),
                 getSwerveModulePositions()
         );
         this.aprilTagVisionSubsystem.getAllPoseObservations().forEach(observation -> {
@@ -105,7 +105,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
         // Report poses
         Pose2d estimatedPosition = new Pose2d(
                 onlyWheelsGyroSwerveOdometry.getEstimatedPosition().getTranslation(),
-                getCurrentHeading()
+                getCurrentHeadingGyroOnly()
         );
         aKitLog.record("OdometryOnlyRobotPose", estimatedPosition);
         batchedPushRequests.putPose2d(xtablesPrefix + ".OdometryOnlyRobotPose", estimatedPosition);
