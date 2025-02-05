@@ -104,19 +104,19 @@ public class PoseSubsystem extends BasePoseSubsystem {
                 getCurrentHeading()
         );
         aKitLog.record("OdometryOnlyRobotPose", estimatedPosition);
-        batchedPushRequests.putPose2d(xtablesPrefix+".OdometryOnlyRobotPose", estimatedPosition);
+        batchedPushRequests.putPose2d(xtablesPrefix + ".OdometryOnlyRobotPose", estimatedPosition);
 
         Pose2d visionEnhancedPosition = new Pose2d(
                 fullSwerveOdometry.getEstimatedPosition().getTranslation(),
                 fullSwerveOdometry.getEstimatedPosition().getRotation()
         );
         aKitLog.record("VisionEnhancedPose", visionEnhancedPosition);
-        batchedPushRequests.putPose2d(xtablesPrefix+".VisionEnhancedPose", visionEnhancedPosition);
+        batchedPushRequests.putPose2d(xtablesPrefix + ".VisionEnhancedPose", visionEnhancedPosition);
 
         Pose2d robotPose = this.useVisionAssistedPose.get() ? visionEnhancedPosition : estimatedPosition;
         aKitLog.record("RobotPose", robotPose);
-        batchedPushRequests.putPose2d(xtablesPrefix+".RobotPose", robotPose);
-        if(xTablesClient != null) {
+        batchedPushRequests.putPose2d(xtablesPrefix + ".RobotPose", robotPose);
+        if (xTablesClient != null) {
             // This is asynchronous - does not block & sends all updates in a single "packet"
             xTablesClient.sendBatchedPushRequests(batchedPushRequests);
         }
