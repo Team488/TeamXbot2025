@@ -125,6 +125,22 @@ public class Landmarks {
         FAR
     }
 
+    // Uses NATO Code Words
+    public enum FRCBranchName {
+        Alpha,
+        Bravo,
+        Charlie,
+        Delta,
+        Echo,
+        Foxtrot,
+        Golf,
+        Hotel,
+        India,
+        Juliet,
+        Kilo,
+        Lima,
+    }
+
     public static Pose2d getBranchPose(ReefFace reefFace, Branch branch) {
         return enumsToPose.getBranchPose(reefFace, branch);
     }
@@ -135,5 +151,29 @@ public class Landmarks {
 
     public static Pose2d getCoralStationSectionPose(CoralStation station, CoralStationSection section) {
         return enumsToPose.getCoralStationPose(station, section);
+    }
+
+    public static ReefFace getReefFaceFromFRCBranchName(FRCBranchName branchName) {
+        return switch (branchName) {
+            case Alpha, Bravo -> ReefFace.CLOSE;
+            case Charlie, Delta -> ReefFace.CLOSE_RIGHT;
+            case Echo, Foxtrot -> ReefFace.FAR_RIGHT;
+            case Golf, Hotel -> ReefFace.FAR;
+            case India, Juliet -> ReefFace.FAR_LEFT;
+            case Kilo, Lima -> ReefFace.CLOSE_LEFT;
+            default ->
+                // How did you get here?
+                ReefFace.CLOSE;
+        };
+    }
+
+    public static Branch getBranchFromFRCBranchName(FRCBranchName branchName) {
+        return switch (branchName) {
+            case Alpha, Charlie, Echo, Golf, India, Kilo -> Branch.A;
+            case Bravo, Delta, Foxtrot, Hotel, Juliet, Lima -> Branch.B;
+            default ->
+                // How did you get here?
+                Branch.A;
+        };
     }
 }
