@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import xbot.common.command.BaseSubsystem;
+import xbot.common.logging.RobotAssertionManager;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.trajectory.XbotSwervePoint;
@@ -16,6 +17,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import java.util.List;
+import java.util.Optional;
 
 import static competition.subsystems.oracle.OracleSubsystem.PrimaryActivity.CollectCoral;
 import static competition.subsystems.oracle.OracleSubsystem.PrimaryActivity.ScoreCoral;
@@ -36,6 +38,7 @@ public class OracleSubsystem extends BaseSubsystem {
     }
 
     final PoseSubsystem pose;
+    final RobotAssertionManager assertionManager;
     final ReefCoordinateGenerator reefCoordinateGenerator;
     final ScoringQueue scoringQueue;
 
@@ -67,8 +70,10 @@ public class OracleSubsystem extends BaseSubsystem {
 
     @Inject
     public OracleSubsystem(PoseSubsystem pose, CoralCollectionInfoSource coralInfoSource,
-                           ScoringQueue scoringQueue, ReefCoordinateGenerator generator, PropertyFactory pf) {
+                           ScoringQueue scoringQueue, ReefCoordinateGenerator generator, PropertyFactory pf,
+                           RobotAssertionManager assertionManager) {
         this.pose = pose;
+        this.assertionManager = assertionManager;
         this.coralInfoSource = coralInfoSource;
         this.scoringQueue = scoringQueue;
         this.reefCoordinateGenerator = generator;
@@ -118,6 +123,7 @@ public class OracleSubsystem extends BaseSubsystem {
 
     public List<XbotSwervePoint> getRecommendedCoralPickupTrajectory() {
         // TODO: go to more than one location.
+        // START HERE NEXT TIME!
         var finalWaypoint = Landmarks.BlueLeftCoralStationMid;
         var route = blueReefRoutingCircle.generateSwervePoints(pose.getCurrentPose2d(), finalWaypoint);
         aKitLog.record("RecommendedRoute", XbotSwervePoint.generateTrajectory(route));
@@ -234,6 +240,11 @@ public class OracleSubsystem extends BaseSubsystem {
 
     private void setScoringSubstageInitilizationFinished() {
         firstRunInScoringSubstage = false;
+    }
+
+    public void addScoringTask(ScoringTask scoringTask) {
+        this.scoringQueue.clearQueueIfDefault();
+        this.scoringQueue.addScoringGoalToBottomOfQueue(scoringTask);
     }
 
 
