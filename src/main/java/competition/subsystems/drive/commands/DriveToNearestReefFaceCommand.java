@@ -26,8 +26,9 @@ public class DriveToNearestReefFaceCommand extends SwerveSimpleTrajectoryCommand
     @Inject
     public DriveToNearestReefFaceCommand(DriveSubsystem drive, PoseSubsystem pose, PropertyFactory pf,
                                          HeadingModule.HeadingModuleFactory headingModuleFactory,
-                                         AprilTagVisionSubsystemExtended aprilTagVisionSubsystem, RobotAssertionManager assertionManager) {
-        super(drive, pose, pf, headingModuleFactory, assertionManager);
+                                         AprilTagVisionSubsystemExtended aprilTagVisionSubsystem,
+                                         RobotAssertionManager robotAssertionManager) {
+        super(drive, pose, pf, headingModuleFactory, robotAssertionManager);
         this.drive = drive;
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
         this.pose = pose;

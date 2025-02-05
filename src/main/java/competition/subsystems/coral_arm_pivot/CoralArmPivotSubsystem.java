@@ -1,6 +1,7 @@
 package competition.subsystems.coral_arm_pivot;
 
 import competition.electrical_contract.ElectricalContract;
+import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.units.measure.Angle;
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
@@ -19,11 +20,6 @@ import static edu.wpi.first.units.Units.Rotations;
 
 @Singleton
 public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
-
-    public enum ArmGoals {
-        Score,
-        HumanLoad
-    }
 
     public final DoubleProperty scoreAngle;
     public final DoubleProperty humanLoadAngle;
@@ -105,11 +101,20 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
         targetAngle = value;
     }
 
-    public void setTargetAngle(ArmGoals value) {
+    public void setTargetAngle(Landmarks.CoralLevel value) {
         switch (value) {
-            case Score -> setTargetValue(Degrees.of(scoreAngle.get()));
-            case HumanLoad -> setTargetValue(Degrees.of(humanLoadAngle.get()));
-            default -> setTargetValue(Degrees.of(humanLoadAngle.get()));
+            case ONE:
+            case TWO:
+            case THREE:
+            case FOUR:
+                setTargetValue(Degrees.of(scoreAngle.get()));
+                break;
+            case COLLECTING:
+                setTargetValue(Degrees.of(humanLoadAngle.get()));
+                break;
+            default:
+                setTargetValue(Degrees.of(humanLoadAngle.get()));
+                break;
         }
     }
 
@@ -192,11 +197,15 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
 
     @Override
     public void periodic() {
+        if (electricalContract.isArmPivotMotorReady()) {
+            armMotor.periodic();
+        }
+
         aKitLog.record("Target Angle", this.getTargetValue().in(Degrees));
         aKitLog.record("Current Angle", this.getCurrentValue().in(Degrees));
     }
   
     public boolean getIsTargetAngleScoring() {
-        return targetAngle == Degrees.of(scoreAngle.get());
+        return Degrees.of(scoreAngle.get()).isNear(targetAngle, Degrees.of(10));
     }
 }

@@ -77,6 +77,6 @@ public class AlgaeArmSimulator {
     }
 
     public boolean isAtCollectionAngle() {
-        return getArmAngle().isNear(Degrees.of(0), 0.05);
+        return getArmAngle().isNear(Degrees.of(0), Degrees.of(5));
     }
 }

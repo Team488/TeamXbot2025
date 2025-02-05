@@ -29,7 +29,7 @@ public class WPIXTablesClient {
         byte[] barr = new byte[bb.capacity()];
         bb.rewind();
         bb.get(barr);
-        this.xTablesClient.putUnknownBytes(String.format("%s.%s", prefix, table), barr);
+        this.xTablesClient.put(String.format("%s.%s", prefix, table), barr);
     }
 
 
