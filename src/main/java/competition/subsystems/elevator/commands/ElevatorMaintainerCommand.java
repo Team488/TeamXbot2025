@@ -38,16 +38,16 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     final TrapezoidProfileManager profileManager;
 
     @Inject
-    public ElevatorMaintainerCommand(ElevatorSubsystem elevator, Provider<PropertyFactory> pfProvider,
+    public ElevatorMaintainerCommand(ElevatorSubsystem elevator, PropertyFactory pf,
                                      HumanVsMachineDecider.HumanVsMachineDeciderFactory hvmFactory,
                                      CalibrationDecider.CalibrationDeciderFactory calibrationDeciderFactory,
+                                     TrapezoidProfileManager.Factory trapezoidProfileManagerFactory,
                                      PIDManager.PIDManagerFactory pidf,
                                      OperatorInterface oi){
-        super(elevator, pfProvider.get(),hvmFactory, Inches.of(1).in(Meters), 0.2);
-        var pf = pfProvider.get();
+        super(elevator, pf, hvmFactory, Inches.of(1).in(Meters), 0.2);
         pf.setPrefix(this);
         this.elevator = elevator;
-        profileManager = new TrapezoidProfileManager(getPrefix() + "trapezoidMotion", pfProvider.get(), 1, 1, elevator.getCurrentValue().in(Meters));
+        profileManager = trapezoidProfileManagerFactory.create(getPrefix() + "trapezoidMotion", 1, 1, elevator.getCurrentValue().in(Meters));
 
         this.oi = oi;
 
