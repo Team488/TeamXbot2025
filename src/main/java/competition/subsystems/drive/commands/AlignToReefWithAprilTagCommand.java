@@ -29,8 +29,6 @@ public class AlignToReefWithAprilTagCommand extends BaseCommand {
     PoseSubsystem pose;
     public Distance cameraXOffset;
     public Pose2d targetReefFacePose;
-    double xOffset;
-    double yOffset;
 
     private final Translation2d alignmentPointOffset;
 
@@ -85,9 +83,7 @@ public class AlignToReefWithAprilTagCommand extends BaseCommand {
             Translation2d aprilTagData = aprilTagVisionSubsystem.getReefAprilTagCameraData();
 
             Translation2d goalVector = aprilTagData.minus(alignmentPointOffset);
-            Translation2d goalVectorWithOffsets = new Translation2d(goalVector.getX() + xOffset,
-                    goalVector.getY() + yOffset);
-            Translation2d powerVector = drive.getPowerForRelativePositionChange(goalVectorWithOffsets);
+            Translation2d powerVector = drive.getPowerForRelativePositionChange(goalVector);
 
             aKitLog.record("AprilTag X", aprilTagData.getX());
             aKitLog.record("AprilTag Y", aprilTagData.getY());
@@ -97,13 +93,5 @@ public class AlignToReefWithAprilTagCommand extends BaseCommand {
         log.info("April tag not in sight, cancelling");
         cancel();
         return new Translation2d(0,0);
-    }
-
-    public void setXOffset(Landmarks.CoralLevel branchLevel) {
-        // TODO: add switch case to set offset depending on branch level, this is only needed if level scoring positions are different
-    }
-
-    public void setYOFFset(Landmarks.Branch branch) {
-        // TODO: add if else to set y offset depending on branch
     }
 }
