@@ -37,8 +37,8 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
     double rotationsAtZero = 0;
     boolean isCalibrated = true;
     final DoubleProperty rangeOfMotionDegrees;
-    final DoubleProperty minArmPosition;
-    final DoubleProperty maxArmPosition;
+    public final DoubleProperty minArmPosition;
+    public final DoubleProperty maxArmPosition;
 
     @Inject
     public CoralArmPivotSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
@@ -69,7 +69,7 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
 
         this.rangeOfMotionDegrees = propertyFactory.createPersistentProperty("Range of Motion in Degrees", 125);
         this.minArmPosition = propertyFactory.createPersistentProperty("Min AbsEncoder Position in Degrees", 90);
-        this.maxArmPosition = propertyFactory.createPersistentProperty("Max AbsEncoder Position in Degrees", 100);
+        this.maxArmPosition = propertyFactory.createPersistentProperty("Max AbsEncoder Position in Degrees", 108);
         this.scoreAngle = propertyFactory.createPersistentProperty("Scoring Angle in Degrees", 125);
         this.humanLoadAngle = propertyFactory.createPersistentProperty("Human Loading Angle in Degrees", 0);
 
@@ -198,6 +198,7 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
 
         aKitLog.record("Target Angle", this.getTargetValue().in(Degrees));
         aKitLog.record("Current Angle", this.getCurrentValue().in(Degrees));
+        aKitLog.record("Current Angle using AbsEncoder", this.getArmAngle().in(Degrees));
     }
   
     public boolean getIsTargetAngleScoring() {
