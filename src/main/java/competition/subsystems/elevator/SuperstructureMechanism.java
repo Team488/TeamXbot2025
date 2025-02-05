@@ -46,7 +46,7 @@ public class SuperstructureMechanism {
 
 
     public SuperstructureMechanism() {
-        this.mech2d = new LoggedMechanism2d(1, 2);
+        this.mech2d = new LoggedMechanism2d(1, 3);
 
         // coral system (elevator, arm, scorer)
         var elevatorRoot = mech2d.getRoot("ElevatorRoot", elevatorBasePositionMeters.getX(), elevatorBasePositionMeters.getY());
