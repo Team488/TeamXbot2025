@@ -123,6 +123,15 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
         return (getSecondsSinceScoringStarted() > waitTimeAfterScoring.get() && coralScorerState == SCORING);
     }
 
+    public boolean IntakeUntillCoral(){
+        if (this.coralSensor.get()){
+            this.motor.setPower(0);
+        }else{
+            setCoralScorerMotorPower(intakePower.get());
+        }
+        return false;
+    }
+
     @Override
     public boolean confidentlyHasCoral() {
         return hasCoralValidator.peekStable();
