@@ -3,8 +3,10 @@ package competition.subsystems.elevator.commands;
 import competition.motion.TrapezoidProfileManager;
 import competition.operator_interface.OperatorInterface;
 import competition.subsystems.elevator.ElevatorSubsystem;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import xbot.common.command.BaseMaintainerCommand;
+import xbot.common.controls.actuators.XCANMotorController;
 import xbot.common.logic.CalibrationDecider;
 import xbot.common.logic.HumanVsMachineDecider;
 import xbot.common.math.MathUtils;
@@ -12,6 +14,8 @@ import xbot.common.math.PIDManager;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 
+import static edu.wpi.first.units.Units.Degree;
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Meters;
@@ -85,11 +89,8 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         // it's helpful to log this to know where the robot is actually trying to get to in the moment
         aKitLog.record("elevatorProfileTarget", setpoint);
 
-        double power = positionPID.calculate(
-                setpoint,
-                elevator.getCurrentValue().in(Meters));
-        //we dont need to counteract gravity when moving down
-        elevator.setPower(power < 0 ? power : power + gravityPIDConstantPower.get());
+        //handles pidding via motor controller and setting power to elevator
+        elevator.masterMotor.setPositionTarget(Degrees.of(setpoint * elevator.rotationsPerMeter.get() * 360), XCANMotorController.MotorPidMode.TrapezoidalVoltage);
     }
 
     @Override

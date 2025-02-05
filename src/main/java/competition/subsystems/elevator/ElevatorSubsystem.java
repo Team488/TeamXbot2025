@@ -50,6 +50,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     public Distance elevatorTargetHeight;
 
     public final DoubleProperty metersPerRotation;
+    public final DoubleProperty rotationsPerMeter;
+
     public final DoubleProperty calibrationNegativePower;
     public final DoubleProperty upperHeightLimit;
     public final DoubleProperty lowerHeightLimit;
@@ -94,8 +96,12 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
 
         //to be tuned
-        this.metersPerRotation = pf.createPersistentProperty("MetersPerRotation", 1.0/1923.0);
+        this.rotationsPerMeter = pf.createPersistentProperty("RotationsPerMeter", 1923.0);
+        this.metersPerRotation = pf.createPersistentProperty("MetersPerRotation", 1.0/rotationsPerMeter.get());
+
         this.calibrationNegativePower = pf.createPersistentProperty("calibrationNegativePower", -0.05);
+
+        //power limits near max and min height
         this.upperHeightLimit = pf.createPersistentProperty("upperHeightLimit", l4Height.get());
         this.lowerHeightLimit = pf.createPersistentProperty("lowerHeightLimit", baseHeight.get());
         this.powerNearUpperLimitThreshold = pf.createPersistentProperty("powerNearUpperLimit", 0.0);
