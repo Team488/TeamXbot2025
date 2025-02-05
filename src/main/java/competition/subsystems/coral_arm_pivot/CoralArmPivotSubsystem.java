@@ -195,7 +195,7 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
 
     @Override
     public void periodic() {
-        if (electricalContract.isArmPivotMotorReady()) {
+        if (electricalContract.isCoralArmPivotMotorReady()) {
             armMotor.periodic();
         }
 
