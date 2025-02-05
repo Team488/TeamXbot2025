@@ -76,14 +76,16 @@ public class PoseSubsystem extends BasePoseSubsystem {
     protected void updateOdometry() {
         XTablesClient xTablesClient = this.coprocessorComms.getXTablesClient().getOrNull();
         String xtablesPrefix = "PoseSubsystem";
+        // Package all requests into single message to ensure all data is synchronized and updated at once.
+        BatchedPushRequests batchedPushRequests = new BatchedPushRequests();
+
         // Update pose estimators
         onlyWheelsGyroSwerveOdometry.update(
                 this.getCurrentHeading(),
                 getSwerveModulePositions()
         );
         aKitLog.record("WheelsOnlyEstimate", onlyWheelsGyroSwerveOdometry.getEstimatedPosition());
-        // Package all requests into single message to ensure all data is synchronized and updated at once.
-        BatchedPushRequests batchedPushRequests = new BatchedPushRequests();
+
 
         batchedPushRequests.putPose2d(xtablesPrefix + ".WheelsOnlyEstimate", onlyWheelsGyroSwerveOdometry.getEstimatedPosition());
         fullSwerveOdometry.update(

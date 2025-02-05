@@ -18,6 +18,7 @@ import competition.subsystems.coral_scorer.commands.StopCoralCommand;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
+import competition.subsystems.drive.commands.DriveToWaypointsWithVisionCommand;
 import competition.subsystems.oracle.commands.DriveAccordingToOracleCommand;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 
@@ -53,7 +54,8 @@ public class OperatorCommandMap {
             SetRobotHeadingCommand resetHeading,
             AlignToReefWithAprilTagCommand alignToReefWithAprilTag,
             DriveAccordingToOracleCommand driveAccordingToOracle,
-            SuperstructureAccordingToOracleCommand superstructureAccordingToOracle) {
+            SuperstructureAccordingToOracleCommand superstructureAccordingToOracle,
+            DriveToWaypointsWithVisionCommand driveToWaypointsWithVisionCommand) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(resetHeading);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(alignToReefWithAprilTag);
@@ -61,6 +63,7 @@ public class OperatorCommandMap {
         var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
 
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(oracleControlsRobot);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(driveToWaypointsWithVisionCommand);
     }
 
     @Inject
@@ -138,22 +141,24 @@ public class OperatorCommandMap {
         DriveSubsystem drive,
         ElevatorSubsystem elevator
     ) {
-        oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.A)
-                .whileTrue(drive.sysIdQuasistaticRotation(SysIdRoutine.Direction.kForward)
-                        .andThen(new WaitCommand(Seconds.of(1)))
-                        .andThen(drive.sysIdQuasistaticRotation(SysIdRoutine.Direction.kReverse))
-                        .andThen(new WaitCommand(Seconds.of(1)))
-                        .andThen(drive.sysIdDynamicRotation(SysIdRoutine.Direction.kForward))
-                        .andThen(new WaitCommand(Seconds.of(1)))
-                        .andThen(drive.sysIdDynamicRotation(SysIdRoutine.Direction.kReverse)));
-        oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.B)
-                .whileTrue(drive.sysIdQuasistaticDrive(SysIdRoutine.Direction.kForward)
-                        .andThen(new WaitCommand(Seconds.of(1)))
-                        .andThen(drive.sysIdQuasistaticDrive(SysIdRoutine.Direction.kReverse))
-                        .andThen(new WaitCommand(Seconds.of(1)))
-                        .andThen(drive.sysIdDynamicDrive(SysIdRoutine.Direction.kForward))
-                        .andThen(new WaitCommand(Seconds.of(1)))
-                        .andThen(drive.sysIdDynamicDrive(SysIdRoutine.Direction.kReverse)));
+
+        // are these missing a method?: sysIdQuasistaticRotation()
+//        oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.A)
+//                .whileTrue(drive.sysIdQuasistaticRotation(SysIdRoutine.Direction.kForward)
+//                        .andThen(new WaitCommand(Seconds.of(1)))
+//                        .andThen(drive.sysIdQuasistaticRotation(SysIdRoutine.Direction.kReverse))
+//                        .andThen(new WaitCommand(Seconds.of(1)))
+//                        .andThen(drive.sysIdDynamicRotation(SysIdRoutine.Direction.kForward))
+//                        .andThen(new WaitCommand(Seconds.of(1)))
+//                        .andThen(drive.sysIdDynamicRotation(SysIdRoutine.Direction.kReverse)));
+//        oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.B)
+//                .whileTrue(drive.sysIdQuasistaticDrive(SysIdRoutine.Direction.kForward)
+//                        .andThen(new WaitCommand(Seconds.of(1)))
+//                        .andThen(drive.sysIdQuasistaticDrive(SysIdRoutine.Direction.kReverse))
+//                        .andThen(new WaitCommand(Seconds.of(1)))
+//                        .andThen(drive.sysIdDynamicDrive(SysIdRoutine.Direction.kForward))
+//                        .andThen(new WaitCommand(Seconds.of(1)))
+//                        .andThen(drive.sysIdDynamicDrive(SysIdRoutine.Direction.kReverse)));
 
         oi.algaeAndSysIdGamepad.getPovIfAvailable(0).whileTrue(elevator.sysIdDynamic(SysIdRoutine.Direction.kForward));
         oi.algaeAndSysIdGamepad.getPovIfAvailable(90).whileTrue(elevator.sysIdDynamic(SysIdRoutine.Direction.kReverse));

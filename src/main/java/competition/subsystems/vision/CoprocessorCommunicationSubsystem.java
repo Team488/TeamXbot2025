@@ -24,9 +24,8 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
     final StringProperty xtablesCoordinateLocation;
     final StringProperty xtablesHeadingLocation;
 
-    // always persisted xtables instance
+    // always persisted xtables client manager instance
     private XTablesClientManager xTablesClientManager;
-    private WPIXTablesClient wxclient;
 
 
     @Inject
@@ -38,17 +37,10 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
         xtablesHeadingLocation = pf.createPersistentProperty("Xtables Heading Location", "target_heading");
 
         xTablesClientManager = XTablesClient.getDefaultClientAsynchronously();
-        wxclient = new WPIXTablesClient(xTablesClientManager);
     }
 
     public XTablesClientManager getXTablesClient(){
-        // in case of any weirdness
         return xTablesClientManager;
-    }
-    /** Returns wrapper around XTablesClient, Adds methods to put wpi classes**/
-    public WPIXTablesClient getWPIXTablesClient(){
-        // in case of any weirdness
-        return wxclient;
     }
 
     public String getXtablesCoordinateLocation(){
