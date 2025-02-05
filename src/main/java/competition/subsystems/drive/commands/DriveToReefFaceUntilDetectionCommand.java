@@ -29,9 +29,8 @@ public class DriveToReefFaceUntilDetectionCommand extends SwerveSimpleTrajectory
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
     }
 
-    // TODO: uncomment
     public void setTargetReefFacePose(Landmarks.ReefFace targetReefFace) {
-//        this.targetReefFacePose = Landmarks.getReefFacePose(targetReefFace);
+        this.targetReefFacePose = Landmarks.getReefFacePose(targetReefFace);
     }
 
     @Override

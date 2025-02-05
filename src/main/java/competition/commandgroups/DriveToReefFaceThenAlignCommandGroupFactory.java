@@ -20,7 +20,7 @@ public class DriveToReefFaceThenAlignCommandGroupFactory {
         this.alignToReefWithAprilTagCommandProvider = alignToReefWithAprilTagCommandProvider;
     }
 
-    public SequentialCommandGroup create(Landmarks.ReefFace targetReefFace, Landmarks.Branch branch) {
+    public SequentialCommandGroup create(Landmarks.ReefFace targetReefFace) {
         var group = new SequentialCommandGroup();
 
         var driveToReefFace = driveToReefFaceCommandProvider.get();
