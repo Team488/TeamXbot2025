@@ -1,6 +1,7 @@
 package competition.subsystems.vision;
 
 import org.kobe.xbot.JClient.XTablesClient;
+import org.kobe.xbot.JClient.XTablesClientManager;
 import xbot.common.advantage.DataFrameRefreshable;
 import xbot.common.command.BaseSubsystem;
 import xbot.common.logging.RobotAssertionManager;
@@ -24,7 +25,7 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
     final StringProperty xtablesHeadingLocation;
 
     // always persisted xtables instance
-    private XTablesClient xclient;
+    private XTablesClientManager xTablesClientManager;
     private WPIXTablesClient wxclient;
 
 
@@ -36,13 +37,13 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
         xtablesCoordinateLocation = pf.createPersistentProperty("Xtables Coordinate Location", "target_waypoints");
         xtablesHeadingLocation = pf.createPersistentProperty("Xtables Heading Location", "target_heading");
 
-        xclient = new XTablesClient();
-        wxclient = new WPIXTablesClient(xclient);
+        xTablesClientManager = XTablesClient.getDefaultClientAsynchronously();
+        wxclient = new WPIXTablesClient(xTablesClientManager);
     }
 
-    public XTablesClient getXTablesClient(){
+    public XTablesClientManager getXTablesClient(){
         // in case of any weirdness
-        return xclient;
+        return xTablesClientManager;
     }
     /** Returns wrapper around XTablesClient, Adds methods to put wpi classes**/
     public WPIXTablesClient getWPIXTablesClient(){

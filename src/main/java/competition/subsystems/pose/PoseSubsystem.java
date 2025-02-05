@@ -1,17 +1,14 @@
 package competition.subsystems.pose;
 
-import java.util.HashMap;
-import java.util.Optional;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import competition.subsystems.drive.DriveSubsystem;
+import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import org.kobe.xbot.JClient.XTablesClient;
+import org.kobe.xbot.Utilities.Entities.BatchedPushRequests;
 import xbot.common.controls.sensors.XGyro.XGyroFactory;
 import xbot.common.math.WrappedRotation2d;
 import xbot.common.properties.BooleanProperty;
@@ -20,6 +17,11 @@ import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.pose.BasePoseSubsystem;
 import xbot.common.subsystems.vision.AprilTagVisionSubsystem;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.HashMap;
+import java.util.Optional;
+
 @Singleton
 public class PoseSubsystem extends BasePoseSubsystem {
 
@@ -27,6 +29,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
     final SwerveDrivePoseEstimator fullSwerveOdometry;
 
     private final DriveSubsystem drive;
+    private final CoprocessorCommunicationSubsystem coprocessorComms;
     private final AprilTagVisionSubsystem aprilTagVisionSubsystem;
     private final BooleanProperty useVisionAssistedPose;
     private final BooleanProperty reportCameraPoses;
@@ -35,9 +38,10 @@ public class PoseSubsystem extends BasePoseSubsystem {
     protected Optional<SwerveModulePosition[]> simulatedModulePositions = Optional.empty();
 
     @Inject
-    public PoseSubsystem(XGyroFactory gyroFactory, PropertyFactory propManager, DriveSubsystem drive, AprilTagVisionSubsystem aprilTagVisionSubsystem) {
+    public PoseSubsystem(XGyroFactory gyroFactory, PropertyFactory propManager, DriveSubsystem drive, AprilTagVisionSubsystem aprilTagVisionSubsystem, CoprocessorCommunicationSubsystem coprocessorComms) {
         super(gyroFactory, propManager);
         this.drive = drive;
+        this.coprocessorComms = coprocessorComms;
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
 
         onlyWheelsGyroSwerveOdometry = initializeSwerveOdometry();
@@ -63,47 +67,59 @@ public class PoseSubsystem extends BasePoseSubsystem {
     private SwerveDrivePoseEstimator initializeSwerveOdometry() {
         return new SwerveDrivePoseEstimator(
                 drive.getSwerveDriveKinematics(),
-                getCurrentHeadingGyroOnly(),
+                getCurrentHeading(),
                 getSwerveModulePositions(),
                 new Pose2d());
     }
 
     @Override
     protected void updateOdometry() {
+        XTablesClient xTablesClient = this.coprocessorComms.getXTablesClient().getOrNull();
+        String xtablesPrefix = "PoseSubsystem";
         // Update pose estimators
         onlyWheelsGyroSwerveOdometry.update(
-                this.getCurrentHeadingGyroOnly(),
+                this.getCurrentHeading(),
                 getSwerveModulePositions()
         );
         aKitLog.record("WheelsOnlyEstimate", onlyWheelsGyroSwerveOdometry.getEstimatedPosition());
+        // Package all requests into single message to ensure all data is synchronized and updated at once.
+        BatchedPushRequests batchedPushRequests = new BatchedPushRequests();
 
+        batchedPushRequests.putPose2d(xtablesPrefix + ".WheelsOnlyEstimate", onlyWheelsGyroSwerveOdometry.getEstimatedPosition());
         fullSwerveOdometry.update(
-                this.getCurrentHeadingGyroOnly(),
+                this.getCurrentHeading(),
                 getSwerveModulePositions()
         );
         this.aprilTagVisionSubsystem.getAllPoseObservations().forEach(observation -> {
             fullSwerveOdometry.addVisionMeasurement(
-                observation.visionRobotPoseMeters(),
-                observation.timestampSeconds(),
-                observation.visionMeasurementStdDevs()
+                    observation.visionRobotPoseMeters(),
+                    observation.timestampSeconds(),
+                    observation.visionMeasurementStdDevs()
             );
         });
 
         // Report poses
         Pose2d estimatedPosition = new Pose2d(
                 onlyWheelsGyroSwerveOdometry.getEstimatedPosition().getTranslation(),
-                getCurrentHeadingGyroOnly()
+                getCurrentHeading()
         );
         aKitLog.record("OdometryOnlyRobotPose", estimatedPosition);
+        batchedPushRequests.putPose2d(xtablesPrefix + ".OdometryOnlyRobotPose", estimatedPosition);
 
         Pose2d visionEnhancedPosition = new Pose2d(
                 fullSwerveOdometry.getEstimatedPosition().getTranslation(),
                 fullSwerveOdometry.getEstimatedPosition().getRotation()
         );
         aKitLog.record("VisionEnhancedPose", visionEnhancedPosition);
+        batchedPushRequests.putPose2d(xtablesPrefix + ".VisionEnhancedPose", visionEnhancedPosition);
 
         Pose2d robotPose = this.useVisionAssistedPose.get() ? visionEnhancedPosition : estimatedPosition;
         aKitLog.record("RobotPose", robotPose);
+        batchedPushRequests.putPose2d(xtablesPrefix + ".RobotPose", robotPose);
+        if (xTablesClient != null) {
+            // This is asynchronous - does not block & sends all updates in a single "packet"
+            xTablesClient.sendBatchedPushRequests(batchedPushRequests);
+        }
 
         // Record the camera positions
         if (reportCameraPoses.get()) {
@@ -128,17 +144,13 @@ public class PoseSubsystem extends BasePoseSubsystem {
         this.totalVelocity = (Math.sqrt(Math.pow(velocityX, 2.0) + Math.pow(velocityY, 2.0))); // Unnecessary?
     }
 
-    public double getAbsoluteVelocity() {
-        return this.totalVelocity;
-    }
-
     private SwerveModulePosition[] getSwerveModulePositions() {
         // if we have simulated data, return that directly instead of asking the
         // modules
-        if(simulatedModulePositions.isPresent()) {
+        if (simulatedModulePositions.isPresent()) {
             return simulatedModulePositions.get();
         }
-        return new SwerveModulePosition[] {
+        return new SwerveModulePosition[]{
                 drive.getFrontLeftSwerveModuleSubsystem().getCurrentPosition(),
                 drive.getFrontRightSwerveModuleSubsystem().getCurrentPosition(),
                 drive.getRearLeftSwerveModuleSubsystem().getCurrentPosition(),
@@ -155,14 +167,14 @@ public class PoseSubsystem extends BasePoseSubsystem {
                 new Pose2d(
                         newXPositionMeters,
                         newYPositionMeters,
-                        this.getCurrentHeadingGyroOnly()));
+                        this.getCurrentHeading()));
         fullSwerveOdometry.resetPosition(
                 heading,
                 getSwerveModulePositions(),
                 new Pose2d(
                         newXPositionMeters,
                         newYPositionMeters,
-                        this.getCurrentHeadingGyroOnly()));
+                        this.getCurrentHeading()));
     }
 
     public void setCurrentPoseInMeters(Pose2d newPoseInMeters) {
@@ -182,15 +194,6 @@ public class PoseSubsystem extends BasePoseSubsystem {
                 onlyWheelsGyroSwerveOdometry.getEstimatedPosition().getTranslation(),
                 onlyWheelsGyroSwerveOdometry.getEstimatedPosition().getRotation()
         );
-    }
-
-    @Override
-    public WrappedRotation2d getCurrentHeading() {
-        if (useVisionAssistedPose.get()) {
-            return WrappedRotation2d.fromRotation2d(fullSwerveOdometry.getEstimatedPosition().getRotation());
-        } else {
-            return WrappedRotation2d.fromRotation2d(onlyWheelsGyroSwerveOdometry.getEstimatedPosition().getRotation());
-        }
     }
 
     // used by the physics simulator to mock what the swerve modules are doing currently for pose estimation
