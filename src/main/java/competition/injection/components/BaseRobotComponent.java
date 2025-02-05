@@ -11,6 +11,7 @@ import competition.subsystems.oracle.OracleSubsystem;
 import competition.subsystems.oracle.ReefCoordinateGenerator;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import competition.subsystems.elevator_mechanism.SuperstructureMechanismSubsystem;
+import competition.subsystems.lights.LightSubsystem;
 import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import xbot.common.injection.components.BaseComponent;
 import xbot.common.injection.swerve.SwerveComponentHolder;
@@ -44,5 +45,7 @@ public abstract class BaseRobotComponent extends BaseComponent {
     public abstract ElectricalContract electricalContract();
 
     public abstract ReefCoordinateGenerator reefCoordinateGenerator();
+
+    public abstract LightSubsystem lightSubsystem();
 
 }
