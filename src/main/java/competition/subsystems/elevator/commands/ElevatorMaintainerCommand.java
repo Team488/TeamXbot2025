@@ -5,12 +5,15 @@ import competition.operator_interface.OperatorInterface;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.units.measure.Distance;
 import xbot.common.command.BaseMaintainerCommand;
+import xbot.common.logic.CalibrationDecider;
 import xbot.common.logic.HumanVsMachineDecider;
 import xbot.common.math.MathUtils;
 import xbot.common.math.PIDManager;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
@@ -19,44 +22,50 @@ import javax.inject.Provider;
 
 public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
-    public enum MaintainerMode{
-        Calibrating,
-        GaveUp,
-        Calibrated,
-    }
-
     private final OperatorInterface oi;
 
     private final PIDManager positionPID;
 
-    ElevatorSubsystem elevator;
+    private final ElevatorSubsystem elevator;
+
+    CalibrationDecider calibrationDecider;
 
     final DoubleProperty humanMaxPowerGoingUp;
     final DoubleProperty humanMaxPowerGoingDown;
+
+    final DoubleProperty gravityPIDConstantPower;
 
     final TrapezoidProfileManager profileManager;
 
     @Inject
     public ElevatorMaintainerCommand(ElevatorSubsystem elevator, Provider<PropertyFactory> pfProvider,
                                      HumanVsMachineDecider.HumanVsMachineDeciderFactory hvmFactory,
+                                     CalibrationDecider.CalibrationDeciderFactory calibrationDeciderFactory,
                                      PIDManager.PIDManagerFactory pidf,
                                      OperatorInterface oi){
-        super(elevator, pfProvider.get(),hvmFactory, 1, 0.2);
+        super(elevator, pfProvider.get(),hvmFactory, Inches.of(1).in(Meters), 0.2);
         var pf = pfProvider.get();
         pf.setPrefix(this);
         this.elevator = elevator;
         profileManager = new TrapezoidProfileManager(getPrefix() + "trapezoidMotion", pfProvider.get(), 1, 1, elevator.getCurrentValue().in(Meters));
 
         this.oi = oi;
-        positionPID = pidf.create(getPrefix() + "positionPID", 0.00, 0, 0.0);
 
-        humanMaxPowerGoingUp = pf.createPersistentProperty("maxPowerGoingUp", 1);
-        humanMaxPowerGoingDown = pf.createPersistentProperty("maxPowerGoingDown", -0.2);
+        calibrationDecider = calibrationDeciderFactory.create("calibrationDecider");
+        calibrationDecider.reset();
+
+        positionPID = pidf.create(getPrefix() + "positionPID", 5.0, 0, 0.5);
+
+        this.humanMaxPowerGoingUp = pf.createPersistentProperty("maxPowerGoingUp", 1);
+        this.humanMaxPowerGoingDown = pf.createPersistentProperty("maxPowerGoingDown", -0.2);
+
+        this.gravityPIDConstantPower = pf.createPersistentProperty("gravityPIDConstant", 0.015);
     }
 
     @Override
     public void initialize() {
         log.info("initializing");
+        calibrationDecider.reset();
     }
 
     @Override
@@ -66,7 +75,6 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     @Override
     protected void calibratedMachineControlAction() {
-
         profileManager.setTargetPosition(
             elevator.getTargetValue().in(Meters),
             elevator.getCurrentValue().in(Meters),
@@ -80,16 +88,29 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         double power = positionPID.calculate(
                 setpoint,
                 elevator.getCurrentValue().in(Meters));
-//        double power = (elevator.getTargetValue().in(Meters) - elevator.getCurrentValue().in(Meters)) * 0.5;
-//        power = MathUtils.constrainDouble(power,-0.8, 1);
-        elevator.setPower(power);
-
+        //we dont need to counteract gravity when moving down
+        elevator.setPower(power < 0 ? power : power + gravityPIDConstantPower.get());
     }
 
     @Override
     protected void uncalibratedMachineControlAction() {
-        //this is just a placeholder for now until we have something to calibrate
-        humanControlAction();
+        var mode = calibrationDecider.decideMode(elevator.isCalibrated());
+
+        switch (mode){
+            case Calibrated -> calibratedMachineControlAction();
+            case Attempting -> attemptCalibration();
+            case GaveUp -> humanControlAction();
+            default -> humanControlAction();
+        }
+    }
+
+    private void attemptCalibration(){
+        elevator.setPower(elevator.calibrationNegativePower.get());
+
+        if (elevator.isTouchingBottom()){
+            elevator.markElevatorAsCalibratedAgainstLowerLimit();
+            elevator.setTargetValue(elevator.getCurrentValue());
+        }
     }
 
     @Override
@@ -120,5 +141,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     protected double getHumanInputMagnitude() {
         return Math.abs(getHumanInput());
     }
+
+
 
 }

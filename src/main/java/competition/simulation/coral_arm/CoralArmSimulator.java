@@ -29,8 +29,8 @@ public class CoralArmSimulator {
 
     @Inject
     public CoralArmSimulator(CoralArmPivotSubsystem armPivotSubsystem, PIDManager.PIDManagerFactory pidManagerFactory, PropertyFactory pf) {
-        pf.setPrefix("ArmSimulator");
-        this.pidManager = pidManagerFactory.create("ArmSimulationPositionalPID", 0.01, 0.001, 0.0, 0.0, 1.0, -1.0);
+        pf.setPrefix("CoralArmSimulator");
+        this.pidManager = pidManagerFactory.create(pf.getPrefix() + "/CANMotorPositionalPID", 0.01, 0.001, 0.0, 0.0, 1.0, -1.0);
         this.armPivotSubsystem = armPivotSubsystem;
         this.armMotor = (MockCANMotorController) armPivotSubsystem.armMotor;
 
@@ -70,6 +70,6 @@ public class CoralArmSimulator {
     }
 
     public boolean isAtCollectionAngle() {
-        return getArmAngle().isNear(Degrees.of(0), 0.05);
+        return getArmAngle().isNear(Degrees.of(0), Degrees.of(4));
     }
 }

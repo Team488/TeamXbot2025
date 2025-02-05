@@ -1,17 +1,17 @@
 
 package competition;
 
+import au.grapplerobotics.CanBridge;
 import competition.injection.components.BaseRobotComponent;
+import competition.injection.components.DaggerRobotComponent;
 import competition.injection.components.DaggerRobotComponent2023;
 import competition.injection.components.DaggerRobotComponent2024;
-import competition.injection.components.DaggerRobotComponent;
 import competition.injection.components.DaggerRoboxComponent;
 import competition.injection.components.DaggerSimulationComponent;
 import competition.simulation.BaseSimulator;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.wpilibj.Preferences;
-import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import xbot.common.command.BaseRobot;
 import xbot.common.math.FieldPose;
 import xbot.common.subsystems.pose.BasePoseSubsystem;
@@ -27,6 +27,7 @@ public class Robot extends BaseRobot {
         getInjectorComponent().operatorCommandMap();
         getInjectorComponent().swerveDefaultCommandMap();
         getInjectorComponent().superstructureMechanismSubsystem();
+        getInjectorComponent().oracleSubsystem();
 
         if (BaseRobot.isSimulation()) {
             simulator = getInjectorComponent().simulator();
@@ -34,11 +35,13 @@ public class Robot extends BaseRobot {
 
         dataFrameRefreshables.add((DriveSubsystem)getInjectorComponent().driveSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().poseSubsystem());
-        dataFrameRefreshables.add(getInjectorComponent().visionSubsystem());
+        dataFrameRefreshables.add(getInjectorComponent().coprocessorCommunicationSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().aprilTagVisionSubsystemExtended());
         dataFrameRefreshables.add(getInjectorComponent().armPivotSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().elevatorSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().coralScorerSubsystem());
+
+        CanBridge.runTCP();
     }
 
     protected BaseRobotComponent createDaggerComponent() {
@@ -82,7 +85,7 @@ public class Robot extends BaseRobot {
         // Automatically enables the robot; remove this line of code if you want the robot
         // to start in a disabled state (as it would on the field). However, this does save you the 
         // hassle of navigating to the DS window and re-enabling the simulated robot.
-        DriverStationSim.setEnabled(true);
+
         //webots.setFieldPoseOffset(getFieldOrigin());
     }
 

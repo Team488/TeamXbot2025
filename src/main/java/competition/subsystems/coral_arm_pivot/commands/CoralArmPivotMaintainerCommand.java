@@ -22,6 +22,7 @@ public class CoralArmPivotMaintainerCommand extends BaseMaintainerCommand<Angle>
    OperatorInterface oi;
    final DoubleProperty humanMaxPower;
    final DoubleProperty humanMinPower;
+   PIDManager positionalPID;
 
    @Inject
    public CoralArmPivotMaintainerCommand(CoralArmPivotSubsystem armPivotSubsystem, PropertyFactory pf,
@@ -34,9 +35,10 @@ public class CoralArmPivotMaintainerCommand extends BaseMaintainerCommand<Angle>
        this.oi = oi;
        pf.setPrefix(this);
        pf.setDefaultLevel(Property.PropertyLevel.Important);
+       positionalPID = pidf.create(getPrefix() + "PositionalPID", 0.05,0,0);
 
-       humanMaxPower = pf.createPersistentProperty("HumanMaxPower", .1);
-       humanMinPower = pf.createPersistentProperty("HumanMinPower", -.1);
+       humanMaxPower = pf.createPersistentProperty("HumanMaxPower", .11);
+       humanMinPower = pf.createPersistentProperty("HumanMinPower", -.11);
    }
 
     @Override
@@ -46,12 +48,19 @@ public class CoralArmPivotMaintainerCommand extends BaseMaintainerCommand<Angle>
 
     @Override
     protected void coastAction() { //rest when no human control and before pid
-
+        armPivotSubsystem.setPower(0);
     }
+
 
     @Override
     protected void calibratedMachineControlAction() { //manages and runs pid
+        double power = positionalPID.calculate(armPivotSubsystem.getTargetValue().in(Degrees),
+                armPivotSubsystem.getCurrentValue().in(Degrees));
 
+        armPivotSubsystem.setPower(power);
+        aKitLog.record("Target Angle", armPivotSubsystem.getTargetValue().in(Degrees));
+        aKitLog.record("Current Angle", armPivotSubsystem.getCurrentValue().in(Degrees));
+        aKitLog.record("Power", power);
     }
 
     @Override

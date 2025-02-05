@@ -1,5 +1,6 @@
 package competition.electrical_contract;
 
+import edu.wpi.first.units.measure.Distance;
 import xbot.common.controls.sensors.XDigitalInput;
 import xbot.common.injection.electrical_contract.CANMotorControllerInfo;
 import xbot.common.injection.electrical_contract.DeviceInfo;
@@ -25,6 +26,10 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
     public abstract boolean isElevatorReady();
 
     public abstract CANMotorControllerInfo getElevatorMotor();
+
+    public abstract boolean isElevatorDistanceSensorReady();
+
+    public abstract DeviceInfo getElevatorDistanceSensor();
 
     public abstract boolean isAlgaeCollectionReady();
 
@@ -54,6 +59,8 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
 
     public abstract DeviceInfo getElevatorBottomSensor();
 
+    public abstract boolean isHumanLoadRampReady();
+
     public abstract CANMotorControllerInfo getAlgaeArmPivotMotor();
 
     public abstract boolean isAlgaeArmPivotMotorReady();
@@ -62,4 +69,5 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
 
     public abstract DeviceInfo getAlgaeArmBottomSensor();
 
+    public abstract Distance getDistanceFromCenterToOuterBumperX();
 }

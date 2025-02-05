@@ -9,6 +9,7 @@ import javax.inject.Inject;
 public class ForceElevatorCalibratedCommand extends BaseCommand {
 
     ElevatorSubsystem elevator;
+    boolean calibrationSwitch;
 
     @Inject
     public ForceElevatorCalibratedCommand(ElevatorSubsystem elevator){
@@ -18,7 +19,8 @@ public class ForceElevatorCalibratedCommand extends BaseCommand {
     @Override
     public void initialize() {
         log.info("Initializing..");
-        elevator.setCalibrated(true);
+        elevator.setCalibrated(!calibrationSwitch);
+        calibrationSwitch = !calibrationSwitch;
     }
 
     @Override
