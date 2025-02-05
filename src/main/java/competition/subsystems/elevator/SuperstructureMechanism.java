@@ -46,7 +46,7 @@ public class SuperstructureMechanism {
 
 
     public SuperstructureMechanism() {
-        this.mech2d = new LoggedMechanism2d(1, 2);
+        this.mech2d = new LoggedMechanism2d(1, 3);
 
         // coral system (elevator, arm, scorer)
         var elevatorRoot = mech2d.getRoot("ElevatorRoot", elevatorBasePositionMeters.getX(), elevatorBasePositionMeters.getY());
@@ -83,8 +83,8 @@ public class SuperstructureMechanism {
         // update mechanism based on current elevatorHeight and armAngle
         elevatorLigament.setLength(elevatorLigamentBaseLengthMeters + elevatorHeight.in(Units.Meters));
         coralArmLigament.setAngle(coralArmLigamentBaseAngleDegrees - coralArmAngle.in(Degrees));
-        // fake showing/hiding coral by changing the segment length between 0 and full length
-        coralPresenceLigament.setLength(coralInScorer ? coralLengthMeters : 0.0);
+        // fake showing/hiding coral by changing the segment width        
+        coralPresenceLigament.setLineWeight(coralInScorer ? 10 : 0.001);
 
         algaeArmLigament.setAngle(algaeArmBaseAngleDegrees + algaeArmAngle.in(Degrees));
 
