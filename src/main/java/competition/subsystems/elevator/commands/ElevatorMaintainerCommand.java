@@ -90,7 +90,9 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         aKitLog.record("elevatorProfileTarget", setpoint);
 
         //handles pidding via motor controller and setting power to elevator
-        elevator.masterMotor.setPositionTarget(Degrees.of(setpoint * elevator.rotationsPerMeter.get() * 360), XCANMotorController.MotorPidMode.TrapezoidalVoltage);
+        elevator.masterMotor.setPositionTarget(
+                Degrees.of(setpoint * elevator.rotationsPerMeter.get() * 360),
+                XCANMotorController.MotorPidMode.TrapezoidalVoltage);
     }
 
     @Override
