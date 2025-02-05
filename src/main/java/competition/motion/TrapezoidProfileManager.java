@@ -2,6 +2,9 @@ package competition.motion;
 
 import static edu.wpi.first.units.Units.Seconds;
 
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedFactory;
+import dagger.assisted.AssistedInject;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.Time;
 import xbot.common.controls.sensors.XTimer;
@@ -9,8 +12,16 @@ import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 
 public class TrapezoidProfileManager {
-    
-    
+
+    @AssistedFactory
+    public abstract static class Factory {
+        public abstract TrapezoidProfileManager create(
+                @Assisted String name,
+                @Assisted("defaultMaxVelocity") double defaultMaxVelocity,
+                @Assisted("defaultMaxAcceleration") double defaultMaxAcceleration,
+                @Assisted("initialPosition") double initialPosition);
+    }
+
     final DoubleProperty maxVelocity;
     final DoubleProperty maxAcceleration;
     
@@ -20,7 +31,13 @@ public class TrapezoidProfileManager {
     TrapezoidProfile.State goalState;
     Time profileStartTime = Seconds.zero(); 
 
-    public TrapezoidProfileManager(String name, PropertyFactory pf, double defaultMaxVelocity, double defaultMaxAcceleration, double initialPosition) { 
+    @AssistedInject
+    public TrapezoidProfileManager(
+            @Assisted String name,
+            PropertyFactory pf,
+            @Assisted("defaultMaxVelocity") double defaultMaxVelocity,
+            @Assisted("defaultMaxAcceleration") double defaultMaxAcceleration,
+            @Assisted("initialPosition") double initialPosition) {
         pf.setPrefix(name);
         maxVelocity = pf.createPersistentProperty("maxVelocity", defaultMaxVelocity);
         maxAcceleration = pf.createPersistentProperty("maxAcceleration", defaultMaxAcceleration);
