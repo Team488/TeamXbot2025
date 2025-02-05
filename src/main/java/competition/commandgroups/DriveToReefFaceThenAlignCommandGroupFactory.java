@@ -26,7 +26,6 @@ public class DriveToReefFaceThenAlignCommandGroupFactory {
         var driveToReefFace = driveToReefFaceCommandProvider.get();
         driveToReefFace.setTargetReefFacePose(targetReefFace);
         var alignToReefWithAprilTag = alignToReefWithAprilTagCommandProvider.get();
-        alignToReefWithAprilTag.setYOFFset(branch);
 
         group.addCommands(driveToReefFace, alignToReefWithAprilTag);
 
