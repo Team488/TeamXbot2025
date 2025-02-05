@@ -1,6 +1,7 @@
 package competition.subsystems.elevator;
 
 import competition.electrical_contract.ElectricalContract;
+import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
@@ -36,14 +37,6 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         Uncalibrated,
         AboveMaxHeight,
         BelowMinHeight
-    }
-
-    public enum ElevatorGoals{
-        ScoreL2,
-        ScoreL3,
-        ScoreL4,
-        HumanLoad,
-        ReturnToBase,
     }
 
     private double periodicTickCounter;
@@ -188,13 +181,12 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
        elevatorTargetHeight = value;
     }
 
-    public void setTargetHeight(ElevatorGoals value){
+    public void setTargetHeight(Landmarks.CoralLevel value){
         switch (value){
-            case ScoreL2 -> setTargetValue(Meters.of(l2Height.get()));
-            case ScoreL3 -> setTargetValue(Meters.of(l3Height.get()));
-            case ScoreL4 -> setTargetValue(Meters.of(l4Height.get()));
-            case HumanLoad -> setTargetValue(Meters.of(humanLoadHeight.get()));
-            case ReturnToBase -> setTargetValue(Meters.of(baseHeight.get()));
+            case TWO -> setTargetValue(Meters.of(l2Height.get()));
+            case THREE -> setTargetValue(Meters.of(l3Height.get()));
+            case FOUR -> setTargetValue(Meters.of(l4Height.get()));
+            case COLLECTING -> setTargetValue(Meters.of(humanLoadHeight.get()));
             default -> setTargetValue(Meters.of(baseHeight.get()));
         }
     }

@@ -16,13 +16,18 @@ import competition.subsystems.coral_scorer.commands.ScoreCoralCommand;
 import competition.subsystems.coral_scorer.commands.ScoreWhenReadyCommand;
 import competition.subsystems.coral_scorer.commands.StopCoralCommand;
 import competition.subsystems.drive.DriveSubsystem;
+import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
+import competition.subsystems.oracle.commands.DriveAccordingToOracleCommand;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 
 import competition.subsystems.elevator.ElevatorSubsystem;
 import competition.subsystems.elevator.commands.ForceElevatorCalibratedCommand;
 import competition.subsystems.elevator.commands.SetElevatorTargetHeightCommand;
 
+import competition.subsystems.oracle.commands.SuperstructureAccordingToOracleCommand;
+import competition.subsystems.pose.Landmarks;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
@@ -43,11 +48,19 @@ public class OperatorCommandMap {
     
     // Example for setting up a command to fire when a button is pressed:
     @Inject
-    public void setupMyCommands(
+    public void setupDriverCommands(
             OperatorInterface operatorInterface,
-            SetRobotHeadingCommand resetHeading) {
+            SetRobotHeadingCommand resetHeading,
+            AlignToReefWithAprilTagCommand alignToReefWithAprilTag,
+            DriveAccordingToOracleCommand driveAccordingToOracle,
+            SuperstructureAccordingToOracleCommand superstructureAccordingToOracle) {
         resetHeading.setHeadingToApply(0);
-        operatorInterface.driverGamepad.getifAvailable(1).onTrue(resetHeading);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(resetHeading);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(alignToReefWithAprilTag);
+
+        var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
+
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(oracleControlsRobot);
     }
 
     @Inject
@@ -55,16 +68,13 @@ public class OperatorCommandMap {
                                       PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
                                       ScoreCoralCommand scoreCoralCommand, IntakeCoralCommand intakeCoralCommand,
                                       ScoreWhenReadyCommand scoreWhenReadyCommand) {
-        var prepL4 = prepCoralSystemCommandGroupFactory.create(ElevatorSubsystem.ElevatorGoals.ScoreL4,
-                CoralArmPivotSubsystem.ArmGoals.Score);
+        var prepL4 = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.FOUR);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
 
-        var prepL2 = prepCoralSystemCommandGroupFactory.create(ElevatorSubsystem.ElevatorGoals.ScoreL2,
-                CoralArmPivotSubsystem.ArmGoals.Score);
+        var prepL2 = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.TWO);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(prepL2);
 
-        var homed = prepCoralSystemCommandGroupFactory.create(ElevatorSubsystem.ElevatorGoals.HumanLoad,
-                CoralArmPivotSubsystem.ArmGoals.HumanLoad);
+        var homed = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.COLLECTING);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
 
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).onTrue(scoreWhenReadyCommand);
@@ -91,16 +101,16 @@ public class OperatorCommandMap {
             ForceElevatorCalibratedCommand forceElevatorCalibratedCommand ) {
 
         var riseToL2 = setElevatorTargetHeightCommandProvider.get();
-        riseToL2.setHeight(ElevatorSubsystem.ElevatorGoals.ScoreL2);
+        riseToL2.setHeight(Landmarks.CoralLevel.TWO);
         var riseToL3 = setElevatorTargetHeightCommandProvider.get();
-        riseToL3.setHeight(ElevatorSubsystem.ElevatorGoals.ScoreL3);
+        riseToL3.setHeight(Landmarks.CoralLevel.THREE);
         var riseToL4 = setElevatorTargetHeightCommandProvider.get();
-        riseToL4.setHeight(ElevatorSubsystem.ElevatorGoals.ScoreL4);
+        riseToL4.setHeight(Landmarks.CoralLevel.FOUR);
 
         var riseToScore = setArmTargetAngleCommandProvider.get();
-        riseToScore.setAngle(CoralArmPivotSubsystem.ArmGoals.Score);
+        riseToScore.setAngle(Landmarks.CoralLevel.FOUR);
         var lowerToHumanLoad = setArmTargetAngleCommandProvider.get();
-        lowerToHumanLoad.setAngle(CoralArmPivotSubsystem.ArmGoals.HumanLoad);
+        lowerToHumanLoad.setAngle(Landmarks.CoralLevel.COLLECTING);
       
         oi.superstructureGamepad.getPovIfAvailable(0).onTrue(changeActiveModule);
         oi.superstructureGamepad.getPovIfAvailable(90).onTrue(debugModule);

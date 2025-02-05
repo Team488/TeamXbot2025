@@ -1,24 +1,31 @@
 package competition.subsystems.coral_scorer;
 
 import competition.electrical_contract.ElectricalContract;
+import competition.subsystems.oracle.contracts.CoralCollectionInfoSource;
 import xbot.common.command.BaseSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
 import xbot.common.controls.sensors.XDigitalInput;
 import xbot.common.controls.sensors.XTimer;
+import xbot.common.logic.TimeStableValidator;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import static competition.subsystems.coral_scorer.CoralScorerSubsystem.CoralScorerState.INTAKING;
+import static competition.subsystems.coral_scorer.CoralScorerSubsystem.CoralScorerState.SCORING;
+import static competition.subsystems.coral_scorer.CoralScorerSubsystem.CoralScorerState.STOPPED;
+
 @Singleton
-public class CoralScorerSubsystem extends BaseSubsystem {
+public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollectionInfoSource {
 
     public enum CoralScorerState {
         INTAKING,
         SCORING,
         STOPPED
     }
+
     public final XCANMotorController motor;
     public final DoubleProperty intakePower;
     public final DoubleProperty scorePower;
@@ -27,6 +34,9 @@ public class CoralScorerSubsystem extends BaseSubsystem {
     private CoralScorerState coralScorerState;
     private double lastScoredTime = -Double.MAX_VALUE;
     public final DoubleProperty waitTimeAfterScoring;
+    public final DoubleProperty waitTimeAfterCollection;
+
+    private final TimeStableValidator hasCoralValidator;
 
     @Inject
     public CoralScorerSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
@@ -49,11 +59,14 @@ public class CoralScorerSubsystem extends BaseSubsystem {
             this.coralSensor = null;
         }
 
-        this.coralScorerState = CoralScorerState.STOPPED;
+        this.coralScorerState = STOPPED;
 
         this.intakePower = propertyFactory.createPersistentProperty("intakePower", .1);
         this.scorePower = propertyFactory.createPersistentProperty("scorerPower", -.1);
         this.waitTimeAfterScoring = propertyFactory.createPersistentProperty("waitTimeAfterScoring", 0.5);
+        this.waitTimeAfterCollection = propertyFactory.createPersistentProperty("waitTimeAfterCollection", 0.1);
+
+        hasCoralValidator = new TimeStableValidator(waitTimeAfterCollection::get);
 
         this.electricalContract = electricalContract;
     }
@@ -64,20 +77,35 @@ public class CoralScorerSubsystem extends BaseSubsystem {
         }
     }
 
+    public void setPowerForState(CoralScorerState state) {
+        switch (state) {
+            case INTAKING:
+                intake();
+                break;
+            case SCORING:
+                scorer();
+                break;
+            case STOPPED:
+            default:
+                stop();
+                break;
+        }
+    }
+
     public void intake() {
         setCoralScorerMotorPower(intakePower.get());
-        coralScorerState = CoralScorerState.INTAKING;
+        coralScorerState = INTAKING;
     }
     public void scorer() {
         setCoralScorerMotorPower(scorePower.get());
-        if (coralScorerState != CoralScorerState.SCORING) {
+        if (coralScorerState != SCORING) {
             lastScoredTime = XTimer.getFPGATimestamp();
         }
-        coralScorerState = CoralScorerState.SCORING;
+        coralScorerState = SCORING;
     }
     public void stop() {
         setCoralScorerMotorPower(0);
-        coralScorerState = CoralScorerState.STOPPED;
+        coralScorerState = STOPPED;
     }
     public boolean hasCoral() {
         if (electricalContract.isCoralSensorReady()) {
@@ -86,13 +114,18 @@ public class CoralScorerSubsystem extends BaseSubsystem {
         return false;
     }
     public double getSecondsSinceScoringStarted() {
-        if (coralScorerState != CoralScorerState.SCORING) {
+        if (coralScorerState != SCORING) {
             return 0;
         }
         return XTimer.getFPGATimestamp() - lastScoredTime;
     }
     public boolean confidentlyHasScoredCoral() {
-        return getSecondsSinceScoringStarted() > waitTimeAfterScoring.get();
+        return (getSecondsSinceScoringStarted() > waitTimeAfterScoring.get() && coralScorerState == SCORING);
+    }
+
+    @Override
+    public boolean confidentlyHasCoral() {
+        return hasCoralValidator.peekStable();
     }
 
     public void periodic() {
@@ -100,8 +133,12 @@ public class CoralScorerSubsystem extends BaseSubsystem {
             motor.periodic();
         }
 
-        aKitLog.record("coralPresent", this.hasCoral()
-        );
+        boolean hasCoral = hasCoral();
+        hasCoralValidator.checkStable(this.hasCoral());
+
+        aKitLog.record("coralPresent", hasCoral());
+        aKitLog.record("coralPresentStable", hasCoralValidator.peekStable());
+        aKitLog.record("CoralConfidentlyScored", confidentlyHasScoredCoral());
     }
 }
 

@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 
 import competition.subsystems.pose.PoseSubsystem;
+import edu.wpi.first.units.measure.Distance;
 import xbot.common.injection.electrical_contract.CANBusId;
 import xbot.common.injection.electrical_contract.CANMotorControllerInfo;
 import xbot.common.injection.electrical_contract.CANMotorControllerOutputConfig;
@@ -18,6 +19,8 @@ import xbot.common.injection.electrical_contract.MotorControllerType;
 import xbot.common.injection.swerve.SwerveInstance;
 import xbot.common.math.XYPair;
 import xbot.common.subsystems.vision.CameraCapabilities;
+
+import static edu.wpi.first.units.Units.Inches;
 
 public class Contract2025 extends ElectricalContract {
 
@@ -264,7 +267,7 @@ public class Contract2025 extends ElectricalContract {
     private static double aprilCameraYDisplacement = 12.972 / PoseSubsystem.INCHES_IN_A_METER;
     private static double aprilCameraZDisplacement = 9.014 / PoseSubsystem.INCHES_IN_A_METER;
     private static double aprilCameraPitch = Math.toRadians(0);
-    private static double aprilCameraYaw = Math.toRadians(10);
+    private static double aprilCameraYaw = Math.toRadians(0);
 
     public CameraInfo[] getCameraInfo() {
         return new CameraInfo[] {
@@ -277,5 +280,10 @@ public class Contract2025 extends ElectricalContract {
                                 new Rotation3d(0, aprilCameraPitch, aprilCameraYaw)),
                         EnumSet.of(CameraCapabilities.APRIL_TAG))
         };
+    }
+
+    @Override
+    public Distance getDistanceFromCenterToOuterBumperX() {
+        return Inches.of(18);
     }
 }
