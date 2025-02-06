@@ -81,7 +81,7 @@ import static edu.wpi.first.units.Units.Volts;
             );
 
             driveToWaypointsSpeed = pf.createPersistentProperty("Speed to drive to waypoints", 2); // meters/s
-            driveToWaypointsDurationPerPoint = pf.createPersistentProperty("Time to drive to waypoints", 5); // meters/s
+            driveToWaypointsDurationPerPoint = pf.createPersistentProperty("Time to drive to waypoints", 0.1); // seconds
         }
 
         public Translation2d getLookAtPointTarget() {
