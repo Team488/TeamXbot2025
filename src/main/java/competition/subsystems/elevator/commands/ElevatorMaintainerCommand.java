@@ -20,6 +20,7 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Rotations;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -27,8 +28,6 @@ import javax.inject.Provider;
 public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     private final OperatorInterface oi;
-
-    private final PIDManager positionPID;
 
     private final ElevatorSubsystem elevator;
 
@@ -57,8 +56,6 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
         calibrationDecider = calibrationDeciderFactory.create("calibrationDecider");
         calibrationDecider.reset();
-
-        positionPID = pidf.create(getPrefix() + "positionPID", 5.0, 0, 0.5);
 
         this.humanMaxPowerGoingUp = pf.createPersistentProperty("maxPowerGoingUp", 1);
         this.humanMaxPowerGoingDown = pf.createPersistentProperty("maxPowerGoingDown", -0.2);
@@ -91,7 +88,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
         //handles pidding via motor controller and setting power to elevator
         elevator.masterMotor.setPositionTarget(
-                Degrees.of(setpoint * elevator.rotationsPerMeter.get() * 360),
+                Rotations.of(setpoint * elevator.rotationsPerMeter.get()),
                 XCANMotorController.MotorPidMode.TrapezoidalVoltage);
     }
 
