@@ -68,7 +68,7 @@ public class DriveToWaypointsWithVisionCommand extends SwerveSimpleTrajectoryCom
         XTablesClient xclient = xTablesClientManager.getOrNull();
         if (xclient == null) {
             log.warn("XTablesClientManager returned null from getXTablesClient. Client possibly waiting to find server...");
-            this.prepareToDriveWithWaypoints(new Translation2d[]{}, Rotation2d.kZero);
+            cancel();
             return;
         }
         // both potentialy null. Will not do anything if coordinates is null, but can proceed if heading is null
@@ -76,7 +76,7 @@ public class DriveToWaypointsWithVisionCommand extends SwerveSimpleTrajectoryCom
         if (coordinates == null) {
             // fail
             log.warn("No coordinates found in vision.");
-            this.prepareToDriveWithWaypoints(new Translation2d[]{}, Rotation2d.kZero);
+            cancel();
             return;
         }
         log.info("Ingested waypoints, preparing to drive.");
