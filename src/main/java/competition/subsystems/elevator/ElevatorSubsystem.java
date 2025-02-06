@@ -9,9 +9,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
+import xbot.common.controls.actuators.XCANMotorControllerPIDProperties;
 import xbot.common.controls.sensors.XDigitalInput;
 import xbot.common.controls.sensors.XLaserCAN;
 import xbot.common.math.MathUtils;
+import xbot.common.properties.DistanceProperty;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 
@@ -53,8 +55,6 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     public final DoubleProperty rotationsPerMeter;
 
     public final DoubleProperty calibrationNegativePower;
-    public final DoubleProperty upperHeightLimit;
-    public final DoubleProperty lowerHeightLimit;
     public final DoubleProperty powerNearLowerLimitThreshold;
     public final DoubleProperty powerNearUpperLimitThreshold;
     public final DoubleProperty powerWhenBottomSensorHit;
@@ -62,12 +62,15 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     public XCANMotorController masterMotor;
 
+    public final DistanceProperty upperHeightLimit;
+    public final DistanceProperty lowerHeightLimit;
+
     //important heights
-    public final DoubleProperty l2Height;
-    public final DoubleProperty l3Height;
-    public final DoubleProperty l4Height;
-    public final DoubleProperty humanLoadHeight;
-    public final DoubleProperty baseHeight;
+    public final DistanceProperty l2Height;
+    public final DistanceProperty l3Height;
+    public final DistanceProperty l4Height;
+    public final DistanceProperty humanLoadHeight;
+    public final DistanceProperty baseHeight;
 
     public final XDigitalInput bottomSensor;
     public final XLaserCAN distanceSensor;
@@ -88,11 +91,11 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         pf.setPrefix(this);
 
         //these are not real measured heights yet, just placeholders
-        l2Height = pf.createPersistentProperty("l2Height-m", Inches.of(1).in(Meters));
-        l3Height = pf.createPersistentProperty("l3Height-m", Inches.of(15.875).in(Meters));
-        l4Height = pf.createPersistentProperty("l4Height-m", Inches.of(40.651).in(Meters));
-        humanLoadHeight = pf.createPersistentProperty("humanLoadHeight-m", Inches.of(1).in(Meters));
-        baseHeight = pf.createPersistentProperty("baseHeight-m", 0);
+        l2Height = pf.createPersistentProperty("l2Height-inches", Inches.of(1));
+        l3Height = pf.createPersistentProperty("l3Height-inches", Inches.of(15.875));
+        l4Height = pf.createPersistentProperty("l4Height-inches", Inches.of(40.651));
+        humanLoadHeight = pf.createPersistentProperty("humanLoadHeight-inches", Inches.of(1));
+        baseHeight = pf.createPersistentProperty("baseHeight-inches", Inches.of(0));
 
 
         //to be tuned
@@ -102,8 +105,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         this.calibrationNegativePower = pf.createPersistentProperty("calibrationNegativePower", -0.05);
 
         //power limits near max and min height
-        this.upperHeightLimit = pf.createPersistentProperty("upperHeightLimit", l4Height.get());
-        this.lowerHeightLimit = pf.createPersistentProperty("lowerHeightLimit", baseHeight.get());
+        this.upperHeightLimit = pf.createPersistentProperty("upperHeightLimit-inches", l4Height.get());
+        this.lowerHeightLimit = pf.createPersistentProperty("lowerHeightLimit-inches", baseHeight.get());
         this.powerNearUpperLimitThreshold = pf.createPersistentProperty("powerNearUpperLimit", 0.0);
         this.powerNearLowerLimitThreshold = pf.createPersistentProperty("powerNearLowerLimit", 0.0);
         this.powerWhenBottomSensorHit = pf.createPersistentProperty("powerWhenBottomSensorHit", 0);
@@ -121,8 +124,10 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         );
 
         if(contract.isElevatorReady()){
-            this.masterMotor = motorFactory.create(contract.getElevatorMotor(), this.getPrefix(), "ElevatorMotor");
-            masterMotor.setPidDirectly(1,0,0.5,0,0.1);
+            this.masterMotor = motorFactory.create(
+                    contract.getElevatorMotor(), this.getPrefix(), "ElevatorMotorPID",
+                    new XCANMotorControllerPIDProperties(1,0,0.5)
+                    );
             this.registerDataFrameRefreshable(masterMotor);
         }
         if (contract.isElevatorBottomSensorReady()){
@@ -148,10 +153,10 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
             if (isTouchingBottom()){
                 power = MathUtils.constrainDouble(power,powerWhenBottomSensorHit.get(),1);
             }
-            if (isNearLowerLimit()){
+            if (belowLowerLimit()){
                 power = MathUtils.constrainDouble(power,powerNearLowerLimitThreshold.get(), 1);
             }
-            if (isNearUpperLimit()){
+            if (aboveUpperLimit()){
                 power = MathUtils.constrainDouble(power, -1, powerNearUpperLimitThreshold.get());
             }
             if (!isCalibrated){
@@ -192,11 +197,11 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     public void setTargetHeight(Landmarks.CoralLevel value){
         switch (value){
-            case TWO -> setTargetValue(Meters.of(l2Height.get()));
-            case THREE -> setTargetValue(Meters.of(l3Height.get()));
-            case FOUR -> setTargetValue(Meters.of(l4Height.get()));
-            case COLLECTING -> setTargetValue(Meters.of(humanLoadHeight.get()));
-            default -> setTargetValue(Meters.of(baseHeight.get()));
+            case TWO -> setTargetValue(l2Height.get());
+            case THREE -> setTargetValue(l3Height.get());
+            case FOUR -> setTargetValue(l4Height.get());
+            case COLLECTING -> setTargetValue(humanLoadHeight.get());
+            default -> setTargetValue(baseHeight.get());
         }
     }
 
@@ -207,12 +212,12 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         return false;
     }
 
-    public boolean isNearUpperLimit(){
-        return getCurrentValue().in(Meters) > upperHeightLimit.get();
+    public boolean aboveUpperLimit(){
+        return getCurrentValue().in(Meters) > upperHeightLimit.get().in(Meters);
     }
 
-    public boolean isNearLowerLimit(){
-        return getCurrentValue().in(Meters) < lowerHeightLimit.get();
+    public boolean belowLowerLimit(){
+        return getCurrentValue().in(Meters) < lowerHeightLimit.get().in(Meters);
     }
 
     public void setCalibrated(boolean calibrated){
