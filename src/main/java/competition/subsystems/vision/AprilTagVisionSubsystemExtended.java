@@ -54,6 +54,12 @@ public class AprilTagVisionSubsystemExtended extends AprilTagVisionSubsystem {
         return targetObservation.fiducialId() == targetAprilTagID;
     }
 
+    // Assuming that John K.'s logic is all correct... (no clue how this works)
+    public boolean aprilTagCameraHasCorrectTarget(int targetAprilTagID, int cameraToUse) {
+        AprilTagVisionIO.TargetObservation targetObservation = getLatestTargetObservation(cameraToUse);
+        return targetObservation.fiducialId() == targetAprilTagID;
+    }
+
     public int getTargetAprilTagID(Pose2d targetReefFacePose) {
         return aprilTagIDHashMap.get(targetReefFacePose);
     }

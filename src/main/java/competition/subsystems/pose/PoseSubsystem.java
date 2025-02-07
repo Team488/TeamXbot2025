@@ -11,6 +11,7 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import xbot.common.controls.sensors.XGyro.XGyroFactory;
 import xbot.common.math.WrappedRotation2d;
@@ -230,5 +231,12 @@ public class PoseSubsystem extends BasePoseSubsystem {
             }
         }
         return hashMap.get(leastDistance);
+    }
+
+    public Translation2d getXYPowersAlignToAprilTag(int targetAprilTagID, int cameraToUse) {
+        Pose2d currentPose = getCurrentPose2d();
+        //if (aprilTagVisionSubsystem.aprilTagCameraHasCorrectTarget(targetAprilTagID)) {
+
+        return new Translation2d(0, 0);
     }
 }
