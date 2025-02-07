@@ -23,10 +23,6 @@ import xbot.common.subsystems.vision.AprilTagVisionSubsystem;
 public abstract class SimulatedRobotModule {
     @Binds
     @Singleton
-    public abstract ElectricalContract getElectricalContract(UnitTestContract2025 impl);
-
-    @Binds
-    @Singleton
     public abstract BaseSimulator getSimulator(MapleSimulator impl);
     
     @Binds
