@@ -55,12 +55,13 @@ public class OracleSubsystem extends BaseSubsystem {
     private boolean firstRunInPrimaryActivity = true;
     private boolean reevaluationRequested = false;
 
+    private CoralStationMode allowedCoralStations = CoralStationMode.ANY_STATION;
+
     private int instructionNumber;
     private OracleDriveAdvice currentDriveAdvice;
     private OracleSuperstructureAdvice currentSuperstructureAdvice;
 
     private Pose2d goalPose;
-
 
     final DoubleProperty rangeToStartMovingSuperstructureMeters;
     final DoubleProperty rangeToActivateScorerMeters;
@@ -117,11 +118,34 @@ public class OracleSubsystem extends BaseSubsystem {
     }
 
     public List<XbotSwervePoint> getRecommendedCoralPickupTrajectory() {
-        // TODO: go to more than one location.
-        var finalWaypoint = Landmarks.BlueLeftCoralStationMid;
-        var route = blueReefRoutingCircle.generateSwervePoints(pose.getCurrentPose2d(), finalWaypoint);
+        var goalCoralStation = getCoralStation(pose.getCurrentPose2d());
+        var route = blueReefRoutingCircle.generateSwervePoints(pose.getCurrentPose2d(), goalCoralStation);
         aKitLog.record("RecommendedRoute", XbotSwervePoint.generateTrajectory(route));
         return route;
+    }
+
+    private Pose2d getCoralStation(Pose2d currentPose) {
+        Pose2d leftStation = PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueLeftCoralStationMid);
+        Pose2d rightStation = PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueRightCoralStationMid);
+        double leftStationDistance = currentPose.getTranslation().getDistance(leftStation.getTranslation());
+        double rightStationDistance = currentPose.getTranslation().getDistance(rightStation.getTranslation());
+
+        // See if we have constraints set
+        return switch (allowedCoralStations) {
+            case ONLY_LEFT_STATION -> leftStation;
+            case ONLY_RIGHT_STATION -> rightStation;
+            case NO_STATION -> currentPose;
+            case ANY_STATION -> leftStationDistance < rightStationDistance ? leftStation : rightStation;
+        };
+    }
+
+    public void setAllowedCoralStations(CoralStationMode mode) {
+        if (mode == null) {
+            // TODO: Add in assertion manager message later
+            return;
+        }
+
+        this.allowedCoralStations = mode;
     }
 
     private void setCurrentDriveAdvice(OracleDriveAdvice advice) {
