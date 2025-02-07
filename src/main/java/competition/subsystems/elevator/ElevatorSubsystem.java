@@ -232,6 +232,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     private Distance getRawDistance() {
         if (contract.isElevatorDistanceSensorReady()) {
+            System.out.println(distanceSensor.getClass().getName());
             return distanceSensor.getDistance();
         } else {
             return Meter.of(0);
