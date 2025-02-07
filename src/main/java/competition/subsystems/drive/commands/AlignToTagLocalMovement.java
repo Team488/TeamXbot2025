@@ -14,6 +14,7 @@ import xbot.common.subsystems.drive.control_logic.HeadingModule;
 
 import javax.inject.Inject;
 
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 
 public class AlignToTagLocalMovement extends BaseCommand {
@@ -40,7 +41,7 @@ public class AlignToTagLocalMovement extends BaseCommand {
 
         this.alignmentPointOffset = new Translation2d(
                 electricalContract.getDistanceFromCenterToOuterBumperX()
-                        .minus(cameraInfos[0].position().getMeasureX()),
+                        .minus(cameraInfos[0].position().getMeasureX()).plus(Inches.of(12)),
                 Meters.zero()
         );
     }

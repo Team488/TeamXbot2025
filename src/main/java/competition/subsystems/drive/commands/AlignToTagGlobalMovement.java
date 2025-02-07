@@ -17,6 +17,7 @@ import xbot.common.subsystems.drive.control_logic.HeadingModule;
 
 import javax.inject.Inject;
 
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 
 public class AlignToTagGlobalMovement extends BaseCommand {
@@ -53,7 +54,7 @@ public class AlignToTagGlobalMovement extends BaseCommand {
 
         this.alignmentPointOffset = new Translation2d(
                 electricalContract.getDistanceFromCenterToOuterBumperX()
-                        .minus(cameraInfos[0].position().getMeasureX()),
+                        .minus(cameraInfos[0].position().getMeasureX()).plus(Inches.of(24)),
                 Meters.zero()
         );
     }
@@ -121,6 +122,7 @@ public class AlignToTagGlobalMovement extends BaseCommand {
         };
 
         aKitLog.record("DriveTarget", driveTarget);
+        aKitLog.record("TagAcquisitionState", tagAcquisitionState);
         return powers;
     }
 }
