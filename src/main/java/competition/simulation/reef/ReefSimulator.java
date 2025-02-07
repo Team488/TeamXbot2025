@@ -12,6 +12,7 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -41,8 +42,8 @@ public class ReefSimulator {
     }
 
     final AKitLogger aKitLog;
-    final Translation2d reefCenter = new Translation2d(4.4785, 4.0132);
-    final Translation2d reefCenterToFar = new Translation2d(0.665, 0);
+    public static final Translation2d reefCenter = Landmarks.BlueCenterOfReef.getTranslation();
+    public static final Translation2d reefCenterToFar = new Translation2d(Landmarks.reefCenterToFace.in(Meters), 0);
     final double faceAngleDeltaDeg = 60;
 
     Set<ReefAlgaeKey> reefAlgaeLocations = new HashSet<>();
@@ -72,7 +73,7 @@ public class ReefSimulator {
         }
     }
 
-    public void scoreCoralNearestTo(Translation3d scorerPose) {
+    public ReefCoralKey findNearestCoral(Translation3d scorerPose) {
         var coralDistanceMap = new HashMap<ReefCoralKey, Distance>();
         for (ReefFace face : ReefFace.values()) {
             for (ReefLevel level : ReefLevel.values()) {
@@ -91,7 +92,20 @@ public class ReefSimulator {
             .min(Map.Entry.comparingByValue())
             .map(Map.Entry::getKey)
             .orElseThrow(() -> new IllegalStateException("No corals found"));
-        System.out.println("Found closest coral: " + closestCoral);
+        return closestCoral;
+    }
+
+    public void scoreCoral(ReefCoralKey coral) {
+        reefCoralLocations.add(coral);
+    }
+
+    public boolean isCoralScored(ReefCoralKey coral) {
+        return reefCoralLocations.contains(coral);
+    }
+
+    public void scoreCoralNearestTo(Translation3d scorerPose) {
+        var closestCoral = findNearestCoral(scorerPose);
+        
         reefCoralLocations.add(closestCoral);
     }
 
@@ -111,6 +125,10 @@ public class ReefSimulator {
         return reefCoralLocations.stream()
                 .map(coralLocation -> getCoralPose(coralLocation.face(), coralLocation.level(), coralLocation.post()))
                 .toArray(Pose3d[]::new);
+    }
+
+    public Pose3d getCoralPose(ReefCoralKey key) {
+        return getCoralPose(key.face, key.level, key.post);
     }
 
     public Pose3d getCoralPose(ReefFace face, ReefLevel level, ReefPost post) {

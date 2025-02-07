@@ -3,69 +3,64 @@ package competition.subsystems.elevator.commands;
 import competition.motion.TrapezoidProfileManager;
 import competition.operator_interface.OperatorInterface;
 import competition.subsystems.elevator.ElevatorSubsystem;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import xbot.common.command.BaseMaintainerCommand;
-import xbot.common.controls.sensors.XTimer;
+import xbot.common.controls.actuators.XCANMotorController;
 import xbot.common.logic.CalibrationDecider;
 import xbot.common.logic.HumanVsMachineDecider;
-import xbot.common.logic.TimeStableValidator;
 import xbot.common.math.MathUtils;
 import xbot.common.math.PIDManager;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 
+import static edu.wpi.first.units.Units.Degree;
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Rotations;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 
 public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
-    public enum MaintainerMode{
-        Calibrating,
-        GaveUp,
-        Calibrated,
-    }
-
     private final OperatorInterface oi;
-
-    private final PIDManager positionPID;
 
     private final ElevatorSubsystem elevator;
 
-    boolean startedCalibration = false;
-    boolean givenUpOnCalibration = false;
-    double calibrationStartTime = 0;
-    final double calibrationMaxDuration = 5;
     CalibrationDecider calibrationDecider;
 
     final DoubleProperty humanMaxPowerGoingUp;
     final DoubleProperty humanMaxPowerGoingDown;
 
+    final DoubleProperty gravityPIDConstantPower;
+
     final TrapezoidProfileManager profileManager;
 
     @Inject
-    public ElevatorMaintainerCommand(ElevatorSubsystem elevator, Provider<PropertyFactory> pfProvider,
+    public ElevatorMaintainerCommand(ElevatorSubsystem elevator, PropertyFactory pf,
                                      HumanVsMachineDecider.HumanVsMachineDeciderFactory hvmFactory,
                                      CalibrationDecider.CalibrationDeciderFactory calibrationDeciderFactory,
+                                     TrapezoidProfileManager.Factory trapezoidProfileManagerFactory,
                                      PIDManager.PIDManagerFactory pidf,
                                      OperatorInterface oi){
-        super(elevator, pfProvider.get(),hvmFactory, 1, 0.2);
-        var pf = pfProvider.get();
+        super(elevator, pf, hvmFactory, Inches.of(1).in(Meters), 0.2);
         pf.setPrefix(this);
         this.elevator = elevator;
-        profileManager = new TrapezoidProfileManager(getPrefix() + "trapezoidMotion", pfProvider.get(), 1, 1, elevator.getCurrentValue().in(Meters));
+        profileManager = trapezoidProfileManagerFactory.create(getPrefix() + "trapezoidMotion", 1, 1, elevator.getCurrentValue().in(Meters));
 
         this.oi = oi;
 
         calibrationDecider = calibrationDeciderFactory.create("calibrationDecider");
         calibrationDecider.reset();
 
-        positionPID = pidf.create(getPrefix() + "positionPID", 0.1, 0, 0.5);
-
         this.humanMaxPowerGoingUp = pf.createPersistentProperty("maxPowerGoingUp", 1);
         this.humanMaxPowerGoingDown = pf.createPersistentProperty("maxPowerGoingDown", -0.2);
+
+        this.gravityPIDConstantPower = pf.createPersistentProperty("gravityPIDConstant", 0.015);
     }
 
     @Override
@@ -91,10 +86,10 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         // it's helpful to log this to know where the robot is actually trying to get to in the moment
         aKitLog.record("elevatorProfileTarget", setpoint);
 
-        double power = positionPID.calculate(
-                setpoint,
-                elevator.getCurrentValue().in(Meters));
-        elevator.setPower(power);
+        //handles pidding via motor controller and setting power to elevator
+        elevator.masterMotor.setPositionTarget(
+                Rotations.of(setpoint * elevator.rotationsPerMeter.get()),
+                XCANMotorController.MotorPidMode.Voltage);
     }
 
     @Override

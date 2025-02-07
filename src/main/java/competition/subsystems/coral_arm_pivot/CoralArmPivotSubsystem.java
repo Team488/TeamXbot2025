@@ -1,6 +1,7 @@
 package competition.subsystems.coral_arm_pivot;
 
 import competition.electrical_contract.ElectricalContract;
+import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.units.measure.Angle;
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
@@ -12,8 +13,6 @@ import xbot.common.properties.PropertyFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
-import java.util.Objects;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Rotations;
@@ -52,12 +51,12 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
 
         this.electricalContract = electricalContract;
 
-        if (electricalContract.isArmPivotMotorReady()) {
-            this.armMotor = xcanMotorControllerFactory.create(electricalContract.getArmPivotMotor(),
+        if (electricalContract.isCoralArmPivotMotorReady()) {
+            this.armMotor = xcanMotorControllerFactory.create(electricalContract.getCoralArmPivotMotor(),
                     getPrefix(), "ArmPivotMotor");
-            this.armAbsoluteEncoder = xAbsoluteEncoderFactory.create(electricalContract.getArmPivotAbsoluteEncoder(),
+            this.armAbsoluteEncoder = xAbsoluteEncoderFactory.create(electricalContract.getCoralArmPivotAbsoluteEncoder(),
                     "ArmPivotAbsoluteEncoder");
-            this.lowSensor = xDigitalInputFactory.create(electricalContract.getArmPivotLowSensor(),
+            this.lowSensor = xDigitalInputFactory.create(electricalContract.getCoralArmPivotLowSensor(),
                     "ArmPivotLowSensor");
             this.registerDataFrameRefreshable(this.armMotor);
             this.registerDataFrameRefreshable(this.armAbsoluteEncoder);
@@ -93,7 +92,7 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
     }
 
     private Angle getMotorPosition() {
-        if (electricalContract.isArmPivotMotorReady()) {
+        if (electricalContract.isCoralArmPivotMotorReady()) {
             return this.armMotor.getPosition();
         }
         return Rotations.of(0);
@@ -109,17 +108,26 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
         targetAngle = value;
     }
 
-    public void setTargetAngle(ArmGoals value) {
+    public void setTargetAngle(Landmarks.CoralLevel value) {
         switch (value) {
-            case Score -> setTargetValue(Degrees.of(scoreAngle.get()));
-            case HumanLoad -> setTargetValue(Degrees.of(humanLoadAngle.get()));
-            default -> setTargetValue(Degrees.of(humanLoadAngle.get()));
+            case ONE:
+            case TWO:
+            case THREE:
+            case FOUR:
+                setTargetValue(Degrees.of(scoreAngle.get()));
+                break;
+            case COLLECTING:
+                setTargetValue(Degrees.of(humanLoadAngle.get()));
+                break;
+            default:
+                setTargetValue(Degrees.of(humanLoadAngle.get()));
+                break;
         }
     }
 
     @Override
     public void setPower(double power) {
-        if (electricalContract.isArmPivotMotorReady()) {
+        if (electricalContract.isCoralArmPivotMotorReady()) {
             if (calibratedPosition().in(Rotations) < humanLoadAngle.get() && isCalibrated()) {
                 power = MathUtils.constrainDouble(power, 0, 1);
             }
@@ -129,7 +137,8 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
             if (!isCalibrated()) {
                 power = MathUtils.constrainDouble(power, -powerWhenNotCalibrated.get(), powerWhenNotCalibrated.get());
             }
-            armMotor.setPower(power);
+
+            this.armMotor.setPower(power);
         }
     }
 
@@ -144,7 +153,7 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
     }
 
     public Angle getArmAngle() {
-        if (electricalContract.isArmPivotAbsoluteEncoderReady() && electricalContract.isArmPivotLowSensorReady()) {
+        if (electricalContract.isCoralArmPivotAbsoluteEncoderReady() && electricalContract.isCoralArmPivotLowSensorReady()) {
             return getArmAngle(minArmPosition.get(), maxArmPosition.get(),
                     armAbsoluteEncoder.getAbsolutePosition(), lowSensor.get(), rangeOfMotionDegrees.get());
         }
@@ -202,11 +211,15 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
 
     @Override
     public void periodic() {
+        if (electricalContract.isCoralArmPivotMotorReady()) {
+            armMotor.periodic();
+        }
+
         aKitLog.record("Target Angle", this.getTargetValue().in(Degrees));
         aKitLog.record("Current Angle", this.getCurrentValue().in(Degrees));
     }
   
     public boolean getIsTargetAngleScoring() {
-        return targetAngle == Degrees.of(scoreAngle.get());
+        return Degrees.of(scoreAngle.get()).isNear(targetAngle, Degrees.of(10));
     }
 }
