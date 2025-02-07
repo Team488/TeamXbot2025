@@ -17,7 +17,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import java.util.List;
-import java.util.Optional;
 
 import static competition.subsystems.oracle.OracleSubsystem.PrimaryActivity.CollectCoral;
 import static competition.subsystems.oracle.OracleSubsystem.PrimaryActivity.ScoreCoral;
@@ -123,7 +122,6 @@ public class OracleSubsystem extends BaseSubsystem {
 
     public List<XbotSwervePoint> getRecommendedCoralPickupTrajectory() {
         // TODO: go to more than one location.
-        // START HERE NEXT TIME!
         var finalWaypoint = Landmarks.BlueLeftCoralStationMid;
         var route = blueReefRoutingCircle.generateSwervePoints(pose.getCurrentPose2d(), finalWaypoint);
         aKitLog.record("RecommendedRoute", XbotSwervePoint.generateTrajectory(route));
