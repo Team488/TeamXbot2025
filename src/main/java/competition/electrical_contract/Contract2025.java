@@ -274,7 +274,7 @@ public class Contract2025 extends ElectricalContract {
                 new CameraInfo("Apriltag_FrontLeft_Camera",
                         "AprilTagFrontLeft",
                         new Transform3d(new Translation3d(
-                                aprilCameraXDisplacement,
+                                -aprilCameraXDisplacement,
                                 aprilCameraYDisplacement,
                                 aprilCameraZDisplacement),
                                 new Rotation3d(0, aprilCameraPitch, aprilCameraYaw)),
