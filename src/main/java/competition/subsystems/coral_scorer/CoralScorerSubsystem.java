@@ -128,6 +128,10 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
         return hasCoralValidator.peekStable();
     }
 
+    public CoralScorerState getCoralScorerState() {
+        return coralScorerState;
+    }
+
     public void periodic() {
         if (electricalContract.isCoralCollectionMotorReady()) {
             motor.periodic();
