@@ -23,6 +23,6 @@ public class IntakeUntillCoral extends BaseCommand {
         } else {
             coral.motor.setPower(coral.intakePower.get());
         }
-        return false;
+        return true;
     }
 }
