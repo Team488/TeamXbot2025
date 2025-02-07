@@ -131,8 +131,6 @@ public class Robot extends BaseRobot {
     @Override
     protected void loopFunc() {
         super.loopFunc();
-
-        System.out.println("Run loopFunc");
         reachedEndOfLoop.release();
     }
 
