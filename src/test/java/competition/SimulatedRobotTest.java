@@ -21,11 +21,11 @@ public class SimulatedRobotTest {
             robotThread.start();
 
             try {
-                var passDisabledInit = robot.reachedDisabledInit.tryAcquire(5, TimeUnit.SECONDS);
+                var passDisabledInit = robot.reachedDisabledInit.await(5, TimeUnit.SECONDS);
                 assertTrue("Robot did not reach disabled init", passDisabledInit);
 
-                var passDisabledPeriodic = robot.reachedEndOfLoop.tryAcquire(5, TimeUnit.SECONDS);
-                assertTrue("Robot did not reach disabled periodic", passDisabledPeriodic);
+                var passExecutionLoops = robot.reachedEndOfLoop.await(5, TimeUnit.SECONDS);
+                assertTrue("Robot did not complete enough execution loops", passExecutionLoops);
 
                 assertEquals(0, robot.getScheduler().getNumberOfCrashes());
             } catch (InterruptedException e) {

@@ -19,12 +19,12 @@ import xbot.common.command.XScheduler;
 import xbot.common.math.FieldPose;
 import xbot.common.subsystems.pose.BasePoseSubsystem;
 
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.CountDownLatch;
 
 public class Robot extends BaseRobot {
 
-    final Semaphore reachedDisabledInit = new Semaphore(0);
-    final Semaphore reachedEndOfLoop = new Semaphore(-5);
+    final CountDownLatch reachedDisabledInit = new CountDownLatch(1);
+    final CountDownLatch reachedEndOfLoop = new CountDownLatch(5);
 
     BaseSimulator simulator;
     ElectricalContract simulatorContract = new UnitTestContract2025();
@@ -95,7 +95,7 @@ public class Robot extends BaseRobot {
     @Override
     public void disabledInit() {
         super.disabledInit();
-        reachedDisabledInit.release();
+        reachedDisabledInit.countDown();
     }
 
     @Override
@@ -131,7 +131,7 @@ public class Robot extends BaseRobot {
     @Override
     protected void loopFunc() {
         super.loopFunc();
-        reachedEndOfLoop.release();
+        reachedEndOfLoop.countDown();
     }
 
     public XScheduler getScheduler() {
