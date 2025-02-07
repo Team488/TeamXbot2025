@@ -66,13 +66,11 @@ public class CoralArmSimulator {
         var armMotorRotations = armRelativeAngle.in(Radians) / CoralArmSimConstants.armEncoderAnglePerRotation.in(Radians);
         armMotor.setPosition(Rotations.of(armMotorRotations));
 
-        absoluteEncoder.setPosition_internal(getAbsoluteEncoderPosition(getArmAngle(), armPivotSubsystem.minArmPosition.get() / 360
-                , armPivotSubsystem.maxArmPosition.get() / 360));
+        absoluteEncoder.setPosition_internal(getAbsoluteEncoderPosition(getArmAngle(), armPivotSubsystem.minArmPosition.get() / 360,
+                armPivotSubsystem.maxArmPosition.get() / 360));
 
         // if the arm angle is lower than 10.8 degrees it will return true, otherwise return false
         lowSensor.setValue(getArmAngle().in(Degrees) < 10.8);
-
-//        System.out.println(absoluteEncoder.getPosition().in(Degrees));
     }
 
     public Angle getArmAngle() {
@@ -84,9 +82,11 @@ public class CoralArmSimulator {
     }
 
     public boolean isAtCollectionAngle() {
-        return getArmAngle().isNear(Degrees.of(0), 0.05);
+        return getArmAngle().isNear(Degrees.of(0), Degrees.of(4));
     }
 
+    // minPosition and maxPosition are the absolute encoder minimum and maximum position in degrees
+    // converted from [0,360] to [0,1]
     public static Angle getAbsoluteEncoderPosition(Angle armAngle, double minPosition, double maxPosition) {
         double currentPosition = armAngle.in(Degrees) / 125;
         double absoluteEncoderPosition;
