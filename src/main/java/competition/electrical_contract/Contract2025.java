@@ -275,7 +275,7 @@ public class Contract2025 extends ElectricalContract {
                         "AprilTagFrontLeft",
                         new Transform3d(new Translation3d(
                                 -aprilCameraXDisplacement,
-                                aprilCameraYDisplacement,
+                                -aprilCameraYDisplacement,
                                 aprilCameraZDisplacement),
                                 new Rotation3d(0, aprilCameraPitch, aprilCameraYaw)),
                         EnumSet.of(CameraCapabilities.APRIL_TAG)),
