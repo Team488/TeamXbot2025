@@ -3,8 +3,10 @@ package competition.subsystems.elevator.commands;
 import competition.motion.TrapezoidProfileManager;
 import competition.operator_interface.OperatorInterface;
 import competition.subsystems.elevator.ElevatorSubsystem;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import xbot.common.command.BaseMaintainerCommand;
+import xbot.common.controls.actuators.XCANMotorController;
 import xbot.common.logic.CalibrationDecider;
 import xbot.common.logic.HumanVsMachineDecider;
 import xbot.common.math.MathUtils;
@@ -12,10 +14,13 @@ import xbot.common.math.PIDManager;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 
+import static edu.wpi.first.units.Units.Degree;
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Rotations;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -23,8 +28,6 @@ import javax.inject.Provider;
 public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     private final OperatorInterface oi;
-
-    private final PIDManager positionPID;
 
     private final ElevatorSubsystem elevator;
 
@@ -53,8 +56,6 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
         calibrationDecider = calibrationDeciderFactory.create("calibrationDecider");
         calibrationDecider.reset();
-
-        positionPID = pidf.create(getPrefix() + "positionPID", 5.0, 0, 0.5);
 
         this.humanMaxPowerGoingUp = pf.createPersistentProperty("maxPowerGoingUp", 1);
         this.humanMaxPowerGoingDown = pf.createPersistentProperty("maxPowerGoingDown", -0.2);
@@ -85,11 +86,10 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         // it's helpful to log this to know where the robot is actually trying to get to in the moment
         aKitLog.record("elevatorProfileTarget", setpoint);
 
-        double power = positionPID.calculate(
-                setpoint,
-                elevator.getCurrentValue().in(Meters));
-        //we dont need to counteract gravity when moving down
-        elevator.setPower(power < 0 ? power : power + gravityPIDConstantPower.get());
+        //handles pidding via motor controller and setting power to elevator
+        elevator.masterMotor.setPositionTarget(
+                Rotations.of(setpoint * elevator.rotationsPerMeter.get()),
+                XCANMotorController.MotorPidMode.Voltage);
     }
 
     @Override
