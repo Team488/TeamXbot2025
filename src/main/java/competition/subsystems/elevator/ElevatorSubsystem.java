@@ -51,8 +51,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     public Distance elevatorTargetHeight;
 
-    public final DoubleProperty metersPerRotation;
     public final DoubleProperty rotationsPerMeter;
+    public final double metersPerRotation;
 
     public final DoubleProperty calibrationNegativePower;
     public final DoubleProperty powerNearLowerLimitThreshold;
@@ -91,22 +91,22 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         pf.setPrefix(this);
 
         //these are not real measured heights yet, just placeholders
-        l2Height = pf.createPersistentProperty("l2Height-inches", Inches.of(1));
-        l3Height = pf.createPersistentProperty("l3Height-inches", Inches.of(15.875));
-        l4Height = pf.createPersistentProperty("l4Height-inches", Inches.of(40.651));
-        humanLoadHeight = pf.createPersistentProperty("humanLoadHeight-inches", Inches.of(1));
-        baseHeight = pf.createPersistentProperty("baseHeight-inches", Inches.of(0));
+        l2Height = pf.createPersistentProperty("l2Height", Inches.of(1));
+        l3Height = pf.createPersistentProperty("l3Height", Inches.of(15.875));
+        l4Height = pf.createPersistentProperty("l4Height", Inches.of(40.651));
+        humanLoadHeight = pf.createPersistentProperty("humanLoadHeight", Inches.of(1));
+        baseHeight = pf.createPersistentProperty("baseHeight", Inches.of(0));
 
 
         //to be tuned
         this.rotationsPerMeter = pf.createPersistentProperty("RotationsPerMeter", 1923.0);
-        this.metersPerRotation = pf.createPersistentProperty("MetersPerRotation", 1.0/rotationsPerMeter.get());
+        this.metersPerRotation = 1.0/ rotationsPerMeter.get();
 
         this.calibrationNegativePower = pf.createPersistentProperty("calibrationNegativePower", -0.05);
 
         //power limits near max and min height
-        this.upperHeightLimit = pf.createPersistentProperty("upperHeightLimit-inches", l4Height.get());
-        this.lowerHeightLimit = pf.createPersistentProperty("lowerHeightLimit-inches", baseHeight.get());
+        this.upperHeightLimit = pf.createPersistentProperty("upperHeightLimit", l4Height.get());
+        this.lowerHeightLimit = pf.createPersistentProperty("lowerHeightLimit", baseHeight.get());
         this.powerNearUpperLimitThreshold = pf.createPersistentProperty("powerNearUpperLimit", 0.0);
         this.powerNearLowerLimitThreshold = pf.createPersistentProperty("powerNearLowerLimit", 0.0);
         this.powerWhenBottomSensorHit = pf.createPersistentProperty("powerWhenBottomSensorHit", 0);
@@ -176,13 +176,13 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         Distance currentHeight = Meters.of(0);
         if (contract.isElevatorReady()){
             currentHeight = Meters.of(
-                    (this.masterMotor.getPosition().in(Rotations) - elevatorPositionOffset) * metersPerRotation.get());
+                    (this.masterMotor.getPosition().in(Rotations) - elevatorPositionOffset) * metersPerRotation);
         }
         return currentHeight;
     }
 
     public LinearVelocity getCurrentVelocity() {
-        return MetersPerSecond.of(masterMotor.getVelocity().in(RotationsPerSecond) * metersPerRotation.get());
+        return MetersPerSecond.of(masterMotor.getVelocity().in(RotationsPerSecond) * metersPerRotation);
     }
 
     @Override
