@@ -288,4 +288,57 @@ public class Contract2025 extends ElectricalContract {
     public Distance getDistanceFromCenterToOuterBumperX() {
         return Inches.of(18);
     }
+    
+    // Begin support for 4-wheel deadwheel odometry, emulating a fixed-angle swerve drive
+    @Override
+    public boolean isFrontDeadwheelReady() {
+        return true;
+    }
+    
+    @Override
+    public boolean isRearDeadwheelReady() {
+        return true;
+    }
+    
+    @Override
+    public boolean isLeftDeadwheelReady() {
+        return true;
+    }
+    
+    @Override
+    public boolean isRightDeadwheelReady() {
+        return true;
+    }
+    
+    @Override
+    public Encoder getFrontDeadwheelEncoder() {
+        return new Encoder(0, 1);
+    }
+    
+    @Override
+    public Encoder getRearDeadwheelEncoder() {
+        return new Encoder(2, 3);
+    }
+    
+    @Override
+    public Encoder getLeftDeadwheelEncoder() {
+        return new Encoder(4, 5);
+    }
+    
+    @Override
+    public Encoder getRightDeadwheelEncoder() {
+        return new Encoder(6, 7);
+    }
+    
+    @Override
+    public XYPair getDeadwheelOffsetsInInches(String deadwheelPosition) {
+        return switch (deadwheelPosition) {
+            case "Front" -> new XYPair(0, 15);
+            case "Rear" -> new XYPair(0, -15);
+            case "Left" -> new XYPair(-15, 0);
+            case "Right" -> new XYPair(15, 0);
+            default -> new XYPair(0, 0);
+        };
+    }
+    // End support for 4-wheel deadwheel odometry, emulating a fixed-angle swerve drive
 }
