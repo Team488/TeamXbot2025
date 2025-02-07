@@ -24,6 +24,7 @@ public class Robot extends BaseRobot {
 
     final Semaphore reachedDisabledInit = new Semaphore(0);
     final Semaphore reachedDisabledPeriodic = new Semaphore(0);
+    volatile boolean completedFirstDisabledPeriodic = false;
 
     BaseSimulator simulator;
     ElectricalContract simulatorContract = new UnitTestContract2025();
@@ -93,7 +94,9 @@ public class Robot extends BaseRobot {
     @Override
     public void disabledInit() {
         super.disabledInit();
-        reachedDisabledInit.release();
+        if (!completedFirstDisabledPeriodic) {
+            reachedDisabledInit.release();
+        }
     }
 
     @Override
@@ -120,7 +123,10 @@ public class Robot extends BaseRobot {
     @Override
     public void disabledPeriodic() {
         super.disabledPeriodic();
-        reachedDisabledPeriodic.release();
+        if (!completedFirstDisabledPeriodic) {
+            reachedDisabledPeriodic.release();
+            completedFirstDisabledPeriodic = true;
+        }
     }
 
     @Override
