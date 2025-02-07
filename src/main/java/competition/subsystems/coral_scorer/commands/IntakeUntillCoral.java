@@ -9,20 +9,20 @@ public class IntakeUntillCoral extends BaseCommand {
     CoralScorerSubsystem coral;
 
     @Inject
-
     public IntakeUntillCoral (CoralScorerSubsystem coralScorerSubsystem){
         coral= coralScorerSubsystem;
         this.addRequirements(coral);
     }
+    @Override
+    public void initialize(){}
 
     @Override
-    public void initialize() {
+    public boolean isFinished() {
         if (this.coral.confidentlyHasCoral()) {
             coral.motor.setPower(0);
         } else {
             coral.motor.setPower(coral.intakePower.get());
         }
+        return false;
     }
-
-
 }
