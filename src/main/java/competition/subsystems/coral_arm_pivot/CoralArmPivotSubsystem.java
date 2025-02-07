@@ -127,7 +127,7 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
 
     @Override
     public void setPower(double power) {
-        if (electricalContract.isArmPivotMotorReady()) {
+        if (electricalContract.isCoralArmPivotMotorReady()) {
             if (calibratedPosition().in(Rotations) < humanLoadAngle.get() && isCalibrated()) {
                 power = MathUtils.constrainDouble(power, 0, 1);
             }
