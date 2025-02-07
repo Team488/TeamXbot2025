@@ -1,6 +1,7 @@
 package competition.injection.components;
 
 import competition.electrical_contract.ElectricalContract;
+import competition.motion.TrapezoidProfileManager;
 import competition.operator_interface.OperatorCommandMap;
 import competition.simulation.BaseSimulator;
 import competition.subsystems.SubsystemDefaultCommandMap;
@@ -45,4 +46,5 @@ public abstract class BaseRobotComponent extends BaseComponent {
 
     public abstract ReefCoordinateGenerator reefCoordinateGenerator();
 
+    public abstract TrapezoidProfileManager.Factory trapezoidProfileManagerFactory();
 }
