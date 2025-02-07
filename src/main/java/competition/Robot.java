@@ -2,6 +2,8 @@
 package competition;
 
 import au.grapplerobotics.CanBridge;
+import competition.electrical_contract.ElectricalContract;
+import competition.electrical_contract.UnitTestContract2025;
 import competition.injection.components.BaseRobotComponent;
 import competition.injection.components.DaggerRobotComponent;
 import competition.injection.components.DaggerRobotComponent2023;
@@ -16,9 +18,16 @@ import xbot.common.command.BaseRobot;
 import xbot.common.math.FieldPose;
 import xbot.common.subsystems.pose.BasePoseSubsystem;
 
+import java.util.concurrent.Semaphore;
+
 public class Robot extends BaseRobot {
 
+    final Semaphore reachedDisabledInit = new Semaphore(0);
+    final Semaphore reachedDisabledPeriodic = new Semaphore(0);
+    volatile boolean completedFirstDisabledPeriodic = false;
+
     BaseSimulator simulator;
+    ElectricalContract simulatorContract = new UnitTestContract2025();
 
     @Override
     protected void initializeSystems() {
@@ -28,6 +37,7 @@ public class Robot extends BaseRobot {
         getInjectorComponent().swerveDefaultCommandMap();
         getInjectorComponent().superstructureMechanismSubsystem();
         getInjectorComponent().oracleSubsystem();
+        getInjectorComponent().lightSubsystem();
 
         if (BaseRobot.isSimulation()) {
             simulator = getInjectorComponent().simulator();
@@ -71,12 +81,23 @@ public class Robot extends BaseRobot {
                     return DaggerRobotComponent.create();
             }
         } else {
-            return DaggerSimulationComponent.create();
+            return DaggerSimulationComponent
+                    .builder()
+                    .electricalContract(simulatorContract)
+                    .build();
         }
     }
 
     public BaseRobotComponent getInjectorComponent() {
         return (BaseRobotComponent)super.getInjectorComponent();
+    }
+
+    @Override
+    public void disabledInit() {
+        super.disabledInit();
+        if (!completedFirstDisabledPeriodic) {
+            reachedDisabledInit.release();
+        }
     }
 
     @Override
@@ -98,6 +119,15 @@ public class Robot extends BaseRobot {
             -4.58*PoseSubsystem.INCHES_IN_A_METER, 
             BasePoseSubsystem.FACING_TOWARDS_DRIVERS
             );
+    }
+
+    @Override
+    public void disabledPeriodic() {
+        super.disabledPeriodic();
+        if (!completedFirstDisabledPeriodic) {
+            reachedDisabledPeriodic.release();
+            completedFirstDisabledPeriodic = true;
+        }
     }
 
     @Override
