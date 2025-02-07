@@ -16,7 +16,7 @@ import javax.inject.Inject;
 
 import static edu.wpi.first.units.Units.Meters;
 
-public class AlignToSpecificTagCommand extends BaseCommand {
+public class AlignToTagLocalMovement extends BaseCommand {
     AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
     DriveSubsystem drive;
     HeadingModule headingModule;
@@ -28,9 +28,9 @@ public class AlignToSpecificTagCommand extends BaseCommand {
     private int targetAprilTagID;
 
     @Inject
-    public AlignToSpecificTagCommand(AprilTagVisionSubsystemExtended aprilTagVisionSubsystem, DriveSubsystem drive,
-                                     HeadingModule.HeadingModuleFactory headingModuleFactory, PoseSubsystem pose,
-                                     ElectricalContract electricalContract) {
+    public AlignToTagLocalMovement(AprilTagVisionSubsystemExtended aprilTagVisionSubsystem, DriveSubsystem drive,
+                                   HeadingModule.HeadingModuleFactory headingModuleFactory, PoseSubsystem pose,
+                                   ElectricalContract electricalContract) {
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
         this.drive = drive;
         this.headingModule = headingModuleFactory.create(drive.getRotateToHeadingPid());
@@ -85,10 +85,11 @@ public class AlignToSpecificTagCommand extends BaseCommand {
             aKitLog.record("AprilTag X", aprilTagData.getX());
             aKitLog.record("AprilTag Y", aprilTagData.getY());
             return powerVector;
+        } else {
+            // Can't see a tag. Stop moving.
+            return new Translation2d(0,0);
         }
 
-        log.info("April tag not in sight, cancelling");
-        cancel();
-        return new Translation2d(0,0);
+
     }
 }
