@@ -20,6 +20,7 @@ public abstract class SimulationComponent extends BaseRobotComponent {
     public abstract static class Builder {
         @BindsInstance
         public abstract Builder electricalContract(ElectricalContract contract);
+
         public abstract BaseRobotComponent build();
     }
 }
