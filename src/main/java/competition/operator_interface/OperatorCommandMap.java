@@ -17,15 +17,15 @@ import competition.subsystems.coral_scorer.commands.StopCoralCommand;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
-import competition.subsystems.oracle.ScoringTask;
-import competition.subsystems.oracle.commands.AddToOracleScoringQueueCommand;
+import competition.subsystems.drive.commands.DriveToWaypointsWithVisionCommand;
 import competition.subsystems.oracle.commands.DriveAccordingToOracleCommand;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
-
+import competition.subsystems.drive.commands.TeleportToPositionCommand;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import competition.subsystems.elevator.commands.ForceElevatorCalibratedCommand;
 import competition.subsystems.elevator.commands.SetElevatorTargetHeightCommand;
 
+import competition.subsystems.oracle.commands.SetAllowedOracleCoralStationCommand;
 import competition.subsystems.oracle.commands.SuperstructureAccordingToOracleCommand;
 import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -54,12 +54,16 @@ public class OperatorCommandMap {
             AlignToReefWithAprilTagCommand alignToReefWithAprilTag,
             DriveAccordingToOracleCommand driveAccordingToOracle,
             SuperstructureAccordingToOracleCommand superstructureAccordingToOracle,
+            DriveToWaypointsWithVisionCommand driveToWaypointsWithVisionCommand,
+            TeleportToPositionCommand teleportToPositionCommand,
             PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
             IntakeCoralCommand intakeCoralCommand,
             ScoreCoralCommand scoreCoralCommand) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(resetHeading);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(alignToReefWithAprilTag);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).onTrue(driveToWaypointsWithVisionCommand);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(teleportToPositionCommand);
 
         var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Back).whileTrue(oracleControlsRobot);
@@ -73,7 +77,7 @@ public class OperatorCommandMap {
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
 
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(intakeCoralCommand);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(scoreCoralCommand);
+        // operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(scoreCoralCommand);
     }
 
 
@@ -153,6 +157,7 @@ public class OperatorCommandMap {
         DriveSubsystem drive,
         ElevatorSubsystem elevator
     ) {
+
         oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.A)
                 .whileTrue(drive.sysIdQuasistaticRotation(SysIdRoutine.Direction.kForward)
                         .andThen(new WaitCommand(Seconds.of(1)))
