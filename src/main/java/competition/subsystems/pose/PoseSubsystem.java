@@ -7,11 +7,17 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import competition.subsystems.drive.DriveSubsystem;
+import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.units.measure.Distance;
+import static edu.wpi.first.units.Units.Meters;
+
+import org.kobe.xbot.JClient.XTablesClient;
+import org.kobe.xbot.Utilities.Entities.BatchedPushRequests;
 import xbot.common.controls.sensors.XGyro.XGyroFactory;
 import xbot.common.math.WrappedRotation2d;
 import xbot.common.properties.BooleanProperty;
@@ -30,15 +36,22 @@ public class PoseSubsystem extends BasePoseSubsystem {
     private final AprilTagVisionSubsystem aprilTagVisionSubsystem;
     private final BooleanProperty useVisionAssistedPose;
     private final BooleanProperty reportCameraPoses;
+    private final CoprocessorCommunicationSubsystem coprocessorComms;
+
+    public static final Distance fieldXMidpointInMeters = Meters.of(8.7785);
+    public static final Distance fieldYMidpointInMeters = Meters.of(4.025);
+
 
     // only used when simulating the robot
     protected Optional<SwerveModulePosition[]> simulatedModulePositions = Optional.empty();
 
     @Inject
-    public PoseSubsystem(XGyroFactory gyroFactory, PropertyFactory propManager, DriveSubsystem drive, AprilTagVisionSubsystem aprilTagVisionSubsystem) {
+    public PoseSubsystem(XGyroFactory gyroFactory, PropertyFactory propManager, DriveSubsystem drive,
+                         AprilTagVisionSubsystem aprilTagVisionSubsystem, CoprocessorCommunicationSubsystem coprocessorComms) {
         super(gyroFactory, propManager);
         this.drive = drive;
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
+        this.coprocessorComms = coprocessorComms;
 
         onlyWheelsGyroSwerveOdometry = initializeSwerveOdometry();
         fullSwerveOdometry = initializeSwerveOdometry();
@@ -70,6 +83,11 @@ public class PoseSubsystem extends BasePoseSubsystem {
 
     @Override
     protected void updateOdometry() {
+        XTablesClient xTablesClient = this.coprocessorComms.getXTablesManager().getOrNull();
+        String xtablesPrefix = "PoseSubsystem";
+        // Package all requests into single message to ensure all data is synchronized and updated at once.
+        BatchedPushRequests batchedPushRequests = new BatchedPushRequests();
+
         // Update pose estimators
         onlyWheelsGyroSwerveOdometry.update(
                 this.getCurrentHeadingGyroOnly(),
@@ -77,15 +95,17 @@ public class PoseSubsystem extends BasePoseSubsystem {
         );
         aKitLog.record("WheelsOnlyEstimate", onlyWheelsGyroSwerveOdometry.getEstimatedPosition());
 
+
+        batchedPushRequests.putPose2d(xtablesPrefix + ".WheelsOnlyEstimate", onlyWheelsGyroSwerveOdometry.getEstimatedPosition());
         fullSwerveOdometry.update(
                 this.getCurrentHeadingGyroOnly(),
                 getSwerveModulePositions()
         );
         this.aprilTagVisionSubsystem.getAllPoseObservations().forEach(observation -> {
             fullSwerveOdometry.addVisionMeasurement(
-                observation.visionRobotPoseMeters(),
-                observation.timestampSeconds(),
-                observation.visionMeasurementStdDevs()
+                    observation.visionRobotPoseMeters(),
+                    observation.timestampSeconds(),
+                    observation.visionMeasurementStdDevs()
             );
         });
 
@@ -95,15 +115,22 @@ public class PoseSubsystem extends BasePoseSubsystem {
                 getCurrentHeadingGyroOnly()
         );
         aKitLog.record("OdometryOnlyRobotPose", estimatedPosition);
+        batchedPushRequests.putPose2d(xtablesPrefix + ".OdometryOnlyRobotPose", estimatedPosition);
 
         Pose2d visionEnhancedPosition = new Pose2d(
                 fullSwerveOdometry.getEstimatedPosition().getTranslation(),
                 fullSwerveOdometry.getEstimatedPosition().getRotation()
         );
         aKitLog.record("VisionEnhancedPose", visionEnhancedPosition);
+        batchedPushRequests.putPose2d(xtablesPrefix + ".VisionEnhancedPose", visionEnhancedPosition);
 
         Pose2d robotPose = this.useVisionAssistedPose.get() ? visionEnhancedPosition : estimatedPosition;
         aKitLog.record("RobotPose", robotPose);
+        batchedPushRequests.putPose2d(xtablesPrefix + ".RobotPose", robotPose);
+        if (xTablesClient != null) {
+            // This is asynchronous - does not block & sends all updates in a single "packet"
+            xTablesClient.sendBatchedPushRequests(batchedPushRequests);
+        }
 
         // Record the camera positions
         if (reportCameraPoses.get()) {
