@@ -1,7 +1,9 @@
 package competition.subsystems;
 
 import competition.BaseCompetitionTest;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 import org.mockito.Mockito;
 import xbot.common.command.BaseSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
@@ -16,6 +18,7 @@ import java.util.Map;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.fail;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING) // Prevent parallel running of tests
 public class GenericSubsystemTest extends BaseCompetitionTest {
 
     @Test
@@ -79,6 +82,8 @@ public class GenericSubsystemTest extends BaseCompetitionTest {
             for (Field field : subsystem.getClass().getFields()) {
                 if (XCANMotorController.class.isAssignableFrom(field.getType())) {
                     field.setAccessible(true);
+                    // This isn't safe for parallel test execution, so we need to force
+                    // tests in this class to run sequentially
                     field.set(subsystem, Mockito.spy(field.get(subsystem)));
                     // Replace the original motor controllers with the mocked ones
                     motorControllers.add(field.get(subsystem));
