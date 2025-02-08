@@ -47,7 +47,7 @@ public class AlignCameraToAprilTagCalculator {
         }
         this.alignmentPointOffset = new Translation2d(
                 distanceFromCenterToOuterBumperX.minus(cameraInfos[targetCameraID].position().getMeasureX())
-                        .plus(Inches.of(offset)),
+                        .plus(Inches.of(backwards ? -offset : offset)),
                 Meters.zero()
         );
     }
