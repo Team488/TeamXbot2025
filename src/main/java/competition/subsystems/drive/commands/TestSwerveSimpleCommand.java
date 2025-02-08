@@ -1,5 +1,6 @@
 package competition.subsystems.drive.commands;
 
+import competition.simulation.MapleSimulator;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
@@ -22,25 +23,30 @@ import java.util.HashMap;
 public class TestSwerveSimpleCommand extends SwerveSimpleTrajectoryCommand {
     DriveSubsystem drive;
     PoseSubsystem pose;
+    MapleSimulator simulator;
 
     @Inject
     public TestSwerveSimpleCommand (DriveSubsystem drive, PoseSubsystem pose, PropertyFactory pf,
                                          HeadingModule.HeadingModuleFactory headingModuleFactory,
-                                         RobotAssertionManager robotAssertionManager) {
+                                         RobotAssertionManager robotAssertionManager, MapleSimulator simulator) {
         super(drive, pose, pf, headingModuleFactory, robotAssertionManager);
         this.drive = drive;
         this.pose = pose;
+        this.simulator = simulator;
     }
 
     @Override
     public void initialize() {
         log.info("Initializing");
 
+        pose.setCurrentPoseInMeters(Landmarks.BlueLeftCoralStationFar);
+        simulator.resetPosition(Landmarks.BlueLeftCoralStationFar);
+
         ArrayList<XbotSwervePoint> swervePoints = new ArrayList<>();
         swervePoints.add(new XbotSwervePoint(Landmarks.BlueCloseLeftAlgae, 10));
         this.logic.setKeyPoints(swervePoints);
         this.logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
-        logic.setGlobalKinematicValues(new SwervePointKinematics(2, 0, 0, 4));
+        this.logic.setGlobalKinematicValues(new SwervePointKinematics(2, 0, 0, 4));
         this.logic.setConstantVelocity(drive.getMaxTargetSpeedMetersPerSecond());
         super.initialize();
     }
