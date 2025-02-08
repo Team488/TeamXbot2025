@@ -94,14 +94,14 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     @Override
     protected void uncalibratedMachineControlAction() {
-        var mode = calibrationDecider.decideMode(elevator.isCalibrated());
+        /*var mode = calibrationDecider.decideMode(elevator.isCalibrated());
 
         switch (mode){
             case Calibrated -> calibratedMachineControlAction();
             case Attempting -> attemptCalibration();
             case GaveUp -> humanControlAction();
             default -> humanControlAction();
-        }
+        }*/
     }
 
     private void attemptCalibration(){

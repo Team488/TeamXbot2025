@@ -64,7 +64,7 @@ public class Contract2025 extends ElectricalContract {
                 MotorControllerType.TalonFx,
                 CANBusId.DefaultCanivore,
                 709,
-                new CANMotorControllerOutputConfig());
+                new CANMotorControllerOutputConfig().withStatorCurrentLimit(Amps.of(5)));
     }
 
     public boolean isCoralSensorReady() { return false; }
@@ -99,7 +99,7 @@ public class Contract2025 extends ElectricalContract {
                 MotorControllerType.TalonFx,
                 CANBusId.DefaultCanivore,
                 884,
-                new CANMotorControllerOutputConfig());
+                new CANMotorControllerOutputConfig().withStatorCurrentLimit(Amps.of(5)));
     }
 
 
@@ -128,7 +128,7 @@ public class Contract2025 extends ElectricalContract {
     @Override
     public CANMotorControllerInfo getElevatorMotor() {
 
-        CANMotorControllerOutputConfig limitedCurrentConfig = new CANMotorControllerOutputConfig()
+        CANMotorControllerOutputConfig elevatorMotorConfig = new CANMotorControllerOutputConfig()
                 .withStatorCurrentLimit(Amps.of(40))
                 .withNeutralMode(CANMotorControllerOutputConfig.NeutralMode.Brake)
                 .withInversionType(CANMotorControllerOutputConfig.InversionType.Inverted);
@@ -136,8 +136,8 @@ public class Contract2025 extends ElectricalContract {
         return new CANMotorControllerInfo(
                 "ElevatorMotor",
                 MotorControllerType.TalonFx,
-                CANBusId.RIO, 29, //change deviceId later
-                limitedCurrentConfig);
+                CANBusId.DefaultCanivore, 99, //change deviceId later
+                elevatorMotorConfig);
     }
 
     @Override
