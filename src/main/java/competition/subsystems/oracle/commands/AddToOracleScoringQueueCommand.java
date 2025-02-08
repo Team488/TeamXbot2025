@@ -9,9 +9,9 @@ import javax.inject.Inject;
 
 public class AddToOracleScoringQueueCommand extends BaseCommand {
 
-    RobotAssertionManager assertionManager;
-    OracleSubsystem oracle;
-    ScoringTask taskToAdd;
+    private final RobotAssertionManager assertionManager;
+    private final OracleSubsystem oracle;
+    private ScoringTask taskToAdd;
 
     public void setTaskToAdd(ScoringTask taskToAdd) {
         this.taskToAdd = taskToAdd;

@@ -54,8 +54,7 @@ public class OperatorCommandMap {
             SetRobotHeadingCommand resetHeading,
             AlignToReefWithAprilTagCommand alignToReefWithAprilTag,
             DriveAccordingToOracleCommand driveAccordingToOracle,
-            SuperstructureAccordingToOracleCommand superstructureAccordingToOracle,
-            AddToOracleScoringQueueCommand addToOracleScoringQueue) {
+            SuperstructureAccordingToOracleCommand superstructureAccordingToOracle) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(resetHeading);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(alignToReefWithAprilTag);
@@ -64,8 +63,6 @@ public class OperatorCommandMap {
 
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(oracleControlsRobot);
 
-        addToOracleScoringQueue.setTaskToAdd(new ScoringTask(Landmarks.ReefFace.CLOSE, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR));
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).onTrue(addToOracleScoringQueue);
     }
 
     @Inject
