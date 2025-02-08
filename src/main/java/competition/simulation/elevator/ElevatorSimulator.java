@@ -23,6 +23,7 @@ import xbot.common.controls.actuators.mock_adapters.MockCANMotorController;
 import xbot.common.math.PIDManager;
 import xbot.common.math.PIDManager.PIDManagerFactory;
 import xbot.common.properties.PropertyFactory;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.MockDigitalInput;
 
 @Singleton
@@ -69,7 +70,11 @@ public class ElevatorSimulator {
     public void update() {
         MotorInternalPIDHelper.updateInternalPID(motor, pidManager);
 
-        this.elevatorSim.setInputVoltage(this.motor.getPower() * RobotController.getBatteryVoltage());
+        if(DriverStation.isEnabled()) {
+            this.elevatorSim.setInputVoltage(this.motor.getPower() * RobotController.getBatteryVoltage());
+        } else {
+            this.elevatorSim.setInputVoltage(0);
+        }
 
         this.elevatorSim.update(SimulationConstants.loopPeriodSec);
 
