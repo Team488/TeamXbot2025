@@ -1,6 +1,6 @@
 package competition.subsystems.coral_scorer.commands;
 
-import competition.subsystems.coral_arm_pivot.CoralArmPivotSubsystem;
+import competition.subsystems.coral_arm.CoralArmSubsystem;
 import competition.subsystems.coral_scorer.CoralScorerSubsystem;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import xbot.common.command.BaseCommand;
@@ -9,11 +9,11 @@ import javax.inject.Inject;
 
 public class ScoreWhenReadyCommand extends BaseCommand {
     CoralScorerSubsystem coralScorerSubsystem;
-    CoralArmPivotSubsystem armPivotSubsystem;
+    CoralArmSubsystem armPivotSubsystem;
     ElevatorSubsystem elevatorSubsystem;
 
     @Inject
-    public ScoreWhenReadyCommand(CoralScorerSubsystem coralScorerSubsystem, CoralArmPivotSubsystem armPivotSubsystem,
+    public ScoreWhenReadyCommand(CoralScorerSubsystem coralScorerSubsystem, CoralArmSubsystem armPivotSubsystem,
                                  ElevatorSubsystem elevatorSubsystem) {
         this.coralScorerSubsystem = coralScorerSubsystem;
         this.armPivotSubsystem = armPivotSubsystem;

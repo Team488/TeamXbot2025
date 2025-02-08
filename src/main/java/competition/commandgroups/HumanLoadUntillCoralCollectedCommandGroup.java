@@ -1,6 +1,6 @@
 package competition.commandgroups;
 
-import competition.subsystems.coral_arm_pivot.commands.SetCoralArmTargetAngleCommand;
+import competition.subsystems.coral_arm.commands.SetCoralArmTargetAngleCommand;
 import competition.subsystems.coral_scorer.commands.IntakeUntillCoral;
 import competition.subsystems.elevator.commands.SetElevatorTargetHeightCommand;
 import competition.subsystems.pose.Landmarks;

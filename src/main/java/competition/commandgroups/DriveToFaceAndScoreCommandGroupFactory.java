@@ -1,6 +1,6 @@
 package competition.commandgroups;
 
-import competition.subsystems.coral_arm_pivot.CoralArmPivotSubsystem;
+import competition.subsystems.coral_arm.CoralArmSubsystem;
 import competition.subsystems.coral_scorer.commands.ScoreWhenReadyCommand;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import competition.subsystems.pose.Landmarks;
