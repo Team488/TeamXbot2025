@@ -171,7 +171,11 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     public void markElevatorAsCalibratedAgainstLowerLimit(){
         isCalibrated = true;
-        elevatorPositionOffset = this.masterMotor.getPosition().in(Rotations);
+        if (this.masterMotor != null) {
+            elevatorPositionOffset = this.masterMotor.getPosition().in(Rotations);
+        } else {
+            elevatorPositionOffset = 0;
+        }
     }
 
     @Override
@@ -185,7 +189,11 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     }
 
     public LinearVelocity getCurrentVelocity() {
-        return MetersPerSecond.of(masterMotor.getVelocity().in(RotationsPerSecond) * metersPerRotation.in(Meters));
+        if (masterMotor != null) {
+            return MetersPerSecond.of(masterMotor.getVelocity().in(RotationsPerSecond) * metersPerRotation.in(Meters));
+        } else {
+            return MetersPerSecond.of(0);
+        }
     }
 
     @Override
