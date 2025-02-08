@@ -4,6 +4,8 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
+import competition.commandgroups.DriveToFaceAndScoreCommandGroupFactory;
+import competition.commandgroups.DriveToStationAndIntakeUntilCollectedCommandGroupFactory;
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
 import competition.simulation.commands.ResetSimulatedPose;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionIntakeCommand;
@@ -62,7 +64,7 @@ public class OperatorCommandMap {
             ScoreCoralCommand scoreCoralCommand) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(resetHeading);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(alignToReefWithAprilTag);
+//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(alignToReefWithAprilTag);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).onTrue(driveToWaypointsWithVisionCommand);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(teleportToPositionCommand);
 
@@ -72,7 +74,7 @@ public class OperatorCommandMap {
         // since there are a lot of free buttons on the driver gamepad currently, let's map some
         // for basic scoring control to make it easier to demo solo. These can all be removed later.
         var prepL4 = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.FOUR);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
+//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
 
         var homed = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.COLLECTING);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
@@ -200,5 +202,17 @@ public class OperatorCommandMap {
         ResetSimulatedPose resetPose
     ) {
         resetPose.includeOnSmartDashboard();
+    }
+
+    @Inject
+    public void test(OperatorInterface oi,
+                     DriveToFaceAndScoreCommandGroupFactory driveToFaceAndScoreCommandGroupFactory,
+                     DriveToStationAndIntakeUntilCollectedCommandGroupFactory driveToStationAndIntakeUntilCollectedCommandGroupFactory,
+                     ScoreCoralCommand scoreCoralCommand) {
+        var collect = driveToStationAndIntakeUntilCollectedCommandGroupFactory.create(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.MID);
+        oi.driverGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(collect);
+
+        var score = driveToFaceAndScoreCommandGroupFactory.create(Landmarks.ReefFace.CLOSE_LEFT, Landmarks.CoralLevel.FOUR);
+        oi.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(score);
     }
 }

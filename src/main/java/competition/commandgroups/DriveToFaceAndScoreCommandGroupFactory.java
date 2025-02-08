@@ -14,7 +14,7 @@ import javax.inject.Provider;
 public class DriveToFaceAndScoreCommandGroupFactory {
 
     DriveToReefFaceThenAlignCommandGroupFactory driveToReefFaceThenAlignCommandGroupFactory;
-     PrepCoralSystemCommandGroupFactory prepCoralSystemFactory;
+    PrepCoralSystemCommandGroupFactory prepCoralSystemFactory;
     Provider<ScoreWhenReadyCommand> scoreWhenReadyProvider;
 
     @Inject
