@@ -146,6 +146,10 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
         return isCalibrated;
     }
 
+    public void setCalibrated(boolean calibrated){
+        isCalibrated = calibrated;
+    }
+
     @Override
     protected boolean areTwoTargetsEquivalent(Angle target1, Angle target2) {
         return target1.isEquivalent(target2);
