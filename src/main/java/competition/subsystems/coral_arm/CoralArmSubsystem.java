@@ -1,10 +1,12 @@
-package competition.subsystems.coral_arm_pivot;
+package competition.subsystems.coral_arm;
 
 import competition.electrical_contract.ElectricalContract;
 import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
+import xbot.common.controls.actuators.XCANMotorControllerPIDProperties;
 import xbot.common.controls.sensors.XAbsoluteEncoder;
 import xbot.common.controls.sensors.XDigitalInput;
 import xbot.common.math.MathUtils;
@@ -15,24 +17,24 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 @Singleton
-public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
-
-    public enum ArmGoals {
-        Score,
-        HumanLoad
-    }
+public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
     public final XCANMotorController armMotor;
     public final XAbsoluteEncoder armAbsoluteEncoder;
     public final XDigitalInput lowSensor;
     Angle targetAngle = Degrees.of(0);
     ElectricalContract electricalContract;
-    DoubleProperty degreesPerRotations;
+
     double rotationsAtZero = 0;
     boolean isCalibrated = true;
+
+    public final DoubleProperty rotationsPerDegrees;
+    public final Angle degreesPerRotations;
     public final DoubleProperty scoreAngle;
     public final DoubleProperty humanLoadAngle;
     public final DoubleProperty rangeOfMotionDegrees;
@@ -41,17 +43,18 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
     public final DoubleProperty powerWhenNotCalibrated;
 
     @Inject
-    public CoralArmPivotSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
-                                  ElectricalContract electricalContract, PropertyFactory propertyFactory,
-                                  XAbsoluteEncoder.XAbsoluteEncoderFactory xAbsoluteEncoderFactory,
-                                  XDigitalInput.XDigitalInputFactory xDigitalInputFactory) {
+    public CoralArmSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
+                             ElectricalContract electricalContract, PropertyFactory propertyFactory,
+                             XAbsoluteEncoder.XAbsoluteEncoderFactory xAbsoluteEncoderFactory,
+                             XDigitalInput.XDigitalInputFactory xDigitalInputFactory) {
         propertyFactory.setPrefix(this);
 
         this.electricalContract = electricalContract;
 
-        if (electricalContract.isCoralArmPivotMotorReady()) {
+        if (electricalContract.isCoralArmMotorReady()) {
             this.armMotor = xcanMotorControllerFactory.create(electricalContract.getCoralArmPivotMotor(),
-                    getPrefix(), "ArmPivotMotor");
+                    getPrefix(), "ArmPivotMotor", new XCANMotorControllerPIDProperties(0.2,0,0.2));
+
             this.armAbsoluteEncoder = xAbsoluteEncoderFactory.create(electricalContract.getCoralArmPivotAbsoluteEncoder(),
                     "ArmPivotAbsoluteEncoder");
             this.lowSensor = xDigitalInputFactory.create(electricalContract.getCoralArmPivotLowSensor(),
@@ -65,7 +68,9 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
             this.lowSensor = null;
         }
 
-        this.degreesPerRotations = propertyFactory.createPersistentProperty("Degrees Per Rotations", 0.1);
+        this.rotationsPerDegrees = propertyFactory.createPersistentProperty("Rotations Per Degrees", 10);
+        this.degreesPerRotations = Degrees.of(rotationsPerDegrees.get() != 0 ? 1.0 / rotationsPerDegrees.get() : 0);
+        if (rotationsPerDegrees.get() == 0) {log.warn("CANNOT DIVIDE BY 0!");}
 
         this.rangeOfMotionDegrees = propertyFactory.createPersistentProperty("Range of Motion in Degrees", 125);
         this.minArmPosition = propertyFactory.createPersistentProperty("Min AbsEncoder Position in Degrees", 90);
@@ -81,8 +86,12 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
 
     @Override
     public Angle getCurrentValue() {
-        double currentAngle = calibratedPosition().in(Rotations) * degreesPerRotations.get();
-        return Degrees.of(currentAngle);
+        Angle currentAngle = Degrees.of(0);
+        if (electricalContract.isCoralArmMotorReady()) {
+            currentAngle = Degrees.of(
+                            (calibratedPosition().in(Rotations)) * degreesPerRotations.in(Degrees));
+        }
+        return currentAngle;
     }
 
     private Angle calibratedPosition() {
@@ -90,7 +99,7 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
     }
 
     private Angle getMotorPosition() {
-        if (electricalContract.isCoralArmPivotMotorReady()) {
+        if (electricalContract.isCoralArmMotorReady()) {
             return this.armMotor.getPosition();
         }
         return Rotations.of(0);
@@ -99,6 +108,10 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
     @Override
     public Angle getTargetValue() {
         return targetAngle;
+    }
+
+    public AngularVelocity getCurrentVelocity() {
+        return DegreesPerSecond.of(armMotor.getVelocity().in(RotationsPerSecond) * degreesPerRotations.in(Degrees));
     }
 
     @Override
@@ -125,7 +138,7 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
 
     @Override
     public void setPower(double power) {
-        if (electricalContract.isCoralArmPivotMotorReady()) {
+        if (electricalContract.isCoralArmMotorReady()) {
             if (calibratedPosition().in(Rotations) < humanLoadAngle.get() && isCalibrated()) {
                 power = MathUtils.constrainDouble(power, 0, 1);
             }
@@ -135,6 +148,7 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
             if (!isCalibrated()) {
                 power = MathUtils.constrainDouble(power, -powerWhenNotCalibrated.get(), powerWhenNotCalibrated.get());
             }
+
             this.armMotor.setPower(power);
         }
     }
@@ -208,7 +222,7 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
 
     @Override
     public void periodic() {
-        if (electricalContract.isCoralArmPivotMotorReady()) {
+        if (electricalContract.isCoralArmMotorReady()) {
             armMotor.periodic();
         }
 
