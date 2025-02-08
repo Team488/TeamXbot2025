@@ -16,8 +16,8 @@ public class SetPoseCommand extends BaseCommand {
     }
     @Override
     public void initialize() {
-        pose.setCurrentPoseInMeters(Landmarks.BlueLeftCoralStationFar);
-        simulator.resetPosition(Landmarks.BlueLeftCoralStationFar);
+        pose.setCurrentPoseInMeters(Landmarks.BlueLeftCoralStationMid);
+        simulator.resetPosition(Landmarks.BlueLeftCoralStationMid);
     }
     @Override
     public boolean isFinished() {

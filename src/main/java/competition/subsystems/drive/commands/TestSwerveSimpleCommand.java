@@ -39,14 +39,14 @@ public class TestSwerveSimpleCommand extends SwerveSimpleTrajectoryCommand {
     public void initialize() {
         log.info("Initializing");
 
-        pose.setCurrentPoseInMeters(Landmarks.BlueLeftCoralStationFar);
-        simulator.resetPosition(Landmarks.BlueLeftCoralStationFar);
+        pose.setCurrentPoseInMeters(Landmarks.BlueLeftCoralStationMid);
+        simulator.resetPosition(Landmarks.BlueLeftCoralStationMid);
 
         ArrayList<XbotSwervePoint> swervePoints = new ArrayList<>();
         swervePoints.add(new XbotSwervePoint(Landmarks.BlueCloseLeftAlgae, 10));
         this.logic.setKeyPoints(swervePoints);
         this.logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
-        this.logic.setGlobalKinematicValues(new SwervePointKinematics(2, 0, 0, 4));
+        this.logic.setGlobalKinematicValues(new SwervePointKinematics(0.5, 0, 0, 2));
         this.logic.setConstantVelocity(drive.getMaxTargetSpeedMetersPerSecond());
         super.initialize();
     }
