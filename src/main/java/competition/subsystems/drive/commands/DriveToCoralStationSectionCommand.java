@@ -42,15 +42,4 @@ public class DriveToCoralStationSectionCommand extends SwerveSimpleTrajectoryCom
 //        this.logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
         super.initialize();
     }
-
-    @Override
-    public void execute() {
-        super.execute();
-    }
-
-    @Override
-    public boolean isFinished() {
-        return super.isFinished();
-    }
-
 }
