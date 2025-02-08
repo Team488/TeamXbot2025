@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import xbot.common.command.BaseSubsystem;
+import xbot.common.logging.RobotAssertionManager;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.trajectory.XbotSwervePoint;
@@ -36,6 +37,7 @@ public class OracleSubsystem extends BaseSubsystem {
     }
 
     final PoseSubsystem pose;
+    final RobotAssertionManager assertionManager;
     final ReefCoordinateGenerator reefCoordinateGenerator;
     final ScoringQueue scoringQueue;
 
@@ -68,8 +70,10 @@ public class OracleSubsystem extends BaseSubsystem {
 
     @Inject
     public OracleSubsystem(PoseSubsystem pose, CoralCollectionInfoSource coralInfoSource,
-                           ScoringQueue scoringQueue, ReefCoordinateGenerator generator, PropertyFactory pf) {
+                           ScoringQueue scoringQueue, ReefCoordinateGenerator generator, PropertyFactory pf,
+                           RobotAssertionManager assertionManager) {
         this.pose = pose;
+        this.assertionManager = assertionManager;
         this.coralInfoSource = coralInfoSource;
         this.scoringQueue = scoringQueue;
         this.reefCoordinateGenerator = generator;
@@ -260,6 +264,11 @@ public class OracleSubsystem extends BaseSubsystem {
 
     private void setScoringSubstageInitilizationFinished() {
         firstRunInScoringSubstage = false;
+    }
+
+    public void addScoringTask(ScoringTask scoringTask) {
+        this.scoringQueue.clearQueueIfDefault();
+        this.scoringQueue.addScoringGoalToBottomOfQueue(scoringTask);
     }
 
 
