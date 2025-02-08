@@ -11,6 +11,9 @@ import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Rotations;
+
+import java.util.Optional;
+
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.RobotController;
@@ -26,7 +29,7 @@ public class AlgaeArmSimulator {
     final PIDManager pidManager;
 
     final AlgaeArmSubsystem armPivotSubsystem;
-    final MockCANMotorController armMotor;
+    final Optional<MockCANMotorController> maybeMotor;
 
     final AKitLogger aKitLog;
 
@@ -36,7 +39,7 @@ public class AlgaeArmSimulator {
         aKitLog = new AKitLogger("Simulator/AlgaeArm/");
         this.pidManager = pidManagerFactory.create(pf.getPrefix() + "/CANMotorPositionalPID", 0.01, 0.001, 0.0, 0.0, 1.0, -1.0);
         this.armPivotSubsystem = armPivotSubsystem;
-        this.armMotor = (MockCANMotorController) armPivotSubsystem.armMotor;
+        this.maybeMotor = armPivotSubsystem.maybeMotor.map(motor -> (MockCANMotorController)motor);
 
         this.armSim = new SingleJointedArmSim(
                 motor,
@@ -52,10 +55,12 @@ public class AlgaeArmSimulator {
 
     public void update() {
         // based on the motor state, potentially run internal PID if need be
-        MotorInternalPIDHelper.updateInternalPID(armMotor, pidManager);
+        maybeMotor.ifPresent(armMotor -> {
+            MotorInternalPIDHelper.updateInternalPID(armMotor, pidManager);
+        });
 
         // invert power because the simulated arm is going "backwards"
-        armSim.setInput(this.armMotor.getPower() * RobotController.getBatteryVoltage() * -1.0);
+        armSim.setInput(this.maybeMotor.map(motor -> motor.getPower()).orElse(0.0) * RobotController.getBatteryVoltage() * -1.0);
         armSim.update(SimulationConstants.loopPeriodSec); // 20ms
 
         // Read out the new arm position for rendering
@@ -64,7 +69,7 @@ public class AlgaeArmSimulator {
         aKitLog.record("armRelativeAngleDegrees", armRelativeAngle.in(Degrees));
 
         var armMotorRotations = armRelativeAngle.in(Radians) / AlgaeArmSimConstants.armEncoderAnglePerRotation.in(Radians);
-        armMotor.setPosition(Rotations.of(armMotorRotations));
+        maybeMotor.ifPresent((arm) -> arm.setPosition(Rotations.of(armMotorRotations)));
 
         // TODO: simulate lower limit sensor triggered when arm is at 0' in relative terms
     }

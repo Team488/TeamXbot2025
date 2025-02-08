@@ -19,6 +19,7 @@ import xbot.common.command.XScheduler;
 import xbot.common.math.FieldPose;
 import xbot.common.subsystems.pose.BasePoseSubsystem;
 
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
 public class Robot extends BaseRobot {
@@ -26,7 +27,7 @@ public class Robot extends BaseRobot {
     final CountDownLatch reachedDisabledInit = new CountDownLatch(1);
     final CountDownLatch reachedEndOfLoop = new CountDownLatch(5);
 
-    BaseSimulator simulator;
+    Optional<BaseSimulator> simulator;
     ElectricalContract simulatorContract = new UnitTestContract2025();
 
     @Override
@@ -40,7 +41,7 @@ public class Robot extends BaseRobot {
         getInjectorComponent().lightSubsystem();
 
         if (BaseRobot.isSimulation()) {
-            simulator = getInjectorComponent().simulator();
+            simulator = Optional.of(getInjectorComponent().simulator());
         }
 
         dataFrameRefreshables.add((DriveSubsystem)getInjectorComponent().driveSubsystem());
@@ -123,9 +124,7 @@ public class Robot extends BaseRobot {
     public void simulationPeriodic() {
         super.simulationPeriodic();
 
-        if (simulator != null) {
-            simulator.update();
-        }
+        simulator.ifPresent((simulator) -> simulator.update());
     }
 
     @Override
