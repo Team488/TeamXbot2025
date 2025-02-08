@@ -2,6 +2,8 @@
 package competition;
 
 import au.grapplerobotics.CanBridge;
+import competition.electrical_contract.ElectricalContract;
+import competition.electrical_contract.UnitTestContract2025;
 import competition.injection.components.BaseRobotComponent;
 import competition.injection.components.DaggerRobotComponent;
 import competition.injection.components.DaggerRobotComponent2023;
@@ -13,12 +15,19 @@ import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.wpilibj.Preferences;
 import xbot.common.command.BaseRobot;
+import xbot.common.command.XScheduler;
 import xbot.common.math.FieldPose;
 import xbot.common.subsystems.pose.BasePoseSubsystem;
 
+import java.util.concurrent.CountDownLatch;
+
 public class Robot extends BaseRobot {
 
+    final CountDownLatch reachedDisabledInit = new CountDownLatch(1);
+    final CountDownLatch reachedEndOfLoop = new CountDownLatch(5);
+
     BaseSimulator simulator;
+    ElectricalContract simulatorContract = new UnitTestContract2025();
 
     @Override
     protected void initializeSystems() {
@@ -72,12 +81,21 @@ public class Robot extends BaseRobot {
                     return DaggerRobotComponent.create();
             }
         } else {
-            return DaggerSimulationComponent.create();
+            return DaggerSimulationComponent
+                    .builder()
+                    .electricalContract(simulatorContract)
+                    .build();
         }
     }
 
     public BaseRobotComponent getInjectorComponent() {
         return (BaseRobotComponent)super.getInjectorComponent();
+    }
+
+    @Override
+    public void disabledInit() {
+        super.disabledInit();
+        reachedDisabledInit.countDown();
     }
 
     @Override
@@ -108,5 +126,15 @@ public class Robot extends BaseRobot {
         if (simulator != null) {
             simulator.update();
         }
+    }
+
+    @Override
+    protected void loopFunc() {
+        super.loopFunc();
+        reachedEndOfLoop.countDown();
+    }
+
+    public XScheduler getScheduler() {
+        return xScheduler;
     }
 }
