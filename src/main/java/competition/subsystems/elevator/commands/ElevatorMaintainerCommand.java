@@ -97,23 +97,21 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
                 XCANMotorController.MotorPidMode.Voltage);
     }
 
+    //defaults humanControlAction if there is no bottom sensor
     @Override
     protected void uncalibratedMachineControlAction() {
-        var mode = calibrationDecider.decideMode(elevator.isCalibrated());
-
-        if(!contract.isElevatorBottomSensorReady()){
-            mode = CalibrationDecider.CalibrationMode.GaveUp;
-        }
+        var mode = contract.isElevatorBottomSensorReady() ?
+                calibrationDecider.decideMode(elevator.isCalibrated()) : CalibrationDecider.CalibrationMode.GaveUp;
 
         switch (mode){
             case Calibrated -> calibratedMachineControlAction();
-            case Attempting -> attemptCalibrationIfSensorExists();
+            case Attempting -> attemptCalibration();
             case GaveUp -> humanControlAction();
             default -> humanControlAction();
         }
     }
 
-    private void attemptCalibrationIfSensorExists(){
+    private void attemptCalibration(){
         elevator.setPower(elevator.calibrationNegativePower.get());
 
         if (elevator.isTouchingBottom()){
