@@ -1,7 +1,6 @@
 package competition.electrical_contract;
 
 import edu.wpi.first.units.measure.Distance;
-import xbot.common.controls.sensors.XDigitalInput;
 import xbot.common.injection.electrical_contract.CANMotorControllerInfo;
 import xbot.common.injection.electrical_contract.DeviceInfo;
 import xbot.common.injection.electrical_contract.XCameraElectricalContract;
@@ -39,7 +38,7 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
 
     public abstract CANMotorControllerInfo getCoralCollectionMotor();
 
-    public abstract boolean isCoralArmPivotMotorReady();
+    public abstract boolean isCoralArmMotorReady();
 
     public abstract CANMotorControllerInfo getCoralArmPivotMotor();
 

@@ -15,7 +15,7 @@ public class UnitTestContract2025 extends Contract2025 {
 
     public boolean isCoralSensorReady() { return true;}
 
-    public boolean isCoralArmPivotMotorReady() { return true; }
+    public boolean isCoralArmMotorReady() { return true; }
 
     public boolean isCoralArmPivotAbsoluteEncoderReady() { return true; }
 

@@ -1,6 +1,6 @@
 package competition.subsystems.oracle.commands;
 
-import competition.subsystems.coral_arm_pivot.CoralArmPivotSubsystem;
+import competition.subsystems.coral_arm.CoralArmSubsystem;
 import competition.subsystems.coral_scorer.CoralScorerSubsystem;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import competition.subsystems.oracle.OracleSubsystem;
@@ -12,7 +12,7 @@ import javax.inject.Inject;
 public class SuperstructureAccordingToOracleCommand extends BaseCommand {
 
     final ElevatorSubsystem elevator;
-    final CoralArmPivotSubsystem coralArm;
+    final CoralArmSubsystem coralArm;
     final CoralScorerSubsystem coralScorer;
     final OracleSubsystem oracle;
 
@@ -20,7 +20,7 @@ public class SuperstructureAccordingToOracleCommand extends BaseCommand {
 
     @Inject
     public SuperstructureAccordingToOracleCommand(OracleSubsystem oracle, ElevatorSubsystem elevator,
-                                                  CoralArmPivotSubsystem coralArm, CoralScorerSubsystem coralScorer) {
+                                                  CoralArmSubsystem coralArm, CoralScorerSubsystem coralScorer) {
         this.oracle = oracle;
         this.elevator = elevator;
         this.coralArm = coralArm;
