@@ -140,10 +140,12 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     @Override
     public void setPower(double power) {
         if (electricalContract.isCoralArmMotorReady()) {
-            if (calibratedPosition().in(Rotations) < humanLoadAngle.get() && isCalibrated()) {
+            if (getCurrentValue().in(Degrees) <= humanLoadAngle.get()) {
+                log.info("human load" + humanLoadAngle.get());
                 power = MathUtils.constrainDouble(power, 0, 1);
             }
-            if (calibratedPosition().in(Rotations) > scoreAngle.get() && isCalibrated()) {
+            if (getCurrentValue().in(Degrees) > scoreAngle.get()) {
+                log.info(scoreAngle.get());
                 power = MathUtils.constrainDouble(power, -1, 0);
             }
             if (!isCalibrated()) {
@@ -229,6 +231,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
         aKitLog.record("Target Angle", this.getTargetValue().in(Degrees));
         aKitLog.record("Current Angle", this.getCurrentValue().in(Degrees));
+        aKitLog.record("isCalibrated", this.isCalibrated());
     }
   
     public boolean getIsTargetAngleScoring() {
