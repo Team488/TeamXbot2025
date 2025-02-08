@@ -11,6 +11,7 @@ import org.kobe.xbot.Utilities.Entities.XTableValues;
 import xbot.common.logging.RobotAssertionManager;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.drive.SwerveSimpleTrajectoryCommand;
+import xbot.common.subsystems.drive.SwerveSimpleTrajectoryMode;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
 import xbot.common.trajectory.XbotSwervePoint;
 
@@ -57,6 +58,7 @@ public class DriveToWaypointsWithVisionCommand extends SwerveSimpleTrajectoryCom
         this.logic.setKeyPoints(swervePoints);
         // this.logic.setAimAtGoalDuringFinalLeg(true);
         this.logic.setConstantVelocity(this.drive.getDriveToWaypointsSpeed().get());
+        this.logic.setVelocityMode(SwerveSimpleTrajectoryMode.ConstantVelocity);
 
         // keep as reminder: if we change the command to poll continously we will need to reset everytime we update keypoints
         // likely not going to happen, this command will stay as is and a new command will take movement vectors instead 

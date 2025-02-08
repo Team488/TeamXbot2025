@@ -53,28 +53,28 @@ public class Contract2024 extends Contract2025 {
                             MotorControllerType.SparkMax,
                             CANBusId.RIO,
                             39,
-                            new CANMotorControllerOutputConfig());
+                            new CANMotorControllerOutputConfig().withNeutralMode(CANMotorControllerOutputConfig.NeutralMode.Brake));
             case "FrontRightDrive" ->
                     new CANMotorControllerInfo(
                             getDriveControllerName(swerveInstance),
                             MotorControllerType.SparkMax,
                             CANBusId.RIO,
                             31,
-                            new CANMotorControllerOutputConfig());
+                            new CANMotorControllerOutputConfig().withNeutralMode(CANMotorControllerOutputConfig.NeutralMode.Brake));
             case "RearLeftDrive" ->
                     new CANMotorControllerInfo(
                             getDriveControllerName(swerveInstance),
                             MotorControllerType.SparkMax,
                             CANBusId.RIO,
                             20,
-                            new CANMotorControllerOutputConfig());
+                            new CANMotorControllerOutputConfig().withNeutralMode(CANMotorControllerOutputConfig.NeutralMode.Brake));
             case "RearRightDrive" ->
                     new CANMotorControllerInfo(
                             getDriveControllerName(swerveInstance),
                             MotorControllerType.SparkMax,
                             CANBusId.RIO,
                             29,
-                            new CANMotorControllerOutputConfig());
+                            new CANMotorControllerOutputConfig().withNeutralMode(CANMotorControllerOutputConfig.NeutralMode.Brake));
             default -> null;
         };
     }
