@@ -46,8 +46,7 @@ public class OperatorCommandMap {
 
     @Inject
     public OperatorCommandMap() {}
-    
-    // Example for setting up a command to fire when a button is pressed:
+
     @Inject
     public void setupDriverCommands(
             OperatorInterface operatorInterface,
@@ -55,18 +54,29 @@ public class OperatorCommandMap {
             AlignToReefWithAprilTagCommand alignToReefWithAprilTag,
             DriveAccordingToOracleCommand driveAccordingToOracle,
             SuperstructureAccordingToOracleCommand superstructureAccordingToOracle,
-            AddToOracleScoringQueueCommand addToOracleScoringQueue) {
+            PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
+            IntakeCoralCommand intakeCoralCommand,
+            ScoreCoralCommand scoreCoralCommand) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(resetHeading);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(alignToReefWithAprilTag);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(alignToReefWithAprilTag);
 
         var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Back).whileTrue(oracleControlsRobot);
 
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(oracleControlsRobot);
+        // since there are a lot of free buttons on the driver gamepad currently, let's map some
+        // for basic scoring control to make it easier to demo solo. These can all be removed later.
+        var prepL4 = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.FOUR);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
 
-        addToOracleScoringQueue.setTaskToAdd(new ScoringTask(Landmarks.ReefFace.CLOSE, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR));
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).onTrue(addToOracleScoringQueue);
+        var homed = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.COLLECTING);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
+
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(intakeCoralCommand);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(scoreCoralCommand);
     }
+
+
 
     @Inject
     public void setUpOperatorCommands(OperatorInterface oi,
