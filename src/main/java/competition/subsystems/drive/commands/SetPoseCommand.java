@@ -8,16 +8,13 @@ import xbot.common.command.BaseCommand;
 import javax.inject.Inject;
 public class SetPoseCommand extends BaseCommand {
     PoseSubsystem pose;
-    MapleSimulator simulator;
     @Inject
-    public SetPoseCommand(PoseSubsystem pose, MapleSimulator simulator) {
+    public SetPoseCommand(PoseSubsystem pose) {
         this.pose = pose;
-        this.simulator = simulator;
     }
     @Override
     public void initialize() {
         pose.setCurrentPoseInMeters(Landmarks.BlueLeftCoralStationMid);
-        simulator.resetPosition(Landmarks.BlueLeftCoralStationMid);
     }
     @Override
     public boolean isFinished() {
