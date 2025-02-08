@@ -13,6 +13,9 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.units.measure.Distance;
+import static edu.wpi.first.units.Units.Meters;
+
 import org.kobe.xbot.JClient.XTablesClient;
 import org.kobe.xbot.Utilities.Entities.BatchedPushRequests;
 import xbot.common.controls.sensors.XGyro.XGyroFactory;
@@ -34,6 +37,10 @@ public class PoseSubsystem extends BasePoseSubsystem {
     private final BooleanProperty useVisionAssistedPose;
     private final BooleanProperty reportCameraPoses;
     private final CoprocessorCommunicationSubsystem coprocessorComms;
+
+    public final static Distance fieldXMidpointInMeters = Meters.of(8.7785);
+    public final static Distance fieldYMidpointInMeters = Meters.of(4.025);
+
 
     // only used when simulating the robot
     protected Optional<SwerveModulePosition[]> simulatedModulePositions = Optional.empty();
@@ -76,7 +83,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
 
     @Override
     protected void updateOdometry() {
-        XTablesClient xTablesClient = this.coprocessorComms.getXTablesClient().getOrNull();
+        XTablesClient xTablesClient = this.coprocessorComms.getXTablesManager().getOrNull();
         String xtablesPrefix = "PoseSubsystem";
         // Package all requests into single message to ensure all data is synchronized and updated at once.
         BatchedPushRequests batchedPushRequests = new BatchedPushRequests();

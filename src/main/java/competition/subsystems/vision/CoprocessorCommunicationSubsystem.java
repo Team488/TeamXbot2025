@@ -39,8 +39,13 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
         xTablesClientManager = XTablesClient.getDefaultClientAsynchronously();
     }
 
-    public XTablesClientManager getXTablesClient(){
+    public XTablesClientManager getXTablesManager(){
         return xTablesClientManager;
+    }
+
+    /** Returns an instance of an xtables client if it can connect, else null**/
+    public XTablesClient tryGetXTablesClient(){
+        return xTablesClientManager.getOrNull();
     }
 
     public String getXtablesCoordinateLocation(){

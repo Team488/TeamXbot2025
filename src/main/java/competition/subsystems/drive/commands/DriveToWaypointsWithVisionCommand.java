@@ -54,7 +54,7 @@ public class DriveToWaypointsWithVisionCommand extends SwerveSimpleTrajectoryCom
         }
 
         this.logic.setKeyPoints(swervePoints);
-        this.logic.setAimAtGoalDuringFinalLeg(true);
+        // this.logic.setAimAtGoalDuringFinalLeg(true);
         this.logic.setConstantVelocity(this.drive.getDriveToWaypointsSpeed().get());
 
         // keep as reminder: if we change the command to poll continously we will need to reset everytime we update keypoints
@@ -64,7 +64,7 @@ public class DriveToWaypointsWithVisionCommand extends SwerveSimpleTrajectoryCom
 
     //allows for driving not in a straight line
     public void retrieveWaypointsFromVision() {
-        XTablesClientManager xTablesClientManager = this.coprocessorComms.getXTablesClient();
+        XTablesClientManager xTablesClientManager = this.coprocessorComms.getXTablesManager();
         XTablesClient xclient = xTablesClientManager.getOrNull();
         if (xclient == null) {
             log.warn("XTablesClientManager returned null from getXTablesClient. Client possibly waiting to find server...");
@@ -85,12 +85,16 @@ public class DriveToWaypointsWithVisionCommand extends SwerveSimpleTrajectoryCom
             XTableValues.Coordinate coordinate = coordinates.get(i);
             waypoints[i] = new Translation2d(coordinate.getX(), coordinate.getY());
         }
+        this.aKitLog.record("Used waypoints", waypoints);
 
         Double heading = xclient.getDouble(this.coprocessorComms.getXtablesHeadingLocation());
         Rotation2d rotation = null;
         if (heading != null) {
             rotation = Rotation2d.fromRadians(heading);
         }
+
+        this.aKitLog.record("Used heading", rotation);
+
 
         this.prepareToDriveWithWaypoints(waypoints, rotation);
     }
