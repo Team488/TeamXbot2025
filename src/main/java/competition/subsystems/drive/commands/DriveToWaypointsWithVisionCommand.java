@@ -40,8 +40,9 @@ public class DriveToWaypointsWithVisionCommand extends SwerveSimpleTrajectoryCom
 
     @Override
     public void initialize() {
-        retrieveWaypointsFromVision();
-        super.initialize();
+        if(retrieveWaypointsFromVision()){
+            super.initialize();
+        };
     }
 
     //allows for driving not in a straight line
@@ -63,13 +64,13 @@ public class DriveToWaypointsWithVisionCommand extends SwerveSimpleTrajectoryCom
     }
 
     //allows for driving not in a straight line
-    public void retrieveWaypointsFromVision() {
+    public boolean retrieveWaypointsFromVision() {
         XTablesClientManager xTablesClientManager = this.coprocessorComms.getXTablesManager();
         XTablesClient xclient = xTablesClientManager.getOrNull();
         if (xclient == null) {
             log.warn("XTablesClientManager returned null from getXTablesClient. Client possibly waiting to find server...");
             cancel();
-            return;
+            return false;
         }
         // both potentialy null. Will not do anything if coordinates is null, but can proceed if heading is null
         List<XTableValues.Coordinate> coordinates = xclient.getCoordinates(this.coprocessorComms.getXtablesCoordinateLocation());
@@ -77,7 +78,7 @@ public class DriveToWaypointsWithVisionCommand extends SwerveSimpleTrajectoryCom
             // fail
             log.warn("No coordinates found in vision.");
             cancel();
-            return;
+            return false;
         }
         log.info("Ingested waypoints, preparing to drive.");
         Translation2d[] waypoints = new Translation2d[coordinates.size()];
@@ -97,6 +98,7 @@ public class DriveToWaypointsWithVisionCommand extends SwerveSimpleTrajectoryCom
 
 
         this.prepareToDriveWithWaypoints(waypoints, rotation);
+        return true;
     }
 
     @Override
