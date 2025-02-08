@@ -91,8 +91,6 @@ public class Contract2025 extends ElectricalContract {
         return false;
     }
 
-
-
     @Override
     public CANMotorControllerInfo getAlgaeArmPivotMotor() {
         return new CANMotorControllerInfo("AlgaeArmPivotMotor",
@@ -101,9 +99,7 @@ public class Contract2025 extends ElectricalContract {
                 884,
                 new CANMotorControllerOutputConfig().withStatorCurrentLimit(Amps.of(5)));
     }
-
-
-
+    
     @Override
     public boolean areCanCodersReady() {
         return true;
