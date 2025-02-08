@@ -20,6 +20,7 @@ public class DriveToReefFaceUntilDetectionCommand extends SwerveSimpleTrajectory
 
     Pose2d targetReefFacePose;
     AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
+    boolean kinematics = false;
 
     @Inject
     public DriveToReefFaceUntilDetectionCommand(DriveSubsystem drive, PoseSubsystem pose,
@@ -41,16 +42,15 @@ public class DriveToReefFaceUntilDetectionCommand extends SwerveSimpleTrajectory
         ArrayList<XbotSwervePoint> swervePoints = new ArrayList<>();
         swervePoints.add(new XbotSwervePoint(targetReefFacePose, 10));
         this.logic.setKeyPoints(swervePoints);
-        this.logic.setConstantVelocity(drive.getMaxTargetSpeedMetersPerSecond());
-        this.logic.setVelocityMode(SwerveSimpleTrajectoryMode.ConstantVelocity);
-//        this.logic.setGlobalKinematicValues(new SwervePointKinematics(.5, 0, 0, 2));
-//        this.logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
+        if (kinematics) {
+            this.logic.setGlobalKinematicValues(new SwervePointKinematics(.5, 0, 0, 2));
+            this.logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
+        }
+        else {
+            this.logic.setConstantVelocity(drive.getMaxTargetSpeedMetersPerSecond());
+            this.logic.setVelocityMode(SwerveSimpleTrajectoryMode.ConstantVelocity);
+        }
         super.initialize();
-    }
-
-    @Override
-    public void execute() {
-        super.execute();
     }
 
     @Override
