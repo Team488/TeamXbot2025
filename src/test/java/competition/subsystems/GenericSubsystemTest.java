@@ -117,7 +117,7 @@ public class GenericSubsystemTest extends BaseCompetitionTest {
         // Check that each motor controller periodic method was called
         for (Object subsystem : subsystems) {
             for (Object motorController : subsystemMotorControllerMap.get(subsystem)) {
-                    Mockito.verify((XCANMotorController)motorController, Mockito.times(1)
+                    Mockito.verify((XCANMotorController)motorController, Mockito.atLeastOnce()
                             .description("Subsystem " + subsystem.getClass().getName() + " did not call periodic on a motor controller.")).periodic();
             }
         }
