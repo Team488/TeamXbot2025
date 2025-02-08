@@ -38,8 +38,8 @@ public class PoseSubsystem extends BasePoseSubsystem {
     private final BooleanProperty reportCameraPoses;
     private final CoprocessorCommunicationSubsystem coprocessorComms;
 
-    public final static Distance fieldXMidpointInMeters = Meters.of(8.7785);
-    public final static Distance fieldYMidpointInMeters = Meters.of(4.025);
+    public static final Distance fieldXMidpointInMeters = Meters.of(8.7785);
+    public static final Distance fieldYMidpointInMeters = Meters.of(4.025);
 
 
     // only used when simulating the robot
