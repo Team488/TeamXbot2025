@@ -141,11 +141,9 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     public void setPower(double power) {
         if (electricalContract.isCoralArmMotorReady()) {
             if (getCurrentValue().in(Degrees) <= humanLoadAngle.get()) {
-                log.info("human load" + humanLoadAngle.get());
                 power = MathUtils.constrainDouble(power, 0, 1);
             }
             if (getCurrentValue().in(Degrees) > scoreAngle.get()) {
-                log.info(scoreAngle.get());
                 power = MathUtils.constrainDouble(power, -1, 0);
             }
             if (!isCalibrated()) {
