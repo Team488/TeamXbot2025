@@ -14,6 +14,8 @@ import competition.simulation.BaseSimulator;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.wpilibj.Preferences;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import xbot.common.command.BaseRobot;
 import xbot.common.command.XScheduler;
 import xbot.common.math.FieldPose;
@@ -22,6 +24,7 @@ import xbot.common.subsystems.pose.BasePoseSubsystem;
 import java.util.concurrent.CountDownLatch;
 
 public class Robot extends BaseRobot {
+    Logger log = LogManager.getLogger(Robot.class);
 
     final CountDownLatch reachedDisabledInit = new CountDownLatch(1);
     final CountDownLatch reachedEndOfLoop = new CountDownLatch(5);
@@ -43,7 +46,7 @@ public class Robot extends BaseRobot {
             simulator = getInjectorComponent().simulator();
         }
 
-        dataFrameRefreshables.add((DriveSubsystem)getInjectorComponent().driveSubsystem());
+        dataFrameRefreshables.add(getInjectorComponent().driveSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().poseSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().coprocessorCommunicationSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().aprilTagVisionSubsystemExtended());
@@ -61,13 +64,13 @@ public class Robot extends BaseRobot {
 
             switch (chosenContract) {
                 case "2023":
-                    System.out.println("Using 2023 contract");
+                    log.info("Using 2023 contract");
                     return DaggerRobotComponent2023.create();
                 case "2024":
-                    System.out.println("Using 2024 contract");
+                    log.info("Using 2024 contract");
                     return DaggerRobotComponent2024.create();
                 case "Robox":
-                    System.out.println("Using Robox contract");
+                    log.info("Using Robox contract");
                     return DaggerRoboxComponent.create();
                 default:
                     // Moved setting the default contract to here; there was some bug where
@@ -76,11 +79,12 @@ public class Robot extends BaseRobot {
                     if (!Preferences.containsKey("ContractToUse")) {
                         Preferences.setString("ContractToUse", "Competition");
                     }
-                    System.out.println("Using Competition contract");
+                    log.info("Using Competition contract");
                     // In all other cases, return the competition component.
                     return DaggerRobotComponent.create();
             }
         } else {
+            log.warn("Using simulation contract");
             return DaggerSimulationComponent
                     .builder()
                     .electricalContract(simulatorContract)
