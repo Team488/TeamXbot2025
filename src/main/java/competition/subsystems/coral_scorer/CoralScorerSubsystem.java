@@ -16,6 +16,7 @@ import javax.inject.Singleton;
 import static competition.subsystems.coral_scorer.CoralScorerSubsystem.CoralScorerState.INTAKING;
 import static competition.subsystems.coral_scorer.CoralScorerSubsystem.CoralScorerState.SCORING;
 import static competition.subsystems.coral_scorer.CoralScorerSubsystem.CoralScorerState.STOPPED;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 @Singleton
 public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollectionInfoSource {
@@ -130,6 +131,11 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
 
     public CoralScorerState getCoralScorerState() {
         return coralScorerState;
+    }
+    public boolean backupDetectedCoral(){
+        if (this.motor.getVelocity().in(RotationsPerSecond) <1.){
+        }
+        return hasCoral();
     }
 
     public void periodic() {
