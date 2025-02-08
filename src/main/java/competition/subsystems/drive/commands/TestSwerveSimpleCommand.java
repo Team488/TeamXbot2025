@@ -1,6 +1,5 @@
 package competition.subsystems.drive.commands;
 
-import competition.simulation.MapleSimulator;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
@@ -23,16 +22,14 @@ import java.util.HashMap;
 public class TestSwerveSimpleCommand extends SwerveSimpleTrajectoryCommand {
     DriveSubsystem drive;
     PoseSubsystem pose;
-    MapleSimulator simulator;
 
     @Inject
     public TestSwerveSimpleCommand (DriveSubsystem drive, PoseSubsystem pose, PropertyFactory pf,
                                          HeadingModule.HeadingModuleFactory headingModuleFactory,
-                                         RobotAssertionManager robotAssertionManager, MapleSimulator simulator) {
+                                         RobotAssertionManager robotAssertionManager) {
         super(drive, pose, pf, headingModuleFactory, robotAssertionManager);
         this.drive = drive;
         this.pose = pose;
-        this.simulator = simulator;
     }
 
     @Override
@@ -40,7 +37,6 @@ public class TestSwerveSimpleCommand extends SwerveSimpleTrajectoryCommand {
         log.info("Initializing");
 
         pose.setCurrentPoseInMeters(Landmarks.BlueLeftCoralStationMid);
-        simulator.resetPosition(Landmarks.BlueLeftCoralStationMid);
 
         ArrayList<XbotSwervePoint> swervePoints = new ArrayList<>();
         swervePoints.add(new XbotSwervePoint(Landmarks.BlueCloseLeftAlgae, 10));
