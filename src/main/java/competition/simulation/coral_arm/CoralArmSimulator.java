@@ -4,13 +4,14 @@ import javax.inject.Inject;
 
 import competition.simulation.MotorInternalPIDHelper;
 import competition.simulation.SimulationConstants;
-import competition.subsystems.coral_arm_pivot.CoralArmPivotSubsystem;
+import competition.subsystems.coral_arm.CoralArmSubsystem;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Rotations;
+
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.MockDigitalInput;
@@ -26,13 +27,13 @@ public class CoralArmSimulator {
     final SingleJointedArmSim armSim;
     final PIDManager pidManager;
 
-    final CoralArmPivotSubsystem armPivotSubsystem;
+    final CoralArmSubsystem armPivotSubsystem;
     final MockCANMotorController armMotor;
     final MockAbsoluteEncoder absoluteEncoder;
     final MockDigitalInput lowSensor;
 
     @Inject
-    public CoralArmSimulator(CoralArmPivotSubsystem armPivotSubsystem, PIDManager.PIDManagerFactory pidManagerFactory, PropertyFactory pf) {
+    public CoralArmSimulator(CoralArmSubsystem armPivotSubsystem, PIDManager.PIDManagerFactory pidManagerFactory, PropertyFactory pf) {
         pf.setPrefix("CoralArmSimulator");
         this.pidManager = pidManagerFactory.create(pf.getPrefix() + "/CANMotorPositionalPID", 0.01, 0.001, 0.0, 0.0, 1.0, -1.0);
         this.armPivotSubsystem = armPivotSubsystem;
