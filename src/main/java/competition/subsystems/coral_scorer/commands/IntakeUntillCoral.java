@@ -20,9 +20,10 @@ public class IntakeUntillCoral extends BaseCommand {
     public boolean isFinished() {
         if (this.coral.confidentlyHasCoral()) {
             coral.motor.setPower(0);
+            return true;
         } else {
             coral.motor.setPower(coral.intakePower.get());
+            return false;
         }
-        return true;
     }
 }
