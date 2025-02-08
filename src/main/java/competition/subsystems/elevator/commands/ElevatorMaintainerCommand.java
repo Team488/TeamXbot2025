@@ -101,6 +101,10 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     protected void uncalibratedMachineControlAction() {
         var mode = calibrationDecider.decideMode(elevator.isCalibrated());
 
+        if(!contract.isElevatorBottomSensorReady()){
+            mode = CalibrationDecider.CalibrationMode.GaveUp;
+        }
+
         switch (mode){
             case Calibrated -> calibratedMachineControlAction();
             case Attempting -> attemptCalibrationIfSensorExists();
@@ -110,9 +114,6 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     }
 
     private void attemptCalibrationIfSensorExists(){
-        if(!contract.isElevatorBottomSensorReady()){
-            return;
-        }
         elevator.setPower(elevator.calibrationNegativePower.get());
 
         if (elevator.isTouchingBottom()){
