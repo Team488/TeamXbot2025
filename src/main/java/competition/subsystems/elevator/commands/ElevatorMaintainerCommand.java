@@ -1,5 +1,6 @@
 package competition.subsystems.elevator.commands;
 
+import competition.electrical_contract.ElectricalContract;
 import competition.motion.TrapezoidProfileManager;
 import competition.operator_interface.OperatorInterface;
 import competition.subsystems.elevator.ElevatorSubsystem;
@@ -40,19 +41,23 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     final TrapezoidProfileManager profileManager;
 
+    final ElectricalContract contract;
+
     @Inject
     public ElevatorMaintainerCommand(ElevatorSubsystem elevator, PropertyFactory pf,
                                      HumanVsMachineDecider.HumanVsMachineDeciderFactory hvmFactory,
                                      CalibrationDecider.CalibrationDeciderFactory calibrationDeciderFactory,
                                      TrapezoidProfileManager.Factory trapezoidProfileManagerFactory,
                                      PIDManager.PIDManagerFactory pidf,
-                                     OperatorInterface oi){
+                                     OperatorInterface oi,
+                                     ElectricalContract contract){
         super(elevator, pf, hvmFactory, Inches.of(1).in(Meters), 0.2);
         pf.setPrefix(this);
         this.elevator = elevator;
         profileManager = trapezoidProfileManagerFactory.create(getPrefix() + "trapezoidMotion", 1, 1, elevator.getCurrentValue().in(Meters));
 
         this.oi = oi;
+        this.contract = contract;
 
         calibrationDecider = calibrationDeciderFactory.create("calibrationDecider");
         calibrationDecider.reset();
@@ -92,9 +97,12 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
                 XCANMotorController.MotorPidMode.Voltage);
     }
 
+    //defaults humanControlAction if there is no bottom sensor
     @Override
     protected void uncalibratedMachineControlAction() {
-        var mode = calibrationDecider.decideMode(elevator.isCalibrated());
+        var mode = contract.isElevatorBottomSensorReady()
+                ? calibrationDecider.decideMode(elevator.isCalibrated())
+                : CalibrationDecider.CalibrationMode.GaveUp;
 
         switch (mode){
             case Calibrated -> calibratedMachineControlAction();
