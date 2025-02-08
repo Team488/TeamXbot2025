@@ -139,7 +139,7 @@ public class OracleSubsystem extends BaseSubsystem {
         };
     }
 
-    public void setAllowedCoralStations(CoralStationMode mode) {
+    public void setCoralStationMode(CoralStationMode mode) {
         if (mode == null) {
             // TODO: Add in assertion manager message later
             return;
