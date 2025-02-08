@@ -20,6 +20,7 @@ import xbot.common.injection.swerve.SwerveInstance;
 import xbot.common.math.XYPair;
 import xbot.common.subsystems.vision.CameraCapabilities;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Inches;
 
 public class Contract2025 extends ElectricalContract {
@@ -126,11 +127,17 @@ public class Contract2025 extends ElectricalContract {
 
     @Override
     public CANMotorControllerInfo getElevatorMotor() {
+
+        CANMotorControllerOutputConfig limitedCurrentConfig = new CANMotorControllerOutputConfig()
+                .withStatorCurrentLimit(Amps.of(40))
+                .withNeutralMode(CANMotorControllerOutputConfig.NeutralMode.Brake)
+                .withInversionType(CANMotorControllerOutputConfig.InversionType.Inverted);
+
         return new CANMotorControllerInfo(
                 "ElevatorMotor",
                 MotorControllerType.TalonFx,
-                CANBusId.DefaultCanivore, 99, //change deviceId later
-                new CANMotorControllerOutputConfig());
+                CANBusId.RIO, 29, //change deviceId later
+                limitedCurrentConfig);
     }
 
     @Override
@@ -155,53 +162,55 @@ public class Contract2025 extends ElectricalContract {
         return "DriveSubsystem/" + swerveInstance.label() + "/SteeringEncoder";
     }
 
+    CANMotorControllerOutputConfig regularDriveMotorConfig =
+            new CANMotorControllerOutputConfig()
+                    .withInversionType(CANMotorControllerOutputConfig.InversionType.Inverted)
+                    .withStatorCurrentLimit(Amps.of(45))
+                    .withNeutralMode(CANMotorControllerOutputConfig.NeutralMode.Brake);
+
+    CANMotorControllerOutputConfig invertedDriveMotorConfig =
+            new CANMotorControllerOutputConfig()
+                    .withInversionType(CANMotorControllerOutputConfig.InversionType.Inverted)
+                    .withStatorCurrentLimit(Amps.of(45))
+                    .withNeutralMode(CANMotorControllerOutputConfig.NeutralMode.Brake);
+
     @Override
     public CANMotorControllerInfo getDriveMotor(SwerveInstance swerveInstance) {
-
-        CANMotorControllerOutputConfig invertedConfig =
-                new CANMotorControllerOutputConfig().withInversionType(
-                        CANMotorControllerOutputConfig.InversionType.Inverted);
-
-        return switch (swerveInstance.label()) {
+                return switch (swerveInstance.label()) {
             case "FrontLeftDrive" ->
                     new CANMotorControllerInfo(
                             getDriveControllerName(swerveInstance),
                             MotorControllerType.TalonFx,
                             CANBusId.DefaultCanivore,
                             39,
-                            new CANMotorControllerOutputConfig());
+                            regularDriveMotorConfig);
             case "FrontRightDrive" ->
                     new CANMotorControllerInfo(
                             getDriveControllerName(swerveInstance),
                             MotorControllerType.TalonFx,
                             CANBusId.DefaultCanivore,
                             31,
-                            invertedConfig);
+                            invertedDriveMotorConfig);
             case "RearLeftDrive" ->
                     new CANMotorControllerInfo(
                             getDriveControllerName(swerveInstance),
                             MotorControllerType.TalonFx,
                             CANBusId.DefaultCanivore,
                             20,
-                            new CANMotorControllerOutputConfig());
+                            regularDriveMotorConfig);
             case "RearRightDrive" ->
                     new CANMotorControllerInfo(
                             getDriveControllerName(swerveInstance),
                             MotorControllerType.TalonFx,
                             CANBusId.DefaultCanivore,
                             29,
-                            invertedConfig);
+                            invertedDriveMotorConfig);
             default -> null;
         };
     }
 
     @Override
     public CANMotorControllerInfo getSteeringMotor(SwerveInstance swerveInstance) {
-        double simulationScalingValue = 1.0;
-
-        CANMotorControllerOutputConfig invertedConfig =
-                new CANMotorControllerOutputConfig().withInversionType(
-                        CANMotorControllerOutputConfig.InversionType.Inverted);
 
         return switch (swerveInstance.label()) {
             case "FrontLeftDrive" ->
@@ -210,28 +219,28 @@ public class Contract2025 extends ElectricalContract {
                             MotorControllerType.TalonFx,
                             CANBusId.DefaultCanivore,
                             38,
-                            invertedConfig);
+                            invertedDriveMotorConfig);
             case "FrontRightDrive" ->
                     new CANMotorControllerInfo(
                             getSteeringControllerName(swerveInstance),
                             MotorControllerType.TalonFx,
                             CANBusId.DefaultCanivore,
                             30,
-                            invertedConfig);
+                            invertedDriveMotorConfig);
             case "RearLeftDrive" ->
                     new CANMotorControllerInfo(
                             getSteeringControllerName(swerveInstance),
                             MotorControllerType.TalonFx,
                             CANBusId.DefaultCanivore,
                             21,
-                            invertedConfig);
+                            invertedDriveMotorConfig);
             case "RearRightDrive" ->
                     new CANMotorControllerInfo(
                             getSteeringControllerName(swerveInstance),
                             MotorControllerType.TalonFx,
                             CANBusId.DefaultCanivore,
                             28,
-                            invertedConfig);
+                            invertedDriveMotorConfig);
             default -> null;
         };
     }
