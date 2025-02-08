@@ -15,16 +15,16 @@ import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.wpilibj.Preferences;
 import xbot.common.command.BaseRobot;
+import xbot.common.command.XScheduler;
 import xbot.common.math.FieldPose;
 import xbot.common.subsystems.pose.BasePoseSubsystem;
 
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.CountDownLatch;
 
 public class Robot extends BaseRobot {
 
-    final Semaphore reachedDisabledInit = new Semaphore(0);
-    final Semaphore reachedDisabledPeriodic = new Semaphore(0);
-    volatile boolean completedFirstDisabledPeriodic = false;
+    final CountDownLatch reachedDisabledInit = new CountDownLatch(1);
+    final CountDownLatch reachedEndOfLoop = new CountDownLatch(5);
 
     BaseSimulator simulator;
     ElectricalContract simulatorContract = new UnitTestContract2025();
@@ -95,9 +95,7 @@ public class Robot extends BaseRobot {
     @Override
     public void disabledInit() {
         super.disabledInit();
-        if (!completedFirstDisabledPeriodic) {
-            reachedDisabledInit.release();
-        }
+        reachedDisabledInit.countDown();
     }
 
     @Override
@@ -122,20 +120,21 @@ public class Robot extends BaseRobot {
     }
 
     @Override
-    public void disabledPeriodic() {
-        super.disabledPeriodic();
-        if (!completedFirstDisabledPeriodic) {
-            reachedDisabledPeriodic.release();
-            completedFirstDisabledPeriodic = true;
-        }
-    }
-
-    @Override
     public void simulationPeriodic() {
         super.simulationPeriodic();
 
         if (simulator != null) {
             simulator.update();
         }
+    }
+
+    @Override
+    protected void loopFunc() {
+        super.loopFunc();
+        reachedEndOfLoop.countDown();
+    }
+
+    public XScheduler getScheduler() {
+        return xScheduler;
     }
 }
