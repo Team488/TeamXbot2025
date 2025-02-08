@@ -85,8 +85,7 @@ public class CoralArmSimulator {
         return getArmAngle().isNear(Degrees.of(0), Degrees.of(4));
     }
 
-    // minPosition and maxPosition are the absolute encoder minimum and maximum position in degrees
-    // converted from [0,360] to [0,1]
+    // minPosition and maxPosition are rotations normalized to [0,1]
     public static Angle getAbsoluteEncoderPosition(Angle armAngle, double minPosition, double maxPosition) {
         double currentPosition = armAngle.in(Degrees) / 125;
         double absoluteEncoderPosition;
