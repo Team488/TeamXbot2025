@@ -79,9 +79,11 @@ public class Contract2025 extends ElectricalContract {
     public DeviceInfo getElevatorBottomSensor() { return new DeviceInfo("ElevatorBottomSensor",1); }
 
     @Override
-    public boolean isAlgaeArmPivotMotorReady() {
-        return false;
-    }
+    public boolean isAlgaeArmPivotMotorReady() {return false;}
+
+    public boolean isAlgaeArmBottomSensorReady(){return false;}
+
+    public DeviceInfo getAlgaeArmBottomSensor() {return new DeviceInfo("AlgaeArmBottomSensor",2); }
 
     @Override
     public boolean isHumanLoadRampReady() {
@@ -263,22 +265,31 @@ public class Contract2025 extends ElectricalContract {
         };
     }
 
-    private static double aprilCameraXDisplacement = 13.153 / PoseSubsystem.INCHES_IN_A_METER;
-    private static double aprilCameraYDisplacement = 12.972 / PoseSubsystem.INCHES_IN_A_METER;
-    private static double aprilCameraZDisplacement = 9.014 / PoseSubsystem.INCHES_IN_A_METER;
-    private static double aprilCameraPitch = Math.toRadians(0);
-    private static double aprilCameraYaw = Math.toRadians(0);
+    private static double frontAprilCameraXDisplacement = 10.25 / PoseSubsystem.INCHES_IN_A_METER;
+    private static double frontAprilCameraYDisplacement = 6.5 / PoseSubsystem.INCHES_IN_A_METER;
+    private static double frontAprilCameraZDisplacement = 7 / PoseSubsystem.INCHES_IN_A_METER;
+    private static double frontAprilCameraPitch = Math.toRadians(-12);
+    private static double frontAprilCameraYaw = Math.toRadians(0);
 
     public CameraInfo[] getCameraInfo() {
         return new CameraInfo[] {
                 new CameraInfo("Apriltag_FrontLeft_Camera",
                         "AprilTagFrontLeft",
                         new Transform3d(new Translation3d(
-                                aprilCameraXDisplacement,
-                                aprilCameraYDisplacement,
-                                aprilCameraZDisplacement),
-                                new Rotation3d(0, aprilCameraPitch, aprilCameraYaw)),
+                                frontAprilCameraXDisplacement,
+                                frontAprilCameraYDisplacement,
+                                frontAprilCameraZDisplacement),
+                                new Rotation3d(0, frontAprilCameraPitch, frontAprilCameraYaw)),
+                        EnumSet.of(CameraCapabilities.APRIL_TAG)),
+                new CameraInfo("Apriltag_FrontRight_Camera",
+                        "AprilTagFrontRight",
+                        new Transform3d(new Translation3d(
+                                frontAprilCameraXDisplacement,
+                                -frontAprilCameraYDisplacement,
+                                frontAprilCameraZDisplacement),
+                                new Rotation3d(0, frontAprilCameraPitch, frontAprilCameraYaw)),
                         EnumSet.of(CameraCapabilities.APRIL_TAG))
+                
         };
     }
 
