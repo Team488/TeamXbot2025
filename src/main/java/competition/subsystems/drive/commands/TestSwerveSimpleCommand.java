@@ -37,7 +37,7 @@ public class TestSwerveSimpleCommand extends SwerveSimpleTrajectoryCommand {
         log.info("Initializing");
 
         ArrayList<XbotSwervePoint> swervePoints = new ArrayList<>();
-        swervePoints.add(new XbotSwervePoint(Landmarks.BlueLeftCoralStationFar, 10));
+        swervePoints.add(new XbotSwervePoint(Landmarks.BlueCloseLeftAlgae, 10));
         this.logic.setKeyPoints(swervePoints);
         this.logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
         logic.setGlobalKinematicValues(new SwervePointKinematics(2, 0, 0, 4));
