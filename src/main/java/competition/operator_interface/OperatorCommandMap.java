@@ -84,9 +84,9 @@ public class OperatorCommandMap {
 //
 //        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(intakeCoralCommand);
 //        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(scoreCoralCommand);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(setPoseCommand);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).onTrue(testPathPlannerCommand);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).onTrue(testSwerveSimpleCommand);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(setPoseCommand);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(testPathPlannerCommand);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(testSwerveSimpleCommand);
     }
 
 

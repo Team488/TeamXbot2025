@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.Timer;
 import org.json.simple.parser.ParseException;
 import org.littletonrobotics.junction.Logger;
 import xbot.common.command.BaseCommand;
+import xbot.common.controls.sensors.XTimer;
 import xbot.common.math.XYPair;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
 
@@ -21,7 +22,8 @@ import javax.inject.Inject;
 import java.io.IOException;
 
 public class FollowPathCommand extends BaseCommand {
-    private final Timer timer = new Timer();
+    private double startingTime = 0;
+    private double currentTime = 0;
     private final DriveSubsystem drive;
     private PathPlannerPath path;
     private final PoseSubsystem pose;
@@ -60,13 +62,13 @@ public class FollowPathCommand extends BaseCommand {
                 drive.getSwerveDriveKinematics().toChassisSpeeds(drive.getSwerveModuleStates()),
                 pose.getCurrentPose2d().getRotation(), robotConfig);
 
-        this.timer.restart();
+        startingTime = XTimer.getFPGATimestamp();
         Logger.recordOutput("PathPlanner/FollowPathCommand/trajectoryTime", trajectory.getTotalTimeSeconds());
     }
 
     @Override
     public void execute() {
-        double currentTime = this.timer.get();
+        currentTime = XTimer.getFPGATimestamp() - startingTime;
         PathPlannerTrajectoryState desiredState =  trajectory.sample(currentTime);
         Pose2d currentPose = pose.getCurrentPose2d();
 
@@ -96,18 +98,17 @@ public class FollowPathCommand extends BaseCommand {
         Logger.recordOutput("PathPlanner/FollowPathCommand/vxFeedBack", vxFeedBack);
         Logger.recordOutput("PathPlanner/FollowPathCommand/vyFeedback", vyFeedBack);
         Logger.recordOutput("PathPlanner/FollowPathCommand/desiredOmega", omega);
-        Logger.recordOutput("PathPlanner/FollowPathCommand/timer", timer.get());
+        Logger.recordOutput("PathPlanner/FollowPathCommand/timer", currentTime);
     }
 
     @Override
     public boolean isFinished() {
-        return timer.hasElapsed(trajectory.getTotalTimeSeconds());
+        return currentTime >= trajectory.getTotalTimeSeconds();
     }
 
     @Override
     public void end(boolean interrupted) {
         log.info("Command has ended");
-        this.timer.stop(); // Stop timer
         driveRobotRelative(new ChassisSpeeds(0, 0, 0));
         drive.stop();
     }
