@@ -6,7 +6,7 @@ import xbot.common.command.BaseSetpointCommand;
 
 import javax.inject.Inject;
 
-public class    SetCoralArmTargetAngleCommand extends BaseSetpointCommand {
+public class SetCoralArmTargetAngleCommand extends BaseSetpointCommand {
 
     Landmarks.CoralLevel angle;
     CoralArmPivotSubsystem coralArm;
