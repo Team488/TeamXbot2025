@@ -123,6 +123,5 @@ public class LightSubsystem extends BaseSubsystem {
         sendState(state);
 
         aKitLog.record("LightState", state.toString());
-
     }  
 }
