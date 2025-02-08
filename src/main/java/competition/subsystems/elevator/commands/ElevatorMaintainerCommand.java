@@ -100,7 +100,8 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     //defaults humanControlAction if there is no bottom sensor
     @Override
     protected void uncalibratedMachineControlAction() {
-        var mode = contract.isElevatorBottomSensorReady() ?
+        var mode = contract.isElevatorBottomSensorReady()
+                ?
                 calibrationDecider.decideMode(elevator.isCalibrated()) : CalibrationDecider.CalibrationMode.GaveUp;
 
         switch (mode){
