@@ -144,7 +144,7 @@ public class MapleSimulator implements BaseSimulator {
             double distanceToReef = aproxScorerTranslation3d.getDistance(closetCoralPose.getTranslation());
 
             System.out.println("Distance from closest reef: " + distanceToReef);
-            if(distanceToReef > 0.15 || coralAlreadyScored) {
+            if(distanceToReef > 0.3 || coralAlreadyScored) {
                 if (coralAlreadyScored) {
                     System.out.println("Coral already scored, dropping on ground");
                 } else {

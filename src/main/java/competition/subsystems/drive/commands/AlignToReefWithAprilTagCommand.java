@@ -73,6 +73,9 @@ public class AlignToReefWithAprilTagCommand extends BaseCommand {
 
     @Override
     public boolean isFinished() {
+        if (drive.getPositionalPid().isOnTarget() && drive.getRotateToHeadingPid().isOnTarget()) {
+            log.info("Align finished");
+        }
         return drive.getPositionalPid().isOnTarget() && drive.getRotateToHeadingPid().isOnTarget();
     }
 

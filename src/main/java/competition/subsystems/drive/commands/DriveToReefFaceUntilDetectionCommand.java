@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import xbot.common.logging.RobotAssertionManager;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.drive.SwerveSimpleTrajectoryCommand;
+import xbot.common.subsystems.drive.SwerveSimpleTrajectoryMode;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
 import xbot.common.trajectory.XbotSwervePoint;
 
@@ -40,6 +41,7 @@ public class DriveToReefFaceUntilDetectionCommand extends SwerveSimpleTrajectory
         swervePoints.add(XbotSwervePoint.createPotentiallyFilppedXbotSwervePoint(targetReefFacePose, 10));
         this.logic.setKeyPoints(swervePoints);
         this.logic.setConstantVelocity(drive.getMaxTargetSpeedMetersPerSecond());
+        this.logic.setVelocityMode(SwerveSimpleTrajectoryMode.ConstantVelocity); // TODO: If want to use acceleration, change this
         super.initialize();
     }
 
