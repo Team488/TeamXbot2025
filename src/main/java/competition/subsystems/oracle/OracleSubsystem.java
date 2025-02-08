@@ -55,7 +55,7 @@ public class OracleSubsystem extends BaseSubsystem {
     private boolean firstRunInPrimaryActivity = true;
     private boolean reevaluationRequested = false;
 
-    private CoralStationMode allowedCoralStations = CoralStationMode.ANY_STATION;
+    private CoralStationMode allowedCoralStations = CoralStationMode.CLOSEST_STATION;
 
     private int instructionNumber;
     private OracleDriveAdvice currentDriveAdvice;
@@ -135,11 +135,11 @@ public class OracleSubsystem extends BaseSubsystem {
             case ONLY_LEFT_STATION -> leftStation;
             case ONLY_RIGHT_STATION -> rightStation;
             case NO_STATION -> currentPose;
-            case ANY_STATION -> leftStationDistance < rightStationDistance ? leftStation : rightStation;
+            case CLOSEST_STATION -> leftStationDistance < rightStationDistance ? leftStation : rightStation;
         };
     }
 
-    public void setAllowedCoralStations(CoralStationMode mode) {
+    public void setCoralStationMode(CoralStationMode mode) {
         if (mode == null) {
             // TODO: Add in assertion manager message later
             return;

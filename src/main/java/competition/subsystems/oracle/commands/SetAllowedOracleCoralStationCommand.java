@@ -10,11 +10,11 @@ import javax.inject.Inject;
 // Maybe we should make a toggle command as well...
 public class SetAllowedOracleCoralStationCommand extends BaseCommand {
 
-    OracleSubsystem oracle;
-    RobotAssertionManager assertionManager;
-    CoralStationMode modeToSet = null;
+    private final OracleSubsystem oracle;
+    private final RobotAssertionManager assertionManager;
+    private CoralStationMode modeToSet = null;
 
-    public void setModeToAllow(CoralStationMode mode) {
+    public void setCoralStationMode(CoralStationMode mode) {
         // Allow only setting the mode once
         if (modeToSet != null) {
             assertionManager.throwException("Set CoralStationMode more than once for toggle command!", new Exception());
@@ -35,7 +35,7 @@ public class SetAllowedOracleCoralStationCommand extends BaseCommand {
             assertionManager.throwException("Mode to toggle not set!", new Exception());
             return;
         }
-        oracle.setAllowedCoralStations(modeToSet);
+        oracle.setCoralStationMode(modeToSet);
     }
 
     @Override
