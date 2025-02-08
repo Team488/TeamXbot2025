@@ -274,8 +274,8 @@ public class Contract2025 extends ElectricalContract {
                 new CameraInfo("Apriltag_FrontLeft_Camera",
                         "AprilTagFrontLeft",
                         new Transform3d(new Translation3d(
-                                -aprilCameraXDisplacement,
-                                -aprilCameraYDisplacement,
+                                aprilCameraXDisplacement,
+                                aprilCameraYDisplacement,
                                 aprilCameraZDisplacement),
                                 new Rotation3d(0, aprilCameraPitch, aprilCameraYaw)),
                         EnumSet.of(CameraCapabilities.APRIL_TAG)),
@@ -284,7 +284,7 @@ public class Contract2025 extends ElectricalContract {
                         "AprilTagFrontRight",
                         new Transform3d(new Translation3d(
                                 aprilCameraXDisplacement,
-                                aprilCameraYDisplacement,
+                                -aprilCameraYDisplacement,
                                 aprilCameraZDisplacement),
                                 new Rotation3d(0, aprilCameraPitch, aprilCameraYaw)),
                         EnumSet.of(CameraCapabilities.APRIL_TAG))
