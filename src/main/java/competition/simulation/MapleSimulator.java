@@ -45,6 +45,7 @@ public class MapleSimulator implements BaseSimulator {
     final ReefSimulator reefSimulator;
     final CoralScorerSimulator coralScorerSimulator;
     final AlgaeArmSimulator algaeArmSimulator;
+    final LightsSimulator lightsSimulator;
 
     final Distance humanLoadingDistanceThreshold = Meters.of(0.5);
 
@@ -56,7 +57,8 @@ public class MapleSimulator implements BaseSimulator {
     @Inject
     public MapleSimulator(PoseSubsystem pose, DriveSubsystem drive, ElevatorSimulator elevatorSimulator,
                           CoralArmSimulator armSimulator, ReefSimulator reefSimulator, 
-                          CoralScorerSimulator coralScorerSimulator, AlgaeArmSimulator algaeArmSimulator) {
+                          CoralScorerSimulator coralScorerSimulator, AlgaeArmSimulator algaeArmSimulator,
+                          LightsSimulator lightsSimulator) {
         this.pose = pose;
         this.drive = drive;
         this.elevatorSimulator = elevatorSimulator;
@@ -64,6 +66,7 @@ public class MapleSimulator implements BaseSimulator {
         this.reefSimulator = reefSimulator;
         this.coralScorerSimulator = coralScorerSimulator;
         this.algaeArmSimulator = algaeArmSimulator;
+        this.lightsSimulator = lightsSimulator;
         this.superstructureMechanism = new SuperstructureMechanism();
 
         aKitLog = new AKitLogger("Simulator/");
@@ -99,6 +102,7 @@ public class MapleSimulator implements BaseSimulator {
         coralArmSimulator.update();
         reefSimulator.update();
         algaeArmSimulator.update();
+        lightsSimulator.update();
         this.updateCoralLoadFromHumanPlayer();
         this.updateCoralScorerSensor();
         this.updateSuperstructureMechanism();

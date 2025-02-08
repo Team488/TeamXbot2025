@@ -22,9 +22,5 @@ import javax.inject.Singleton;
 public abstract class UnitTestRobotModule {
     @Binds
     @Singleton
-    public abstract ElectricalContract getElectricalContract(UnitTestContract2025 impl);
-
-    @Binds
-    @Singleton
     public abstract BaseSimulator getSimulator(MapleSimulator impl);
 }
