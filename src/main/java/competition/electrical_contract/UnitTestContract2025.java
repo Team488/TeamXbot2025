@@ -32,7 +32,10 @@ public class UnitTestContract2025 extends Contract2025 {
 
     public boolean isElevatorBottomSensorReady() { return true; }
 
+    public boolean isAlgaeArmBottomSensorReady() { return true; }
+
     public boolean isAlgaeArmPivotMotorReady() { return true; }
 
     public boolean isElevatorDistanceSensorReady() { return true ; }
+
 }
