@@ -143,8 +143,8 @@ public class OperatorCommandMap {
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeCoralCommand);
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreCoralCommand);
 
-        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(returnToBase);
-        //oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(riseToScore);
+        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(lowerToHumanLoad);
+        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(riseToScore);
       
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(forceElevatorCalibratedCommand);
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(riseToL2);
