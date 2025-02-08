@@ -65,6 +65,9 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
 
     public abstract boolean isAlgaeArmPivotMotorReady();
 
-    public abstract Distance getDistanceFromCenterToOuterBumperX();
+    public abstract boolean isAlgaeArmBottomSensorReady();
 
+    public abstract DeviceInfo getAlgaeArmBottomSensor();
+
+    public abstract Distance getDistanceFromCenterToOuterBumperX();
 }
