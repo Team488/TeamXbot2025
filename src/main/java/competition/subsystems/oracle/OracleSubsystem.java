@@ -127,15 +127,17 @@ public class OracleSubsystem extends BaseSubsystem {
     private Pose2d getCoralStation(Pose2d currentPose) {
         Pose2d leftStation = PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueLeftCoralStationMid);
         Pose2d rightStation = PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueRightCoralStationMid);
-        double leftStationDistance = currentPose.getTranslation().getDistance(leftStation.getTranslation());
-        double rightStationDistance = currentPose.getTranslation().getDistance(rightStation.getTranslation());
 
         // See if we have constraints set
         return switch (allowedCoralStations) {
             case ONLY_LEFT_STATION -> leftStation;
             case ONLY_RIGHT_STATION -> rightStation;
             case NO_STATION -> currentPose;
-            case CLOSEST_STATION -> leftStationDistance < rightStationDistance ? leftStation : rightStation;
+            case CLOSEST_STATION -> {
+                double leftStationDistance = currentPose.getTranslation().getDistance(leftStation.getTranslation());
+                double rightStationDistance = currentPose.getTranslation().getDistance(rightStation.getTranslation());
+                yield leftStationDistance < rightStationDistance ? leftStation : rightStation;
+            }
         };
     }
 
