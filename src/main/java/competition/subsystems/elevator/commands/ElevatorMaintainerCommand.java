@@ -101,8 +101,8 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     @Override
     protected void uncalibratedMachineControlAction() {
         var mode = contract.isElevatorBottomSensorReady()
-                ?
-                calibrationDecider.decideMode(elevator.isCalibrated()) : CalibrationDecider.CalibrationMode.GaveUp;
+                ? calibrationDecider.decideMode(elevator.isCalibrated())
+                : CalibrationDecider.CalibrationMode.GaveUp;
 
         switch (mode){
             case Calibrated -> calibratedMachineControlAction();
