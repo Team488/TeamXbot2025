@@ -35,6 +35,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
     public final DoubleProperty rotationsPerDegrees;
     public final Angle degreesPerRotations;
+    
     public final DoubleProperty scoreAngle;
     public final DoubleProperty humanLoadAngle;
     public final DoubleProperty rangeOfMotionDegrees;
