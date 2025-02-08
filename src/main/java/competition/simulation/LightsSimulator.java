@@ -6,6 +6,7 @@ import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
 
 import competition.subsystems.lights.LightSubsystem;
+import competition.subsystems.lights.LightSubsystem.LightsStateMessage;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import xbot.common.advantage.AKitLogger;
@@ -23,12 +24,30 @@ public class LightsSimulator {
         this.aKitLog = new AKitLogger("Simulator/");
 
         this.lightsMechanism = new LoggedMechanism2d(1, 1);
-        var root = this.lightsMechanism.getRoot("lightsRoot", 0, 0.8);
-        this.lightsLigament = new LoggedMechanismLigament2d("lights", 1, 0, 10, new Color8Bit(Color.kGreen));
+        var root = this.lightsMechanism.getRoot("lightsRoot", 0.55, 0.2);
+        this.lightsLigament = new LoggedMechanismLigament2d("lights", 0.5, 90, 14, new Color8Bit(Color.kGreen));
         root.append(lightsLigament);
     }
 
+    Color8Bit getColorForSubsystemState(LightsStateMessage state) {
+        switch (state) {
+            case RobotDisabled:
+                return new Color8Bit(Color.kRed);
+            case RobotEnabled:
+                return new Color8Bit(Color.kGreen);
+            case CoralPresent:
+                return new Color8Bit(Color.kBlue);
+            case RequestCoralFromHuman:
+                return new Color8Bit(Color.kTurquoise);
+            case ReadyToScore:
+                return new Color8Bit(Color.kWhite);
+            default:
+                return new Color8Bit(Color.kBlack);
+        }
+    }
+
     public void update() {
+        this.lightsLigament.setColor(getColorForSubsystemState(lightSubsystem.getState()));
         aKitLog.record("FieldSimulation/Lights", this.lightsMechanism);
 
     }

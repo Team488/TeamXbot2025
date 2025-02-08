@@ -22,6 +22,8 @@ public class LightSubsystem extends BaseSubsystem {
     final AutonomousCommandSelector autonomousCommandSelector;
     final CoralScorerSubsystem coralScorerSubsystem;
 
+    LightsStateMessage state = LightsStateMessage.NoCode;
+
     public enum LightsStateMessage{
         // we never send NoCode, it's implicit when the robot is off
         // and all of the DIOs float high
@@ -92,6 +94,10 @@ public class LightSubsystem extends BaseSubsystem {
         // TODO: decide on how communication will actually happen
     }
 
+    public LightsStateMessage getState() {
+        return state;
+    }
+
     /**
      * Convert an integer to a boolean array representing the bits of the integer.
      * The leftmost bit in the result is the least significant bit of the integer.
@@ -113,9 +119,10 @@ public class LightSubsystem extends BaseSubsystem {
 
     @Override
     public void periodic() {
-        var currentState = getCurrentState();
-        aKitLog.record("LightState", currentState.toString());
-        sendState(currentState);
+        this.state = getCurrentState();
+        sendState(state);
+
+        aKitLog.record("LightState", state.toString());
 
     }  
 }
