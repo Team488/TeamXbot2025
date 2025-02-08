@@ -35,13 +35,13 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
     public final DoubleProperty rotationsPerDegrees;
     public final Angle degreesPerRotations;
+
     public final DoubleProperty scoreAngle;
     public final DoubleProperty humanLoadAngle;
     public final DoubleProperty rangeOfMotionDegrees;
     public final DoubleProperty minArmPosition;
     public final DoubleProperty maxArmPosition;
     public final DoubleProperty powerWhenNotCalibrated;
-
 
     @Inject
     public CoralArmSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
@@ -75,7 +75,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
         this.rangeOfMotionDegrees = propertyFactory.createPersistentProperty("Range of Motion in Degrees", 125);
         this.minArmPosition = propertyFactory.createPersistentProperty("Min AbsEncoder Position in Degrees", 90);
-        this.maxArmPosition = propertyFactory.createPersistentProperty("Max AbsEncoder Position in Degrees", 100);
+        this.maxArmPosition = propertyFactory.createPersistentProperty("Max AbsEncoder Position in Degrees", 108);
         this.scoreAngle = propertyFactory.createPersistentProperty("Scoring Angle in Degrees", 125);
         this.humanLoadAngle = propertyFactory.createPersistentProperty("Human Loading Angle in Degrees", 0);
         this.powerWhenNotCalibrated = propertyFactory.createPersistentProperty("Power When Not Calibrated", 0.05);
@@ -168,7 +168,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
     public Angle getArmAngle() {
         if (electricalContract.isCoralArmPivotAbsoluteEncoderReady() && electricalContract.isCoralArmPivotLowSensorReady()) {
-            return getArmAngle(minArmPosition.get(), maxArmPosition.get(),
+            return getArmAngle(minArmPosition.get() / 360, maxArmPosition.get() / 360,
                     armAbsoluteEncoder.getAbsolutePosition(), lowSensor.get(), rangeOfMotionDegrees.get());
         }
         return Angle.ofBaseUnits(0, Degrees);
@@ -232,6 +232,10 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
         aKitLog.record("Target Angle", this.getTargetValue().in(Degrees));
         aKitLog.record("Current Angle", this.getCurrentValue().in(Degrees));
         aKitLog.record("isCalibrated", this.isCalibrated());
+        aKitLog.record("Current Angle using AbsEncoder", this.getArmAngle().in(Degrees));
+        if(electricalContract.isAlgaeArmBottomSensorReady()) {
+            aKitLog.record("lowSensor Status", lowSensor.get());
+        }
     }
   
     public boolean getIsTargetAngleScoring() {

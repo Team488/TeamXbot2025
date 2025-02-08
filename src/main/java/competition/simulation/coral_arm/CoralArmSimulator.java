@@ -14,9 +14,11 @@ import static edu.wpi.first.units.Units.Rotations;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.MockDigitalInput;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import xbot.common.controls.actuators.mock_adapters.MockCANMotorController;
+import xbot.common.controls.sensors.mock_adapters.MockAbsoluteEncoder;
 import xbot.common.math.PIDManager;
 import xbot.common.properties.PropertyFactory;
 
@@ -27,6 +29,8 @@ public class CoralArmSimulator {
 
     final CoralArmSubsystem armPivotSubsystem;
     final MockCANMotorController armMotor;
+    final MockAbsoluteEncoder absoluteEncoder;
+    final MockDigitalInput lowSensor;
 
     @Inject
     public CoralArmSimulator(CoralArmSubsystem armPivotSubsystem, PIDManager.PIDManagerFactory pidManagerFactory, PropertyFactory pf) {
@@ -34,6 +38,8 @@ public class CoralArmSimulator {
         this.pidManager = pidManagerFactory.create(pf.getPrefix() + "/CANMotorPositionalPID", 0.01, 0.001, 0.0, 0.0, 1.0, -1.0);
         this.armPivotSubsystem = armPivotSubsystem;
         this.armMotor = (MockCANMotorController) armPivotSubsystem.armMotor;
+        this.absoluteEncoder = (MockAbsoluteEncoder) armPivotSubsystem.armAbsoluteEncoder;
+        this.lowSensor = (MockDigitalInput) armPivotSubsystem.lowSensor;
 
         this.armSim = new SingleJointedArmSim(
                 motor,
@@ -60,6 +66,12 @@ public class CoralArmSimulator {
 
         var armMotorRotations = armRelativeAngle.in(Radians) / CoralArmSimConstants.armEncoderAnglePerRotation.in(Radians);
         armMotor.setPosition(Rotations.of(armMotorRotations));
+
+        absoluteEncoder.setPosition_internal(getAbsoluteEncoderPosition(getArmAngle(), armPivotSubsystem.minArmPosition.get() / 360,
+                armPivotSubsystem.maxArmPosition.get() / 360));
+
+        // if the arm angle is lower than 10.8 degrees it will return true, otherwise return false
+        lowSensor.setValue(getArmAngle().in(Degrees) < 10.8);
     }
 
     public Angle getArmAngle() {
@@ -73,4 +85,30 @@ public class CoralArmSimulator {
     public boolean isAtCollectionAngle() {
         return getArmAngle().isNear(Degrees.of(0), Degrees.of(4));
     }
+
+    // minPosition and maxPosition are rotations normalized to [0,1]
+    public static Angle getAbsoluteEncoderPosition(Angle armAngle, double minPosition, double maxPosition) {
+        double currentPosition = armAngle.in(Degrees) / 125;
+        double absoluteEncoderPosition;
+        if (maxPosition > minPosition) {
+            absoluteEncoderPosition = minPosition + currentPosition;
+            if (absoluteEncoderPosition > 1) {
+                absoluteEncoderPosition = maxPosition + currentPosition - 1;
+            }
+        }
+        else {
+            if (currentPosition < maxPosition) {
+                absoluteEncoderPosition = maxPosition - currentPosition;
+            }
+            else if (currentPosition > minPosition) {
+                absoluteEncoderPosition = 1 - currentPosition - maxPosition;
+            }
+            else {
+                absoluteEncoderPosition = currentPosition + minPosition - 1;
+            }
+        }
+
+        return Degrees.of(absoluteEncoderPosition * 360);
+    }
+
 }

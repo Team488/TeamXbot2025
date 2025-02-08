@@ -87,7 +87,7 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
        log.info(oi.superstructureGamepad.getRightStickY());
        return MathUtils.constrainDouble(
                MathUtils.deadband(
-                       oi.superstructureGamepad.getRightStickY(),
+                       oi.superstructureGamepad.getLeftStickY(),
                        oi.getOperatorGamepadTypicalDeadband(),
                        (a) -> (a)),
                humanMinPower.get(), humanMaxPower.get());

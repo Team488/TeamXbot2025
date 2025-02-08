@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import xbot.common.command.BaseSubsystem;
+import xbot.common.logging.RobotAssertionManager;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.trajectory.XbotSwervePoint;
@@ -36,6 +37,7 @@ public class OracleSubsystem extends BaseSubsystem {
     }
 
     final PoseSubsystem pose;
+    final RobotAssertionManager assertionManager;
     final ReefCoordinateGenerator reefCoordinateGenerator;
     final ScoringQueue scoringQueue;
 
@@ -55,20 +57,23 @@ public class OracleSubsystem extends BaseSubsystem {
     private boolean firstRunInPrimaryActivity = true;
     private boolean reevaluationRequested = false;
 
+    private CoralStationMode allowedCoralStations = CoralStationMode.CLOSEST_STATION;
+
     private int instructionNumber;
     private OracleDriveAdvice currentDriveAdvice;
     private OracleSuperstructureAdvice currentSuperstructureAdvice;
 
     private Pose2d goalPose;
 
-
     final DoubleProperty rangeToStartMovingSuperstructureMeters;
     final DoubleProperty rangeToActivateScorerMeters;
 
     @Inject
     public OracleSubsystem(PoseSubsystem pose, CoralCollectionInfoSource coralInfoSource,
-                           ScoringQueue scoringQueue, ReefCoordinateGenerator generator, PropertyFactory pf) {
+                           ScoringQueue scoringQueue, ReefCoordinateGenerator generator, PropertyFactory pf,
+                           RobotAssertionManager assertionManager) {
         this.pose = pose;
+        this.assertionManager = assertionManager;
         this.coralInfoSource = coralInfoSource;
         this.scoringQueue = scoringQueue;
         this.reefCoordinateGenerator = generator;
@@ -117,11 +122,36 @@ public class OracleSubsystem extends BaseSubsystem {
     }
 
     public List<XbotSwervePoint> getRecommendedCoralPickupTrajectory() {
-        // TODO: go to more than one location.
-        var finalWaypoint = Landmarks.BlueLeftCoralStationMid;
-        var route = blueReefRoutingCircle.generateSwervePoints(pose.getCurrentPose2d(), finalWaypoint);
+        var goalCoralStation = getCoralStation(pose.getCurrentPose2d());
+        var route = blueReefRoutingCircle.generateSwervePoints(pose.getCurrentPose2d(), goalCoralStation);
         aKitLog.record("RecommendedRoute", XbotSwervePoint.generateTrajectory(route));
         return route;
+    }
+
+    private Pose2d getCoralStation(Pose2d currentPose) {
+        Pose2d leftStation = PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueLeftCoralStationMid);
+        Pose2d rightStation = PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueRightCoralStationMid);
+
+        // See if we have constraints set
+        return switch (allowedCoralStations) {
+            case ONLY_LEFT_STATION -> leftStation;
+            case ONLY_RIGHT_STATION -> rightStation;
+            case NO_STATION -> currentPose;
+            case CLOSEST_STATION -> {
+                double leftStationDistance = currentPose.getTranslation().getDistance(leftStation.getTranslation());
+                double rightStationDistance = currentPose.getTranslation().getDistance(rightStation.getTranslation());
+                yield leftStationDistance < rightStationDistance ? leftStation : rightStation;
+            }
+        };
+    }
+
+    public void setCoralStationMode(CoralStationMode mode) {
+        if (mode == null) {
+            // TODO: Add in assertion manager message later
+            return;
+        }
+
+        this.allowedCoralStations = mode;
     }
 
     private void setCurrentDriveAdvice(OracleDriveAdvice advice) {
@@ -234,6 +264,11 @@ public class OracleSubsystem extends BaseSubsystem {
 
     private void setScoringSubstageInitilizationFinished() {
         firstRunInScoringSubstage = false;
+    }
+
+    public void addScoringTask(ScoringTask scoringTask) {
+        this.scoringQueue.clearQueueIfDefault();
+        this.scoringQueue.addScoringGoalToBottomOfQueue(scoringTask);
     }
 
 

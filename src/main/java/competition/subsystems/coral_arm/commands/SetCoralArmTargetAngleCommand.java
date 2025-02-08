@@ -25,7 +25,12 @@ public class SetCoralArmTargetAngleCommand extends BaseSetpointCommand {
 
     @Override
     public void execute() {
+        // No-op, wait for arms to get to the target
+    }
 
+    @Override
+    public boolean isFinished() {
+        return true;
     }
 
     public void setAngle(Landmarks.CoralLevel angle) { this.angle = angle; }

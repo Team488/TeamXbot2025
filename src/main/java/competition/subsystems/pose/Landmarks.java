@@ -15,8 +15,6 @@ import static edu.wpi.first.units.Units.Meters;
 @Singleton
 public class Landmarks {
 
-    public static EnumsToPose enumsToPose = new EnumsToPose();
-
     // Auto starting positions
     public static Pose2d BlueLeftStartingLine = new Pose2d(7.56, 7.262, Rotation2d.fromDegrees(180));
     public static Pose2d BlueMidStartingLine = new Pose2d(7.56, 6.135, Rotation2d.fromDegrees(180));
@@ -86,7 +84,6 @@ public class Landmarks {
         namesToLocations.put(name, location);
     }
 
-
     public enum ReefFace {
         CLOSE,
         CLOSE_LEFT,
@@ -126,14 +123,17 @@ public class Landmarks {
     }
 
     public static Pose2d getBranchPose(ReefFace reefFace, Branch branch) {
+        EnumsToPose enumsToPose = new EnumsToPose();
         return enumsToPose.getBranchPose(reefFace, branch);
     }
 
     public static Pose2d getReefFacePose(ReefFace reefFace) {
+        EnumsToPose enumsToPose = new EnumsToPose();
         return enumsToPose.getReefFacePose(reefFace);
     }
 
     public static Pose2d getCoralStationSectionPose(CoralStation station, CoralStationSection section) {
+        EnumsToPose enumsToPose = new EnumsToPose();
         return enumsToPose.getCoralStationPose(station, section);
     }
 }
