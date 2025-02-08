@@ -36,6 +36,7 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
     private double lastScoredTime = -Double.MAX_VALUE;
     public final DoubleProperty waitTimeAfterScoring;
     public final DoubleProperty waitTimeAfterCollection;
+    public DoubleProperty belowThisAndItsCoral;
 
     private final TimeStableValidator hasCoralValidator;
 
@@ -133,9 +134,13 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
         return coralScorerState;
     }
     public boolean backupDetectedCoral(){
-        if (this.motor.getVelocity().in(RotationsPerSecond) <1.){
-        hasCoral();
-        return true;}
+        if (electricalContract.isCoralCollectionMotorReady()){
+            if ((this.motor.getVelocity().in(RotationsPerSecond)< belowThisAndItsCoral.get())
+                    &&
+                    coralScorerState==INTAKING){
+                return hasCoral();
+            }
+        }
         return false;
     }
 
