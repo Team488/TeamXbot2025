@@ -10,7 +10,6 @@ import competition.simulation.commands.ResetSimulatedPose;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionIntakeCommand;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionOutputCommand;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionStopCommand;
-import competition.subsystems.coral_arm_pivot.CoralArmPivotSubsystem;
 import competition.subsystems.coral_arm_pivot.commands.SetCoralArmTargetAngleCommand;
 import competition.subsystems.coral_scorer.commands.IntakeCoralCommand;
 import competition.subsystems.coral_scorer.commands.ScoreCoralCommand;
@@ -19,17 +18,18 @@ import competition.subsystems.coral_scorer.commands.StopCoralCommand;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
-import competition.subsystems.drive.commands.FollowPathCommand;
 import competition.subsystems.drive.commands.SetPoseCommand;
 import competition.subsystems.drive.commands.TestPathPlannerCommand;
 import competition.subsystems.drive.commands.TestSwerveSimpleCommand;
+import competition.subsystems.drive.commands.DriveToWaypointsWithVisionCommand;
 import competition.subsystems.oracle.commands.DriveAccordingToOracleCommand;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
-
+import competition.subsystems.drive.commands.TeleportToPositionCommand;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import competition.subsystems.elevator.commands.ForceElevatorCalibratedCommand;
 import competition.subsystems.elevator.commands.SetElevatorTargetHeightCommand;
 
+import competition.subsystems.oracle.commands.SetAllowedOracleCoralStationCommand;
 import competition.subsystems.oracle.commands.SuperstructureAccordingToOracleCommand;
 import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -59,6 +59,8 @@ public class OperatorCommandMap {
             AlignToReefWithAprilTagCommand alignToReefWithAprilTag,
             DriveAccordingToOracleCommand driveAccordingToOracle,
             SuperstructureAccordingToOracleCommand superstructureAccordingToOracle,
+            DriveToWaypointsWithVisionCommand driveToWaypointsWithVisionCommand,
+            TeleportToPositionCommand teleportToPositionCommand,
             PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
             IntakeCoralCommand intakeCoralCommand,
             ScoreCoralCommand scoreCoralCommand, TestPathPlannerCommand testPathPlannerCommand,
@@ -66,9 +68,10 @@ public class OperatorCommandMap {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(resetHeading);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(alignToReefWithAprilTag);
+//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).onTrue(driveToWaypointsWithVisionCommand);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(teleportToPositionCommand);
 
         var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
-
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Back).whileTrue(oracleControlsRobot);
 
         // since there are a lot of free buttons on the driver gamepad currently, let's map some
@@ -163,6 +166,7 @@ public class OperatorCommandMap {
         DriveSubsystem drive,
         ElevatorSubsystem elevator
     ) {
+
         oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.A)
                 .whileTrue(drive.sysIdQuasistaticRotation(SysIdRoutine.Direction.kForward)
                         .andThen(new WaitCommand(Seconds.of(1)))

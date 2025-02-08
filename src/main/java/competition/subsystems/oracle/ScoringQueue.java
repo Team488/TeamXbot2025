@@ -11,6 +11,7 @@ import java.util.Queue;
 public class ScoringQueue {
 
     private final Queue<ScoringTask> scoringTasks;
+    private boolean defaultState = true;
 
     @Inject
     public ScoringQueue() {
@@ -52,5 +53,12 @@ public class ScoringQueue {
 
     public void clearQueue() {
         scoringTasks.clear();
+    }
+
+    public void clearQueueIfDefault() {
+        if (defaultState) {
+            defaultState = false;
+            clearQueue();
+        }
     }
 }
