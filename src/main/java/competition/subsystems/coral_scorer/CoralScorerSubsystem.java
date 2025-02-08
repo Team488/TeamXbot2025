@@ -134,8 +134,9 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
     }
     public boolean backupDetectedCoral(){
         if (this.motor.getVelocity().in(RotationsPerSecond) <1.){
-        }
-        return hasCoral();
+        hasCoral();
+        return true;}
+        return false;
     }
 
     public void periodic() {
