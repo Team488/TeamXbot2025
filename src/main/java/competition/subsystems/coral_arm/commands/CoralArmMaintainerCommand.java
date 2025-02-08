@@ -84,6 +84,7 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
 
     @Override
     protected double getHumanInput() { //gamepad controls: Left joy stick up/down & Left bumper to switch between elevator/arm
+       log.info(oi.superstructureGamepad.getRightStickY());
        return MathUtils.constrainDouble(
                MathUtils.deadband(
                        oi.superstructureGamepad.getLeftStickY(),
