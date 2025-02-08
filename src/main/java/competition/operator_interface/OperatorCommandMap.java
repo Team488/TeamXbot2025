@@ -46,8 +46,7 @@ public class OperatorCommandMap {
 
     @Inject
     public OperatorCommandMap() {}
-    
-    // Example for setting up a command to fire when a button is pressed:
+
     @Inject
     public void setupDriverCommands(
             OperatorInterface operatorInterface,
@@ -56,17 +55,34 @@ public class OperatorCommandMap {
             DriveAccordingToOracleCommand driveAccordingToOracle,
             SuperstructureAccordingToOracleCommand superstructureAccordingToOracle,
             DriveToWaypointsWithVisionCommand driveToWaypointsWithVisionCommand,
-            TeleportToPositionCommand teleportToPositionCommand) {
+            TeleportToPositionCommand teleportToPositionCommand,
+            PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
+            IntakeCoralCommand intakeCoralCommand,
+            ScoreCoralCommand scoreCoralCommand) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(resetHeading);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(alignToReefWithAprilTag);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(alignToReefWithAprilTag);
 
         var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
 
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(oracleControlsRobot);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).onTrue(driveToWaypointsWithVisionCommand);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(teleportToPositionCommand);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(teleportToPositionCommand);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Back).whileTrue(oracleControlsRobot);
+
+        // since there are a lot of free buttons on the driver gamepad currently, let's map some
+        // for basic scoring control to make it easier to demo solo. These can all be removed later.
+        var prepL4 = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.FOUR);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
+
+        var homed = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.COLLECTING);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
+
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(intakeCoralCommand);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(scoreCoralCommand);
     }
+
+
 
     @Inject
     public void setUpOperatorCommands(OperatorInterface oi,

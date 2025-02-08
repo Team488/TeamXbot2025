@@ -1,6 +1,7 @@
 package competition.injection.components;
 
 import competition.electrical_contract.ElectricalContract;
+import competition.motion.TrapezoidProfileManager;
 import competition.operator_interface.OperatorCommandMap;
 import competition.simulation.BaseSimulator;
 import competition.subsystems.SubsystemDefaultCommandMap;
@@ -11,6 +12,7 @@ import competition.subsystems.oracle.OracleSubsystem;
 import competition.subsystems.oracle.ReefCoordinateGenerator;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import competition.subsystems.elevator_mechanism.SuperstructureMechanismSubsystem;
+import competition.subsystems.lights.LightSubsystem;
 import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import xbot.common.injection.components.BaseComponent;
 import xbot.common.injection.swerve.SwerveComponentHolder;
@@ -45,4 +47,7 @@ public abstract class BaseRobotComponent extends BaseComponent {
 
     public abstract ReefCoordinateGenerator reefCoordinateGenerator();
 
+    public abstract LightSubsystem lightSubsystem();
+
+    public abstract TrapezoidProfileManager.Factory trapezoidProfileManagerFactory();
 }

@@ -203,6 +203,18 @@ jacocoTestReport {
     reports {
         xml.required = true
     }
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, excludes: [
+                    'competition/injection/components/Dagger*.class',
+                    'competition/electrical_contract/*.class',
+                    '**/*_Factory.class',
+                    '**/*_Factory$InstanceHolder.class',
+                    '**/*_Factory_Impl.class',
+                    '**/*_MembersInjector.class'
+            ])
+        }))
+    }
 }
 
 // always generate the coverage report after the tests run
