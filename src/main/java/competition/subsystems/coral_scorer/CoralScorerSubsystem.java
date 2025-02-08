@@ -133,7 +133,7 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
     public CoralScorerState getCoralScorerState() {
         return coralScorerState;
     }
-    public boolean backupDetectedCoral(){
+    public boolean checkCoralByVelocity(){
         if (electricalContract.isCoralCollectionMotorReady()){
             return (this.motor.getVelocity().in(RotationsPerSecond) < belowThisAndItsCoral.get())
                     &&
@@ -147,7 +147,10 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
             motor.periodic();
         }
 
+
+
         boolean hasCoral = hasCoral();
+        boolean checkCoralByVelocity= checkCoralByVelocity();
         hasCoralValidator.checkStable(this.hasCoral());
 
         aKitLog.record("coralPresent", hasCoral());
