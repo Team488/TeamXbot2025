@@ -54,7 +54,7 @@ public class RoboxContract extends Contract2025 {
                 motor2025.type(),
                 CANBusId.RIO, // Only relevant when connected directly to the robox.
                 29, // TODO: This is not the correct long-term value. The motor needs to be given a new ID.
-                motor2025.outputConfig().withStatorCurrentLimit(Amps.of(40)));
+                motor2025.outputConfig().withStatorCurrentLimit(Amps.of(60)));
                 // When running off of the wall power supply, the current limit is 40A.
     }
 
