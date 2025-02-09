@@ -22,6 +22,7 @@ public class AlignCameraToAprilTagCalculator {
     private final int targetCameraID;
     public final Translation2d alignmentPointOffset;
     private final AKitLogger aKitLogger;
+    private final boolean backwards;
 
     public enum TagAcquisitionState {
         NeverSeen,
@@ -32,10 +33,11 @@ public class AlignCameraToAprilTagCalculator {
 
     public static Translation2d generateAlignmentPointOffset(Distance robotCenterToOuterBumperX, CameraInfo cameraInfo,
                                                              Distance offset, boolean backwards) {
+        // Flip robotCenterToOuterBumperX and offset if backwards
         return new Translation2d(
-                (backwards ? robotCenterToOuterBumperX.times(-1) : robotCenterToOuterBumperX)
-                .minus(cameraInfo.position().getMeasureX())
-                .plus(backwards ? offset.times(-1) : offset),
+                robotCenterToOuterBumperX.times(backwards ? -1 : 1)
+                        .minus(cameraInfo.position().getMeasureX())
+                        .plus(offset.times(backwards? -1 : 1)),
                 Meters.zero()
         );
     }
@@ -47,6 +49,7 @@ public class AlignCameraToAprilTagCalculator {
         this.positionalPid = positionalPid;
         this.targetAprilTagID = targetAprilTagID;
         this.targetCameraID = targetCameraID;
+        this.backwards = backwards;
 
         this.alignmentPointOffset = generateAlignmentPointOffset(
                 electricalContract.getDistanceFromCenterToOuterBumperX(),
@@ -57,7 +60,6 @@ public class AlignCameraToAprilTagCalculator {
 
         aKitLogger = new AKitLogger("AlignCameraToAprilTagCalculator/");
         aKitLogger.record("alignmentPointOffset", this.alignmentPointOffset);
-        //aKitLogger.record();
     }
 
     public TagAcquisitionState getTagAcquisitionState() {
@@ -72,11 +74,13 @@ public class AlignCameraToAprilTagCalculator {
             Translation2d aprilTagData = aprilTagVisionSubsystem.getAprilTagCameraData(targetCameraID);
 
             // This transform will always be at rotation 0, since in its own frame, the robot is always facing forward.
-            Transform2d relativeGoalTransform =
-                    new Transform2d(aprilTagData.minus(alignmentPointOffset), new Rotation2d());
+            Transform2d relativeGoalTransform = new Transform2d(
+                    aprilTagData.minus(alignmentPointOffset.times(backwards ? -1 : 1)),
+                    new Rotation2d()
+            );
 
             // Move from robot-relative frame to field frame
-            driveTarget = currentPose.transformBy(relativeGoalTransform).getTranslation();
+            driveTarget = currentPose.transformBy(relativeGoalTransform.times(backwards ? -1 : 1)).getTranslation();
             aKitLogger.record("aprilTagData", aprilTagData);
 
         } else {

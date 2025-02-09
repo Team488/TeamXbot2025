@@ -16,6 +16,7 @@ import competition.subsystems.coral_scorer.commands.ScoreWhenReadyCommand;
 import competition.subsystems.coral_scorer.commands.StopCoralCommand;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
+import competition.subsystems.drive.commands.AlignToTagGlobalMovementWithCalculator;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
 import competition.subsystems.oracle.commands.DriveAccordingToOracleCommand;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
@@ -52,7 +53,8 @@ public class OperatorCommandMap {
             SetRobotHeadingCommand resetHeading,
             AlignToReefWithAprilTagCommand alignToReefWithAprilTag,
             DriveAccordingToOracleCommand driveAccordingToOracle,
-            SuperstructureAccordingToOracleCommand superstructureAccordingToOracle) {
+            SuperstructureAccordingToOracleCommand superstructureAccordingToOracle,
+            Provider<AlignToTagGlobalMovementWithCalculator> alignToTagProvider) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(resetHeading);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(alignToReefWithAprilTag);
@@ -60,6 +62,18 @@ public class OperatorCommandMap {
         var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
 
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(oracleControlsRobot);
+
+        var alignToTag = alignToTagProvider.get();
+        alignToTag.setAprilTagTarget(21);
+        alignToTag.setCameraTarget(2);
+        alignToTag.setIsCameraBackwards(true);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(alignToTag);
+
+        var alignToTag2 = alignToTagProvider.get();
+        alignToTag2.setAprilTagTarget(18);
+        alignToTag2.setCameraTarget(0);
+        alignToTag2.setIsCameraBackwards(false);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(alignToTag2);
     }
 
     @Inject
@@ -91,10 +105,6 @@ public class OperatorCommandMap {
             SwerveDriveWithJoysticksCommand typicalSwerveDrive,
             IntakeCoralCommand intakeCoralCommand,
             ScoreCoralCommand scoreCoralCommand,
-            StopCoralCommand stopCoralCommand,
-            AlgaeCollectionIntakeCommand algaeCollectionIntakeCommand,
-            AlgaeCollectionOutputCommand algaeCollectionOutputCommand,
-            AlgaeCollectionStopCommand algaeCollectionStopCommand,
             Provider<SetCoralArmTargetAngleCommand> setArmTargetAngleCommandProvider,
             Provider<SetElevatorTargetHeightCommand> setElevatorTargetHeightCommandProvider,
             ForceElevatorCalibratedCommand forceElevatorCalibratedCommand ) {
