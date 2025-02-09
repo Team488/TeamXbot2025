@@ -47,42 +47,41 @@ public class RoboxContract extends Contract2025 {
     @Override
     public CANMotorControllerInfo getElevatorMotor() {
 
-        CANMotorControllerOutputConfig elevatorMotorConfig = new CANMotorControllerOutputConfig()
-                .withStatorCurrentLimit(Amps.of(60))
-                .withNeutralMode(CANMotorControllerOutputConfig.NeutralMode.Brake)
-                .withInversionType(CANMotorControllerOutputConfig.InversionType.Inverted);
+        var motor2025 = super.getElevatorMotor();
 
         return new CANMotorControllerInfo(
-                "ElevatorMotor",
-                MotorControllerType.TalonFx,
-                CANBusId.RIO, 29, //change deviceId later
-                elevatorMotorConfig);
+                motor2025.name(),
+                motor2025.type(),
+                CANBusId.RIO, // Only relevant when connected directly to the robox.
+                29, // TODO: This is not the correct long-term value. The motor needs to be given a new ID.
+                motor2025.outputConfig().withStatorCurrentLimit(Amps.of(40)));
+                // When running off of the wall power supply, the current limit is 40A.
     }
 
     @Override
     public CANMotorControllerInfo getCoralCollectionMotor() {
-        return new CANMotorControllerInfo("CoralCollectionMotor",
-                MotorControllerType.TalonFx,
-                CANBusId.RIO,
-                25,
-                new CANMotorControllerOutputConfig()
-                        .withStatorCurrentLimit(Amps.of(5))
-                        .withNeutralMode(CANMotorControllerOutputConfig.NeutralMode.Brake)
+
+        var motor2025 = super.getCoralCollectionMotor();
+
+        return new CANMotorControllerInfo(
+                motor2025.name(),
+                motor2025.type(),
+                CANBusId.RIO, // Only relevant when connected directly to the robox.
+                motor2025.deviceId(), // TODO: This is not the correct long-term value. The motor needs to be given a new ID.
+                motor2025.outputConfig().withStatorCurrentLimit(Amps.of(5)) // limiting current on the robox
         );
     }
 
     public CANMotorControllerInfo getCoralArmPivotMotor() {
-        return new CANMotorControllerInfo("ArmPivotMotor",
-                MotorControllerType.TalonFx,
-                CANBusId.RIO,
-                24,
-                new CANMotorControllerOutputConfig().withStatorCurrentLimit(Amps.of(17.5)));
-    }
 
-    /*
-    @Override
-    public CameraInfo[] getCameraInfo() {
-        // Robox has no cameras, so return an empty array
-        return new CameraInfo[]{};
-    }*/
+        var motor2025 = super.getCoralArmPivotMotor();
+
+        return new CANMotorControllerInfo(
+                motor2025.name(),
+                motor2025.type(),
+                CANBusId.RIO, // Only relevant when connected directly to the robox.
+                motor2025.deviceId(), // TODO: This is not the correct long-term value. The motor needs to be given a new ID.
+                motor2025.outputConfig().withStatorCurrentLimit(Amps.of(17.5)) // limiting current on the robox
+        );
+    }
 }

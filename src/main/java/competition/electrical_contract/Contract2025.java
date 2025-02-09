@@ -53,7 +53,10 @@ public class Contract2025 extends ElectricalContract {
                 MotorControllerType.TalonFx,
                 CANBusId.DefaultCanivore,
                 25,
-                new CANMotorControllerOutputConfig().withStatorCurrentLimit(Amps.of(5)));
+                new CANMotorControllerOutputConfig()
+                        .withStatorCurrentLimit(Amps.of(5))
+                        .withNeutralMode(CANMotorControllerOutputConfig.NeutralMode.Brake)
+        );
     }
 
     public boolean isArmPivotReady() { return false; }
@@ -125,7 +128,7 @@ public class Contract2025 extends ElectricalContract {
     public CANMotorControllerInfo getElevatorMotor() {
 
         CANMotorControllerOutputConfig elevatorMotorConfig = new CANMotorControllerOutputConfig()
-                .withStatorCurrentLimit(Amps.of(40))
+                .withStatorCurrentLimit(Amps.of(60))
                 .withNeutralMode(CANMotorControllerOutputConfig.NeutralMode.Brake)
                 .withInversionType(CANMotorControllerOutputConfig.InversionType.Inverted);
 
@@ -208,6 +211,12 @@ public class Contract2025 extends ElectricalContract {
     @Override
     public CANMotorControllerInfo getSteeringMotor(SwerveInstance swerveInstance) {
 
+        CANMotorControllerOutputConfig invertedSteeringMotorConfig =
+                new CANMotorControllerOutputConfig()
+                        .withInversionType(CANMotorControllerOutputConfig.InversionType.Inverted)
+                        .withStatorCurrentLimit(Amps.of(45))
+                        .withNeutralMode(CANMotorControllerOutputConfig.NeutralMode.Brake);
+
         return switch (swerveInstance.label()) {
             case "FrontLeftDrive" ->
                     new CANMotorControllerInfo(
@@ -215,28 +224,28 @@ public class Contract2025 extends ElectricalContract {
                             MotorControllerType.TalonFx,
                             CANBusId.DefaultCanivore,
                             38,
-                            invertedDriveMotorConfig);
+                            invertedSteeringMotorConfig);
             case "FrontRightDrive" ->
                     new CANMotorControllerInfo(
                             getSteeringControllerName(swerveInstance),
                             MotorControllerType.TalonFx,
                             CANBusId.DefaultCanivore,
                             30,
-                            invertedDriveMotorConfig);
+                            invertedSteeringMotorConfig);
             case "RearLeftDrive" ->
                     new CANMotorControllerInfo(
                             getSteeringControllerName(swerveInstance),
                             MotorControllerType.TalonFx,
                             CANBusId.DefaultCanivore,
                             21,
-                            invertedDriveMotorConfig);
+                            invertedSteeringMotorConfig);
             case "RearRightDrive" ->
                     new CANMotorControllerInfo(
                             getSteeringControllerName(swerveInstance),
                             MotorControllerType.TalonFx,
                             CANBusId.DefaultCanivore,
                             28,
-                            invertedDriveMotorConfig);
+                            invertedSteeringMotorConfig);
             default -> null;
         };
     }

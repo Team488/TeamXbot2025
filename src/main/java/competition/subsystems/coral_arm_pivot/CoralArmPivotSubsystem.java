@@ -52,34 +52,35 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
         if (electricalContract.isCoralArmPivotMotorReady()) {
             this.armMotor = xcanMotorControllerFactory.create(electricalContract.getCoralArmPivotMotor(),
                     getPrefix(), "ArmPivotMotor");
-            /*this.armAbsoluteEncoder = xAbsoluteEncoderFactory.create(electricalContract.getCoralArmPivotAbsoluteEncoder(),
-                    "ArmPivotAbsoluteEncoder");
-            this.lowSensor = xDigitalInputFactory.create(electricalContract.getCoralArmPivotLowSensor(),
-                    "ArmPivotLowSensor");*/
-            this.armAbsoluteEncoder = null;
-            this.lowSensor = null;
             this.registerDataFrameRefreshable(this.armMotor);
-            //this.registerDataFrameRefreshable(this.armAbsoluteEncoder);
-            //this.registerDataFrameRefreshable(this.lowSensor);
         } else {
             this.armMotor = null;
+        }
+
+        if (electricalContract.isCoralArmPivotAbsoluteEncoderReady()) {
+            this.armAbsoluteEncoder = xAbsoluteEncoderFactory.create(electricalContract.getCoralArmPivotAbsoluteEncoder(),
+                    this.getPrefix());
+            this.registerDataFrameRefreshable(this.armAbsoluteEncoder);
+        } else {
             this.armAbsoluteEncoder = null;
+        }
+
+        if (electricalContract.isCoralArmPivotLowSensorReady()) {
+            this.lowSensor = xDigitalInputFactory.create(electricalContract.getCoralArmPivotLowSensor(),
+                    this.getPrefix());
+            this.registerDataFrameRefreshable(this.lowSensor);
+        } else {
             this.lowSensor = null;
         }
 
         this.degreesPerRotations = propertyFactory.createPersistentProperty("Degrees Per Rotations", 0.1);
-
         this.rangeOfMotionDegrees = propertyFactory.createPersistentProperty("Range of Motion in Degrees", 125);
         this.minArmPosition = propertyFactory.createPersistentProperty("Min AbsEncoder Position in Degrees", 90);
         this.maxArmPosition = propertyFactory.createPersistentProperty("Max AbsEncoder Position in Degrees", 108);
         this.scoreAngle = propertyFactory.createPersistentProperty("Scoring Angle in Degrees", 125);
         this.humanLoadAngle = propertyFactory.createPersistentProperty("Human Loading Angle in Degrees", 0);
         this.powerWhenNotCalibrated = propertyFactory.createPersistentProperty("Power When Not Calibrated", 0.05);
-
     }
-
-
-
 
     @Override
     public Angle getCurrentValue() {
@@ -208,7 +209,7 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
 
     }
 
-    public void forceCalibrated() {
+    public void forceCalibratedHere() {
         if (electricalContract.isCoralArmPivotMotorReady()) {
             rotationsAtZero = getMotorPosition().in(Rotations);
         }

@@ -162,7 +162,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     @Override
     public void setPower(double power) {
         if(contract.isElevatorReady()){
-            /*if (isTouchingBottom()){
+            if (isTouchingBottom()){
                 power = MathUtils.constrainDouble(power,powerWhenBottomSensorHit.get(),1);
             }
             if (belowLowerLimit()){
@@ -173,7 +173,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
             }
             if (!isCalibrated){
                 power = MathUtils.constrainDouble(power,calibrationNegativePower.get(),0);
-            }*/
+            }
 
             aKitLog.record("ElevatorPower", power);
 

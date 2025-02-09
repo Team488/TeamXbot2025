@@ -35,20 +35,11 @@ public class CoralArmPivotMaintainerCommand extends BaseMaintainerCommand<Angle>
        this.oi = oi;
        pf.setPrefix(this);
        pf.setDefaultLevel(Property.PropertyLevel.Important);
-       positionalPID = pidf.create(getPrefix() + "PositionalPID", 0.05,0,0);
+       positionalPID = pidf.create(getPrefix() + "PositionalPID", 0.05,0,0, 0.4, -0.4);
 
        humanMaxPower = pf.createPersistentProperty("HumanMaxPower", .11);
        humanMinPower = pf.createPersistentProperty("HumanMinPower", -.11);
-
-       positionalPID.setMaxOutput(0.4);
-         positionalPID.setMinOutput(-0.4);
    }
-
-    @Override
-    public void initialize() {
-        log.info("Initializing");
-        armPivotSubsystem.setTargetValue(armPivotSubsystem.getCurrentValue());
-    }
 
     @Override
     protected void coastAction() { //rest when no human control and before pid

@@ -16,7 +16,8 @@ public class ForceCoralPivotCalibrated extends BaseCommand {
 
     @Override
     public void initialize() {
-        coralArmPivotSubsystem.forceCalibrated();
+        log.info("Initializing");
+        coralArmPivotSubsystem.forceCalibratedHere();
     }
 
     @Override
