@@ -20,6 +20,7 @@ import xbot.common.injection.swerve.SwerveInstance;
 import xbot.common.math.XYPair;
 import xbot.common.subsystems.vision.CameraCapabilities;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Inches;
 
 public class Contract2025 extends ElectricalContract {
@@ -56,14 +57,14 @@ public class Contract2025 extends ElectricalContract {
     }
 
     public boolean isArmPivotReady() { return false; }
-    public boolean isArmPivotMotorReady() { return false; }
+    public boolean isCoralArmMotorReady() { return false; }
 
-    public CANMotorControllerInfo getArmPivotMotor() {
+    public CANMotorControllerInfo getCoralArmPivotMotor() {
         return new CANMotorControllerInfo("ArmPivotMotor",
                 MotorControllerType.TalonFx,
                 CANBusId.DefaultCanivore,
                 709,
-                new CANMotorControllerOutputConfig());
+                new CANMotorControllerOutputConfig().withStatorCurrentLimit(Amps.of(5)));
     }
 
     public boolean isCoralSensorReady() { return false; }
@@ -76,12 +77,14 @@ public class Contract2025 extends ElectricalContract {
     public boolean isElevatorBottomSensorReady() { return false; }
 
     @Override
-    public DeviceInfo getElevatorBottomSensor() { return new DeviceInfo("ElevatorBottomSensor",1); }
+    public DeviceInfo getElevatorBottomSensor() { return new DeviceInfo("ElevatorBottomSensor", 3); }
 
     @Override
-    public boolean isAlgaeArmPivotMotorReady() {
-        return false;
-    }
+    public boolean isAlgaeArmPivotMotorReady() {return false;}
+
+    public boolean isAlgaeArmBottomSensorReady(){return false;}
+
+    public DeviceInfo getAlgaeArmBottomSensor() {return new DeviceInfo("AlgaeArmBottomSensor", 2); }
 
     @Override
     public boolean isHumanLoadRampReady() {
@@ -96,7 +99,7 @@ public class Contract2025 extends ElectricalContract {
                 MotorControllerType.TalonFx,
                 CANBusId.DefaultCanivore,
                 884,
-                new CANMotorControllerOutputConfig());
+                new CANMotorControllerOutputConfig().withStatorCurrentLimit(Amps.of(5)));
     }
 
 
@@ -106,16 +109,16 @@ public class Contract2025 extends ElectricalContract {
         return true;
     }
     // change channels
-    public DeviceInfo getArmPivotAbsoluteEncoder() {
+    public DeviceInfo getCoralArmPivotAbsoluteEncoder() {
         return new DeviceInfo("ArmPivotAbsoluteEncoder", 100);
     }
 
-    public boolean isArmPivotAbsoluteEncoderReady() { return false; }
+    public boolean isCoralArmPivotAbsoluteEncoderReady() { return false; }
 
-    public DeviceInfo getArmPivotLowSensor() {
+    public DeviceInfo getCoralArmPivotLowSensor() {
         return new DeviceInfo("ArmPivotLowSensor", 101);
     }
-    public boolean isArmPivotLowSensorReady() { return false; }
+    public boolean isCoralArmPivotLowSensorReady() { return false; }
 
     @Override
     public boolean isElevatorReady() {
@@ -128,7 +131,7 @@ public class Contract2025 extends ElectricalContract {
                 "ElevatorMotor",
                 MotorControllerType.TalonFx,
                 CANBusId.DefaultCanivore, 99, //change deviceId later
-                new CANMotorControllerOutputConfig());
+                new CANMotorControllerOutputConfig().withStatorCurrentLimit(Amps.of(5)));
     }
 
     @Override
@@ -263,21 +266,39 @@ public class Contract2025 extends ElectricalContract {
         };
     }
 
-    private static double aprilCameraXDisplacement = 13.153 / PoseSubsystem.INCHES_IN_A_METER;
-    private static double aprilCameraYDisplacement = 12.972 / PoseSubsystem.INCHES_IN_A_METER;
-    private static double aprilCameraZDisplacement = 9.014 / PoseSubsystem.INCHES_IN_A_METER;
-    private static double aprilCameraPitch = Math.toRadians(0);
-    private static double aprilCameraYaw = Math.toRadians(0);
+    private static double frontAprilCameraXDisplacement = 10.25 / PoseSubsystem.INCHES_IN_A_METER;
+    private static double frontAprilCameraYDisplacement = 6.5 / PoseSubsystem.INCHES_IN_A_METER;
+    private static double frontAprilCameraZDisplacement = 7 / PoseSubsystem.INCHES_IN_A_METER;
+    private static double frontAprilCameraPitch = Math.toRadians(-12);
+    private static double frontAprilCameraYaw = Math.toRadians(0);
 
     public CameraInfo[] getCameraInfo() {
         return new CameraInfo[] {
                 new CameraInfo("Apriltag_FrontLeft_Camera",
                         "AprilTagFrontLeft",
                         new Transform3d(new Translation3d(
-                                aprilCameraXDisplacement,
-                                aprilCameraYDisplacement,
-                                aprilCameraZDisplacement),
-                                new Rotation3d(0, aprilCameraPitch, aprilCameraYaw)),
+                                frontAprilCameraXDisplacement,
+                                frontAprilCameraYDisplacement,
+                                frontAprilCameraZDisplacement),
+                                new Rotation3d(0, frontAprilCameraPitch, frontAprilCameraYaw)),
+                        EnumSet.of(CameraCapabilities.APRIL_TAG)),
+
+                new CameraInfo("Apriltag_FrontRight_Camera",
+                        "AprilTagFrontRight",
+                        new Transform3d(new Translation3d(
+                                frontAprilCameraXDisplacement,
+                                -frontAprilCameraYDisplacement,
+                                frontAprilCameraZDisplacement),
+                                new Rotation3d(0, frontAprilCameraPitch, frontAprilCameraYaw)),
+                        EnumSet.of(CameraCapabilities.APRIL_TAG)),
+
+                new CameraInfo("Apriltag_Back_Camera",
+                        "AprilTagBack",
+                        new Transform3d(new Translation3d(
+                                -frontAprilCameraXDisplacement,
+                                0,
+                                frontAprilCameraZDisplacement),
+                                new Rotation3d(0, frontAprilCameraPitch, Math.PI)),
                         EnumSet.of(CameraCapabilities.APRIL_TAG))
         };
     }
