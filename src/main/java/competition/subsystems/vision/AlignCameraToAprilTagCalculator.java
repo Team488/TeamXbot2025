@@ -7,7 +7,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Distance;
-import xbot.common.advantage.AKitLogger;
 import xbot.common.injection.electrical_contract.CameraInfo;
 import xbot.common.math.PIDManager;
 
@@ -21,7 +20,6 @@ public class AlignCameraToAprilTagCalculator {
     private final int targetAprilTagID;
     private final int targetCameraID;
     public final Translation2d alignmentPointOffset;
-    private final AKitLogger aKitLogger;
     private final boolean backwards;
 
     public enum TagAcquisitionState {
@@ -57,9 +55,6 @@ public class AlignCameraToAprilTagCalculator {
                 Inches.of(offsetInInches),
                 backwards
         );
-
-        aKitLogger = new AKitLogger("AlignCameraToAprilTagCalculator/");
-        aKitLogger.record("alignmentPointOffset", this.alignmentPointOffset);
     }
 
     public TagAcquisitionState getTagAcquisitionState() {
@@ -81,18 +76,12 @@ public class AlignCameraToAprilTagCalculator {
 
             // Move from robot-relative frame to field frame
             driveTarget = currentPose.transformBy(relativeGoalTransform.times(backwards ? -1 : 1)).getTranslation();
-            aKitLogger.record("aprilTagData", aprilTagData);
 
         } else {
             if (tagAcquisitionState == TagAcquisitionState.LockedOn) {
                 tagAcquisitionState = TagAcquisitionState.Lost;
             }
         }
-
-        aKitLogger.record("driveTarget", driveTarget);
-        aKitLogger.record("alignmentPointOffset", alignmentPointOffset);
-
-        aKitLogger.record("tagAcquisitionState", tagAcquisitionState);
 
         return switch (tagAcquisitionState) {
             case LockedOn, Lost -> DrivePowerCalculator.getPowerToAchieveFieldPosition(
