@@ -171,8 +171,9 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     @Override
     public Distance getCurrentValue() {
-        return Meters.of(contract.isElevatorReady() ?
-                (this.masterMotor.getPosition().in(Rotations) - elevatorPositionOffset) * metersPerRotation.in(Meters) : 0);
+        return Meters.of(contract.isElevatorReady()
+                ? (this.masterMotor.getPosition().in(Rotations) - elevatorPositionOffset) * metersPerRotation.in(Meters)
+                : 0);
     }
 
     public LinearVelocity getCurrentVelocity() {
