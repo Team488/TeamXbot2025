@@ -31,7 +31,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     ElectricalContract electricalContract;
 
     double rotationsAtZero = 0;
-    boolean isCalibrated = true;
+    boolean isCalibrated;
 
     public final DoubleProperty rotationsPerDegrees;
     public final Angle degreesPerRotations;
