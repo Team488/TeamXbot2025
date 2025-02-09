@@ -1,5 +1,6 @@
 package competition.subsystems.vision;
 
+import org.kobe.xbot.JClient.CachedSubscriber;
 import org.kobe.xbot.JClient.XTablesClient;
 import org.kobe.xbot.JClient.XTablesClientManager;
 import xbot.common.advantage.DataFrameRefreshable;
@@ -21,11 +22,13 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
     final RobotAssertionManager assertionManager;
 
     // xtables properties
-    final StringProperty xtablesCoordinateLocation;
+    final StringProperty xtablesWayPointLocation;
     final StringProperty xtablesHeadingLocation;
 
     // always persisted xtables client manager instance
     private XTablesClientManager xTablesClientManager;
+    private CachedSubscriber wayPointSubscriber = null;
+    private CachedSubscriber headingSubscriber = null;
 
 
     @Inject
@@ -33,10 +36,37 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
         this.assertionManager = assertionManager;
         pf.setPrefix(this);
 
-        xtablesCoordinateLocation = pf.createPersistentProperty("Xtables Coordinate Location", "target_waypoints");
+        xtablesWayPointLocation = pf.createPersistentProperty("Xtables Coordinate Location", "target_waypoints");
         xtablesHeadingLocation = pf.createPersistentProperty("Xtables Heading Location", "target_heading");
 
         xTablesClientManager = XTablesClient.getDefaultClientAsynchronously();
+
+
+
+    }
+
+    public CachedSubscriber getWayPointSubscriber() {
+        if(wayPointSubscriber == null) {
+            // try get xclient
+            XTablesClient client = this.xTablesClientManager.getOrNull();
+            if(client != null) {
+                // try create
+                wayPointSubscriber = new CachedSubscriber("target_waypoints",client);
+            }
+        }
+        return wayPointSubscriber;
+    }
+
+    public CachedSubscriber getHeadingSubscriber() {
+        if(headingSubscriber == null) {
+            // try get xclient
+            XTablesClient client = this.xTablesClientManager.getOrNull();
+            if(client != null) {
+                // try create
+                headingSubscriber = new CachedSubscriber(xtablesHeadingLocation.get(),client);
+            }
+        }
+        return headingSubscriber;
     }
 
     public XTablesClientManager getXTablesManager(){
@@ -48,8 +78,8 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
         return xTablesClientManager.getOrNull();
     }
 
-    public String getXtablesCoordinateLocation(){
-        return xtablesCoordinateLocation.get();
+    public String getXtablesWayPointLocation(){
+        return xtablesWayPointLocation.get();
     }
 
     public String getXtablesHeadingLocation(){

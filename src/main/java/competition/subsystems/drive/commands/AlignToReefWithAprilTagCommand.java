@@ -22,7 +22,7 @@ import java.util.HashMap;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 
-public class AlignToReefWithAprilTagCommand extends BaseCommand {
+public class  AlignToReefWithAprilTagCommand extends BaseCommand {
     AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
     DriveSubsystem drive;
     HeadingModule headingModule;
@@ -43,11 +43,20 @@ public class AlignToReefWithAprilTagCommand extends BaseCommand {
         addRequirements(drive);
         CameraInfo[] cameraInfos = electricalContract.getCameraInfo();
 
-        this.alignmentPointOffset = new Translation2d(
-                electricalContract.getDistanceFromCenterToOuterBumperX()
-                        .minus(cameraInfos[0].position().getMeasureX()),
-                Meters.zero()
-        );
+        if(cameraInfos.length <= 0){
+            this.alignmentPointOffset = new Translation2d(
+                    electricalContract.getDistanceFromCenterToOuterBumperX(),
+                    Meters.zero()
+            );
+        }
+        else{
+            this.alignmentPointOffset = new Translation2d(
+                    electricalContract.getDistanceFromCenterToOuterBumperX()
+                            .minus(cameraInfos[0].position().getMeasureX()),
+                    Meters.zero()
+            );
+        }
+
 
     }
 

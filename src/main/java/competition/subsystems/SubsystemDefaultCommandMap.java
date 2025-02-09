@@ -53,11 +53,6 @@ public class SubsystemDefaultCommandMap {
     }
 
     @Inject
-    public void setupHumanLoadRampSubSystem(HumanLoadRampSubsystem humanLoadRampSubsystem, HumanLoadRampRetractCommand command){
-        humanLoadRampSubsystem.setDefaultCommand(command);
-    }
-
-    @Inject
     public void setupAlgaeArmSubsystem(AlgaeArmSubsystem algaeArmSubsystem, AlgaeArmMaintainerCommand commands){
         algaeArmSubsystem.setDefaultCommand(commands);
     }
