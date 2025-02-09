@@ -1,10 +1,7 @@
 package competition.commandgroups;
 
-import competition.subsystems.coral_arm.commands.SetCoralArmTargetAngleCommand;
-import competition.subsystems.coral_scorer.commands.IntakeUntillCoral;
-import competition.subsystems.elevator.commands.SetElevatorTargetHeightCommand;
+import competition.subsystems.coral_scorer.commands.IntakeUntilCoralCollectedCommand;
 import competition.subsystems.pose.Landmarks;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 
 import javax.inject.Inject;
@@ -14,10 +11,9 @@ public class HumanLoadUntillCoralCollectedCommandGroup extends ParallelCommandGr
 
     @Inject
     public HumanLoadUntillCoralCollectedCommandGroup(PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
-                                                     IntakeUntillCoral intakeUntillCoral,
-                                                     Landmarks.CoralLevel coralGoal){
+                                                     IntakeUntilCoralCollectedCommand intakeUntilCoralCollectedCommand){
 
-        var prepCoralSystemCommandGroup = prepCoralSystemCommandGroupFactory.create(coralGoal);
-        this.addCommands(intakeUntillCoral, prepCoralSystemCommandGroup);
+        var prepCoralSystemCommandGroup = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.COLLECTING);
+        this.addCommands(intakeUntilCoralCollectedCommand, prepCoralSystemCommandGroup);
     }
 }
