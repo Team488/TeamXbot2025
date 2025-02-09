@@ -40,6 +40,11 @@ public class RoboxContract extends Contract2025 {
     }
 
     @Override
+    public boolean isCoralArmMotorReady() {
+        return true;
+    }
+
+    @Override
     public CANMotorControllerInfo getElevatorMotor() {
 
         var motor2025 = super.getElevatorMotor();
@@ -78,5 +83,10 @@ public class RoboxContract extends Contract2025 {
                 motor2025.deviceId(), // TODO: This is not the correct long-term value. The motor needs to be given a new ID.
                 motor2025.outputConfig().withStatorCurrentLimit(Amps.of(17.5)) // limiting current on the robox
         );
+    }
+
+    @Override
+    public CameraInfo[] getCameraInfo() {
+        return new CameraInfo[] {};
     }
 }
