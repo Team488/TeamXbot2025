@@ -39,11 +39,15 @@ public class CoralArmPivotMaintainerCommand extends BaseMaintainerCommand<Angle>
 
        humanMaxPower = pf.createPersistentProperty("HumanMaxPower", .11);
        humanMinPower = pf.createPersistentProperty("HumanMinPower", -.11);
+
+       positionalPID.setMaxOutput(0.4);
+         positionalPID.setMinOutput(-0.4);
    }
 
     @Override
     public void initialize() {
         log.info("Initializing");
+        armPivotSubsystem.setTargetValue(armPivotSubsystem.getCurrentValue());
     }
 
     @Override
