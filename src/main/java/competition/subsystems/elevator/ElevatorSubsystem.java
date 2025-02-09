@@ -32,15 +32,6 @@ import static edu.wpi.first.units.Units.Volts;
 @Singleton
 public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
-    public enum ElevatorPowerRestrictionReason{
-        FullPowerAvailable,
-        BottomSensorHit,
-        UpperSensorHit,
-        Uncalibrated,
-        AboveMaxHeight,
-        BelowMinHeight
-    }
-
     private double periodicTickCounter;
 
     final ElectricalContract contract;
@@ -192,7 +183,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     @Override
     public Distance getCurrentValue() {
-        Distance currentHeight = Meters.of(0);
+        Distance currentHeight = Meters.zero();
         if (contract.isElevatorReady()){
             currentHeight = Meters.of(
                     (this.masterMotor.getPosition().in(Rotations) - elevatorPositionOffset) * getMetersPerRotation().in(Meters));

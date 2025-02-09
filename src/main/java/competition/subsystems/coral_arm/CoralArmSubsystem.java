@@ -33,6 +33,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     double rotationsAtZero = 0;
     boolean isCalibrated = false;
     private final DoubleProperty degreesPerRotations;
+
     public final DoubleProperty scoreAngle;
     public final DoubleProperty humanLoadAngle;
     public final DoubleProperty rangeOfMotionDegrees;
@@ -148,11 +149,9 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     public void setPower(double power) {
         if (electricalContract.isCoralArmMotorReady()) {
             if (getCurrentValue().in(Degrees) <= humanLoadAngle.get()) {
-                log.info("human load" + humanLoadAngle.get());
                 power = MathUtils.constrainDouble(power, 0, 1);
             }
             if (getCurrentValue().in(Degrees) > scoreAngle.get()) {
-                log.info(scoreAngle.get());
                 power = MathUtils.constrainDouble(power, -1, 0);
             }
             if (!isCalibrated()) {
@@ -166,6 +165,10 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     @Override
     public boolean isCalibrated() {
         return isCalibrated;
+    }
+
+    public void setCalibrated(boolean calibrated){
+        isCalibrated = calibrated;
     }
 
     @Override

@@ -42,8 +42,8 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
                90, 90, armPivotSubsystem.getCurrentValue().in(Degrees));
        pf.setDefaultLevel(Property.PropertyLevel.Important);
 
-       humanMaxPower = pf.createPersistentProperty("HumanMaxPower", .11);
-       humanMinPower = pf.createPersistentProperty("HumanMinPower", -.11);
+       humanMaxPower = pf.createPersistentProperty("HumanMaxPower", .20);
+       humanMinPower = pf.createPersistentProperty("HumanMinPower", -.20);
    }
 
     @Override
@@ -79,7 +79,6 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
 
     @Override
     protected double getHumanInput() { //gamepad controls: Left joy stick up/down & Left bumper to switch between elevator/arm
-       log.info(oi.superstructureGamepad.getRightStickY());
        return MathUtils.constrainDouble(
                MathUtils.deadband(
                        oi.superstructureGamepad.getRightStickY(),
