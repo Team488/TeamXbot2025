@@ -26,13 +26,14 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 @Singleton
 public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
-    public enum ElevatorPowerRestrictionReason{
+    public enum ElevatorPowerRestrictionReason {
         FullPowerAvailable,
         BottomSensorHit,
         UpperSensorHit,
@@ -101,7 +102,9 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         //to be tuned
         this.rotationsPerMeter = pf.createPersistentProperty("RotationsPerMeter", 1923.0);
         this.metersPerRotation = Meters.of(rotationsPerMeter.get() != 0 ? 1.0 / rotationsPerMeter.get() : 0);
-        if (rotationsPerMeter.get() == 0){log.warn("ROTATIONS PER METER CANNOT BE ZERO CHANGE THIS NOW PLEASE");}
+        if (rotationsPerMeter.get() == 0) {
+            log.warn("ROTATIONS PER METER CANNOT BE ZERO CHANGE THIS NOW PLEASE");
+        }
 
         this.calibrationNegativePower = pf.createPersistentProperty("calibrationNegativePower", -0.05);
 
@@ -114,7 +117,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
         this.sysId = new SysIdRoutine(
                 new SysIdRoutine.Config(
-                        null, null,
+                        Volts.of(0.2).per(Second),
+                        Volts.of(0.5),
                         Seconds.of(8),
                         (state) -> org.littletonrobotics.junction.Logger.recordOutput(this.getPrefix() + "/SysIdState", state.toString())),
                 new SysIdRoutine.Mechanism(
@@ -124,20 +128,19 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
                 )
         );
 
-        if(contract.isElevatorReady()){
+        if (contract.isElevatorReady()) {
             this.masterMotor = motorFactory.create(
                     contract.getElevatorMotor(), this.getPrefix(), "ElevatorMotorPID",
-                    new XCANMotorControllerPIDProperties(1,0,0.5)
-                    );
+                    new XCANMotorControllerPIDProperties(1, 0, 0.5)
+            );
             this.registerDataFrameRefreshable(masterMotor);
         }
-        if (contract.isElevatorBottomSensorReady()){
 
-            this.bottomSensor= xDigitalInputFactory.create(contract.getElevatorBottomSensor(), "Elevator Bottom Sensor");
+        if (contract.isElevatorBottomSensorReady()) {
+            this.bottomSensor = xDigitalInputFactory.create(contract.getElevatorBottomSensor(), "Elevator Bottom Sensor");
             this.registerDataFrameRefreshable(bottomSensor);
-
-        }else{
-            this.bottomSensor=null;
+        } else {
+            this.bottomSensor = null;
         }
 
         if (contract.isElevatorDistanceSensorReady()) {
@@ -147,29 +150,34 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
             this.distanceSensor = null;
         }
 
+        if (contract.isElevatorReady() && contract.isElevatorBottomSensorReady()) {
+            this.masterMotor.setSoftwareReverseLimit(this::isTouchingBottom);
+            this.masterMotor.setSoftwareReverseLimit(() -> getCurrentValue().gt(upperHeightLimit.get()));
+        }
+
         setCalibrated(false);
     }
 
     @Override
     public void setPower(double power) {
-        if(contract.isElevatorReady()){
-            if (isTouchingBottom()){
-                power = MathUtils.constrainDouble(power,powerWhenBottomSensorHit.get(),1);
+        if (contract.isElevatorReady()) {
+            if (isTouchingBottom()) {
+                power = MathUtils.constrainDouble(power, powerWhenBottomSensorHit.get(), 1);
             }
-            if (belowLowerLimit()){
-                power = MathUtils.constrainDouble(power,powerNearLowerLimitThreshold.get(), 1);
+            if (belowLowerLimit()) {
+                power = MathUtils.constrainDouble(power, powerNearLowerLimitThreshold.get(), 1);
             }
-            if (aboveUpperLimit()){
+            if (aboveUpperLimit()) {
                 power = MathUtils.constrainDouble(power, -1, powerNearUpperLimitThreshold.get());
             }
-            if (!isCalibrated){
-                power = MathUtils.constrainDouble(power,calibrationNegativePower.get(),0);
+            if (!isCalibrated) {
+                power = MathUtils.constrainDouble(power, calibrationNegativePower.get(), 0);
             }
-            masterMotor.setVoltage(Volts.of(power*12));
+            masterMotor.setVoltage(Volts.of(power * 12));
         }
     }
 
-    public void markElevatorAsCalibratedAgainstLowerLimit(){
+    public void markElevatorAsCalibratedAgainstLowerLimit() {
         isCalibrated = true;
         if (this.masterMotor != null) {
             elevatorPositionOffset = this.masterMotor.getPosition().in(Rotations);
@@ -181,7 +189,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     @Override
     public Distance getCurrentValue() {
         Distance currentHeight = Meters.of(0);
-        if (contract.isElevatorReady()){
+        if (contract.isElevatorReady()) {
             currentHeight = Meters.of(
                     (this.masterMotor.getPosition().in(Rotations) - elevatorPositionOffset) * metersPerRotation.in(Meters));
         }
@@ -198,16 +206,16 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     @Override
     public Distance getTargetValue() {
-       return elevatorTargetHeight;
+        return elevatorTargetHeight;
     }
 
     @Override
     public void setTargetValue(Distance value) {
-       elevatorTargetHeight = value;
+        elevatorTargetHeight = value;
     }
 
-    public void setTargetHeight(Landmarks.CoralLevel value){
-        switch (value){
+    public void setTargetHeight(Landmarks.CoralLevel value) {
+        switch (value) {
             case TWO -> setTargetValue(l2Height.get());
             case THREE -> setTargetValue(l3Height.get());
             case FOUR -> setTargetValue(l4Height.get());
@@ -216,22 +224,22 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         }
     }
 
-    public boolean isTouchingBottom(){
-        if (contract.isElevatorBottomSensorReady()){
+    public boolean isTouchingBottom() {
+        if (contract.isElevatorBottomSensorReady()) {
             return this.bottomSensor.get();
         }
         return false;
     }
 
-    public boolean aboveUpperLimit(){
+    public boolean aboveUpperLimit() {
         return getCurrentValue().in(Meters) > upperHeightLimit.get().in(Meters);
     }
 
-    public boolean belowLowerLimit(){
+    public boolean belowLowerLimit() {
         return getCurrentValue().in(Meters) < lowerHeightLimit.get().in(Meters);
     }
 
-    public void setCalibrated(boolean calibrated){
+    public void setCalibrated(boolean calibrated) {
         isCalibrated = calibrated;
     }
 
@@ -255,6 +263,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     /**
      * Gets a command to run the SysId routine in the quasistatic mode.
+     *
      * @param direction The direction to run the SysId routine.
      * @return The command to run the SysId routine.
      */
@@ -264,6 +273,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     /**
      * Gets a command to run the SysId routine in the dynamic mode.
+     *
      * @param direction The direction to run the SysId routine.
      * @return The command to run the SysId routine.
      */
@@ -272,19 +282,20 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     }
 
     @Override
-    public void periodic(){
-        if (contract.isElevatorReady()){
+    public void periodic() {
+        if (contract.isElevatorReady()) {
             masterMotor.periodic();
         }
         //bandage case: isTouchingBottom flashes true for one tick on startup, investigate later?
-        if (this.isTouchingBottom() && periodicTickCounter >= 3){
+        if (this.isTouchingBottom() && periodicTickCounter >= 3) {
             markElevatorAsCalibratedAgainstLowerLimit();
         }
-        aKitLog.record("ElevatorTargetHeight-m",elevatorTargetHeight);
-        aKitLog.record("ElevatorCurrentHeight-m",getCurrentValue().in(Meters));
-        aKitLog.record("ElevatorBottomSensor",this.isTouchingBottom());
+
+        aKitLog.record("ElevatorTargetHeight-m", elevatorTargetHeight);
+        aKitLog.record("ElevatorCurrentHeight-m", getCurrentValue().in(Meters));
+        aKitLog.record("ElevatorBottomSensor", this.isTouchingBottom());
         aKitLog.record("isElevatorCalibrated", isCalibrated());
-        aKitLog.record("ElevatorDistanceSensor-m",getRawDistance().in(Meters));
+        aKitLog.record("ElevatorDistanceSensor-m", getRawDistance().in(Meters));
 
         periodicTickCounter++;
     }
