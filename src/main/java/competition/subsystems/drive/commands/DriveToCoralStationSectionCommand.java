@@ -3,7 +3,6 @@ package competition.subsystems.drive.commands;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
-import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import edu.wpi.first.math.geometry.Pose2d;
 import xbot.common.logging.RobotAssertionManager;
 import xbot.common.properties.PropertyFactory;
@@ -16,31 +15,27 @@ import xbot.common.trajectory.XbotSwervePoint;
 import javax.inject.Inject;
 import java.util.ArrayList;
 
-public class DriveToReefFaceUntilDetectionCommand extends SwerveSimpleTrajectoryCommand {
+public class DriveToCoralStationSectionCommand extends SwerveSimpleTrajectoryCommand {
 
-    Pose2d targetReefFacePose;
-    AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
+    Pose2d targetCoralStationSection;
     boolean kinematics = false;
 
     @Inject
-    public DriveToReefFaceUntilDetectionCommand(DriveSubsystem drive, PoseSubsystem pose,
-                                                PropertyFactory pf,
-                                                HeadingModule.HeadingModuleFactory headingModuleFactory,
-                                                AprilTagVisionSubsystemExtended aprilTagVisionSubsystem,
-                                                RobotAssertionManager robotAssertionManager) {
+    public DriveToCoralStationSectionCommand(DriveSubsystem drive, PoseSubsystem pose,
+                                             PropertyFactory pf, HeadingModule.HeadingModuleFactory headingModuleFactory,
+                                             RobotAssertionManager robotAssertionManager) {
         super(drive, pose, pf, headingModuleFactory, robotAssertionManager);
-        this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
     }
 
-    public void setTargetReefFacePose(Landmarks.ReefFace targetReefFace) {
-        this.targetReefFacePose = Landmarks.getReefFacePose(targetReefFace);
+    public void setTargetCoralStationSection(Landmarks.CoralStation station, Landmarks.CoralStationSection section) {
+        this.targetCoralStationSection = Landmarks.getCoralStationSectionPose(station, section);
     }
 
     @Override
     public void initialize() {
         log.info("Initializing");
         ArrayList<XbotSwervePoint> swervePoints = new ArrayList<>();
-        swervePoints.add(new XbotSwervePoint(targetReefFacePose, 10));
+        swervePoints.add(new XbotSwervePoint(targetCoralStationSection, 10));
         this.logic.setKeyPoints(swervePoints);
         if (kinematics) {
             this.logic.setGlobalKinematicValues(new SwervePointKinematics(.5, 0, 0, 2));
@@ -51,12 +46,5 @@ public class DriveToReefFaceUntilDetectionCommand extends SwerveSimpleTrajectory
             this.logic.setVelocityMode(SwerveSimpleTrajectoryMode.ConstantVelocity);
         }
         super.initialize();
-    }
-
-    @Override
-    public boolean isFinished() {
-        return aprilTagVisionSubsystem.reefAprilTagCameraHasCorrectTarget(
-                aprilTagVisionSubsystem.getTargetAprilTagID(targetReefFacePose))
-                || logic.recommendIsFinished(pose.getCurrentPose2d(), drive.getPositionalPid(), headingModule);
     }
 }

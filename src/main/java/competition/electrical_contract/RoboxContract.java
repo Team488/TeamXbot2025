@@ -30,11 +30,6 @@ public class RoboxContract extends Contract2025 {
     }
 
     @Override
-    public boolean isCoralArmPivotMotorReady() {
-        return true;
-    }
-
-    @Override
     public boolean isCoralCollectionMotorReady() {
         return true;
     }
