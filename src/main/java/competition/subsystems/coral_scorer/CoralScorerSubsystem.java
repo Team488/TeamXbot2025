@@ -54,7 +54,7 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
 
         if (electricalContract.isCoralSensorReady()) {
             this.coralSensor = xDigitalInputFactory.create(electricalContract.getCoralSensor(),
-                    "CoralSensor");
+                    this.getPrefix());
             this.registerDataFrameRefreshable(coralSensor);
         } else {
             this.coralSensor = null;
