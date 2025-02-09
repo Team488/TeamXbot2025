@@ -62,8 +62,8 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         calibrationDecider = calibrationDeciderFactory.create("calibrationDecider");
         calibrationDecider.reset();
 
-        this.humanMaxPowerGoingUp = pf.createPersistentProperty("maxPowerGoingUp", 1);
-        this.humanMaxPowerGoingDown = pf.createPersistentProperty("maxPowerGoingDown", -0.2);
+        this.humanMaxPowerGoingUp = pf.createPersistentProperty("humanMaxPowerGoingUp", 0.2);
+        this.humanMaxPowerGoingDown = pf.createPersistentProperty("humanMaxPowerGoingDown", -0.2);
 
         this.gravityPIDConstantPower = pf.createPersistentProperty("gravityPIDConstant", 0.015);
     }
@@ -139,7 +139,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     protected double getHumanInput() {
         return MathUtils.constrainDouble(
                 MathUtils.deadband(
-                    oi.superstructureGamepad.getLeftVector().getY(),
+                    oi.superstructureGamepad.getLeftStickY(),
                     oi.getOperatorGamepadTypicalDeadband(),
                     (a) -> (a)),
                 humanMaxPowerGoingDown.get(), humanMaxPowerGoingUp.get());
