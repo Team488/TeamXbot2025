@@ -30,7 +30,7 @@ public class ScoreWhenReadyCommand extends BaseCommand {
     public void execute() {
         if (coralScorerSubsystem.hasCoral() && armPivotSubsystem.getIsTargetAngleScoring()
                 && armPivotSubsystem.isMaintainerAtGoal() && elevatorSubsystem.isMaintainerAtGoal()) {
-            coralScorerSubsystem.scorer();
+            coralScorerSubsystem.setCoralScorerState(CoralScorerSubsystem.CoralScorerState.SCORING);
         }
     }
 
