@@ -32,7 +32,7 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
     ElectricalContract electricalContract;
     DoubleProperty degreesPerRotations;
     double rotationsAtZero = 0;
-    boolean isCalibrated = true;
+    boolean isCalibrated = false;
     public final DoubleProperty scoreAngle;
     public final DoubleProperty humanLoadAngle;
     public final DoubleProperty rangeOfMotionDegrees;
@@ -52,13 +52,15 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
         if (electricalContract.isCoralArmPivotMotorReady()) {
             this.armMotor = xcanMotorControllerFactory.create(electricalContract.getCoralArmPivotMotor(),
                     getPrefix(), "ArmPivotMotor");
-            this.armAbsoluteEncoder = xAbsoluteEncoderFactory.create(electricalContract.getCoralArmPivotAbsoluteEncoder(),
+            /*this.armAbsoluteEncoder = xAbsoluteEncoderFactory.create(electricalContract.getCoralArmPivotAbsoluteEncoder(),
                     "ArmPivotAbsoluteEncoder");
             this.lowSensor = xDigitalInputFactory.create(electricalContract.getCoralArmPivotLowSensor(),
-                    "ArmPivotLowSensor");
+                    "ArmPivotLowSensor");*/
+            this.armAbsoluteEncoder = null;
+            this.lowSensor = null;
             this.registerDataFrameRefreshable(this.armMotor);
-            this.registerDataFrameRefreshable(this.armAbsoluteEncoder);
-            this.registerDataFrameRefreshable(this.lowSensor);
+            //this.registerDataFrameRefreshable(this.armAbsoluteEncoder);
+            //this.registerDataFrameRefreshable(this.lowSensor);
         } else {
             this.armMotor = null;
             this.armAbsoluteEncoder = null;

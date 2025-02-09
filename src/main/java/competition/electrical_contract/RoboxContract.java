@@ -30,6 +30,21 @@ public class RoboxContract extends Contract2025 {
     }
 
     @Override
+    public boolean isCoralArmPivotMotorReady() {
+        return true;
+    }
+
+    @Override
+    public boolean isCoralCollectionMotorReady() {
+        return true;
+    }
+
+    @Override
+    public boolean isElevatorBottomSensorReady() {
+        return false;
+    }
+
+    @Override
     public CANMotorControllerInfo getElevatorMotor() {
 
         CANMotorControllerOutputConfig elevatorMotorConfig = new CANMotorControllerOutputConfig()
@@ -42,6 +57,26 @@ public class RoboxContract extends Contract2025 {
                 MotorControllerType.TalonFx,
                 CANBusId.RIO, 29, //change deviceId later
                 elevatorMotorConfig);
+    }
+
+    @Override
+    public CANMotorControllerInfo getCoralCollectionMotor() {
+        return new CANMotorControllerInfo("CoralCollectionMotor",
+                MotorControllerType.TalonFx,
+                CANBusId.RIO,
+                25,
+                new CANMotorControllerOutputConfig()
+                        .withStatorCurrentLimit(Amps.of(5))
+                        .withNeutralMode(CANMotorControllerOutputConfig.NeutralMode.Brake)
+        );
+    }
+
+    public CANMotorControllerInfo getCoralArmPivotMotor() {
+        return new CANMotorControllerInfo("ArmPivotMotor",
+                MotorControllerType.TalonFx,
+                CANBusId.RIO,
+                24,
+                new CANMotorControllerOutputConfig().withStatorCurrentLimit(Amps.of(17.5)));
     }
 
     /*

@@ -99,7 +99,11 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
 
         //to be tuned
-        this.rotationsPerMeter = pf.createPersistentProperty("RotationsPerMeter", 1923.0);
+        // based on some initial experiments:
+        // Elevator raises 36.375 inches (0.923925 meters) after 42.6535 revolutions
+        // 46.16554374 rotations per meter
+        double experimentalRotationsPerMeter = 42.6535 / Inches.of(36.375).in(Meters);
+        this.rotationsPerMeter = pf.createPersistentProperty("RotationsPerMeter", experimentalRotationsPerMeter);
         this.metersPerRotation = Meters.of(rotationsPerMeter.get() != 0 ? 1.0 / rotationsPerMeter.get() : 0);
         if (rotationsPerMeter.get() == 0){log.warn("ROTATIONS PER METER CANNOT BE ZERO CHANGE THIS NOW PLEASE");}
 

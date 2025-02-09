@@ -52,8 +52,8 @@ public class Contract2025 extends ElectricalContract {
         return new CANMotorControllerInfo("CoralCollectionMotor",
                 MotorControllerType.TalonFx,
                 CANBusId.DefaultCanivore,
-                4888,
-                new CANMotorControllerOutputConfig());
+                25,
+                new CANMotorControllerOutputConfig().withStatorCurrentLimit(Amps.of(5)));
     }
 
     public boolean isArmPivotReady() { return false; }
@@ -63,7 +63,7 @@ public class Contract2025 extends ElectricalContract {
         return new CANMotorControllerInfo("ArmPivotMotor",
                 MotorControllerType.TalonFx,
                 CANBusId.DefaultCanivore,
-                709,
+                24,
                 new CANMotorControllerOutputConfig().withStatorCurrentLimit(Amps.of(5)));
     }
 
@@ -77,7 +77,7 @@ public class Contract2025 extends ElectricalContract {
     public boolean isElevatorBottomSensorReady() { return false; }
 
     @Override
-    public DeviceInfo getElevatorBottomSensor() { return new DeviceInfo("ElevatorBottomSensor",1); }
+    public DeviceInfo getElevatorBottomSensor() { return new DeviceInfo("ElevatorBottomSensor",3); }
 
     @Override
     public boolean isAlgaeArmPivotMotorReady() {return false;}
@@ -99,7 +99,7 @@ public class Contract2025 extends ElectricalContract {
                 884,
                 new CANMotorControllerOutputConfig().withStatorCurrentLimit(Amps.of(5)));
     }
-    
+
     @Override
     public boolean areCanCodersReady() {
         return true;
