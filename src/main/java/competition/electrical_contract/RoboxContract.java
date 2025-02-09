@@ -48,7 +48,7 @@ public class RoboxContract extends Contract2025 {
     public CANMotorControllerInfo getElevatorMotor() {
 
         CANMotorControllerOutputConfig elevatorMotorConfig = new CANMotorControllerOutputConfig()
-                .withStatorCurrentLimit(Amps.of(40))
+                .withStatorCurrentLimit(Amps.of(60))
                 .withNeutralMode(CANMotorControllerOutputConfig.NeutralMode.Brake)
                 .withInversionType(CANMotorControllerOutputConfig.InversionType.Inverted);
 

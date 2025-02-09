@@ -73,6 +73,8 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     public void initialize() {
         log.info("initializing");
         calibrationDecider.reset();
+
+        elevator.setTargetValue(elevator.getCurrentValue());
     }
 
     @Override
@@ -92,6 +94,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         // it's helpful to log this to know where the robot is actually trying to get to in the moment
         aKitLog.record("elevatorProfileTarget", setpoint);
 
+        // TODO: this is disabled for testing
         //handles pidding via motor controller and setting power to elevator
         elevator.masterMotor.setPositionTarget(
                 Rotations.of(setpoint * elevator.rotationsPerMeter.get()),

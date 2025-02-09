@@ -131,7 +131,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         if(contract.isElevatorReady()){
             this.masterMotor = motorFactory.create(
                     contract.getElevatorMotor(), this.getPrefix(), "ElevatorMotorPID",
-                    new XCANMotorControllerPIDProperties(1,0,0.5)
+                    new XCANMotorControllerPIDProperties(0.02,0,0)
                     );
             this.registerDataFrameRefreshable(masterMotor);
         }
