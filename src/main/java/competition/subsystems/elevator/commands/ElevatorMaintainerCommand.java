@@ -52,8 +52,8 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         this.elevator = elevator;
         profileManager = trapezoidProfileManagerFactory.create(
                 getPrefix() + "trapezoidMotion",
-                1,
-                1,
+                3,
+                1.75,
                 elevator.getCurrentValue().in(Meters));
 
         this.oi = oi;

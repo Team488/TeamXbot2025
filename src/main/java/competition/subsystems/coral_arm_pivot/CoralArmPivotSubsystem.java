@@ -208,6 +208,13 @@ public class CoralArmPivotSubsystem extends BaseSetpointSubsystem<Angle> {
 
     }
 
+    public void forceCalibrated() {
+        if (electricalContract.isCoralArmPivotMotorReady()) {
+            rotationsAtZero = getMotorPosition().in(Rotations);
+        }
+        isCalibrated = true;
+    }
+
     @Override
     public void periodic() {
         if (electricalContract.isCoralArmPivotMotorReady()) {

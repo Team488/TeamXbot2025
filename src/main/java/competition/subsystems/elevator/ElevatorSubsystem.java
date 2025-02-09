@@ -52,7 +52,6 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     public Distance elevatorTargetHeight;
 
     public final DoubleProperty rotationsPerMeter;
-    public final Distance metersPerRotation;
 
     public final DoubleProperty calibrationNegativePower;
     public final DoubleProperty powerNearLowerLimitThreshold;
@@ -104,7 +103,6 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         // 46.16554374 rotations per meter
         double experimentalRotationsPerMeter = 42.6535 / Inches.of(36.375).in(Meters);
         this.rotationsPerMeter = pf.createPersistentProperty("RotationsPerMeter", experimentalRotationsPerMeter);
-        this.metersPerRotation = Meters.of(rotationsPerMeter.get() != 0 ? 1.0 / rotationsPerMeter.get() : 0);
         if (rotationsPerMeter.get() == 0){log.warn("ROTATIONS PER METER CANNOT BE ZERO CHANGE THIS NOW PLEASE");}
 
         this.calibrationNegativePower = pf.createPersistentProperty("calibrationNegativePower", -0.05);
@@ -131,7 +129,14 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         if(contract.isElevatorReady()){
             this.masterMotor = motorFactory.create(
                     contract.getElevatorMotor(), this.getPrefix(), "ElevatorMotorPID",
-                    new XCANMotorControllerPIDProperties(0.02,0,0)
+                    new XCANMotorControllerPIDProperties(
+                            1,
+                            0,
+                            0,
+                            0,
+                            0.750,
+                            0.4,
+                            -0.4)
                     );
             this.registerDataFrameRefreshable(masterMotor);
         }
@@ -186,13 +191,13 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         Distance currentHeight = Meters.of(0);
         if (contract.isElevatorReady()){
             currentHeight = Meters.of(
-                    (this.masterMotor.getPosition().in(Rotations) - elevatorPositionOffset) * metersPerRotation.in(Meters));
+                    (this.masterMotor.getPosition().in(Rotations) - elevatorPositionOffset) * getMetersPerRotation().in(Meters));
         }
         return currentHeight;
     }
 
     public LinearVelocity getCurrentVelocity() {
-        return MetersPerSecond.of(masterMotor.getVelocity().in(RotationsPerSecond) * metersPerRotation.in(Meters));
+        return MetersPerSecond.of(masterMotor.getVelocity().in(RotationsPerSecond) * getMetersPerRotation().in(Meters));
     }
 
     @Override
@@ -245,6 +250,10 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         } else {
             return Meter.of(0);
         }
+    }
+
+    private Distance getMetersPerRotation() {
+        return Meters.of(rotationsPerMeter.get() != 0 ? 1.0 / rotationsPerMeter.get() : 0);
     }
 
     @Override
