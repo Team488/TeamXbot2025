@@ -16,6 +16,7 @@ import competition.subsystems.coral_scorer.commands.ScoreWhenReadyCommand;
 import competition.subsystems.coral_scorer.commands.StopCoralCommand;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
+import competition.subsystems.drive.commands.AlignToTagGlobalMovementWithCalculator;
 import competition.subsystems.drive.commands.AlignToTagLocalMovement;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
 import competition.subsystems.oracle.commands.DriveAccordingToOracleCommand;
@@ -54,7 +55,7 @@ public class OperatorCommandMap {
             AlignToReefWithAprilTagCommand alignToReefWithAprilTag,
             DriveAccordingToOracleCommand driveAccordingToOracle,
             SuperstructureAccordingToOracleCommand superstructureAccordingToOracle,
-            AlignToTagLocalMovement alignToSpecificTag) {
+            AlignToTagGlobalMovementWithCalculator alignToSpecificTag) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(resetHeading);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(alignToReefWithAprilTag);
@@ -62,7 +63,9 @@ public class OperatorCommandMap {
         var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(oracleControlsRobot);
 
-        alignToSpecificTag.setAprilTagTaret(1);
+        alignToSpecificTag.setAprilTagTarget(18);
+        alignToSpecificTag.setCameraTarget(2);
+        alignToSpecificTag.setIsCameraBackwards(true);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(alignToSpecificTag);
     }
 

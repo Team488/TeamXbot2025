@@ -49,6 +49,12 @@ public class AprilTagVisionSubsystemExtended extends AprilTagVisionSubsystem {
         return new Translation2d(data.getX(), data.getY());
     }
 
+    public Translation2d getAprilTagCameraData(int cameraToUse) {
+        Transform3d data = getLatestTargetObservation(cameraToUse).cameraToTarget();
+
+        return new Translation2d(data.getX(), data.getY());
+    }
+
     public boolean reefAprilTagCameraHasCorrectTarget(int targetAprilTagID) {
         AprilTagVisionIO.TargetObservation targetObservation = getLatestTargetObservation(0);
         return targetObservation.fiducialId() == targetAprilTagID;

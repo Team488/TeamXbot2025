@@ -30,6 +30,7 @@ public class AlignToTagGlobalMovementWithCalculator extends BaseCommand {
 
     private int targetAprilTagID;
     private int targetCameraID;
+    private boolean backwards;
 
     AlignCameraToAprilTagCalculator calculator;
 
@@ -53,6 +54,10 @@ public class AlignToTagGlobalMovementWithCalculator extends BaseCommand {
         this.targetCameraID = targetCameraID;
     }
 
+    public void setIsCameraBackwards(boolean backwards) {
+        this.backwards = backwards;
+    }
+
     double headingAtCommandStart = 0;
 
     @Override
@@ -60,13 +65,14 @@ public class AlignToTagGlobalMovementWithCalculator extends BaseCommand {
         log.info("Initializing");
         drive.getPositionalPid().reset();
         headingAtCommandStart = pose.getCurrentPose2d().getRotation().getDegrees();
-        calculator = new AlignCameraToAprilTagCalculator(aprilTagVisionSubsystem, electricalContract,
-                drive.getPositionalPid(), targetAprilTagID, targetCameraID, 24, false);
+        calculator = new AlignCameraToAprilTagCalculator(aprilTagVisionSubsystem, drive.getPositionalPid(),
+                electricalContract, targetAprilTagID, targetCameraID, 12, backwards);
     }
 
     @Override
     public void execute() {
         Translation2d driveValues = calculator.getXYPowersAlignToAprilTag(pose.getCurrentPose2d());
+        aKitLog.record("driveValues", driveValues);
         double omega = headingModule.calculateHeadingPower(headingAtCommandStart);
         drive.fieldOrientedDrive(
                 new XYPair(driveValues.getX(), driveValues.getY()),
