@@ -60,6 +60,11 @@ public class Robot extends BaseRobot {
     protected BaseRobotComponent createDaggerComponent() {
         if (BaseRobot.isReal()) {
 
+            if (!Preferences.containsKey("ContractToUse")) {
+                log.error("No contract set in Preferences! This is likely unexpected.");
+                log.info("Count of keys in the Preferences system: {}", Preferences.getKeys().size());
+            }
+
             String chosenContract = Preferences.getString("ContractToUse", "Competition");
 
             switch (chosenContract) {
