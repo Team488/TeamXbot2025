@@ -32,7 +32,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
     double rotationsAtZero = 0;
     boolean isCalibrated = false;
-    public final DoubleProperty degreesPerRotations;
+    private final DoubleProperty degreesPerRotations;
     public final DoubleProperty scoreAngle;
     public final DoubleProperty humanLoadAngle;
     public final DoubleProperty rangeOfMotionDegrees;
@@ -111,6 +111,15 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
     public AngularVelocity getCurrentVelocity() {
         return DegreesPerSecond.of(armMotor.getVelocity().in(RotationsPerSecond) * degreesPerRotations.get());
+    }
+
+    public double getDegreesPerRotation() {
+        return degreesPerRotations.get();
+    }
+
+    public double getRotationsPerDegree() {
+        // if the degreesPerRotations is 0, return 0 to avoid division by zero
+        return degreesPerRotations.get() == 0 ? 0 : 1 / degreesPerRotations.get();
     }
 
     @Override

@@ -114,7 +114,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         switch (mode){
             case Calibrated -> calibratedMachineControlAction();
             case Attempting -> attemptCalibration();
-            case GaveUp, default -> humanControlAction();
+            default -> humanControlAction();
         }
     }
 
