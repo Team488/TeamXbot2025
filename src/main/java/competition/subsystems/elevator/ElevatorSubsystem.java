@@ -100,7 +100,11 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
 
         //to be tuned
-        this.rotationsPerMeter = pf.createPersistentProperty("RotationsPerMeter", 1923.0);
+        // based on some initial experiments:
+        // Elevator raises 36.375 inches (0.923925 meters) after 42.6535 revolutions
+        // 46.16554374 rotations per meter
+        double experimentalRotationsPerMeter = 42.6535 / Inches.of(36.375).in(Meters);
+        this.rotationsPerMeter = pf.createPersistentProperty("RotationsPerMeter", experimentalRotationsPerMeter);
         this.metersPerRotation = Meters.of(rotationsPerMeter.get() != 0 ? 1.0 / rotationsPerMeter.get() : 0);
         if (rotationsPerMeter.get() == 0) {
             log.warn("ROTATIONS PER METER CANNOT BE ZERO CHANGE THIS NOW PLEASE");
@@ -117,8 +121,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
         this.sysId = new SysIdRoutine(
                 new SysIdRoutine.Config(
-                        Volts.of(0.2).per(Second),
-                        Volts.of(0.5),
+                        Volts.of(0.4).per(Second),
+                        Volts.of(0.9),
                         Seconds.of(8),
                         (state) -> org.littletonrobotics.junction.Logger.recordOutput(this.getPrefix() + "/SysIdState", state.toString())),
                 new SysIdRoutine.Mechanism(
@@ -131,7 +135,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         if (contract.isElevatorReady()) {
             this.masterMotor = motorFactory.create(
                     contract.getElevatorMotor(), this.getPrefix(), "ElevatorMotorPID",
-                    new XCANMotorControllerPIDProperties(1, 0, 0.5)
+                    new XCANMotorControllerPIDProperties(66.454, 0, 1.5392, 0.14726, 0.14904, -1.0, 1.0)
             );
             this.registerDataFrameRefreshable(masterMotor);
         }
@@ -160,9 +164,9 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     @Override
     public void setPower(double power) {
-        if (contract.isElevatorReady()) {
-            if (isTouchingBottom()) {
-                power = MathUtils.constrainDouble(power, powerWhenBottomSensorHit.get(), 1);
+        if(contract.isElevatorReady()){
+            /*if (isTouchingBottom()){
+                power = MathUtils.constrainDouble(power,powerWhenBottomSensorHit.get(),1);
             }
             if (belowLowerLimit()) {
                 power = MathUtils.constrainDouble(power, powerNearLowerLimitThreshold.get(), 1);
@@ -170,10 +174,13 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
             if (aboveUpperLimit()) {
                 power = MathUtils.constrainDouble(power, -1, powerNearUpperLimitThreshold.get());
             }
-            if (!isCalibrated) {
-                power = MathUtils.constrainDouble(power, calibrationNegativePower.get(), 0);
-            }
-            masterMotor.setVoltage(Volts.of(power * 12));
+            if (!isCalibrated){
+                power = MathUtils.constrainDouble(power,calibrationNegativePower.get(),0);
+            }*/
+
+            aKitLog.record("ElevatorPower", power);
+
+            masterMotor.setVoltage(Volts.of(power*12));
         }
     }
 

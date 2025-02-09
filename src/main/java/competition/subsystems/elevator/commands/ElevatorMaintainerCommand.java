@@ -54,7 +54,11 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         super(elevator, pf, hvmFactory, Inches.of(1).in(Meters), 0.2);
         pf.setPrefix(this);
         this.elevator = elevator;
-        profileManager = trapezoidProfileManagerFactory.create(getPrefix() + "trapezoidMotion", 1, 1, elevator.getCurrentValue().in(Meters));
+        profileManager = trapezoidProfileManagerFactory.create(
+                getPrefix() + "trapezoidMotion",
+                1,
+                1,
+                elevator.getCurrentValue().in(Meters));
 
         this.oi = oi;
         this.contract = contract;
@@ -65,7 +69,9 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         this.humanMaxPowerGoingUp = pf.createPersistentProperty("maxPowerGoingUp", 1);
         this.humanMaxPowerGoingDown = pf.createPersistentProperty("maxPowerGoingDown", -0.2);
 
-        this.gravityPIDConstantPower = pf.createPersistentProperty("gravityPIDConstant", 0.015);
+        this.gravityPIDConstantPower = pf.createPersistentProperty("gravityPIDConstant", 0.07416666);
+
+        decider.setDeadband(0.02);
     }
 
     @Override
@@ -100,16 +106,14 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     //defaults humanControlAction if there is no bottom sensor
     @Override
     protected void uncalibratedMachineControlAction() {
-        var mode = contract.isElevatorBottomSensorReady()
-                ? calibrationDecider.decideMode(elevator.isCalibrated())
-                : CalibrationDecider.CalibrationMode.GaveUp;
+        /*var mode = calibrationDecider.decideMode(elevator.isCalibrated());
 
         switch (mode){
             case Calibrated -> calibratedMachineControlAction();
             case Attempting -> attemptCalibration();
             case GaveUp -> humanControlAction();
             default -> humanControlAction();
-        }
+        }*/
     }
 
     private void attemptCalibration(){
@@ -137,12 +141,16 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     @Override
     protected double getHumanInput() {
-        return MathUtils.constrainDouble(
+
+        double humanInput = MathUtils.constrainDouble(
                 MathUtils.deadband(
-                    oi.superstructureGamepad.getLeftVector().getY(),
-                    oi.getOperatorGamepadTypicalDeadband(),
-                    (a) -> (a)),
+                        oi.superstructureGamepad.getLeftVector().getY(),
+                        oi.getOperatorGamepadTypicalDeadband(),
+                        (a) -> MathUtils.exponentAndRetainSign(a, 3)),
                 humanMaxPowerGoingDown.get(), humanMaxPowerGoingUp.get());
+
+        aKitLog.record("elevatorHumanInput", humanInput);
+        return humanInput;
     }
 
     @Override

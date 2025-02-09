@@ -35,7 +35,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
     public final DoubleProperty rotationsPerDegrees;
     public final Angle degreesPerRotations;
-    
+
     public final DoubleProperty scoreAngle;
     public final DoubleProperty humanLoadAngle;
     public final DoubleProperty rangeOfMotionDegrees;
@@ -54,8 +54,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
         if (electricalContract.isCoralArmMotorReady()) {
             this.armMotor = xcanMotorControllerFactory.create(electricalContract.getCoralArmPivotMotor(),
-                    getPrefix(), "ArmPivotMotor", new XCANMotorControllerPIDProperties(0.2,0,0.2));
-
+                    getPrefix(), "ArmPivotMotor");
             this.armAbsoluteEncoder = xAbsoluteEncoderFactory.create(electricalContract.getCoralArmPivotAbsoluteEncoder(),
                     "ArmPivotAbsoluteEncoder");
             this.lowSensor = xDigitalInputFactory.create(electricalContract.getCoralArmPivotLowSensor(),
