@@ -278,25 +278,6 @@ public class Contract2025 extends ElectricalContract {
                                 aprilCameraYDisplacement,
                                 aprilCameraZDisplacement),
                                 new Rotation3d(0, aprilCameraPitch, aprilCameraYaw)),
-                        EnumSet.of(CameraCapabilities.APRIL_TAG)),
-
-                new CameraInfo("Apriltag_FrontRight_Camera",
-                        "AprilTagFrontRight",
-                        new Transform3d(new Translation3d(
-                                aprilCameraXDisplacement,
-                                -aprilCameraYDisplacement,
-                                aprilCameraZDisplacement),
-                                new Rotation3d(0, aprilCameraPitch, aprilCameraYaw)),
-                        EnumSet.of(CameraCapabilities.APRIL_TAG)),
-
-                // This one is back camera for coral collection but coords may be wrong!
-                new CameraInfo("Apriltag_Back_Camera",
-                        "AprilTagBack",
-                        new Transform3d(new Translation3d(
-                                -aprilCameraXDisplacement,
-                                0,
-                                aprilCameraZDisplacement),
-                                new Rotation3d(0, aprilCameraPitch, Math.PI)),
                         EnumSet.of(CameraCapabilities.APRIL_TAG))
         };
     }

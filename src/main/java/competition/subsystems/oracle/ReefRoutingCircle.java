@@ -44,6 +44,12 @@ public class ReefRoutingCircle {
         return radius;
     }
 
+    /**
+     * Generates a list of swerve points from Point A -> B while avoiding the big reef
+     * @param startingPose you are at
+     * @param endingPose you want to go to
+     * @return a list of swerve points to destination
+     */
     public List<XbotSwervePoint> generateSwervePoints(Pose2d startingPose, Pose2d endingPose) {
         List<XbotSwervePoint> swervePoints = new ArrayList<>();
         Translation2d start = startingPose.getTranslation();

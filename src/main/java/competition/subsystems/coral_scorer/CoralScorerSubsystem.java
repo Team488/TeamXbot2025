@@ -28,6 +28,7 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
 
     public final XCANMotorController motor;
     public final DoubleProperty intakePower;
+    public final DoubleProperty hasCoralIntakePower;
     public final DoubleProperty scorePower;
     public final XDigitalInput coralSensor;
     public final ElectricalContract electricalContract;
@@ -61,8 +62,9 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
 
         this.coralScorerState = STOPPED;
 
-        this.intakePower = propertyFactory.createPersistentProperty("intakePower", .1);
-        this.scorePower = propertyFactory.createPersistentProperty("scorerPower", -.1);
+        this.intakePower = propertyFactory.createPersistentProperty("intakePower", 0.1);
+        this.hasCoralIntakePower = propertyFactory.createPersistentProperty("hasCoralIntakePower", 0.01);
+        this.scorePower = propertyFactory.createPersistentProperty("scorerPower", -0.1);
         this.waitTimeAfterScoring = propertyFactory.createPersistentProperty("waitTimeAfterScoring", 0.5);
         this.waitTimeAfterCollection = propertyFactory.createPersistentProperty("waitTimeAfterCollection", 0.1);
 
@@ -93,7 +95,11 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
     }
 
     public void intake() {
-        setCoralScorerMotorPower(intakePower.get());
+        if (confidentlyHasCoral()) {
+            setCoralScorerMotorPower(hasCoralIntakePower.get());
+        } else {
+            setCoralScorerMotorPower(intakePower.get());
+        }
         coralScorerState = INTAKING;
     }
     public void scorer() {
@@ -126,6 +132,10 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
     @Override
     public boolean confidentlyHasCoral() {
         return hasCoralValidator.peekStable();
+    }
+
+    public CoralScorerState getCoralScorerState() {
+        return coralScorerState;
     }
 
     public void periodic() {

@@ -1,7 +1,6 @@
 package competition.subsystems.drive.commands;
 
 import competition.subsystems.drive.DriveSubsystem;
-import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -14,20 +13,19 @@ import xbot.common.trajectory.XbotSwervePoint;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 
-public class DriveToNearestReefFaceCommand extends SwerveSimpleTrajectoryCommand {
+public class DriveToNearestReefFaceUntilDetectionCommand extends SwerveSimpleTrajectoryCommand {
     DriveSubsystem drive;
     AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
     Pose2d targetReefFacePose;
     PoseSubsystem pose;
 
     @Inject
-    public DriveToNearestReefFaceCommand(DriveSubsystem drive, PoseSubsystem pose, PropertyFactory pf,
-                                         HeadingModule.HeadingModuleFactory headingModuleFactory,
-                                         AprilTagVisionSubsystemExtended aprilTagVisionSubsystem,
-                                         RobotAssertionManager robotAssertionManager) {
+    public DriveToNearestReefFaceUntilDetectionCommand(DriveSubsystem drive, PoseSubsystem pose, PropertyFactory pf,
+                                                       HeadingModule.HeadingModuleFactory headingModuleFactory,
+                                                       AprilTagVisionSubsystemExtended aprilTagVisionSubsystem,
+                                                       RobotAssertionManager robotAssertionManager) {
         super(drive, pose, pf, headingModuleFactory, robotAssertionManager);
         this.drive = drive;
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
