@@ -4,7 +4,11 @@ import competition.subsystems.pose.Landmarks;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.swing.text.html.Option;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 import java.util.Queue;
 
 @Singleton
@@ -23,16 +27,30 @@ public class ScoringQueue {
         scoringTasks.add(new ScoringTask(Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR));
         scoringTasks.add(new ScoringTask(Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.THREE));
         scoringTasks.add(new ScoringTask(Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.THREE));
+    }
 
-        scoringTasks.add(new ScoringTask(Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR));
-        scoringTasks.add(new ScoringTask(Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR));
-        scoringTasks.add(new ScoringTask(Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.THREE));
-        scoringTasks.add(new ScoringTask(Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.THREE));
+    public void addCoralTask(Landmarks.ReefFace face, Landmarks.Branch branch, Landmarks.CoralLevel level) {
+        scoringTasks.add(new ScoringTask(
+                GameAction.ScoreCoral,
+                Optional.of(face),
+                Optional.of(branch),
+                Optional.of(level)));
+    }
 
-        scoringTasks.add(new ScoringTask(Landmarks.ReefFace.CLOSE, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR));
-        scoringTasks.add(new ScoringTask(Landmarks.ReefFace.CLOSE, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR));
-        scoringTasks.add(new ScoringTask(Landmarks.ReefFace.CLOSE, Landmarks.Branch.A, Landmarks.CoralLevel.THREE));
-        scoringTasks.add(new ScoringTask(Landmarks.ReefFace.CLOSE, Landmarks.Branch.B, Landmarks.CoralLevel.THREE));
+    public void addAlgaeRemovalTask(Landmarks.ReefFace face) {
+        scoringTasks.add(new ScoringTask(
+                GameAction.RemoveAlgae,
+                Optional.of(face),
+                Optional.empty(),
+                Optional.empty()));
+    }
+
+    public void addAlgaeProcessingTask() {
+        scoringTasks.add(new ScoringTask(
+                GameAction.ProcessAlgae,
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty()));
     }
 
     public void addScoringGoalToBottomOfQueue(ScoringTask scoringTask) {
@@ -60,5 +78,10 @@ public class ScoringQueue {
             defaultState = false;
             clearQueue();
         }
+    }
+
+    public List<String> getTaskArray() {
+        var tasks = new ArrayList<String>();
+        scoringTasks.forEach((t) -> tasks.add(t.toString()));
     }
 }
