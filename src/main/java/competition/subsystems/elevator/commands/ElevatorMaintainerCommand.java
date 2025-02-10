@@ -78,6 +78,8 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     public void initialize() {
         super.initialize();
         calibrationDecider.reset();
+
+        setpoint = elevator.getCurrentValue().in(Meters);
     }
 
     @Override
@@ -85,14 +87,17 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         elevator.setPower(0);
     }
 
+    double setpoint = 0;
+
     @Override
     protected void calibratedMachineControlAction() {
         profileManager.setTargetPosition(
             elevator.getTargetValue().in(Meters),
             elevator.getCurrentValue().in(Meters),
-            elevator.getCurrentVelocity().in(MetersPerSecond)
+            elevator.getCurrentVelocity().in(MetersPerSecond),
+            setpoint
         );
-        var setpoint = profileManager.getRecommendedPositionForTime();
+        setpoint = profileManager.getRecommendedPositionForTime();
 
         // it's helpful to log this to know where the robot is actually trying to get to in the moment
         aKitLog.record("elevatorProfileTarget", setpoint);

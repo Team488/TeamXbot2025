@@ -13,9 +13,11 @@ import xbot.common.properties.Property;
 import xbot.common.properties.PropertyFactory;
 
 import javax.inject.Inject;
+import javax.naming.InitialContext;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
@@ -50,19 +52,27 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
    }
 
     @Override
+    public void initialize() {
+        super.initialize();
+        setpoint = coralArm.getCurrentValue().in(Rotations);
+    }
+
+    @Override
     protected void coastAction() { //rest when no human control and before pid
         coralArm.setPower(0);
     }
 
+    double setpoint = 0;
 
     @Override
     protected void calibratedMachineControlAction() { //manages and runs pid
         profileManager.setTargetPosition(
             coralArm.getTargetValue().in(Rotations),
             coralArm.getCurrentValue().in(Rotations),
-            coralArm.getCurrentVelocity().in(RotationsPerSecond)
+            coralArm.getCurrentVelocity().in(RotationsPerSecond),
+            setpoint
         );
-        var setpoint = profileManager.getRecommendedPositionForTime();
+        setpoint = profileManager.getRecommendedPositionForTime();
 
         aKitLog.record("coralArmProfileTarget", setpoint);
 
