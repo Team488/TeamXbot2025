@@ -17,6 +17,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import java.util.List;
+import java.util.Optional;
 
 import static competition.subsystems.oracle.OracleSubsystem.PrimaryActivity.CollectCoral;
 import static competition.subsystems.oracle.OracleSubsystem.PrimaryActivity.ScoreCoral;
@@ -68,6 +69,9 @@ public class OracleSubsystem extends BaseSubsystem {
     final DoubleProperty rangeToStartMovingSuperstructureMeters;
     final DoubleProperty rangeToActivateScorerMeters;
 
+    private DriverStation.Alliance currentAlliance = DriverStation.Alliance.Blue;
+    private ReefRoutingCircle chosenRoutingCircle;
+
     @Inject
     public OracleSubsystem(PoseSubsystem pose, CoralCollectionInfoSource coralInfoSource,
                            ScoringQueue scoringQueue, ReefCoordinateGenerator generator, PropertyFactory pf,
@@ -97,6 +101,20 @@ public class OracleSubsystem extends BaseSubsystem {
         aKitLog.record("BlueRoutingCircle", blueReefRoutingCircle.visualizeOuterRoutingCircleAsTrajectory());
     }
 
+    /**
+     * Should be called in AutonomousInit, or optionally earlier (e.g. during a disabled state)
+     * in order to confirm the oracle's priorities ahead of match start.
+     * @param alliance Alliance the robot is on
+     */
+    public void configureOracle(DriverStation.Alliance alliance) {
+        this.currentAlliance = alliance;
+        if (alliance == DriverStation.Alliance.Blue) {
+            chosenRoutingCircle = blueReefRoutingCircle;
+        } else {
+            chosenRoutingCircle = redReefRoutingCircle;
+        }
+    }
+
     public List<XbotSwervePoint> getRecommendedScoringTrajectory() {
 
         ScoringTask activeScoringTask = scoringQueue.getActiveTask();
@@ -113,7 +131,7 @@ public class OracleSubsystem extends BaseSubsystem {
                 activeScoringTask.branch(),
                 activeScoringTask.coralLevel());
 
-        var route = blueReefRoutingCircle.generateSwervePoints(pose.getCurrentPose2d(), penultimateWaypoint);
+        var route = chosenRoutingCircle.generateSwervePoints(pose.getCurrentPose2d(), penultimateWaypoint);
         route.add(new XbotSwervePoint(finalWaypoint, 10));
 
         aKitLog.record("RecommendedRoute", XbotSwervePoint.generateTrajectory(route));
@@ -121,26 +139,41 @@ public class OracleSubsystem extends BaseSubsystem {
         return route;
     }
 
-    public List<XbotSwervePoint> getRecommendedCoralPickupTrajectory() {
-        var goalCoralStation = getCoralStation(pose.getCurrentPose2d());
-        var route = blueReefRoutingCircle.generateSwervePoints(pose.getCurrentPose2d(), goalCoralStation);
-        aKitLog.record("RecommendedRoute", XbotSwervePoint.generateTrajectory(route));
-        return route;
+    /**
+     * Gets list of points to the best coral station. Returns empty if no route possible.
+     * @return (Optional) list of points to the best coral station.
+     */
+    public Optional<List<XbotSwervePoint>> getRecommendedCoralPickupTrajectory() {
+        var goalCoralStation = getBestCoralStation(pose.getCurrentPose2d());
+
+        if (goalCoralStation.isEmpty()) {
+            return Optional.empty();
+        } else {
+            var route = chosenRoutingCircle.generateSwervePoints(pose.getCurrentPose2d(), goalCoralStation.get());
+            aKitLog.record("RecommendedRoute", XbotSwervePoint.generateTrajectory(route));
+            return Optional.of(route);
+        }
     }
 
-    private Pose2d getCoralStation(Pose2d currentPose) {
+    /**
+     * Gets best available coral station. Returns empty if no route possible
+     * (e.g. all coral stations are marked as disallowed)
+     * @param currentPose Robot's current location
+     * @return (Optional) Closest coral station
+     */
+    private Optional<Pose2d> getBestCoralStation(Pose2d currentPose) {
         Pose2d leftStation = PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueLeftCoralStationMid);
         Pose2d rightStation = PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueRightCoralStationMid);
 
         // See if we have constraints set
         return switch (allowedCoralStations) {
-            case ONLY_LEFT_STATION -> leftStation;
-            case ONLY_RIGHT_STATION -> rightStation;
-            case NO_STATION -> currentPose;
+            case ONLY_LEFT_STATION -> Optional.of(leftStation);
+            case ONLY_RIGHT_STATION -> Optional.of(rightStation);
+            case NO_STATION -> Optional.empty();
             case CLOSEST_STATION -> {
                 double leftStationDistance = currentPose.getTranslation().getDistance(leftStation.getTranslation());
                 double rightStationDistance = currentPose.getTranslation().getDistance(rightStation.getTranslation());
-                yield leftStationDistance < rightStationDistance ? leftStation : rightStation;
+                yield Optional.of(leftStationDistance < rightStationDistance ? leftStation : rightStation);
             }
         };
     }
@@ -280,15 +313,26 @@ public class OracleSubsystem extends BaseSubsystem {
                 // Check for first run or reevaluation
                 if (isPrimaryActivityInitilizationRequired() || reevaluationRequested) {
                     // Command the drive
-                    var newDriveAdvice = new OracleDriveAdvice(getNextInstructionNumber(), getRecommendedCoralPickupTrajectory());
-                    goalPose = newDriveAdvice.path().get(newDriveAdvice.path().size() - 1).keyPose;
-                    setCurrentDriveAdvice(newDriveAdvice);
-                    // Command the superstructure
-                    var newSuperstructureAdvice = new OracleSuperstructureAdvice(
-                            getNextInstructionNumber(), Landmarks.CoralLevel.COLLECTING, CoralScorerSubsystem.CoralScorerState.INTAKING);
-                    setSuperstructureAdvice(newSuperstructureAdvice);
 
-                    setPrimaryActivityInitializationFinished();
+                    // Check to see if there is any possible route to get coral
+                    var route = getRecommendedCoralPickupTrajectory();
+                    if (route.isEmpty()) {
+                        // We need to keep attempting to plan a route until something becomes available.
+                        // Exit this switch, without marking initialization finished.
+                        break;
+                    } else {
+                        var newDriveAdvice = new OracleDriveAdvice(
+                                getNextInstructionNumber(),
+                                route.get());
+                        goalPose = newDriveAdvice.path().get(newDriveAdvice.path().size() - 1).keyPose;
+                        setCurrentDriveAdvice(newDriveAdvice);
+                        // Command the superstructure
+                        var newSuperstructureAdvice = new OracleSuperstructureAdvice(
+                                getNextInstructionNumber(), Landmarks.CoralLevel.COLLECTING, CoralScorerSubsystem.CoralScorerState.INTAKING);
+                        setSuperstructureAdvice(newSuperstructureAdvice);
+
+                        setPrimaryActivityInitializationFinished();
+                    }
                 }
 
                 // Check if it's time to switch activities

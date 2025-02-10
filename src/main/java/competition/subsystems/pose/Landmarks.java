@@ -136,4 +136,42 @@ public class Landmarks {
         EnumsToPose enumsToPose = new EnumsToPose();
         return enumsToPose.getCoralStationPose(station, section);
     }
+
+    public static int getAprilTagForAllianceReefFace(DriverStation.Alliance alliance, ReefFace face) {
+        if (alliance == DriverStation.Alliance.Blue) {
+            return switch (face) {
+                case CLOSE -> 18;
+                case CLOSE_LEFT -> 19;
+                case FAR_LEFT -> 20;
+                case FAR -> 21;
+                case FAR_RIGHT -> 22;
+                case CLOSE_RIGHT -> 17;
+            };
+        } else {
+            return switch (face) {
+                case CLOSE -> 7;
+                case CLOSE_LEFT -> 6;
+                case FAR_LEFT -> 11;
+                case FAR -> 10;
+                case FAR_RIGHT -> 9;
+                case CLOSE_RIGHT -> 8;
+            };
+        }
+    }
+
+    public static ReefAlgae getAlgaePositionForReefFace(ReefFace face) {
+        return switch (face) {
+            case CLOSE, FAR_LEFT, FAR_RIGHT -> ReefAlgae.HIGH;
+            case CLOSE_LEFT, CLOSE_RIGHT, FAR -> ReefAlgae.LOW;
+        };
+    }
+
+    public static ReefFace[] allReefFaces = new ReefFace[] {
+            ReefFace.CLOSE,
+            ReefFace.CLOSE_LEFT,
+            ReefFace.CLOSE_RIGHT,
+            ReefFace.FAR,
+            ReefFace.FAR_LEFT,
+            ReefFace.FAR_RIGHT
+    };
 }

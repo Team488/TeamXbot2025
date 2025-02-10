@@ -11,8 +11,9 @@ import competition.injection.components.DaggerRobotComponent2024;
 import competition.injection.components.DaggerRoboxComponent;
 import competition.injection.components.DaggerSimulationComponent;
 import competition.simulation.BaseSimulator;
-import competition.subsystems.drive.DriveSubsystem;
+import competition.subsystems.oracle.OracleSubsystem;
 import competition.subsystems.pose.PoseSubsystem;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Preferences;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,6 +32,7 @@ public class Robot extends BaseRobot {
 
     BaseSimulator simulator;
     ElectricalContract simulatorContract = new UnitTestContract2025();
+    OracleSubsystem oracle;
 
     @Override
     protected void initializeSystems() {
@@ -39,7 +41,7 @@ public class Robot extends BaseRobot {
         getInjectorComponent().operatorCommandMap();
         getInjectorComponent().swerveDefaultCommandMap();
         getInjectorComponent().superstructureMechanismSubsystem();
-        getInjectorComponent().oracleSubsystem();
+        oracle = getInjectorComponent().oracleSubsystem();
         getInjectorComponent().lightSubsystem();
 
         if (BaseRobot.isSimulation()) {
@@ -134,6 +136,14 @@ public class Robot extends BaseRobot {
 
         if (simulator != null) {
             simulator.update();
+        }
+    }
+
+    @Override
+    public void autonomousInit() {
+        super.autonomousInit();
+        if (oracle != null) {
+            oracle.configureOracle(DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
         }
     }
 
