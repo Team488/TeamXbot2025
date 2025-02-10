@@ -44,6 +44,7 @@ public class OracleSubsystem extends BaseSubsystem {
 
     final ReefRoutingCircle blueReefRoutingCircle;
     final ReefRoutingCircle redReefRoutingCircle;
+    private ReefRoutingCircle chosenRoutingCircle;
 
     Distance reefCollisionRadius = Meters.of(1.6);
     Distance reefRoutingRadius = Meters.of(2.0);
@@ -70,7 +71,11 @@ public class OracleSubsystem extends BaseSubsystem {
     final DoubleProperty rangeToActivateScorerMeters;
 
     private DriverStation.Alliance currentAlliance = DriverStation.Alliance.Blue;
-    private ReefRoutingCircle chosenRoutingCircle;
+
+    final VirtualReef blueReef = new VirtualReef(DriverStation.Alliance.Blue);
+    final VirtualReef redReef = new VirtualReef(DriverStation.Alliance.Red);
+    private VirtualReef chosenReef;
+
 
     @Inject
     public OracleSubsystem(PoseSubsystem pose, CoralCollectionInfoSource coralInfoSource,
@@ -110,8 +115,10 @@ public class OracleSubsystem extends BaseSubsystem {
         this.currentAlliance = alliance;
         if (alliance == DriverStation.Alliance.Blue) {
             chosenRoutingCircle = blueReefRoutingCircle;
+            chosenReef = blueReef;
         } else {
             chosenRoutingCircle = redReefRoutingCircle;
+            chosenReef = redReef;
         }
     }
 
