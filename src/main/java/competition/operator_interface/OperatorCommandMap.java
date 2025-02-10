@@ -12,28 +12,36 @@ import competition.subsystems.coral_scorer.commands.ScoreCoralCommand;
 import competition.subsystems.coral_scorer.commands.ScoreWhenReadyCommand;
 import competition.subsystems.coral_scorer.commands.StopCoralCommand;
 import competition.subsystems.drive.DriveSubsystem;
-import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
-import competition.subsystems.drive.commands.DriveToWaypointsWithVisionCommand;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
-import competition.subsystems.drive.commands.TeleportToPositionCommand;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import competition.subsystems.elevator.commands.ForceElevatorCalibratedCommand;
 import competition.subsystems.elevator.commands.SetElevatorTargetHeightCommand;
-import competition.subsystems.oracle.commands.DriveAccordingToOracleCommand;
-import competition.subsystems.oracle.commands.SuperstructureAccordingToOracleCommand;
 import competition.subsystems.pose.Landmarks;
-import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import org.dyn4j.geometry.Rotation;
 import xbot.common.controls.sensors.XXboxController;
+import xbot.common.subsystems.drive.BezierCurveInfo;
+import xbot.common.subsystems.drive.SwerveSimpleTrajectoryCommand;
+import xbot.common.subsystems.drive.SwerveSimpleTrajectoryMode;
 import xbot.common.subsystems.drive.swerve.commands.ChangeActiveSwerveModuleCommand;
 import xbot.common.subsystems.pose.commands.SetRobotHeadingCommand;
+import xbot.common.trajectory.XbotSwervePoint;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
 /**
@@ -49,36 +57,26 @@ public class OperatorCommandMap {
     public void setupDriverCommands(
             OperatorInterface operatorInterface,
             SetRobotHeadingCommand resetHeading,
-            AlignToReefWithAprilTagCommand alignToReefWithAprilTag,
-            DriveAccordingToOracleCommand driveAccordingToOracle,
-            SuperstructureAccordingToOracleCommand superstructureAccordingToOracle,
-            DriveToWaypointsWithVisionCommand driveToWaypointsWithVisionCommand,
-            TeleportToPositionCommand teleportToPositionCommand,
-            PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
-            IntakeCoralCommand intakeCoralCommand,
-            SetCoralArmTargetAngleCommand setCoralArmTargetAngleCommand,
-            ScoreCoralCommand scoreCoralCommand,
-            ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
-            ForceCoralPivotCalibrated forceCoralPivotCalibratedCommand) {
+            SwerveSimpleTrajectoryCommand bezierCurveExample) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(resetHeading);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(alignToReefWithAprilTag);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).onTrue(driveToWaypointsWithVisionCommand);
 
-        var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Back).onTrue(forceCoralPivotCalibratedCommand);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(forceElevatorCalibratedCommand);
-
-        // since there are a lot of free buttons on the driver gamepad currently, let's map some
-        // for basic scoring control to make it easier to demo solo. These can all be removed later.
-        var prepL4 = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.FOUR);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
-
-        var homed = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.COLLECTING);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
-
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(intakeCoralCommand);
-        // operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(scoreCoralCommand);
+        List<Translation2d> controlPoints1 = new ArrayList<>();
+        controlPoints1.add(new Translation2d(7, 3));
+        controlPoints1.add(new Translation2d(7, 2));
+        controlPoints1.add(new Translation2d(7, 1));
+        controlPoints1.add(new Translation2d(6, 1));
+        controlPoints1.add(new Translation2d(5, 1));
+        controlPoints1.add(new Translation2d(4, 1));
+        controlPoints1.add(new Translation2d(3, 1));
+        List<XbotSwervePoint> points = new ArrayList<>();
+        XbotSwervePoint p1 = new XbotSwervePoint(new Pose2d(2, 1, new Rotation2d()), 10);
+        p1.setBezierCurveInfo(
+                new BezierCurveInfo(MetersPerSecond.of(1), Seconds.of(5), controlPoints1));
+        points.add(p1);
+        bezierCurveExample.logic.setKeyPoints(points);
+        bezierCurveExample.logic.setVelocityMode(SwerveSimpleTrajectoryMode.BezierCurves);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(bezierCurveExample);
     }
 
 
