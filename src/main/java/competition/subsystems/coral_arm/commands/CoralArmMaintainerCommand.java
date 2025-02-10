@@ -13,10 +13,13 @@ import xbot.common.properties.Property;
 import xbot.common.properties.PropertyFactory;
 
 import javax.inject.Inject;
+import javax.naming.InitialContext;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 
 public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
@@ -39,16 +42,19 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
        this.oi = oi;
        pf.setPrefix(this);
        profileManager = trapzoidProfileManagerFactory.create(getPrefix() + "trapezoidMotion",
-               90, 90, armPivotSubsystem.getCurrentValue().in(Degrees));
+               60, 100, armPivotSubsystem.getCurrentValue().in(Rotations));
        pf.setDefaultLevel(Property.PropertyLevel.Important);
 
        humanMaxPower = pf.createPersistentProperty("HumanMaxPower", .20);
        humanMinPower = pf.createPersistentProperty("HumanMinPower", -.20);
+
+       decider.setDeadband(0.02);
    }
 
     @Override
     public void initialize() {
-        log.info("Initializing");
+        super.initialize();
+        setpoint = coralArm.getCurrentValue().in(Rotations);
     }
 
     @Override
@@ -56,21 +62,21 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
         coralArm.setPower(0);
     }
 
+    double setpoint = 0;
 
     @Override
     protected void calibratedMachineControlAction() { //manages and runs pid
         profileManager.setTargetPosition(
-            coralArm.getTargetValue().in(Degrees),
-            coralArm.getCurrentValue().in(Degrees),
-            coralArm.getCurrentVelocity().in(DegreesPerSecond)
+            coralArm.getTargetValue().in(Rotations),
+            coralArm.getCurrentValue().in(Rotations),
+            coralArm.getCurrentVelocity().in(RotationsPerSecond),
+            setpoint
         );
-        var setpoint = profileManager.getRecommendedPositionForTime();
+        setpoint = profileManager.getRecommendedPositionForTime();
 
         aKitLog.record("coralArmProfileTarget", setpoint);
 
-        coralArm.armMotor.setPositionTarget(
-                Rotations.of(setpoint * coralArm.rotationsPerDegrees.get()),
-                XCANMotorController.MotorPidMode.Voltage);
+        coralArm.setPositionalGoalIncludingOffset(Rotations.of(setpoint));
     }
 
     @Override
@@ -88,7 +94,7 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
                MathUtils.deadband(
                        oi.superstructureGamepad.getRightStickY(),
                        oi.getOperatorGamepadTypicalDeadband(),
-                       (a) -> (a)),
+                       (a) -> MathUtils.exponentAndRetainSign(a, 3)),
                humanMinPower.get(), humanMaxPower.get());
     }
 

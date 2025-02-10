@@ -51,12 +51,12 @@ public class SuperstructureAccordingToOracleCommand extends BaseCommand {
         if (advice.desiredScorerState() == CoralScorerSubsystem.CoralScorerState.SCORING) {
             // don't run the scorer until we're at height and the arm is in the right place!!
             if (elevator.isMaintainerAtGoal() && coralArm.isMaintainerAtGoal()) {
-                coralScorer.setPowerForState(CoralScorerSubsystem.CoralScorerState.SCORING);
+                coralScorer.setCoralScorerState(CoralScorerSubsystem.CoralScorerState.SCORING);
             } else {
-                coralScorer.setPowerForState(CoralScorerSubsystem.CoralScorerState.STOPPED);
+                coralScorer.setCoralScorerState(CoralScorerSubsystem.CoralScorerState.INTAKING);
             }
         } else {
-            coralScorer.setPowerForState(advice.desiredScorerState());
+            coralScorer.setCoralScorerState(advice.desiredScorerState());
         }
     }
 }

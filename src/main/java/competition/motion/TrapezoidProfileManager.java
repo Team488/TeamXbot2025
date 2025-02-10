@@ -48,7 +48,7 @@ public class TrapezoidProfileManager {
         goalState = new TrapezoidProfile.State(initialPosition, 0);
     }
 
-    public void setTargetPosition(double targetValue, double currentValue, double currentVelocity) {
+    public void setTargetPosition(double targetValue, double currentValue, double currentVelocity, double previousSetpoint) {
         // if the profile's constraints properties have changed, recompute the profile
         // there's maybe a better place to do this but this should be fine since setTarget will be called
         // over and over again
@@ -59,9 +59,9 @@ public class TrapezoidProfileManager {
 
         // if the target has changed, recompute the goal and current states
         if(goalState.position != targetValue) {
-            initialState = new TrapezoidProfile.State(currentValue, currentVelocity);
+            initialState = new TrapezoidProfile.State(previousSetpoint, currentVelocity);
             goalState = new TrapezoidProfile.State(targetValue, 0);
-            profileStartTime = XTimer.getFPGATimestampTime();
+            profileStartTime = XTimer.getFPGATimestampTime().minus(Seconds.of(0.02));
         }
 
     }

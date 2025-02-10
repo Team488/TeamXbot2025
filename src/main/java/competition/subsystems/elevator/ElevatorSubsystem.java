@@ -43,7 +43,6 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     public Distance elevatorTargetHeight;
 
     public final DoubleProperty rotationsPerMeter;
-    public final Distance metersPerRotation;
 
     public final DoubleProperty calibrationNegativePower;
     public final DoubleProperty powerNearLowerLimitThreshold;
@@ -90,8 +89,11 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
 
         //to be tuned
-        this.rotationsPerMeter = pf.createPersistentProperty("RotationsPerMeter", 1923.0);
-        this.metersPerRotation = Meters.of(rotationsPerMeter.get() != 0 ? 1.0 / rotationsPerMeter.get() : 0);
+        // based on some initial experiments:
+        // Elevator raises 36.375 inches (0.923925 meters) after 42.6535 revolutions
+        // 46.16554374 rotations per meter
+        double experimentalRotationsPerMeter = 42.6535 / Inches.of(36.375).in(Meters);
+        this.rotationsPerMeter = pf.createPersistentProperty("RotationsPerMeter", experimentalRotationsPerMeter);
         if (rotationsPerMeter.get() == 0){log.warn("ROTATIONS PER METER CANNOT BE ZERO CHANGE THIS NOW PLEASE");}
 
         this.calibrationNegativePower = pf.createPersistentProperty("calibrationNegativePower", -0.05);
@@ -118,13 +120,20 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         if(contract.isElevatorReady()){
             this.masterMotor = motorFactory.create(
                     contract.getElevatorMotor(), this.getPrefix(), "ElevatorMotorPID",
-                    new XCANMotorControllerPIDProperties(0.2,0,0.2)
+                    new XCANMotorControllerPIDProperties(
+                            4,
+                            0,
+                            0,
+                            0,
+                            0.750,
+                            1,
+                            -0.4)
                     );
             this.registerDataFrameRefreshable(masterMotor);
         }
         if (contract.isElevatorBottomSensorReady()){
 
-            this.bottomSensor= xDigitalInputFactory.create(contract.getElevatorBottomSensor(), "Elevator Bottom Sensor");
+            this.bottomSensor= xDigitalInputFactory.create(contract.getElevatorBottomSensor(), this.getPrefix());
             this.registerDataFrameRefreshable(bottomSensor);
 
         }else{
@@ -156,6 +165,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
             if (!isCalibrated){
                 power = MathUtils.constrainDouble(power,calibrationNegativePower.get(),0);
             }
+
             masterMotor.setVoltage(Volts.of(power*12));
         }
     }
@@ -171,14 +181,17 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     @Override
     public Distance getCurrentValue() {
-        return Meters.of(contract.isElevatorReady()
-                ? (this.masterMotor.getPosition().in(Rotations) - elevatorPositionOffset) * metersPerRotation.in(Meters)
-                : 0);
+        Distance currentHeight = Meters.zero();
+        if (contract.isElevatorReady()){
+            currentHeight = Meters.of(
+                    (this.masterMotor.getPosition().in(Rotations) - elevatorPositionOffset) * getMetersPerRotation().in(Meters));
+        }
+        return currentHeight;
     }
 
     public LinearVelocity getCurrentVelocity() {
         if (masterMotor != null) {
-            return MetersPerSecond.of(masterMotor.getVelocity().in(RotationsPerSecond) * metersPerRotation.in(Meters));
+            return MetersPerSecond.of(masterMotor.getVelocity().in(RotationsPerSecond) * getMetersPerRotation().in(Meters));
         } else {
             return MetersPerSecond.of(0);
         }
@@ -234,6 +247,10 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         } else {
             return Meter.of(0);
         }
+    }
+
+    private Distance getMetersPerRotation() {
+        return Meters.of(rotationsPerMeter.get() != 0 ? 1.0 / rotationsPerMeter.get() : 0);
     }
 
     @Override
