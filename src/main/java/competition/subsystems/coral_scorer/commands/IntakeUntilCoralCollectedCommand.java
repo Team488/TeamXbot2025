@@ -13,19 +13,14 @@ public class IntakeUntilCoralCollectedCommand extends BaseCommand {
         coral= coralScorerSubsystem;
         this.addRequirements(coral);
     }
+
     @Override
     public void initialize() {
-
+        coral.setCoralScorerState(CoralScorerSubsystem.CoralScorerState.INTAKING);
     }
 
     @Override
     public boolean isFinished() {
-        if (this.coral.confidentlyHasCoral()) {
-            coral.stop();
-            return true;
-        } else {
-            coral.intake();
-            return false;
-        }
+        return this.coral.confidentlyHasCoral();
     }
 }

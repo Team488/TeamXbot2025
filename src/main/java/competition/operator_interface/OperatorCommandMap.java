@@ -1,14 +1,11 @@
 package competition.operator_interface;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
-import javax.inject.Singleton;
-
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
 import competition.simulation.commands.ResetSimulatedPose;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionIntakeCommand;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionOutputCommand;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionStopCommand;
+import competition.subsystems.coral_arm.commands.ForceCoralPivotCalibrated;
 import competition.subsystems.coral_arm.commands.SetCoralArmTargetAngleCommand;
 import competition.subsystems.coral_scorer.commands.IntakeCoralCommand;
 import competition.subsystems.coral_scorer.commands.ScoreCoralCommand;
@@ -18,23 +15,24 @@ import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
 import competition.subsystems.drive.commands.DriveToWaypointsWithVisionCommand;
-import competition.subsystems.oracle.commands.DriveAccordingToOracleCommand;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.drive.commands.TeleportToPositionCommand;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import competition.subsystems.elevator.commands.ForceElevatorCalibratedCommand;
 import competition.subsystems.elevator.commands.SetElevatorTargetHeightCommand;
-
-import competition.subsystems.oracle.commands.SetAllowedOracleCoralStationCommand;
+import competition.subsystems.oracle.commands.DriveAccordingToOracleCommand;
 import competition.subsystems.oracle.commands.SuperstructureAccordingToOracleCommand;
 import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-
 import xbot.common.controls.sensors.XXboxController;
 import xbot.common.subsystems.drive.swerve.commands.ChangeActiveSwerveModuleCommand;
 import xbot.common.subsystems.pose.commands.SetRobotHeadingCommand;
+
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.inject.Singleton;
 
 import static edu.wpi.first.units.Units.Seconds;
 
@@ -59,15 +57,17 @@ public class OperatorCommandMap {
             PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
             IntakeCoralCommand intakeCoralCommand,
             SetCoralArmTargetAngleCommand setCoralArmTargetAngleCommand,
-            ScoreCoralCommand scoreCoralCommand) {
+            ScoreCoralCommand scoreCoralCommand,
+            ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
+            ForceCoralPivotCalibrated forceCoralPivotCalibratedCommand) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(resetHeading);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(alignToReefWithAprilTag);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).onTrue(driveToWaypointsWithVisionCommand);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(teleportToPositionCommand);
 
         var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Back).whileTrue(oracleControlsRobot);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Back).onTrue(forceCoralPivotCalibratedCommand);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(forceElevatorCalibratedCommand);
 
         // since there are a lot of free buttons on the driver gamepad currently, let's map some
         // for basic scoring control to make it easier to demo solo. These can all be removed later.
@@ -120,8 +120,11 @@ public class OperatorCommandMap {
             AlgaeCollectionStopCommand algaeCollectionStopCommand,
             Provider<SetCoralArmTargetAngleCommand> setArmTargetAngleCommandProvider,
             Provider<SetElevatorTargetHeightCommand> setElevatorTargetHeightCommandProvider,
-            ForceElevatorCalibratedCommand forceElevatorCalibratedCommand ) {
+            ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
+            ForceCoralPivotCalibrated forceCoralPivotCalibratedCommand) {
 
+        var returnToBase = setElevatorTargetHeightCommandProvider.get();
+        returnToBase.setHeight(Landmarks.CoralLevel.COLLECTING);
         var riseToL2 = setElevatorTargetHeightCommandProvider.get();
         riseToL2.setHeight(Landmarks.CoralLevel.TWO);
         var riseToL3 = setElevatorTargetHeightCommandProvider.get();
@@ -133,21 +136,24 @@ public class OperatorCommandMap {
         riseToScore.setAngle(Landmarks.CoralLevel.FOUR);
         var lowerToHumanLoad = setArmTargetAngleCommandProvider.get();
         lowerToHumanLoad.setAngle(Landmarks.CoralLevel.COLLECTING);
-      
+
+        /*
         oi.superstructureGamepad.getPovIfAvailable(0).onTrue(changeActiveModule);
         oi.superstructureGamepad.getPovIfAvailable(90).onTrue(debugModule);
         oi.superstructureGamepad.getPovIfAvailable(180).onTrue(typicalSwerveDrive);
-
+        */
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeCoralCommand);
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreCoralCommand);
 
-        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(lowerToHumanLoad);
-        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(riseToScore);
+        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).onTrue(lowerToHumanLoad);
+        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).onTrue(riseToScore);
       
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(forceElevatorCalibratedCommand);
-        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(riseToL2);
-        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(riseToL3);
-//        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(riseToL4);
+        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(riseToL2);
+        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(riseToL3);
+        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(riseToL4);
+
+        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.Back).onTrue(forceCoralPivotCalibratedCommand);
 
 //        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(algaeCollectionIntakeCommand);
 //        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(algaeCollectionOutputCommand);

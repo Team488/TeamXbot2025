@@ -17,6 +17,11 @@ public class ScoreCoralCommand extends BaseCommand {
 
     @Override
     public void initialize() {
-        coral.scorer();
+        coral.setCoralScorerState(CoralScorerSubsystem.CoralScorerState.SCORING);
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        coral.setCoralScorerState(CoralScorerSubsystem.CoralScorerState.STOPPED);
     }
 }

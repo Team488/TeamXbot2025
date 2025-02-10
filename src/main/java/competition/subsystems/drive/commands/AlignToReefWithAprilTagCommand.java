@@ -43,11 +43,16 @@ public class AlignToReefWithAprilTagCommand extends BaseCommand {
         addRequirements(drive);
         CameraInfo[] cameraInfos = electricalContract.getCameraInfo();
 
-        this.alignmentPointOffset = new Translation2d(
-                electricalContract.getDistanceFromCenterToOuterBumperX()
-                        .minus(cameraInfos[0].position().getMeasureX()),
-                Meters.zero()
-        );
+        if (cameraInfos.length != 1) {
+            // no cameras.
+            alignmentPointOffset = new Translation2d(Meters.zero(), Meters.zero());
+        } else {
+            this.alignmentPointOffset = new Translation2d(
+                    electricalContract.getDistanceFromCenterToOuterBumperX()
+                            .minus(cameraInfos[0].position().getMeasureX()),
+                    Meters.zero()
+            );
+        }
 
     }
 

@@ -18,7 +18,7 @@ public class TrapezoidProfileManagerTest extends BaseCompetitionTest {
 
     @Test
     public void setTargetPosition() {
-        manager.setTargetPosition(1, 0, 0);
+        manager.setTargetPosition(1, 0, 0, 0);
         assertEquals(1, manager.goalState.position, 0.001);
         assertEquals(0, manager.goalState.velocity, 0.001);
         assertEquals(0, manager.initialState.position, 0.001);
@@ -33,18 +33,18 @@ public class TrapezoidProfileManagerTest extends BaseCompetitionTest {
 
     @Test
     public void endToEndTest() {
-        manager.setTargetPosition(1, 0, 0);
+        manager.setTargetPosition(1, 0, 0, 0);
         var recommendation = manager.getRecommendedPositionForTime();
         assertEquals(0, recommendation, 0.001);
         timer.advanceTimeInSecondsBy(1);
         recommendation = manager.getRecommendedPositionForTime();
-        assertEquals(0.5, recommendation, 0.001);
+        assertEquals(0.5198, recommendation, 0.001);
 
-        manager.setTargetPosition(2, 1, 0.5);
+        manager.setTargetPosition(2, 1, 0.5, 1);
         recommendation = manager.getRecommendedPositionForTime();
-        assertEquals(1, recommendation, 0.001);
+        assertEquals(1.0102, recommendation, 0.001);
         timer.advanceTimeInSecondsBy(1);
         recommendation = manager.getRecommendedPositionForTime();
-        assertEquals(1.8047, recommendation, 0.001);
+        assertEquals(1.8169, recommendation, 0.001);
     }
 }
