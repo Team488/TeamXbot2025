@@ -23,16 +23,26 @@ import competition.subsystems.elevator.commands.SetElevatorTargetHeightCommand;
 import competition.subsystems.oracle.commands.DriveAccordingToOracleCommand;
 import competition.subsystems.oracle.commands.SuperstructureAccordingToOracleCommand;
 import competition.subsystems.pose.Landmarks;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import xbot.common.controls.sensors.XXboxController;
+import xbot.common.subsystems.drive.SwerveBezierTrajectoryCommand;
+import xbot.common.subsystems.drive.SwervePointKinematics;
+import xbot.common.subsystems.drive.SwerveSimpleTrajectoryCommand;
+import xbot.common.subsystems.drive.SwerveSimpleTrajectoryMode;
 import xbot.common.subsystems.drive.swerve.commands.ChangeActiveSwerveModuleCommand;
 import xbot.common.subsystems.pose.commands.SetRobotHeadingCommand;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static edu.wpi.first.units.Units.Seconds;
 
@@ -49,36 +59,20 @@ public class OperatorCommandMap {
     public void setupDriverCommands(
             OperatorInterface operatorInterface,
             SetRobotHeadingCommand resetHeading,
-            AlignToReefWithAprilTagCommand alignToReefWithAprilTag,
-            DriveAccordingToOracleCommand driveAccordingToOracle,
-            SuperstructureAccordingToOracleCommand superstructureAccordingToOracle,
-            DriveToWaypointsWithVisionCommand driveToWaypointsWithVisionCommand,
-            TeleportToPositionCommand teleportToPositionCommand,
-            PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
-            IntakeCoralCommand intakeCoralCommand,
-            SetCoralArmTargetAngleCommand setCoralArmTargetAngleCommand,
-            ScoreCoralCommand scoreCoralCommand,
-            ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
-            ForceCoralPivotCalibrated forceCoralPivotCalibratedCommand) {
+            SwerveBezierTrajectoryCommand sbtc) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(resetHeading);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(alignToReefWithAprilTag);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).onTrue(driveToWaypointsWithVisionCommand);
 
-        var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Back).onTrue(forceCoralPivotCalibratedCommand);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(forceElevatorCalibratedCommand);
+        List<Translation2d> controlPoints = new ArrayList<>();
+        controlPoints.add(new Translation2d(7, 3));
+        controlPoints.add(new Translation2d(7, 1));
+        controlPoints.add(new Translation2d(3, 1));
 
-        // since there are a lot of free buttons on the driver gamepad currently, let's map some
-        // for basic scoring control to make it easier to demo solo. These can all be removed later.
-        var prepL4 = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.FOUR);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
+        sbtc.setBezierConfiguration(controlPoints, new Pose2d(2, 1, Rotation2d.fromDegrees(0)), 5);
+        sbtc.logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
+        sbtc.logic.setGlobalKinematicValues(new SwervePointKinematics(0.5, 0, 0, 2));
 
-        var homed = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.COLLECTING);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
-
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(intakeCoralCommand);
-        // operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(scoreCoralCommand);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(sbtc);
     }
 
 
