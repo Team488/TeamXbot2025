@@ -166,8 +166,6 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
                 power = MathUtils.constrainDouble(power,calibrationNegativePower.get(),0);
             }
 
-            aKitLog.record("ElevatorPower", power);
-
             masterMotor.setVoltage(Volts.of(power*12));
         }
     }
