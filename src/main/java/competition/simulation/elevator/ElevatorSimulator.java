@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.Seconds;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import competition.electrical_contract.ElectricalContract;
 import competition.simulation.MotorInternalPIDHelper;
 import competition.simulation.SimulationConstants;
 import competition.subsystems.elevator.ElevatorSubsystem;
@@ -33,17 +34,20 @@ public class ElevatorSimulator {
     final ElevatorSim elevatorSim;
     final DCMotor elevatorGearBox = DCMotor.getKrakenX60(2);
     final PIDManager pidManager;
+    final ElectricalContract electricalContract;
+    final double gravityFeedForward = 0.02;
 
     final ElevatorSubsystem elevatorSubsystem;
     final MockCANMotorController motor;
     final MockDigitalInput bottomSensor;
 
     @Inject
-    public ElevatorSimulator(ElevatorSubsystem elevatorSubsystem, PIDManagerFactory pidManagerFactory, PropertyFactory pf) {
+    public ElevatorSimulator(ElevatorSubsystem elevatorSubsystem, PIDManagerFactory pidManagerFactory, PropertyFactory pf, ElectricalContract electricalContract) {
         aKitLog = new AKitLogger("Simulator/");
         pf.setPrefix("ElevatorSimulator");
+        this.electricalContract = electricalContract;
         this.elevatorSubsystem = elevatorSubsystem;
-        this.pidManager = pidManagerFactory.create("ElevatorSimulationPositionalPID", 0.01, 0.001, 0.0, 0.0, 1.0, -1.0);
+        this.pidManager = pidManagerFactory.create("ElevatorSimulationPositionalPID", 0.05, 0.0, 0.0, 0.0, 1.0, -1.0);
         this.motor = (MockCANMotorController) elevatorSubsystem.masterMotor;
         this.bottomSensor = (MockDigitalInput) elevatorSubsystem.bottomSensor;
 
@@ -68,7 +72,8 @@ public class ElevatorSimulator {
     }
 
     public void update() {
-        MotorInternalPIDHelper.updateInternalPID(motor, pidManager);
+        MotorInternalPIDHelper.updateInternalPID(motor, pidManager, gravityFeedForward);
+        aKitLog.record("ElevatorMotorControlMode", motor.getControlMode());
 
         if(DriverStation.isEnabled()) {
             this.elevatorSim.setInputVoltage(this.motor.getPower() * RobotController.getBatteryVoltage());
