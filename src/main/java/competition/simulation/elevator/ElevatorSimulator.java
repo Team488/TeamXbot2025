@@ -35,6 +35,7 @@ public class ElevatorSimulator {
     final DCMotor elevatorGearBox = DCMotor.getKrakenX60(2);
     final PIDManager pidManager;
     final ElectricalContract electricalContract;
+    final double gravityFeedForward = 0.02;
 
     final ElevatorSubsystem elevatorSubsystem;
     final MockCANMotorController motor;
@@ -46,7 +47,7 @@ public class ElevatorSimulator {
         pf.setPrefix("ElevatorSimulator");
         this.electricalContract = electricalContract;
         this.elevatorSubsystem = elevatorSubsystem;
-        this.pidManager = pidManagerFactory.create("ElevatorSimulationPositionalPID", 0.01, 0.001, 0.0, 0.0, 1.0, -1.0);
+        this.pidManager = pidManagerFactory.create("ElevatorSimulationPositionalPID", 0.05, 0.0, 0.0, 0.0, 1.0, -1.0);
         this.motor = (MockCANMotorController) elevatorSubsystem.masterMotor;
         this.bottomSensor = (MockDigitalInput) elevatorSubsystem.bottomSensor;
 
@@ -71,7 +72,8 @@ public class ElevatorSimulator {
     }
 
     public void update() {
-        MotorInternalPIDHelper.updateInternalPID(motor, pidManager);
+        MotorInternalPIDHelper.updateInternalPID(motor, pidManager, gravityFeedForward);
+        aKitLog.record("ElevatorMotorControlMode", motor.getControlMode());
 
         if(DriverStation.isEnabled()) {
             this.elevatorSim.setInputVoltage(this.motor.getPower() * RobotController.getBatteryVoltage());
