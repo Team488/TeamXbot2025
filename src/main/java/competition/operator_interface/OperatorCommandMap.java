@@ -44,6 +44,7 @@ import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
 
+import static edu.wpi.first.units.Units.Rotation;
 import static edu.wpi.first.units.Units.Seconds;
 
 /**
@@ -68,7 +69,7 @@ public class OperatorCommandMap {
         controlPoints.add(new Translation2d(7, 1));
         controlPoints.add(new Translation2d(3, 1));
 
-        sbtc.setBezierConfiguration(controlPoints, new Pose2d(2, 1, Rotation2d.fromDegrees(0)), 5);
+        sbtc.setBezierConfiguration(controlPoints, new Pose2d(2, 1, Rotation2d.fromDegrees(180)), 5);
         sbtc.logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
         sbtc.logic.setGlobalKinematicValues(new SwervePointKinematics(0.5, 0, 0, 2));
 
