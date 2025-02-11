@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.MockDigitalInput;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import xbot.common.advantage.AKitLogger;
 import xbot.common.controls.actuators.mock_adapters.MockCANMotorController;
 import xbot.common.controls.sensors.mock_adapters.MockAbsoluteEncoder;
 import xbot.common.math.PIDManager;
@@ -27,6 +28,7 @@ public class CoralArmSimulator {
     final DCMotor motor = DCMotor.getKrakenX60(1);
     final SingleJointedArmSim armSim;
     final PIDManager pidManager;
+    final AKitLogger aKitLog;
 
     final CoralArmSubsystem armPivotSubsystem;
     final MockCANMotorController armMotor;
@@ -36,6 +38,7 @@ public class CoralArmSimulator {
     @Inject
     public CoralArmSimulator(CoralArmSubsystem armPivotSubsystem, PIDManager.PIDManagerFactory pidManagerFactory, PropertyFactory pf) {
         pf.setPrefix("CoralArmSimulator");
+        this.aKitLog = new AKitLogger("FieldSimulation/CoralArm");
         this.pidManager = pidManagerFactory.create(pf.getPrefix() + "/CANMotorPositionalPID", 0.01, 0.001, 0.0, 0.0, 1.0, -1.0);
         this.armPivotSubsystem = armPivotSubsystem;
         this.armMotor = (MockCANMotorController) armPivotSubsystem.armMotor;
@@ -68,6 +71,7 @@ public class CoralArmSimulator {
 
         // Read out the new arm position for rendering
         var armRelativeAngle = getArmAngle();
+        aKitLog.record("armAngle", armRelativeAngle.in(Degrees));
 
         var armMotorRotations = armRelativeAngle.in(Radians) / CoralArmSimConstants.armEncoderAnglePerRotation.in(Radians);
         armMotor.setPosition(Rotations.of(armMotorRotations));
@@ -84,7 +88,7 @@ public class CoralArmSimulator {
         // reference where the bottom is 0' and the top is 125'
         var armSimAngle = Radians.of(armSim.getAngleRads());
 
-        return armSimAngle.minus(CoralArmSimConstants.maxAngleRads).times(-1);
+        return armSimAngle.minus(CoralArmSimConstants.angleAtRobotZero).times(-1);
     }
 
     public boolean isAtCollectionAngle() {
