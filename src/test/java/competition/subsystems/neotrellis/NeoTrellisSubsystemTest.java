@@ -46,5 +46,15 @@ public class NeoTrellisSubsystemTest extends BaseCompetitionTest {
         neoTrellis.pressButton(neoSubsystem.getNeoTrellisButtonIndex(Landmarks.CoralLevel.FOUR));
         neoSubsystem.periodic();
         assertEquals(1, scoringQueue.getQueueSize());
+        neoSubsystem.periodic();
+        assertEquals(1, scoringQueue.getQueueSize());
+
+        neoTrellis.releaseButton(neoSubsystem.getNeoTrellisButtonIndex(Landmarks.CoralLevel.FOUR));
+        neoSubsystem.periodic();
+        assertEquals(1, scoringQueue.getQueueSize());
+
+        neoTrellis.pressButton(neoSubsystem.getNeoTrellisButtonIndex(Landmarks.CoralLevel.FOUR));
+        neoSubsystem.periodic();
+        assertEquals(2, scoringQueue.getQueueSize());
     }
 }
