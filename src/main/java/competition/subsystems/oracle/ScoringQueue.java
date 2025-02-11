@@ -23,10 +23,12 @@ public class ScoringQueue {
 
         // TODO: set this up based on some commands invoked by the operator (before auto, or during the match)
         // for now, cheating in some tasks.
-        scoringTasks.add(new ScoringTask(Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR));
-        scoringTasks.add(new ScoringTask(Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR));
-        scoringTasks.add(new ScoringTask(Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.THREE));
-        scoringTasks.add(new ScoringTask(Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.THREE));
+
+        addCoralTask(Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR);
+        addCoralTask(Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR);
+
+        addCoralTask(Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.THREE);
+        addCoralTask(Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.THREE);
     }
 
     public void addCoralTask(Landmarks.ReefFace face, Landmarks.Branch branch, Landmarks.CoralLevel level) {
@@ -51,6 +53,19 @@ public class ScoringQueue {
                 Optional.empty(),
                 Optional.empty(),
                 Optional.empty()));
+    }
+
+    public static boolean isTaskWellFormed(ScoringTask task) {
+        if (task != null) {
+            return switch (task.gameAction()) {
+                case ScoreCoral ->
+                        task.reefFace().isPresent() && task.branch().isPresent() && task.coralLevel().isPresent();
+                case RemoveAlgae -> task.reefFace().isPresent();
+                case ProcessAlgae -> true;
+                default -> false;
+            };
+        }
+        return false;
     }
 
     public void addScoringGoalToBottomOfQueue(ScoringTask scoringTask) {
@@ -83,5 +98,6 @@ public class ScoringQueue {
     public List<String> getTaskArray() {
         var tasks = new ArrayList<String>();
         scoringTasks.forEach((t) -> tasks.add(t.toString()));
+        return tasks;
     }
 }

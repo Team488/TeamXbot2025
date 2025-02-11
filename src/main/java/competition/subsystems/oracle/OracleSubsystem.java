@@ -103,15 +103,15 @@ public class OracleSubsystem extends BaseSubsystem {
 
         var penultimateWaypoint = reefCoordinateGenerator.getPoseRelativeToReefFaceAndBranch(
                 DriverStation.Alliance.Blue,
-                activeScoringTask.reefFace(),
-                activeScoringTask.branch(),
+                activeScoringTask.reefFace().get(),
+                activeScoringTask.branch().get(),
                 Meters.of(1),
                 Meters.of(0));
         var finalWaypoint = reefCoordinateGenerator.getTypicalScoringLocationForFaceBranchLevel(
                 DriverStation.Alliance.Blue,
-                activeScoringTask.reefFace(),
-                activeScoringTask.branch(),
-                activeScoringTask.coralLevel());
+                activeScoringTask.reefFace().get(),
+                activeScoringTask.branch().get(),
+                activeScoringTask.coralLevel().get());
 
         var route = blueReefRoutingCircle.generateSwervePoints(pose.getCurrentPose2d(), penultimateWaypoint);
         route.add(new XbotSwervePoint(finalWaypoint, 10));
@@ -186,6 +186,12 @@ public class OracleSubsystem extends BaseSubsystem {
     // -In the approach stage, we raise the elevator and arm to scoring position
     // -In the scoring stage, we run the scorer until we've confidently scored
     private void evaluateScoringSubstage() {
+
+        if (!ScoringQueue.isTaskWellFormed(scoringQueue.getActiveTask())) {
+            // Incomplete information, we can't proceed
+            return;
+        }
+
         switch (currentScoringSubstage) {
             case Travel:
                 if (isScoringSubstageInitilizationRequired()) {
@@ -200,7 +206,7 @@ public class OracleSubsystem extends BaseSubsystem {
                 break;
             case Approach:
                 if (isScoringSubstageInitilizationRequired()) {
-                    setSuperstructureAdvice(scoringQueue.getActiveTask().coralLevel(), CoralScorerSubsystem.CoralScorerState.STOPPED);
+                    setSuperstructureAdvice(scoringQueue.getActiveTask().coralLevel().get(), CoralScorerSubsystem.CoralScorerState.STOPPED);
                     setScoringSubstageInitilizationFinished();
                 }
 
@@ -211,7 +217,7 @@ public class OracleSubsystem extends BaseSubsystem {
                 break;
             case Scoring:
                 if (isScoringSubstageInitilizationRequired()) {
-                    setSuperstructureAdvice(scoringQueue.getActiveTask().coralLevel(), CoralScorerSubsystem.CoralScorerState.SCORING);
+                    setSuperstructureAdvice(scoringQueue.getActiveTask().coralLevel().get(), CoralScorerSubsystem.CoralScorerState.SCORING);
                     setScoringSubstageInitilizationFinished();
                 }
 

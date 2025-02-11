@@ -2,7 +2,9 @@ package competition.injection.components;
 
 import competition.electrical_contract.ElectricalContract;
 import competition.motion.TrapezoidProfileManager;
+import competition.operator_interface.NeoTrellisSubsystem;
 import competition.operator_interface.OperatorCommandMap;
+import competition.operator_interface.OperatorInterface;
 import competition.simulation.BaseSimulator;
 import competition.subsystems.SubsystemDefaultCommandMap;
 import competition.subsystems.coral_arm.CoralArmSubsystem;
@@ -10,6 +12,7 @@ import competition.subsystems.coral_scorer.CoralScorerSubsystem;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import competition.subsystems.oracle.OracleSubsystem;
 import competition.subsystems.oracle.ReefCoordinateGenerator;
+import competition.subsystems.oracle.ScoringQueue;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import competition.subsystems.elevator_mechanism.SuperstructureMechanismSubsystem;
 import competition.subsystems.lights.LightSubsystem;
@@ -50,4 +53,10 @@ public abstract class BaseRobotComponent extends BaseComponent {
     public abstract LightSubsystem lightSubsystem();
 
     public abstract TrapezoidProfileManager.Factory trapezoidProfileManagerFactory();
+
+    public abstract NeoTrellisSubsystem neoTrellisSubsystem();
+
+    public abstract OperatorInterface operatorInterface();
+
+    public abstract ScoringQueue scoringQueue();
 }

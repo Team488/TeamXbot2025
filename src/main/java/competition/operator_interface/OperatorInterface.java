@@ -3,6 +3,7 @@ package competition.operator_interface;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import xbot.common.controls.sensors.XJoystick;
 import xbot.common.controls.sensors.XXboxController;
 import xbot.common.controls.sensors.XXboxController.XXboxControllerFactory;
 import xbot.common.logging.RobotAssertionManager;
@@ -17,7 +18,7 @@ import xbot.common.properties.PropertyFactory;
 public class OperatorInterface {
     public final XXboxController driverGamepad;
     public final XXboxController operatorGamepad;
-    public final XXboxController neoTrellis;
+    public final XJoystick neoTrellis;
     public final XXboxController oiPanel;
     public final XXboxController superstructureGamepad;
     public final XXboxController algaeAndSysIdGamepad;
@@ -29,7 +30,11 @@ public class OperatorInterface {
 
 
     @Inject
-    public OperatorInterface(XXboxControllerFactory controllerFactory, RobotAssertionManager assertionManager, PropertyFactory pf) {
+    public OperatorInterface(
+            XXboxControllerFactory controllerFactory,
+            XJoystick.XJoystickFactory joystickFactory,
+            RobotAssertionManager assertionManager,
+            PropertyFactory pf) {
         driverGamepad = controllerFactory.create(0);
         driverGamepad.setLeftInversion(false, true);
         driverGamepad.setRightInversion(true, true);
@@ -38,7 +43,7 @@ public class OperatorInterface {
         operatorGamepad.setLeftInversion(false, true);
         operatorGamepad.setRightInversion(false, true);
 
-        neoTrellis = controllerFactory.create(2);
+        neoTrellis = joystickFactory.create(2, 32);
         // No axes to invert on the NeoTrellis
 
         oiPanel = controllerFactory.create(3);
