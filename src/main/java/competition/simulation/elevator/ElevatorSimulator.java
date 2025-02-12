@@ -42,7 +42,8 @@ public class ElevatorSimulator {
     final MockDigitalInput bottomSensor;
 
     @Inject
-    public ElevatorSimulator(ElevatorSubsystem elevatorSubsystem, PIDManagerFactory pidManagerFactory, PropertyFactory pf, ElectricalContract electricalContract) {
+    public ElevatorSimulator(ElevatorSubsystem elevatorSubsystem, PIDManagerFactory pidManagerFactory,
+            PropertyFactory pf, ElectricalContract electricalContract) {
         aKitLog = new AKitLogger("Simulator/");
         pf.setPrefix("ElevatorSimulator");
         this.electricalContract = electricalContract;
