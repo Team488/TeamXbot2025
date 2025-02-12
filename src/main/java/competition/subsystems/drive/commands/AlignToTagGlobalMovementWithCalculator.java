@@ -66,7 +66,7 @@ public class AlignToTagGlobalMovementWithCalculator extends BaseCommand {
         drive.getPositionalPid().reset();
         headingAtCommandStart = pose.getCurrentPose2d().getRotation().getDegrees();
         calculator = new AlignCameraToAprilTagCalculator(aprilTagVisionSubsystem, drive.getPositionalPid(),
-                electricalContract, targetAprilTagID, targetCameraID, 12, backwards);
+                electricalContract, targetAprilTagID, targetCameraID, 24, backwards);
     }
 
     @Override

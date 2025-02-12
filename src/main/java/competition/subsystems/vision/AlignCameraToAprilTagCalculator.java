@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Distance;
+import xbot.common.advantage.AKitLogger;
 import xbot.common.injection.electrical_contract.CameraInfo;
 import xbot.common.math.PIDManager;
 
@@ -21,6 +22,7 @@ public class AlignCameraToAprilTagCalculator {
     private final int targetCameraID;
     public final Translation2d alignmentPointOffset;
     private final boolean backwards;
+    AKitLogger akitLog;
 
     public enum TagAcquisitionState {
         NeverSeen,
@@ -55,6 +57,8 @@ public class AlignCameraToAprilTagCalculator {
                 Inches.of(offsetInInches),
                 backwards
         );
+
+        this.akitLog = new AKitLogger("AlignToTagGlobalMovementWithCalculator/");
     }
 
     public TagAcquisitionState getTagAcquisitionState() {
@@ -67,6 +71,7 @@ public class AlignCameraToAprilTagCalculator {
         if (aprilTagVisionSubsystem.aprilTagCameraHasCorrectTarget(targetAprilTagID, targetCameraID)) {
             tagAcquisitionState = TagAcquisitionState.LockedOn;
             Translation2d aprilTagData = aprilTagVisionSubsystem.getAprilTagCameraData(targetCameraID);
+            akitLog.record("AprilTagData", aprilTagData);
 
             // This transform will always be at rotation 0, since in its own frame, the robot is always facing forward.
             Transform2d relativeGoalTransform = new Transform2d(

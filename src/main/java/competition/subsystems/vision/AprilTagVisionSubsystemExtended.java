@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import xbot.common.advantage.AKitLogger;
 import xbot.common.injection.electrical_contract.XCameraElectricalContract;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.vision.AprilTagVisionIO;
@@ -20,6 +21,7 @@ import java.util.HashMap;
 @Singleton
 public class AprilTagVisionSubsystemExtended extends AprilTagVisionSubsystem {
     HashMap<Pose2d, Integer> aprilTagIDHashMap = new HashMap<>();
+    AKitLogger akitLog;
     @Inject
     public AprilTagVisionSubsystemExtended(PropertyFactory pf,
                                            AprilTagFieldLayout fieldLayout, XCameraElectricalContract contract,
@@ -41,6 +43,7 @@ public class AprilTagVisionSubsystemExtended extends AprilTagVisionSubsystem {
             aprilTagIDHashMap.put(Landmarks.BlueFarAlgae, 21);
             aprilTagIDHashMap.put(Landmarks.BlueFarRightAlgae, 22);
 
+            akitLog = new AKitLogger("AprilTagVisionSubsystemExtended/");
     }
 
     public Translation2d getReefAprilTagCameraData() {
@@ -51,6 +54,7 @@ public class AprilTagVisionSubsystemExtended extends AprilTagVisionSubsystem {
 
     public Translation2d getAprilTagCameraData(int cameraToUse) {
         Transform3d data = getLatestTargetObservation(cameraToUse).cameraToTarget();
+        akitLog.record("TargetDistance", data);
 
         return new Translation2d(data.getX(), data.getY());
     }
