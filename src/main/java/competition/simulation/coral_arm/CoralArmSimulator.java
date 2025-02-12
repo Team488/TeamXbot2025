@@ -39,7 +39,7 @@ public class CoralArmSimulator {
     public CoralArmSimulator(CoralArmSubsystem armPivotSubsystem, PIDManager.PIDManagerFactory pidManagerFactory, PropertyFactory pf) {
         pf.setPrefix("CoralArmSimulator");
         this.aKitLog = new AKitLogger("FieldSimulation/CoralArm");
-        this.pidManager = pidManagerFactory.create(pf.getPrefix() + "/CANMotorPositionalPID", 0.01, 0.001, 0.0, 0.0, 1.0, -1.0);
+        this.pidManager = pidManagerFactory.create(pf.getPrefix() + "/CANMotorPositionalPID", 0.2, 0.001, 0.0, 0.0, 1.0, -1.0);
         this.armPivotSubsystem = armPivotSubsystem;
         this.armMotor = (MockCANMotorController) armPivotSubsystem.armMotor;
         this.absoluteEncoder = (MockAbsoluteEncoder) armPivotSubsystem.armAbsoluteEncoder;
