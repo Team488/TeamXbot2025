@@ -11,6 +11,7 @@ import competition.subsystems.algae_collection.commands.AlgaeCollectionOutputCom
 import competition.subsystems.algae_collection.commands.AlgaeCollectionStopCommand;
 import competition.subsystems.coral_arm.commands.SetCoralArmTargetAngleCommand;
 import competition.subsystems.coral_scorer.commands.IntakeCoralCommand;
+import competition.subsystems.coral_scorer.commands.IntakeUntillCoral;
 import competition.subsystems.coral_scorer.commands.ScoreCoralCommand;
 import competition.subsystems.coral_scorer.commands.ScoreWhenReadyCommand;
 import competition.subsystems.coral_scorer.commands.StopCoralCommand;
@@ -29,6 +30,7 @@ import competition.subsystems.oracle.commands.SetAllowedOracleCoralStationComman
 import competition.subsystems.oracle.commands.SuperstructureAccordingToOracleCommand;
 import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
@@ -77,7 +79,7 @@ public class OperatorCommandMap {
         var homed = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.COLLECTING);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
 
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(intakeCoralCommand);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileFalse(intakeCoralCommand);
         // operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(scoreCoralCommand);
     }
 
@@ -89,6 +91,7 @@ public class OperatorCommandMap {
                                       ScoreCoralCommand scoreCoralCommand, IntakeCoralCommand intakeCoralCommand,
                                       SetCoralArmTargetAngleCommand setCoralArmTargetAngleCommand,
                                       ScoreWhenReadyCommand scoreWhenReadyCommand) {
+        var rumbleModeFalse = new InstantCommand(() -> oi.operatorGamepad.getRumbleManager().stopGamepadRumble());
         var prepL4 = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.FOUR);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
 
@@ -99,7 +102,7 @@ public class OperatorCommandMap {
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
 
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(scoreWhenReadyCommand);
-        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(intakeCoralCommand);
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(intakeCoralCommand).whileTrue(rumbleModeFalse);
 
     }
 
@@ -120,7 +123,10 @@ public class OperatorCommandMap {
             AlgaeCollectionStopCommand algaeCollectionStopCommand,
             Provider<SetCoralArmTargetAngleCommand> setArmTargetAngleCommandProvider,
             Provider<SetElevatorTargetHeightCommand> setElevatorTargetHeightCommandProvider,
-            ForceElevatorCalibratedCommand forceElevatorCalibratedCommand ) {
+            ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
+            IntakeUntillCoral intakeUntillCoral) {
+        var rumbleModeFalse= new InstantCommand(() -> oi.operatorGamepad.getRumbleManager().stopGamepadRumble());
+
 
         var riseToL2 = setElevatorTargetHeightCommandProvider.get();
         riseToL2.setHeight(Landmarks.CoralLevel.TWO);
@@ -138,7 +144,7 @@ public class OperatorCommandMap {
         oi.superstructureGamepad.getPovIfAvailable(90).onTrue(debugModule);
         oi.superstructureGamepad.getPovIfAvailable(180).onTrue(typicalSwerveDrive);
 
-        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeCoralCommand);
+        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeCoralCommand).onFalse(rumbleModeFalse);
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreCoralCommand);
 
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(lowerToHumanLoad);
@@ -148,6 +154,7 @@ public class OperatorCommandMap {
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(riseToL2);
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(riseToL3);
 //        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(riseToL4);
+
 
 //        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(algaeCollectionIntakeCommand);
 //        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(algaeCollectionOutputCommand);
