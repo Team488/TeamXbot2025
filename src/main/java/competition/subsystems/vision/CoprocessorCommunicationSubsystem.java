@@ -2,6 +2,7 @@ package competition.subsystems.vision;
 
 import org.kobe.xbot.JClient.XTablesClient;
 import org.kobe.xbot.JClient.XTablesClientManager;
+import org.kobe.xbot.Utilities.Logger.XTablesLogger;
 import xbot.common.advantage.DataFrameRefreshable;
 import xbot.common.command.BaseSubsystem;
 import xbot.common.logging.RobotAssertionManager;
@@ -10,6 +11,7 @@ import xbot.common.properties.StringProperty;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.logging.Level;
 
 /**
  * This is a subsystem for getting data from coprocessors not related to AprilTags (e.g. data
@@ -37,6 +39,7 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
         xtablesHeadingLocation = pf.createPersistentProperty("Xtables Heading Location", "target_heading");
 
         xTablesClientManager = XTablesClient.getDefaultClientAsynchronously();
+        XTablesLogger.setLoggingLevel(Level.OFF);
     }
 
     public XTablesClientManager getXTablesManager(){

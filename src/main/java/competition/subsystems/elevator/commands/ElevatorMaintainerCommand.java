@@ -54,7 +54,11 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         super(elevator, pf, hvmFactory, Inches.of(1).in(Meters), 0.2);
         pf.setPrefix(this);
         this.elevator = elevator;
-        profileManager = trapezoidProfileManagerFactory.create(getPrefix() + "trapezoidMotion", 1, 1, elevator.getCurrentValue().in(Meters));
+        profileManager = trapezoidProfileManagerFactory.create(
+                getPrefix() + "trapezoidMotion",
+                5,
+                3.5,
+                elevator.getCurrentValue().in(Meters));
 
         this.oi = oi;
         this.contract = contract;
@@ -62,16 +66,20 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         calibrationDecider = calibrationDeciderFactory.create("calibrationDecider");
         calibrationDecider.reset();
 
-        this.humanMaxPowerGoingUp = pf.createPersistentProperty("maxPowerGoingUp", 1);
-        this.humanMaxPowerGoingDown = pf.createPersistentProperty("maxPowerGoingDown", -0.2);
+        this.humanMaxPowerGoingUp = pf.createPersistentProperty("humanMaxPowerGoingUp", 0.2);
+        this.humanMaxPowerGoingDown = pf.createPersistentProperty("humanMaxPowerGoingDown", -0.2);
 
-        this.gravityPIDConstantPower = pf.createPersistentProperty("gravityPIDConstant", 0.015);
+        this.gravityPIDConstantPower = pf.createPersistentProperty("gravityPIDConstant", 0.07416666);
+
+        decider.setDeadband(0.02);
     }
 
     @Override
     public void initialize() {
-        log.info("initializing");
+        super.initialize();
         calibrationDecider.reset();
+
+        setpoint = elevator.getCurrentValue().in(Meters);
     }
 
     @Override
@@ -79,18 +87,22 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         elevator.setPower(0);
     }
 
+    double setpoint = 0;
+
     @Override
     protected void calibratedMachineControlAction() {
         profileManager.setTargetPosition(
             elevator.getTargetValue().in(Meters),
             elevator.getCurrentValue().in(Meters),
-            elevator.getCurrentVelocity().in(MetersPerSecond)
+            elevator.getCurrentVelocity().in(MetersPerSecond),
+            setpoint
         );
-        var setpoint = profileManager.getRecommendedPositionForTime();
+        setpoint = profileManager.getRecommendedPositionForTime();
 
         // it's helpful to log this to know where the robot is actually trying to get to in the moment
         aKitLog.record("elevatorProfileTarget", setpoint);
 
+        // TODO: this is disabled for testing
         //handles pidding via motor controller and setting power to elevator
         elevator.masterMotor.setPositionTarget(
                 Rotations.of(setpoint * elevator.rotationsPerMeter.get()),
@@ -107,7 +119,6 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         switch (mode){
             case Calibrated -> calibratedMachineControlAction();
             case Attempting -> attemptCalibration();
-            case GaveUp -> humanControlAction();
             default -> humanControlAction();
         }
     }
@@ -137,12 +148,16 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     @Override
     protected double getHumanInput() {
-        return MathUtils.constrainDouble(
+
+        double humanInput = MathUtils.constrainDouble(
                 MathUtils.deadband(
-                    oi.superstructureGamepad.getLeftVector().getY(),
-                    oi.getOperatorGamepadTypicalDeadband(),
-                    (a) -> (a)),
+                        oi.superstructureGamepad.getLeftStickY(),
+                        oi.getOperatorGamepadTypicalDeadband(),
+                        (a) -> MathUtils.exponentAndRetainSign(a, 3)),
                 humanMaxPowerGoingDown.get(), humanMaxPowerGoingUp.get());
+
+        aKitLog.record("elevatorHumanInput", humanInput);
+        return humanInput;
     }
 
     @Override
