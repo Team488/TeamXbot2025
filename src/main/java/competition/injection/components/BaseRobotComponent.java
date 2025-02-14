@@ -53,7 +53,7 @@ public abstract class BaseRobotComponent extends BaseComponent {
     public abstract LightSubsystem lightSubsystem();
 
     public abstract TrapezoidProfileManager.Factory trapezoidProfileManagerFactory();
-    
+
     public abstract NeoTrellisSubsystem neoTrellisSubsystem();
 
     public abstract OperatorInterface operatorInterface();
