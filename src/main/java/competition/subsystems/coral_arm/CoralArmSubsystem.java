@@ -290,6 +290,8 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
         aKitLog.record("Target Angle", this.getTargetValue().in(Rotations));
         aKitLog.record("Current Angle", this.getCurrentValue().in(Rotations));
         aKitLog.record("isCalibrated", this.isCalibrated());
+        aKitLog.record("isAtTargetAngle", this.getIsTargetAngleScoring());
+        aKitLog.record("isAtMaintainerGoal", this.isMaintainerAtGoal());
         if (electricalContract.isCoralArmPivotAbsoluteEncoderReady()) {
             aKitLog.record("Current Angle using AbsEncoder", this.getArmAngle().in(Degrees));
         }

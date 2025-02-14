@@ -298,6 +298,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         aKitLog.record("ElevatorCurrentHeight-m", getCurrentValue().in(Meters));
         aKitLog.record("ElevatorBottomSensor", this.isTouchingBottom());
         aKitLog.record("isElevatorCalibrated", isCalibrated());
+        aKitLog.record("isElevatorMaintainerAtGoal", this.isMaintainerAtGoal());
         aKitLog.record("ElevatorDistanceSensor-m", getRawDistance().in(Meters));
 
         periodicTickCounter++;
