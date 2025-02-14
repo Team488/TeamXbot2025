@@ -11,6 +11,7 @@ import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.units.measure.Distance;
@@ -257,5 +258,33 @@ public class PoseSubsystem extends BasePoseSubsystem {
             }
         }
         return hashMap.get(leastDistance);
+    }
+
+    public Landmarks.ReefFace getReefFaceFromAngle() {
+        double currentAngleInDegrees;
+        if (useVisionAssistedPose.get()) {
+            currentAngleInDegrees = fullSwerveOdometry.getEstimatedPosition().getRotation().getDegrees();
+        } else {
+            currentAngleInDegrees = onlyWheelsGyroSwerveOdometry.getEstimatedPosition().getRotation().getDegrees();
+        }
+        
+        if (currentAngleInDegrees > 150 || currentAngleInDegrees < -150) {
+            return Landmarks.ReefFace.FAR;
+        }
+        else if (currentAngleInDegrees > 90) {
+            return Landmarks.ReefFace.FAR_RIGHT;
+        }
+        else if (currentAngleInDegrees > 30) {
+            return Landmarks.ReefFace.CLOSE_RIGHT;
+        }
+        else if (currentAngleInDegrees > -30) {
+            return Landmarks.ReefFace.CLOSE;
+        }
+        else if (currentAngleInDegrees > -90) {
+            return Landmarks.ReefFace.CLOSE_LEFT;
+        }
+        else {
+            return Landmarks.ReefFace.FAR_LEFT;
+        }
     }
 }
