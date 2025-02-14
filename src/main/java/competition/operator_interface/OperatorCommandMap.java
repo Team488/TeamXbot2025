@@ -100,7 +100,7 @@ public class OperatorCommandMap {
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(prepL2);
 
         var homed = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.COLLECTING);
-        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(homed);
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeUntilCoralCollectedCommand);
 
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).onTrue(scoreCoralCommand);
