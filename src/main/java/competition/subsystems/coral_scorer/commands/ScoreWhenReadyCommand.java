@@ -18,7 +18,7 @@ public class ScoreWhenReadyCommand extends BaseCommand {
         this.coralScorerSubsystem = coralScorerSubsystem;
         this.armPivotSubsystem = armPivotSubsystem;
         this.elevatorSubsystem = elevatorSubsystem;
-        addRequirements(coralScorerSubsystem);
+        addRequirements(coralScorerSubsystem, armPivotSubsystem, elevatorSubsystem);
     }
 
     @Override
