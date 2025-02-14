@@ -15,6 +15,7 @@ import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
 import competition.subsystems.drive.commands.DriveToWaypointsWithVisionCommand;
+import competition.subsystems.drive.commands.SwerveBezierTrajectoryCommand;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.drive.commands.TeleportToPositionCommand;
 import competition.subsystems.elevator.ElevatorSubsystem;
@@ -30,7 +31,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import xbot.common.controls.sensors.XXboxController;
-import xbot.common.subsystems.drive.SwerveBezierTrajectoryCommand;
 import xbot.common.subsystems.drive.SwervePointKinematics;
 import xbot.common.subsystems.drive.SwerveSimpleTrajectoryCommand;
 import xbot.common.subsystems.drive.SwerveSimpleTrajectoryMode;
@@ -64,15 +64,6 @@ public class OperatorCommandMap {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(resetHeading);
 
-        List<Translation2d> controlPoints = new ArrayList<>();
-        controlPoints.add(new Translation2d(7, 3));
-        controlPoints.add(new Translation2d(7, 1));
-        controlPoints.add(new Translation2d(3, 1));
-
-        sbtc.setBezierConfiguration(controlPoints, new Pose2d(2, 1, Rotation2d.fromDegrees(180)), 5);
-        sbtc.logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
-        sbtc.logic.setGlobalKinematicValues(new SwervePointKinematics(0.5, 0, 0, 2));
-
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(sbtc);
     }
 
@@ -93,8 +84,8 @@ public class OperatorCommandMap {
         var homed = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.COLLECTING);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
 
-        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(scoreWhenReadyCommand);
-        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(intakeCoralCommand);
+//        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(scoreWhenReadyCommand);
+//        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(intakeCoralCommand);
 
     }
 
