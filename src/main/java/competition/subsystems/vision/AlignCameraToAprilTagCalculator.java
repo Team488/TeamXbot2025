@@ -2,6 +2,7 @@ package competition.subsystems.vision;
 
 import competition.electrical_contract.ElectricalContract;
 import competition.subsystems.drive.DrivePowerCalculator;
+import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -71,16 +72,19 @@ public class AlignCameraToAprilTagCalculator {
         if (aprilTagVisionSubsystem.aprilTagCameraHasCorrectTarget(targetAprilTagID, targetCameraID)) {
             tagAcquisitionState = TagAcquisitionState.LockedOn;
             Translation2d aprilTagData = aprilTagVisionSubsystem.getAprilTagCameraData(targetCameraID);
+
             akitLog.record("AprilTagData", aprilTagData);
 
             // This transform will always be at rotation 0, since in its own frame, the robot is always facing forward.
             Transform2d relativeGoalTransform = new Transform2d(
-                    aprilTagData.minus(alignmentPointOffset.times(backwards ? -1 : 1)),
+                    aprilTagData.minus(alignmentPointOffset),
                     new Rotation2d()
             );
 
+            // Let's brute-force and do some changes
+
             // Move from robot-relative frame to field frame
-            driveTarget = currentPose.transformBy(relativeGoalTransform.times(backwards ? -1 : 1)).getTranslation();
+            driveTarget = currentPose.transformBy(relativeGoalTransform).getTranslation();
 
         } else {
             if (tagAcquisitionState == TagAcquisitionState.LockedOn) {
