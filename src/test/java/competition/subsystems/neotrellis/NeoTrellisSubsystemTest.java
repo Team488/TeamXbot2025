@@ -42,6 +42,9 @@ public class NeoTrellisSubsystemTest extends BaseCompetitionTest {
 
     @Test
     public void testButtonCombo() {
+
+        getInjectorComponent().scheduler().reset();
+
         assertEquals(0, scoringQueue.getQueueSize());
         neoTrellis.pressButton(neoSubsystem.getNeoTrellisButtonIndex(Landmarks.ReefFace.CLOSE, Landmarks.Branch.A));
         neoTrellis.pressButton(neoSubsystem.getNeoTrellisButtonIndex(Landmarks.CoralLevel.FOUR));
