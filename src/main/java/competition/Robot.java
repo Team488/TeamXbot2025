@@ -10,8 +10,8 @@ import competition.injection.components.DaggerRobotComponent2023;
 import competition.injection.components.DaggerRobotComponent2024;
 import competition.injection.components.DaggerRoboxComponent;
 import competition.injection.components.DaggerSimulationComponent;
+import competition.operator_interface.OperatorInterface;
 import competition.simulation.BaseSimulator;
-import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.wpilibj.Preferences;
 import org.apache.logging.log4j.LogManager;
@@ -31,6 +31,7 @@ public class Robot extends BaseRobot {
 
     BaseSimulator simulator;
     ElectricalContract simulatorContract = new UnitTestContract2025();
+    OperatorInterface oi;
 
     @Override
     protected void initializeSystems() {
@@ -41,6 +42,7 @@ public class Robot extends BaseRobot {
         getInjectorComponent().superstructureMechanismSubsystem();
         getInjectorComponent().oracleSubsystem();
         getInjectorComponent().lightSubsystem();
+        oi = getInjectorComponent().operatorInterface();
 
         if (BaseRobot.isSimulation()) {
             simulator = getInjectorComponent().simulator();
@@ -145,5 +147,13 @@ public class Robot extends BaseRobot {
 
     public XScheduler getScheduler() {
         return xScheduler;
+    }
+
+    @Override
+    public void sharedPeriodic() {
+        super.sharedPeriodic();
+        if(oi != null) {
+            oi.periodic();
+        }
     }
 }

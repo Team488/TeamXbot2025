@@ -85,13 +85,13 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
             this.lowSensor = null;
         }
 
-        this.degreesPerRotations = propertyFactory.createPersistentProperty("Degrees Per Rotations", 0.1);
+        this.degreesPerRotations = propertyFactory.createPersistentProperty("Degrees Per Rotations", 6.94444);
 
         this.rangeOfMotionDegrees = propertyFactory.createPersistentProperty("Range of Motion in Degrees", 125);
         this.minArmPosition = propertyFactory.createPersistentProperty("Min AbsEncoder Position in Degrees", 90);
         this.maxArmPosition = propertyFactory.createPersistentProperty("Max AbsEncoder Position in Degrees", 108);
-        this.scoreAngle = propertyFactory.createPersistentProperty("Scoring Angle in rotations", 23);
-        this.humanLoadAngle = propertyFactory.createPersistentProperty("Human Loading Angle in rotations", 5);
+        this.scoreAngle = propertyFactory.createPersistentProperty("Scoring Angle in Degrees", 125);
+        this.humanLoadAngle = propertyFactory.createPersistentProperty("Human Loading Angle in Degrees", 0);
         this.powerWhenNotCalibrated = propertyFactory.createPersistentProperty("Power When Not Calibrated", 0.05);
 
         this.minRotations = propertyFactory.createPersistentProperty("Min Rotations", 0);
@@ -100,9 +100,11 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
     @Override
     public Angle getCurrentValue() {
-        // Temporarily using Rotations everywhere until we have a way of better
-        // measuring the physical location of the arm.
-        return getCalibratedPosition();
+        double currentAngle = 0;
+        if (electricalContract.isCoralArmMotorReady()) {
+            currentAngle = getCalibratedPosition().in(Rotations) * degreesPerRotations.get();
+        }
+        return Degrees.of(currentAngle);
     }
 
     private Angle getAbsoluteAngle() {
