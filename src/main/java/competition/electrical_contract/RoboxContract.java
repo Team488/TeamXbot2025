@@ -26,12 +26,12 @@ public class RoboxContract extends Contract2025 {
 
     @Override
     public boolean isElevatorReady() {
-        return true;
+        return false;
     }
 
     @Override
     public boolean isCoralCollectionMotorReady() {
-        return true;
+        return false;
     }
 
     @Override
@@ -41,8 +41,13 @@ public class RoboxContract extends Contract2025 {
 
     @Override
     public boolean isCoralArmMotorReady() {
-        return true;
+        return false;
     }
+
+    @Override
+    public boolean isAlgaeCollectionReady() { return true; }
+    @Override
+    public boolean isAlgaeArmPivotMotorReady() { return true; }
 
     @Override
     public CANMotorControllerInfo getElevatorMotor() {
@@ -82,6 +87,32 @@ public class RoboxContract extends Contract2025 {
                 CANBusId.RIO, // Only relevant when connected directly to the robox.
                 motor2025.deviceId(), // TODO: This is not the correct long-term value. The motor needs to be given a new ID.
                 motor2025.outputConfig().withStatorCurrentLimit(Amps.of(17.5)) // limiting current on the robox
+        );
+    }
+
+    @Override
+    public CANMotorControllerInfo getAlgaeCollectionMotor() {
+        var motor2025 = super.getAlgaeCollectionMotor();
+
+        return new CANMotorControllerInfo(
+                motor2025.name(),
+                motor2025.type(),
+                CANBusId.RIO, // Only relevant when connected directly to the robox.
+                motor2025.deviceId(), // TODO: This is not the correct long-term value. The motor needs to be given a new ID.
+                motor2025.outputConfig().withStatorCurrentLimit(Amps.of(5)) // limiting current on the robox
+        );
+    }
+
+    @Override
+    public CANMotorControllerInfo getAlgaeArmPivotMotor() {
+        var motor2025 = super.getAlgaeArmPivotMotor();
+
+        return new CANMotorControllerInfo(
+                motor2025.name(),
+                motor2025.type(),
+                CANBusId.RIO, // Only relevant when connected directly to the robox.
+                motor2025.deviceId(), // TODO: This is not the correct long-term value. The motor needs to be given a new ID.
+                motor2025.outputConfig().withStatorCurrentLimit(Amps.of(5)) // limiting current on the robox
         );
     }
 

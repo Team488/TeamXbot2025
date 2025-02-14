@@ -65,7 +65,9 @@ public class Robot extends BaseRobot {
                 log.info("Count of keys in the Preferences system: {}", Preferences.getKeys().size());
             }
 
-            String chosenContract = Preferences.getString("ContractToUse", "Competition");
+//            String chosenContract = Preferences.getString("ContractToUse", "Competition");
+
+            var chosenContract = "Robox";
 
             switch (chosenContract) {
                 case "2023":

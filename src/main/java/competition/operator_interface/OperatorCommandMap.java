@@ -142,18 +142,20 @@ public class OperatorCommandMap {
         oi.superstructureGamepad.getPovIfAvailable(90).onTrue(debugModule);
         oi.superstructureGamepad.getPovIfAvailable(180).onTrue(typicalSwerveDrive);
         */
-        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeCoralCommand);
-        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreCoralCommand);
+//        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeCoralCommand);
+//        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreCoralCommand);
+//
+//        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).onTrue(lowerToHumanLoad);
+//        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).onTrue(riseToScore);
+//
+//        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(forceElevatorCalibratedCommand);
+//        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(riseToL2);
+//        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(riseToL3);
+//        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(riseToL4);
+//
+//        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.Back).onTrue(forceCoralPivotCalibratedCommand);
 
-        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).onTrue(lowerToHumanLoad);
-        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).onTrue(riseToScore);
-      
-        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(forceElevatorCalibratedCommand);
-        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(riseToL2);
-        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(riseToL3);
-        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(riseToL4);
-
-        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.Back).onTrue(forceCoralPivotCalibratedCommand);
+//        oi.
 
 //        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(algaeCollectionIntakeCommand);
 //        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(algaeCollectionOutputCommand);
@@ -164,30 +166,33 @@ public class OperatorCommandMap {
     public void setupSysIdCommands(
         OperatorInterface oi,
         DriveSubsystem drive,
-        ElevatorSubsystem elevator
+        ElevatorSubsystem elevator,
+        AlgaeCollectionIntakeCommand algaeCollectionIntakeCommand,
+        AlgaeCollectionOutputCommand algaeCollectionOutputCommand,
+        AlgaeCollectionStopCommand algaeCollectionStopCommand
     ) {
 
-        oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.A)
-                .whileTrue(drive.sysIdQuasistaticRotation(SysIdRoutine.Direction.kForward)
-                        .andThen(new WaitCommand(Seconds.of(1)))
-                        .andThen(drive.sysIdQuasistaticRotation(SysIdRoutine.Direction.kReverse))
-                        .andThen(new WaitCommand(Seconds.of(1)))
-                        .andThen(drive.sysIdDynamicRotation(SysIdRoutine.Direction.kForward))
-                        .andThen(new WaitCommand(Seconds.of(1)))
-                        .andThen(drive.sysIdDynamicRotation(SysIdRoutine.Direction.kReverse)));
-        oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.B)
-                .whileTrue(drive.sysIdQuasistaticDrive(SysIdRoutine.Direction.kForward)
-                        .andThen(new WaitCommand(Seconds.of(1)))
-                        .andThen(drive.sysIdQuasistaticDrive(SysIdRoutine.Direction.kReverse))
-                        .andThen(new WaitCommand(Seconds.of(1)))
-                        .andThen(drive.sysIdDynamicDrive(SysIdRoutine.Direction.kForward))
-                        .andThen(new WaitCommand(Seconds.of(1)))
-                        .andThen(drive.sysIdDynamicDrive(SysIdRoutine.Direction.kReverse)));
-
-        oi.algaeAndSysIdGamepad.getPovIfAvailable(0).whileTrue(elevator.sysIdDynamic(SysIdRoutine.Direction.kForward));
-        oi.algaeAndSysIdGamepad.getPovIfAvailable(90).whileTrue(elevator.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-        oi.algaeAndSysIdGamepad.getPovIfAvailable(180).whileTrue(elevator.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-        oi.algaeAndSysIdGamepad.getPovIfAvailable(270).whileTrue(elevator.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+//        oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.A)
+//                .whileTrue(drive.sysIdQuasistaticRotation(SysIdRoutine.Direction.kForward)
+//                        .andThen(new WaitCommand(Seconds.of(1)))
+//                        .andThen(drive.sysIdQuasistaticRotation(SysIdRoutine.Direction.kReverse))
+//                        .andThen(new WaitCommand(Seconds.of(1)))
+//                        .andThen(drive.sysIdDynamicRotation(SysIdRoutine.Direction.kForward))
+//                        .andThen(new WaitCommand(Seconds.of(1)))
+//                        .andThen(drive.sysIdDynamicRotation(SysIdRoutine.Direction.kReverse)));
+//        oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.B)
+//                .whileTrue(drive.sysIdQuasistaticDrive(SysIdRoutine.Direction.kForward)
+//                        .andThen(new WaitCommand(Seconds.of(1)))
+//                        .andThen(drive.sysIdQuasistaticDrive(SysIdRoutine.Direction.kReverse))
+//                        .andThen(new WaitCommand(Seconds.of(1)))
+//                        .andThen(drive.sysIdDynamicDrive(SysIdRoutine.Direction.kForward))
+//                        .andThen(new WaitCommand(Seconds.of(1)))
+//                        .andThen(drive.sysIdDynamicDrive(SysIdRoutine.Direction.kReverse)));
+//
+//        oi.algaeAndSysIdGamepad.getPovIfAvailable(0).whileTrue(elevator.sysIdDynamic(SysIdRoutine.Direction.kForward));
+//        oi.algaeAndSysIdGamepad.getPovIfAvailable(90).whileTrue(elevator.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+//        oi.algaeAndSysIdGamepad.getPovIfAvailable(180).whileTrue(elevator.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+//        oi.algaeAndSysIdGamepad.getPovIfAvailable(270).whileTrue(elevator.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
 
         // Not used, but leaving these here as a sample of how to use a DeferredCommand
 //        oi.sysIdGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper)
@@ -198,6 +203,11 @@ public class OperatorCommandMap {
 //                .whileTrue(new DeferredCommand(() -> drive.getActiveSwerveModuleSubsystem()
 //                        .getSteeringSubsystem()
 //                        .sysIdQuasistatic(SysIdRoutine.Direction.kReverse), Set.of()));
+
+        oi.algaeAndSysIdGamepad.getXboxButton(XXboxController.XboxButton.A).whileTrue(algaeCollectionIntakeCommand);
+        oi.algaeAndSysIdGamepad.getXboxButton(XXboxController.XboxButton.B).whileTrue(algaeCollectionOutputCommand);
+        oi.algaeAndSysIdGamepad.getXboxButton(XXboxController.XboxButton.X).onTrue(algaeCollectionStopCommand);
+
 
     }
 

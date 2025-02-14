@@ -42,7 +42,7 @@ public class Contract2025 extends ElectricalContract {
         return new CANMotorControllerInfo("AlgaeCollectionMotor",
                 MotorControllerType.TalonFx,
                 CANBusId.DefaultCanivore,
-                488,
+                32,
                 new CANMotorControllerOutputConfig());
     }
 
@@ -99,7 +99,7 @@ public class Contract2025 extends ElectricalContract {
         return new CANMotorControllerInfo("AlgaeArmPivotMotor",
                 MotorControllerType.TalonFx,
                 CANBusId.DefaultCanivore,
-                884,
+                33, //33
                 new CANMotorControllerOutputConfig().withStatorCurrentLimit(Amps.of(5)));
     }
 
