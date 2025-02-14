@@ -90,8 +90,8 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
         this.rangeOfMotionDegrees = propertyFactory.createPersistentProperty("Range of Motion in Degrees", 125);
         this.minArmPosition = propertyFactory.createPersistentProperty("Min AbsEncoder Position in Degrees", 90);
         this.maxArmPosition = propertyFactory.createPersistentProperty("Max AbsEncoder Position in Degrees", 108);
-        this.scoreAngle = propertyFactory.createPersistentProperty("Scoring Angle in rotations", 125);
-        this.humanLoadAngle = propertyFactory.createPersistentProperty("Human Loading Angle in rotations", 0);
+        this.scoreAngle = propertyFactory.createPersistentProperty("Scoring Angle in Degrees", 125);
+        this.humanLoadAngle = propertyFactory.createPersistentProperty("Human Loading Angle in Degrees", 0);
         this.powerWhenNotCalibrated = propertyFactory.createPersistentProperty("Power When Not Calibrated", 0.05);
 
         this.minRotations = propertyFactory.createPersistentProperty("Min Rotations", 0);
