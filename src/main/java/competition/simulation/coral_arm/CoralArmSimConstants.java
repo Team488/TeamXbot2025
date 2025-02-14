@@ -18,7 +18,6 @@ public class CoralArmSimConstants {
     public static final Angle minAngleRads = Degrees.of(225 - 125);
     public static final Angle armEncoderAnglePerRotation = Degrees.of(6.94444);
     public static final Angle angleAtRobotZero = Degrees.of(225);
-    // right now the arm starts past it's 0' point because of gravity so pick that as the 'max' angle here (which is our min)
-    public static final Angle maxAngleRads = Degrees.of(225 + armEncoderAnglePerRotation.times(5).in(Degrees));
+    public static final Angle maxAngleRads = Degrees.of(225);
     public static final Angle startingAngle = maxAngleRads;
 }
