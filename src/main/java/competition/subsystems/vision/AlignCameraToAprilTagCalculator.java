@@ -81,8 +81,6 @@ public class AlignCameraToAprilTagCalculator {
                     new Rotation2d()
             );
 
-            // Let's brute-force and do some changes
-
             // Move from robot-relative frame to field frame
             driveTarget = currentPose.transformBy(relativeGoalTransform).getTranslation();
 

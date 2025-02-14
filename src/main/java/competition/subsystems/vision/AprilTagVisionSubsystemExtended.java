@@ -22,6 +22,8 @@ import java.util.HashMap;
 @Singleton
 public class AprilTagVisionSubsystemExtended extends AprilTagVisionSubsystem {
     HashMap<Pose2d, Integer> aprilTagIDHashMap = new HashMap<>();
+    private final AprilTagFieldLayout aprilTagFieldLayout;
+
     @Inject
     public AprilTagVisionSubsystemExtended(PropertyFactory pf,
                                            AprilTagFieldLayout fieldLayout, XCameraElectricalContract contract,
@@ -30,18 +32,20 @@ public class AprilTagVisionSubsystemExtended extends AprilTagVisionSubsystem {
 
         // Note: flipped april tag IDs across the y-midpoint of the field for blue alliance
         // map both blue and red alliance poses
-            aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueCloseLeftAlgae), 8);
-            aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueCloseAlgae), 7);
-            aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueCloseRightAlgae), 6);
-            aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueFarLeftAlgae), 9);
-            aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueFarAlgae), 10);
-            aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueFarRightAlgae), 11);
-            aprilTagIDHashMap.put(Landmarks.BlueCloseLeftAlgae, 19);
-            aprilTagIDHashMap.put(Landmarks.BlueCloseAlgae, 18);
-            aprilTagIDHashMap.put(Landmarks.BlueCloseRightAlgae, 17);
-            aprilTagIDHashMap.put(Landmarks.BlueFarLeftAlgae, 20);
-            aprilTagIDHashMap.put(Landmarks.BlueFarAlgae, 21);
-            aprilTagIDHashMap.put(Landmarks.BlueFarRightAlgae, 22);
+        aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueCloseLeftAlgae), 8);
+        aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueCloseAlgae), 7);
+        aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueCloseRightAlgae), 6);
+        aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueFarLeftAlgae), 9);
+        aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueFarAlgae), 10);
+        aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueFarRightAlgae), 11);
+        aprilTagIDHashMap.put(Landmarks.BlueCloseLeftAlgae, 19);
+        aprilTagIDHashMap.put(Landmarks.BlueCloseAlgae, 18);
+        aprilTagIDHashMap.put(Landmarks.BlueCloseRightAlgae, 17);
+        aprilTagIDHashMap.put(Landmarks.BlueFarLeftAlgae, 20);
+        aprilTagIDHashMap.put(Landmarks.BlueFarAlgae, 21);
+        aprilTagIDHashMap.put(Landmarks.BlueFarRightAlgae, 22);
+
+        aprilTagFieldLayout = fieldLayout;
     }
 
     public Translation2d getReefAprilTagCameraData() {
@@ -56,6 +60,10 @@ public class AprilTagVisionSubsystemExtended extends AprilTagVisionSubsystem {
         );
 
         return new Translation2d(data.getX(), data.getY());
+    }
+
+    public double getAprilTagFieldOrientedRotation(int targetAprilTagID) {
+        return aprilTagFieldLayout.getTagPose(targetAprilTagID).get().getRotation().getZ();
     }
 
     public boolean reefAprilTagCameraHasCorrectTarget(int targetAprilTagID) {

@@ -73,7 +73,8 @@ public class AlignToTagGlobalMovementWithCalculator extends BaseCommand {
     public void execute() {
         Translation2d driveValues = calculator.getXYPowersAlignToAprilTag(pose.getCurrentPose2d());
         aKitLog.record("driveValues", driveValues);
-        double omega = headingModule.calculateHeadingPower(headingAtCommandStart);
+        double rotation = aprilTagVisionSubsystem.getAprilTagFieldOrientedRotation(targetAprilTagID);
+        double omega = headingModule.calculateHeadingPower(rotation);
         drive.fieldOrientedDrive(
                 new XYPair(driveValues.getX(), driveValues.getY()),
                 omega,
