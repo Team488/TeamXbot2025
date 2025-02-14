@@ -3,6 +3,7 @@ package competition.injection.components;
 import competition.electrical_contract.ElectricalContract;
 import competition.motion.TrapezoidProfileManager;
 import competition.operator_interface.OperatorCommandMap;
+import competition.operator_interface.OperatorInterface;
 import competition.simulation.BaseSimulator;
 import competition.subsystems.SubsystemDefaultCommandMap;
 import competition.subsystems.coral_arm.CoralArmSubsystem;
@@ -50,4 +51,6 @@ public abstract class BaseRobotComponent extends BaseComponent {
     public abstract LightSubsystem lightSubsystem();
 
     public abstract TrapezoidProfileManager.Factory trapezoidProfileManagerFactory();
+
+    public abstract OperatorInterface operatorInterface();
 }
