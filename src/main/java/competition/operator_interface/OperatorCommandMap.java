@@ -60,8 +60,7 @@ public class OperatorCommandMap {
             SetCoralArmTargetAngleCommand setCoralArmTargetAngleCommand,
             ScoreCoralCommand scoreCoralCommand,
             ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
-            ForceCoralPivotCalibrated forceCoralPivotCalibratedCommand,
-            Provider<AlignToTagGlobalMovementWithCalculator> alignToTagWithCalculatorProvider) {
+            ForceCoralPivotCalibrated forceCoralPivotCalibratedCommand) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(resetHeading);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(alignToReefWithAprilTag);
@@ -81,17 +80,6 @@ public class OperatorCommandMap {
 
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(intakeCoralCommand);
         // operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(scoreCoralCommand);
-//        var alignToTag = alignToTagWithCalculatorProvider.get();
-//        alignToTag.setAprilTagTarget(13);
-//        alignToTag.setCameraTarget(2);
-//        alignToTag.setIsCameraBackwards(true);
-//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(alignToTag);
-//
-//        var alignToTag2 = alignToTagWithCalculatorProvider.get();
-//        alignToTag2.setAprilTagTarget(13);
-//        alignToTag2.setCameraTarget(0);
-//        alignToTag2.setIsCameraBackwards(false);
-//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(alignToTag2);
     }
 
 
