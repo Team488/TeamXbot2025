@@ -148,10 +148,13 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
         return coralScorerState;
     }
 
+
     private boolean coralLikelyJammed() {
         return coralScorerState == CoralScorerState.INTAKING
                 && Math.abs(motor.getVelocity().in(RotationsPerSecond)) < intakeFreeSpeedRPSProperty.get();
+
     }
+
 
     public void periodic() {
         if (electricalContract.isCoralCollectionMotorReady()) {
