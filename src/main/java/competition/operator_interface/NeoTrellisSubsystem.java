@@ -62,7 +62,7 @@ public class NeoTrellisSubsystem extends BaseSubsystem {
         processAlgaeButton = neoTrellis.getifAvailable(20);
         resetQueueButton = neoTrellis.getifAvailable(11);
 
-        resetQueueButton.onTrue(new InstantCommand(scoringQueue::clearQueue));
+        resetQueueButton.onTrue(new InstantCommand(scoringQueue::clearQueue).ignoringDisable(true));
 
         comboDetectedLatch = new Latch(
                 false,

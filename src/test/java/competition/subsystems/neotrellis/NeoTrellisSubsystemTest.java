@@ -5,6 +5,7 @@ import competition.operator_interface.NeoTrellisSubsystem;
 import competition.subsystems.oracle.ScoringQueue;
 import competition.subsystems.pose.Landmarks;
 import org.junit.Test;
+import xbot.common.command.XScheduler;
 import xbot.common.controls.sensors.mock_adapters.MockJoystick;
 
 import static org.junit.Assert.assertEquals;
@@ -56,5 +57,19 @@ public class NeoTrellisSubsystemTest extends BaseCompetitionTest {
         neoTrellis.pressButton(neoSubsystem.getNeoTrellisButtonIndex(Landmarks.CoralLevel.FOUR));
         neoSubsystem.periodic();
         assertEquals(2, scoringQueue.getQueueSize());
+
+        neoTrellis.releaseButton(neoSubsystem.getNeoTrellisButtonIndex(Landmarks.CoralLevel.FOUR));
+        neoTrellis.releaseButton(neoSubsystem.getNeoTrellisButtonIndex(Landmarks.ReefFace.CLOSE, Landmarks.Branch.A));
+
+        neoSubsystem.periodic();
+        assertEquals(2, scoringQueue.getQueueSize());
+
+        neoTrellis.pressButton(neoSubsystem.getNeoTrellisButtonClearQueue());
+
+        // The clear queue is managed by the regular button->command mapping,
+        // so to invoke it we need to run the scheduler.
+        this.getInjectorComponent().scheduler().run();
+
+        assertEquals(0, scoringQueue.getQueueSize());
     }
 }
