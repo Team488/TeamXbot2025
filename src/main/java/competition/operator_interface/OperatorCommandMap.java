@@ -60,7 +60,10 @@ public class OperatorCommandMap {
             SetCoralArmTargetAngleCommand setCoralArmTargetAngleCommand,
             ScoreCoralCommand scoreCoralCommand,
             ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
-            ForceCoralPivotCalibrated forceCoralPivotCalibratedCommand) {
+            ForceCoralPivotCalibrated forceCoralPivotCalibratedCommand,
+            DebugSwerveModuleCommand debugModule,
+            ChangeActiveSwerveModuleCommand changeActiveModule,
+            SwerveDriveWithJoysticksCommand typicalSwerveDrive) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(resetHeading);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(alignToReefWithAprilTag);
@@ -74,9 +77,12 @@ public class OperatorCommandMap {
         // for basic scoring control to make it easier to demo solo. These can all be removed later.
         var prepL4 = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.FOUR);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
-
         var homed = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.COLLECTING);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
+
+        operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
+        operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(changeActiveModule);
+        operatorInterface.driverGamepad.getPovIfAvailable(180).onTrue(typicalSwerveDrive);
 
 //        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(intakeCoralCommand);
         // operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(scoreCoralCommand);
@@ -113,9 +119,6 @@ public class OperatorCommandMap {
     @Inject
     public void setupProgrammerCommands(
             OperatorInterface oi,
-            DebugSwerveModuleCommand debugModule,
-            ChangeActiveSwerveModuleCommand changeActiveModule,
-            SwerveDriveWithJoysticksCommand typicalSwerveDrive,
             IntakeCoralCommand intakeCoralCommand,
             ScoreCoralCommand scoreCoralCommand,
             StopCoralCommand stopCoralCommand,

@@ -99,9 +99,11 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
     protected boolean areTwoTargetsEquivalent(Angle targetAngle1, Angle targetAngle2) {
         return targetAngle1.isEquivalent(targetAngle2);
     }
-        
 
-
+    @Override
+    public void periodic() {
+        armMotor.periodic();
+    }
 }
 
 
