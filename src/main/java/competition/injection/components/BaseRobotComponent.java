@@ -11,6 +11,7 @@ import competition.subsystems.coral_scorer.CoralScorerSubsystem;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import competition.subsystems.oracle.OracleSubsystem;
 import competition.subsystems.oracle.ReefCoordinateGenerator;
+import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import competition.subsystems.elevator_mechanism.SuperstructureMechanismSubsystem;
 import competition.subsystems.lights.LightSubsystem;
@@ -20,6 +21,9 @@ import xbot.common.injection.swerve.SwerveComponentHolder;
 import xbot.common.subsystems.drive.swerve.SwerveDefaultCommandMap;
 
 public abstract class BaseRobotComponent extends BaseComponent {
+    @Override
+    public abstract PoseSubsystem poseSubsystem();
+
     public abstract SubsystemDefaultCommandMap subsystemDefaultCommandMap();
 
     public abstract OperatorCommandMap operatorCommandMap();
