@@ -50,7 +50,7 @@ public class DriveToReefFaceFromAngleUntilDetectionCommand extends SwerveSimpleT
         List<XbotSwervePoint> swervePoints = routingCircle.generateSwervePoints(currentPose, targetReefFacePose);
         this.logic.setKeyPoints(swervePoints);
         if (kinematics) {
-            this.logic.setGlobalKinematicValues(new SwervePointKinematics(2, 0, 0, 4.5));
+            this.logic.setGlobalKinematicValues(new SwervePointKinematics(0.5, 0, 0, 2));
             this.logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
         }
         else {
