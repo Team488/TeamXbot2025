@@ -55,6 +55,6 @@ public class CommonProviderModule {
     @Provides
     @Singleton
     public AprilTagFieldLayout fieldLayout() {
-        return AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape);
+        return AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
     }
 }
