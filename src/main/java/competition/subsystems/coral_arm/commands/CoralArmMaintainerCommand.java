@@ -100,7 +100,7 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
 
     private boolean checkSubsystemCollisions(){
         return algaeArm.getCurrentValue().isNear(algaeArmCollisionAngle, 50)
-                || elevator.getCurrentValue().in(Meters) > elevator.humanLoadHeight.get().in(Meters);
+                || elevator.getCurrentValue().in(Meters) < elevator.humanLoadHeight.get().in(Meters);
     }
 
     @Override
