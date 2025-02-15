@@ -29,7 +29,9 @@ import java.util.HashMap;
  * D - remove algae
  * P - process algae
  *
- * 
+ * Rather than creating ~48+ ChordButtons, this system instead monitors for the any combination
+ * of a "branch button" and an "action button" being pressed. Once detected, the appropriate
+ * scoring activity is placed in the scoring queue.
  */
 @Singleton
 public class NeoTrellisSubsystem extends BaseSubsystem {
@@ -49,20 +51,6 @@ public class NeoTrellisSubsystem extends BaseSubsystem {
 
     final Latch comboDetectedLatch;
 
-    public enum NeoTrellisButtonNames {
-        NearA(1),
-        NearB(2);
-
-        int buttonIndex = 0;
-        NeoTrellisButtonNames(int buttonIndex) {
-            this.buttonIndex = this.buttonIndex;
-        }
-
-        public int getButtonIndex() {
-            return buttonIndex;
-        }
-    }
-
     @Inject
     public NeoTrellisSubsystem(OperatorInterface oi, ScoringQueue scoringQueue) {
         this.oi = oi;
@@ -80,6 +68,8 @@ public class NeoTrellisSubsystem extends BaseSubsystem {
         processAlgaeButton = neoTrellis.getifAvailable(20);
         resetQueueButton = neoTrellis.getifAvailable(11);
 
+        // Resetting doesn't need any other button to be pressed, so we set it up as a typical
+        // "press this button and get this command" binding.
         resetQueueButton.onTrue(new InstantCommand(scoringQueue::clearQueue).ignoringDisable(true));
 
         comboDetectedLatch = new Latch(
@@ -118,16 +108,24 @@ public class NeoTrellisSubsystem extends BaseSubsystem {
         locationsToButtonIndices.put(faceBranch, buttonIndex);
     }
 
+    /**
+     * This method is invoked when at least one location button and one action button are pressed.
+     * It should only take action on the "rising edge" of such an event to debounce the buttons.
+     * @param e EdgeType (from the Latch)
+     */
     private void queueAppropriateAction(Latch.EdgeType e) {
         if (e != Latch.EdgeType.RisingEdge) {
+            // If this is a falling edge, we don't care. We only want to act on the rising edge.
             return;
         }
 
         // Rising edge detected, aka a legal combo press was detected. Find the first indicator
-        // in each category (location, action) and queue it for the Oracle.
+        // in each category (location, action) and queue it for the Oracle (or anything else that's
+        // listening to the ScoringQueue).
 
         FaceBranch location = new FaceBranch(Landmarks.ReefFace.CLOSE, Landmarks.Branch.A);
 
+        // Find the first location button that's currently active.
         for (var locationEntry : locationsToButtons.entrySet()) {
             if (locationEntry.getValue().getAsBoolean()) {
                 location = locationEntry.getKey();
@@ -135,7 +133,7 @@ public class NeoTrellisSubsystem extends BaseSubsystem {
             }
         }
 
-        // Now check possible actions
+        // Find the first coral button that's currently active
         for (var heightEntry : levelsToButtons.entrySet()) {
             if (heightEntry.getValue().getAsBoolean()) {
                 scoringQueue.addCoralTask(
@@ -158,6 +156,10 @@ public class NeoTrellisSubsystem extends BaseSubsystem {
             scoringQueue.addAlgaeProcessingTask();
             return;
         }
+
+        // Somehow, we are in a state where we have a location button pressed, but no action button,
+        // but the latch is still high.
+        log.warn("Combo press detected, but no action seems valid. No action will be added to the ScoringQueue.");
     }
 
     @Override
