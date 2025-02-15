@@ -4,11 +4,10 @@ import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.wpilibj.DriverStation;
-import xbot.common.advantage.AKitLogger;
 import xbot.common.injection.electrical_contract.XCameraElectricalContract;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.vision.AprilTagVisionIO;
@@ -18,6 +17,7 @@ import xbot.common.subsystems.vision.AprilTagVisionSubsystem;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.HashMap;
+import java.util.Optional;
 
 @Singleton
 public class AprilTagVisionSubsystemExtended extends AprilTagVisionSubsystem {
@@ -54,7 +54,7 @@ public class AprilTagVisionSubsystemExtended extends AprilTagVisionSubsystem {
         return new Translation2d(data.getX(), data.getY());
     }
 
-    public Translation2d getAprilTagCameraData(int cameraToUse) {
+    public Translation2d getRobotRelativeLocationOfBestDetectedAprilTag(int cameraToUse) {
         Translation3d data = getLatestTargetObservation(cameraToUse).cameraToTarget().getTranslation().rotateBy(
                 getCameraPosition(cameraToUse).getRotation()
         );
@@ -62,8 +62,8 @@ public class AprilTagVisionSubsystemExtended extends AprilTagVisionSubsystem {
         return new Translation2d(data.getX(), data.getY());
     }
 
-    public double getAprilTagFieldOrientedRotation(int targetAprilTagID) {
-        return aprilTagFieldLayout.getTagPose(targetAprilTagID).get().getRotation().getZ();
+    public Optional<Pose3d> getAprilTagFieldOrientedPose(int targetAprilTagID) {
+        return aprilTagFieldLayout.getTagPose(targetAprilTagID);
     }
 
     public boolean reefAprilTagCameraHasCorrectTarget(int targetAprilTagID) {
@@ -71,7 +71,7 @@ public class AprilTagVisionSubsystemExtended extends AprilTagVisionSubsystem {
         return targetObservation.fiducialId() == targetAprilTagID;
     }
 
-    public boolean aprilTagCameraHasCorrectTarget(int targetAprilTagID, int cameraToUse) {
+    public boolean doesCameraBestObservationHaveAprilTagId(int cameraToUse, int targetAprilTagID) {
         AprilTagVisionIO.TargetObservation targetObservation = getLatestTargetObservation(cameraToUse);
         return targetObservation.fiducialId() == targetAprilTagID;
     }

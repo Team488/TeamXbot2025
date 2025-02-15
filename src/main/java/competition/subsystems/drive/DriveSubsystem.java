@@ -16,6 +16,7 @@ import xbot.common.injection.swerve.FrontRightDrive;
 import xbot.common.injection.swerve.RearLeftDrive;
 import xbot.common.injection.swerve.RearRightDrive;
 import xbot.common.injection.swerve.SwerveComponent;
+import xbot.common.math.PIDManager;
 import xbot.common.math.PIDManager.PIDManagerFactory;
 import xbot.common.math.XYPair;
 import xbot.common.properties.DoubleProperty;
@@ -179,5 +180,14 @@ import static edu.wpi.first.units.Units.Volts;
 
         public DoubleProperty getDriveToWaypointsDurationPerPoint() {
             return driveToWaypointsDurationPerPoint;
+        }
+
+        public Translation2d getPowerToAchieveFieldPosition(
+                Translation2d current, Translation2d target) {
+            var goalVector = target.minus(current);
+            // This essentially says "our goal is X distance away from where we are now.
+            // Assume we are at zero. How much power should we use to go X distance?"
+            double drivePower = getPositionalPid().calculate(goalVector.getNorm(), 0);
+            return new Translation2d(drivePower, goalVector.getAngle());
         }
     }

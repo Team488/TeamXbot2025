@@ -23,6 +23,9 @@ public class AlignCameraToAprilTagCalculatorTest extends BaseCompetitionTest {
 
     @Test
     public void testAlignmentPointOffset() {
+        // Tests to make sure the generateAlignmentPointOffset method properly calculates the offset
+        // between the cameras and april tags. Takes in consideration of bumper, camera location, and a manual offset
+
         Distance robotCenterToOuterBumperX = Inches.of(10);
 
         CameraInfo mockForwardCameraInfo = new CameraInfo(
