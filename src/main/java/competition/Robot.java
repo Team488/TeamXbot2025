@@ -107,6 +107,8 @@ public class Robot extends BaseRobot {
     public void disabledInit() {
         super.disabledInit();
         reachedDisabledInit.countDown();
+        var poseSub = (PoseSubsystem) getInjectorComponent().poseSubsystem();
+        poseSub.getResetTranslationToVisionEstimateCommand().schedule();
     }
 
     @Override
