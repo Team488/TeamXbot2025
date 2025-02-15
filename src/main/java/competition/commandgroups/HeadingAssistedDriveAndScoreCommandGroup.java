@@ -6,7 +6,6 @@ import competition.subsystems.drive.commands.DriveToReefFaceFromAngleUntilDetect
 import competition.subsystems.drive.commands.MeasureDistanceBeforeScoringCommand;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
@@ -14,7 +13,6 @@ import javax.inject.Inject;
 
 public class HeadingAssistedDriveAndScoreCommandGroup extends SequentialCommandGroup {
     PoseSubsystem pose;
-    Landmarks.CoralLevel targetCoralLevel = Landmarks.CoralLevel.COLLECTING;
 
     @Inject
     public HeadingAssistedDriveAndScoreCommandGroup(DriveToReefFaceFromAngleUntilDetectionCommand driveToReefFaceFromAngleCommand,
@@ -27,10 +25,12 @@ public class HeadingAssistedDriveAndScoreCommandGroup extends SequentialCommandG
         this.addCommands(driveToReefFaceFromAngleCommand);
         var prep = prepCoralSystemCommandGroupFactory.create(pose::getTargetCoralLevel);
 
-//        var measureDistanceBeforePrep = new SequentialCommandGroup(measureDistanceBeforeScoringCommand, prep);
-//        var alignWhilePrepping = new ParallelCommandGroup(alignToReefWithAprilTagCommand, measureDistanceBeforePrep);
-//        this.addCommands(alignWhilePrepping);
-        this.addCommands(prep);
+        var measureDistanceBeforePrep = new SequentialCommandGroup(measureDistanceBeforeScoringCommand, prep);
+        var alignWhilePrepping = new ParallelCommandGroup(alignToReefWithAprilTagCommand, measureDistanceBeforePrep);
+        this.addCommands(alignWhilePrepping);
 //        this.addCommands(scoreWhenReadyCommand);
+
+        var home = prepCoralSystemCommandGroupFactory.create(()-> Landmarks.CoralLevel.COLLECTING);
+        this.addCommands(home);
     }
 }

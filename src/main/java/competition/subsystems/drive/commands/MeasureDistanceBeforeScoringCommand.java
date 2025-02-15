@@ -12,7 +12,7 @@ import static edu.wpi.first.units.Units.Meters;
 
 public class MeasureDistanceBeforeScoringCommand extends BaseCommand {
     PoseSubsystem pose;
-    Distance distanceThreshold = Meters.of(5);
+    Distance distanceThreshold = Meters.of(1.5);
     @Inject
     public MeasureDistanceBeforeScoringCommand(PoseSubsystem pose) {
         this.pose = pose;
