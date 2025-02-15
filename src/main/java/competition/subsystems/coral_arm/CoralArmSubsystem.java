@@ -4,6 +4,7 @@ import competition.electrical_contract.ElectricalContract;
 import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.wpilibj.Alert;
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
 import xbot.common.controls.actuators.XCANMotorControllerPIDProperties;
@@ -32,6 +33,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
     double rotationsAtZero = 0;
     boolean isCalibrated = false;
+    final Alert isNotCalibratedAlert = new Alert("CoralArm: not calibrated", Alert.AlertType.kWarning);
     private final DoubleProperty degreesPerRotations;
 
     public final DoubleProperty scoreAngle;
@@ -290,6 +292,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
         aKitLog.record("Target Angle", this.getTargetValue().in(Rotations));
         aKitLog.record("Current Angle", this.getCurrentValue().in(Rotations));
         aKitLog.record("isCalibrated", this.isCalibrated());
+        isNotCalibratedAlert.set(!isCalibrated());
         if (electricalContract.isCoralArmPivotAbsoluteEncoderReady()) {
             aKitLog.record("Current Angle using AbsEncoder", this.getArmAngle().in(Degrees));
         }
