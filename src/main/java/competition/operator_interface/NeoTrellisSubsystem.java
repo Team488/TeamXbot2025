@@ -13,6 +13,24 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.HashMap;
 
+
+
+
+/**
+ * General neotrellis map of buttons:
+ * xooooxxh 1-8
+ * oxCxxoxh 9-16
+ * oxRPxoxh 17-24
+ * xooooxxh 25-32
+ * o - branch button
+ * x - unused
+ * h - height button
+ * C - clear queue
+ * D - remove algae
+ * P - process algae
+ *
+ * 
+ */
 @Singleton
 public class NeoTrellisSubsystem extends BaseSubsystem {
 
@@ -188,21 +206,5 @@ public class NeoTrellisSubsystem extends BaseSubsystem {
         return 11;
     }
 
-    // General neotrellis idea
-        // xooooxxh 1-8
-        // oxCxxoxh 9-16
-        // oxRPxoxh 17-24
-        // xooooxxh 25-32
-        // o - branch button
-        // x - unused
-        // h - height button
-        // C - clear queue
-        // D - remove algae
-        // P - process algae
 
-        // This would normally create a gajillion buttons, which seems gross. Maybe a subsystem that just
-        // checks in periodic? But then I have to do all the debouncing myself.
-
-        // could check for the rising edge of a button from each "category" being true. When that's the case,
-        // evaluate the buttons and take the appropriate action
 }
