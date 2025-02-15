@@ -14,7 +14,8 @@ import javax.inject.Inject;
 
 public class HeadingAssistedDriveAndScoreCommandGroup extends SequentialCommandGroup {
     PoseSubsystem pose;
-    Landmarks.CoralLevel targetCoralLevel;
+    Landmarks.CoralLevel targetCoralLevel = Landmarks.CoralLevel.COLLECTING;
+
     @Inject
     public HeadingAssistedDriveAndScoreCommandGroup(DriveToReefFaceFromAngleUntilDetectionCommand driveToReefFaceFromAngleCommand,
                                                     PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
@@ -23,10 +24,8 @@ public class HeadingAssistedDriveAndScoreCommandGroup extends SequentialCommandG
                                                     MeasureDistanceBeforeScoringCommand measureDistanceBeforeScoringCommand,
                                                     PoseSubsystem pose) {
         this.pose = pose;
-        var getTargetCoralLevel = new InstantCommand(()-> targetCoralLevel = pose.getTargetCoralLevel());
-        this.addCommands(getTargetCoralLevel);
-//        this.addCommands(driveToReefFaceFromAngleCommand);
-        var prep = prepCoralSystemCommandGroupFactory.create(targetCoralLevel);
+        this.addCommands(driveToReefFaceFromAngleCommand);
+        var prep = prepCoralSystemCommandGroupFactory.create(pose::getTargetCoralLevel);
 
 //        var measureDistanceBeforePrep = new SequentialCommandGroup(measureDistanceBeforeScoringCommand, prep);
 //        var alignWhilePrepping = new ParallelCommandGroup(alignToReefWithAprilTagCommand, measureDistanceBeforePrep);

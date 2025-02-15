@@ -5,11 +5,12 @@ import competition.subsystems.pose.Landmarks;
 import xbot.common.command.BaseSetpointCommand;
 
 import javax.inject.Inject;
+import java.util.function.Supplier;
 
 public class SetCoralArmTargetAngleCommand extends BaseSetpointCommand {
 
-    Landmarks.CoralLevel angle;
     CoralArmSubsystem coralArm;
+    private Supplier<Landmarks.CoralLevel> angleSupplier;
 
     @Inject
     public SetCoralArmTargetAngleCommand(CoralArmSubsystem coralArm) {
@@ -20,7 +21,7 @@ public class SetCoralArmTargetAngleCommand extends BaseSetpointCommand {
     @Override
     public void initialize() {
         log.info("Initializing");
-        coralArm.setTargetAngle(angle);
+        coralArm.setTargetAngle(this.angleSupplier.get());
     }
 
     @Override
@@ -33,5 +34,11 @@ public class SetCoralArmTargetAngleCommand extends BaseSetpointCommand {
         return true;
     }
 
-    public void setAngle(Landmarks.CoralLevel angle) { this.angle = angle; }
+    public void setAngle(Landmarks.CoralLevel angle) {
+        setAngleSupplier(() -> angle);
+    }
+
+    public void setAngleSupplier(Supplier<Landmarks.CoralLevel> angleSupplier) {
+        this.angleSupplier = angleSupplier;
+    }
 }
