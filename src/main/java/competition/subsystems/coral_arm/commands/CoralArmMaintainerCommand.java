@@ -2,7 +2,9 @@ package competition.subsystems.coral_arm.commands;
 
 import competition.motion.TrapezoidProfileManager;
 import competition.operator_interface.OperatorInterface;
+import competition.subsystems.algae_arm.AlgaeArmSubsystem;
 import competition.subsystems.coral_arm.CoralArmSubsystem;
+import competition.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.units.measure.Angle;
 import xbot.common.command.BaseMaintainerCommand;
 import xbot.common.controls.actuators.XCANMotorController;
@@ -25,20 +27,29 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
 
    CoralArmSubsystem coralArm;
+   AlgaeArmSubsystem algaeArm;
+   ElevatorSubsystem elevator;
+
    OperatorInterface oi;
    final DoubleProperty humanMaxPower;
    final DoubleProperty humanMinPower;
 
+   final Angle algaeArmCollisionAngle;
+
    final TrapezoidProfileManager profileManager;
 
    @Inject
-   public CoralArmMaintainerCommand(CoralArmSubsystem armPivotSubsystem, PropertyFactory pf,
+   public CoralArmMaintainerCommand(CoralArmSubsystem armPivotSubsystem, ElevatorSubsystem elevator,
+                                    AlgaeArmSubsystem algaeArm, PropertyFactory pf,
                                     HumanVsMachineDecider.HumanVsMachineDeciderFactory hvmFactory,
                                     TrapezoidProfileManager.Factory trapzoidProfileManagerFactory,
                                     OperatorInterface oi) {
 
        super(armPivotSubsystem, pf, hvmFactory, 1,1);
        this.coralArm = armPivotSubsystem;
+       this.algaeArm = algaeArm;
+       this.elevator = elevator;
+
        this.oi = oi;
        pf.setPrefix(this);
        profileManager = trapzoidProfileManagerFactory.create(getPrefix() + "trapezoidMotion",
@@ -47,6 +58,9 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
 
        humanMaxPower = pf.createPersistentProperty("HumanMaxPower", .20);
        humanMinPower = pf.createPersistentProperty("HumanMinPower", -.20);
+
+       //reaplcea
+       algaeArmCollisionAngle = Degrees.of(90);
 
        decider.setDeadband(0.02);
    }
@@ -76,7 +90,17 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
 
         aKitLog.record("coralArmProfileTarget", setpoint);
 
-        coralArm.setPositionalGoalIncludingOffset(Rotations.of(setpoint));
+        if(checkSubsystemCollisions()){
+            coralArm.setPositionalGoalIncludingOffset(Rotations.of(coralArm.scoreAngle.get()));
+        }
+        else {
+            coralArm.setPositionalGoalIncludingOffset(Rotations.of(setpoint));
+        }
+    }
+
+    private boolean checkSubsystemCollisions(){
+        return algaeArm.getCurrentValue().isNear(algaeArmCollisionAngle, 50)
+                || elevator.getCurrentValue().in(Meters) > elevator.humanLoadHeight.get().in(Meters);
     }
 
     @Override
