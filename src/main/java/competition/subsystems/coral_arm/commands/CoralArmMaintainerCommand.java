@@ -91,7 +91,7 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
         aKitLog.record("coralArmProfileTarget", setpoint);
 
         if(checkSubsystemCollisions()){
-            coralArm.setPositionalGoalIncludingOffset(Rotations.of(coralArm.scoreAngle.get()));
+            coralArm.setPositionalGoalIncludingOffset(Rotations.of(coralArm.humanLoadAngle.get()));
         }
         else {
             coralArm.setPositionalGoalIncludingOffset(Rotations.of(setpoint));
