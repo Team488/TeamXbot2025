@@ -42,7 +42,7 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
        this.oi = oi;
        pf.setPrefix(this);
        profileManager = trapzoidProfileManagerFactory.create(getPrefix() + "trapezoidMotion",
-               60, 100, armPivotSubsystem.getCurrentValue().in(Rotations));
+               60, 100, armPivotSubsystem.getCurrentValue().in(Degrees));
        pf.setDefaultLevel(Property.PropertyLevel.Important);
 
        humanMaxPower = pf.createPersistentProperty("HumanMaxPower", .20);
@@ -54,7 +54,7 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
     @Override
     public void initialize() {
         super.initialize();
-        setpoint = coralArm.getCurrentValue().in(Rotations);
+        setpoint = coralArm.getCurrentValue().in(Degrees);
     }
 
     @Override
@@ -67,9 +67,9 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
     @Override
     protected void calibratedMachineControlAction() { //manages and runs pid
         profileManager.setTargetPosition(
-            coralArm.getTargetValue().in(Rotations),
-            coralArm.getCurrentValue().in(Rotations),
-            coralArm.getCurrentVelocity().in(RotationsPerSecond),
+            coralArm.getTargetValue().in(Degrees),
+            coralArm.getCurrentValue().in(Degrees),
+            coralArm.getCurrentVelocity().in(DegreesPerSecond),
             setpoint
         );
         setpoint = profileManager.getRecommendedPositionForTime();

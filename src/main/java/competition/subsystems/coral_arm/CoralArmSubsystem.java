@@ -171,11 +171,11 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
             case TWO:
             case THREE:
             case FOUR:
-                setTargetValue(Rotations.of(scoreAngle.get()));
+                setTargetValue(Degrees.of(scoreAngle.get()));
                 break;
             case COLLECTING:
             default:
-                setTargetValue(Rotations.of(humanLoadAngle.get()));
+                setTargetValue(Degrees.of(humanLoadAngle.get()));
                 break;
         }
     }
@@ -287,8 +287,8 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
             armMotor.periodic();
         }
 
-        aKitLog.record("Target Angle", this.getTargetValue().in(Rotations));
-        aKitLog.record("Current Angle", this.getCurrentValue().in(Rotations));
+        aKitLog.record("Target Angle", this.getTargetValue().in(Degrees));
+        aKitLog.record("Current Angle", this.getCurrentValue().in(Degrees));
         aKitLog.record("isCalibrated", this.isCalibrated());
         aKitLog.record("isAtTargetAngle", this.getIsTargetAngleScoring());
         aKitLog.record("isAtMaintainerGoal", this.isMaintainerAtGoal());
@@ -298,9 +298,12 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
         if(electricalContract.isAlgaeArmBottomSensorReady()) {
             aKitLog.record("lowSensor Status", lowSensor.get());
         }
+        aKitLog.record("Target Angle 2", this.targetAngle.in(Degrees));
+        aKitLog.record("Score Angle", this.scoreAngle.get());
+
     }
   
     public boolean getIsTargetAngleScoring() {
-        return Degrees.of(scoreAngle.get()).isNear(targetAngle, Rotations.of(0.25));
+        return Degrees.of(scoreAngle.get()).isNear(targetAngle, Degrees.of(0.25));
     }
 }
