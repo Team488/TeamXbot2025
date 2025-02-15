@@ -2,6 +2,7 @@ package competition.subsystems.coral_scorer;
 
 import competition.electrical_contract.ElectricalContract;
 import competition.subsystems.oracle.contracts.CoralCollectionInfoSource;
+import edu.wpi.first.units.measure.AngularVelocity;
 import xbot.common.command.BaseSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
 import xbot.common.controls.sensors.XDigitalInput;
@@ -155,6 +156,13 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
 
     }
 
+    public AngularVelocity getMotorVelocity() {
+        if(electricalContract.isCoralCollectionMotorReady()) {
+            return motor.getVelocity();
+        }
+
+        return RotationsPerSecond.zero();
+    }
 
     public void periodic() {
         if (electricalContract.isCoralCollectionMotorReady()) {
@@ -181,7 +189,7 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
         aKitLog.record("coralPresentFromJamming", coralLikelyJammed);
         aKitLog.record("coralPresentStable", hasCoralValidator.peekStable());
         aKitLog.record("CoralConfidentlyScored", confidentlyHasScoredCoral());
-        aKitLog.record("IntakeRPS", motor.getVelocity().in(RotationsPerSecond));
+        aKitLog.record("IntakeRPS", getMotorVelocity().in(RotationsPerSecond));
 
     }
 }
