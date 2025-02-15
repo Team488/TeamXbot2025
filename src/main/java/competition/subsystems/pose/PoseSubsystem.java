@@ -14,8 +14,11 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.units.measure.Distance;
+
 import static edu.wpi.first.units.Units.Meters;
 
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import org.kobe.xbot.JClient.XTablesClient;
 import org.kobe.xbot.Utilities.Entities.BatchedPushRequests;
 import xbot.common.controls.sensors.XGyro.XGyroFactory;
@@ -71,7 +74,6 @@ public class PoseSubsystem extends BasePoseSubsystem {
     protected double getRightDriveDistance() {
         return drive.getRightTotalDistance();
     }
-
 
     private SwerveDrivePoseEstimator initializeSwerveOdometry() {
         return new SwerveDrivePoseEstimator(
@@ -159,13 +161,41 @@ public class PoseSubsystem extends BasePoseSubsystem {
         return this.totalVelocity;
     }
 
+    /**
+     * Get a command that resets the pose estimator to the current vision estimate
+     * @return The command that resets the pose estimator
+     */
+    public Command getResetTranslationToVisionEstimateCommand() {
+        return new InstantCommand(() -> {
+            var estimatedPose = new Pose2d(
+                    fullSwerveOdometry.getEstimatedPosition().getTranslation(),
+                    getCurrentHeadingGyroOnly());
+            resetPoseEstimator(estimatedPose);
+        }).ignoringDisable(true);
+    }
+
+    /**
+     * Get a command that resets the pose estimator to a specific pose
+     * @param pose The pose to reset the estimator to
+     * @return The command that resets the pose estimator
+     */
+    public Command getResetPoseCommand(Pose2d pose) {
+        return new InstantCommand(() -> resetPoseEstimator(pose))
+                .ignoringDisable(true);
+    }
+
+    private void resetPoseEstimator(Pose2d pose) {
+        this.fullSwerveOdometry.resetPose(pose);
+        this.onlyWheelsGyroSwerveOdometry.resetPose(pose);
+    }
+
     private SwerveModulePosition[] getSwerveModulePositions() {
         // if we have simulated data, return that directly instead of asking the
         // modules
-        if(simulatedModulePositions.isPresent()) {
+        if (simulatedModulePositions.isPresent()) {
             return simulatedModulePositions.get();
         }
-        return new SwerveModulePosition[] {
+        return new SwerveModulePosition[]{
                 drive.getFrontLeftSwerveModuleSubsystem().getCurrentPosition(),
                 drive.getFrontRightSwerveModuleSubsystem().getCurrentPosition(),
                 drive.getRearLeftSwerveModuleSubsystem().getCurrentPosition(),
