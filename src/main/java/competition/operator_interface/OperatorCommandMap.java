@@ -23,6 +23,7 @@ import competition.subsystems.elevator.commands.ForceElevatorCalibratedCommand;
 import competition.subsystems.elevator.commands.SetElevatorTargetHeightCommand;
 import competition.subsystems.oracle.commands.DriveAccordingToOracleCommand;
 import competition.subsystems.oracle.commands.SuperstructureAccordingToOracleCommand;
+import competition.subsystems.pose.Cameras;
 import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -65,11 +66,11 @@ public class OperatorCommandMap {
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(resetHeading);
 
         var alignToReefWithAprilTagWithLeftCamera = alignToReefWithAprilTagProvider.get();
-        alignToReefWithAprilTagWithLeftCamera.setConfigurations(0, false, 0.5);
+        alignToReefWithAprilTagWithLeftCamera.setConfigurations(Cameras.FRONT_LEFT_CAMERA.getIndex(), false, 0.5);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(alignToReefWithAprilTagWithLeftCamera);
 
         var alignToReefWithAprilTagWithRightCamera = alignToReefWithAprilTagProvider.get();
-        alignToReefWithAprilTagWithRightCamera.setConfigurations(1, false, 0.5);
+        alignToReefWithAprilTagWithRightCamera.setConfigurations(Cameras.FRONT_RIGHT_CAMERA.getIndex(), false, 0.5);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(alignToReefWithAprilTagWithRightCamera);
 
         var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
