@@ -19,6 +19,8 @@ import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import xbot.common.injection.components.BaseComponent;
 import xbot.common.injection.swerve.SwerveComponentHolder;
 import xbot.common.subsystems.drive.swerve.SwerveDefaultCommandMap;
+import xbot.common.subsystems.pose.BasePoseSubsystem;
+import xbot.common.subsystems.pose.GameField;
 
 public abstract class BaseRobotComponent extends BaseComponent {
     @Override
@@ -57,4 +59,6 @@ public abstract class BaseRobotComponent extends BaseComponent {
     public abstract TrapezoidProfileManager.Factory trapezoidProfileManagerFactory();
 
     public abstract OperatorInterface operatorInterface();
+
+    public abstract GameField gameField();
 }
