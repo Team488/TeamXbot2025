@@ -1,6 +1,5 @@
 package competition.operator_interface;
 
-import competition.commandgroups.DriveToFaceAndScoreCommandGroupFactory;
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
 import competition.simulation.commands.ResetSimulatedPose;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionIntakeCommand;
@@ -9,13 +8,13 @@ import competition.subsystems.algae_collection.commands.AlgaeCollectionStopComma
 import competition.subsystems.coral_arm.commands.ForceCoralPivotCalibrated;
 import competition.subsystems.coral_arm.commands.SetCoralArmTargetAngleCommand;
 import competition.subsystems.coral_scorer.commands.IntakeCoralCommand;
+import competition.subsystems.coral_scorer.commands.IntakeUntilCoralCollectedCommand;
 import competition.subsystems.coral_scorer.commands.ScoreCoralCommand;
 import competition.subsystems.coral_scorer.commands.ScoreWhenReadyCommand;
 import competition.subsystems.coral_scorer.commands.StopCoralCommand;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
-import competition.subsystems.drive.commands.DriveToReefFaceFromAngleCommand;
 import competition.subsystems.drive.commands.DriveToWaypointsWithVisionCommand;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.drive.commands.TeleportToPositionCommand;
@@ -25,7 +24,6 @@ import competition.subsystems.elevator.commands.SetElevatorTargetHeightCommand;
 import competition.subsystems.oracle.commands.DriveAccordingToOracleCommand;
 import competition.subsystems.oracle.commands.SuperstructureAccordingToOracleCommand;
 import competition.subsystems.pose.Landmarks;
-import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -65,7 +63,7 @@ public class OperatorCommandMap {
             ForceCoralPivotCalibrated forceCoralPivotCalibratedCommand) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(resetHeading);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(alignToReefWithAprilTag);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(alignToReefWithAprilTag);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).onTrue(driveToWaypointsWithVisionCommand);
 
         var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
@@ -80,7 +78,7 @@ public class OperatorCommandMap {
         var homed = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.COLLECTING);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
 
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(intakeCoralCommand);
+//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(intakeCoralCommand);
         // operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(scoreCoralCommand);
     }
 
@@ -89,20 +87,23 @@ public class OperatorCommandMap {
     @Inject
     public void setUpOperatorCommands(OperatorInterface oi,
                                       PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
-                                      ScoreCoralCommand scoreCoralCommand, IntakeCoralCommand intakeCoralCommand,
-                                      SetCoralArmTargetAngleCommand setCoralArmTargetAngleCommand,
+                                      ScoreCoralCommand scoreCoralCommand, IntakeUntilCoralCollectedCommand intakeUntilCoralCollectedCommand,
                                       ScoreWhenReadyCommand scoreWhenReadyCommand) {
         var prepL4 = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.FOUR);
-//        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
+
+        var prepL3 = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.THREE);
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(prepL3);
 
         var prepL2 = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.TWO);
-        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).onTrue(prepL2);
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(prepL2);
 
         var homed = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.COLLECTING);
-//        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeUntilCoralCollectedCommand);
 
-//        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(scoreWhenReadyCommand);
-//        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(intakeCoralCommand);
+//        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreWhenReadyCommand);
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreCoralCommand);
 
     }
 
@@ -150,7 +151,7 @@ public class OperatorCommandMap {
 
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).onTrue(lowerToHumanLoad);
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).onTrue(riseToScore);
-      
+
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(forceElevatorCalibratedCommand);
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(riseToL2);
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(riseToL3);
@@ -209,12 +210,5 @@ public class OperatorCommandMap {
         ResetSimulatedPose resetPose
     ) {
         resetPose.includeOnSmartDashboard();
-    }
-
-    @Inject
-    public void test(OperatorInterface oi,
-                     DriveToReefFaceFromAngleCommand drive) {
-        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(drive);
-
     }
 }
