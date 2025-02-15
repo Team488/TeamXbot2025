@@ -17,6 +17,8 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.units.measure.Distance;
 import static edu.wpi.first.units.Units.Meters;
 
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import org.kobe.xbot.JClient.XTablesClient;
 import org.kobe.xbot.Utilities.Entities.BatchedPushRequests;
 import xbot.common.controls.sensors.XGyro.XGyroFactory;
@@ -46,6 +48,8 @@ public class PoseSubsystem extends BasePoseSubsystem {
     // only used when simulating the robot
     protected Optional<SwerveModulePosition[]> simulatedModulePositions = Optional.empty();
 
+    public Landmarks.CoralLevel targetCoralLevel;
+
     @Inject
     public PoseSubsystem(XGyroFactory gyroFactory, PropertyFactory propManager, DriveSubsystem drive,
                          AprilTagVisionSubsystem aprilTagVisionSubsystem, CoprocessorCommunicationSubsystem coprocessorComms) {
@@ -61,6 +65,8 @@ public class PoseSubsystem extends BasePoseSubsystem {
         propManager.setDefaultLevel(Property.PropertyLevel.Important);
         useVisionAssistedPose = propManager.createPersistentProperty("UseVisionAssistedPose", true);
         reportCameraPoses = propManager.createPersistentProperty("ReportCameraPoses", false);
+
+        targetCoralLevel = Landmarks.CoralLevel.COLLECTING;
     }
 
     @Override
@@ -286,5 +292,16 @@ public class PoseSubsystem extends BasePoseSubsystem {
         else {
             return Landmarks.ReefFace.FAR_LEFT;
         }
+    }
+
+    public Command createSetTargetCoralLevelCommand(Landmarks.CoralLevel coralLevel) {
+        return Commands.runOnce(() -> setTargetCoralLevel(coralLevel));
+    }
+    public void setTargetCoralLevel(Landmarks.CoralLevel coralLevel) {
+        this.targetCoralLevel = coralLevel;
+    }
+
+    public Landmarks.CoralLevel getTargetCoralLevel() {
+        return this.targetCoralLevel;
     }
 }
