@@ -99,7 +99,9 @@ public class ElevatorSimulator {
         // this would be used to simulate the bottom position sensor being triggered
         var elevatorIsAtBottom = elevatorCurrentHeight
                 .in(Meters) <= ElevatorSimConstants.elevatorBottomSensorTriggerHeight;
-        bottomSensor.setValue(elevatorIsAtBottom);
+        if(bottomSensor != null) {
+            bottomSensor.setValue(elevatorIsAtBottom);
+        }
         aKitLog.record("FieldSimulation/ElevatorHeight-Meters", elevatorCurrentHeight.in(Meters));
         aKitLog.record("FieldSimulation/ElevatorBottomSensorTriggered", elevatorIsAtBottom);
         // Record the robot relevative positive of the Elevator so AdvantageScope can render it correctly
