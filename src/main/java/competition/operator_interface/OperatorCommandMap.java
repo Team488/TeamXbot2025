@@ -162,8 +162,8 @@ public class OperatorCommandMap {
 
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.Back).onTrue(forceCoralPivotCalibratedCommand);
 
-//        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(algaeCollectionIntakeCommand);
-//        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(algaeCollectionOutputCommand);
+        oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(algaeCollectionIntakeCommand);
+        oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(algaeCollectionOutputCommand);
 
     }
 
@@ -173,7 +173,7 @@ public class OperatorCommandMap {
         DriveSubsystem drive,
         ElevatorSubsystem elevator
     ) {
-
+/*
         oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.A)
                 .whileTrue(drive.sysIdQuasistaticRotation(SysIdRoutine.Direction.kForward)
                         .andThen(new WaitCommand(Seconds.of(1)))
@@ -195,7 +195,7 @@ public class OperatorCommandMap {
         oi.algaeAndSysIdGamepad.getPovIfAvailable(90).whileTrue(elevator.sysIdDynamic(SysIdRoutine.Direction.kReverse));
         oi.algaeAndSysIdGamepad.getPovIfAvailable(180).whileTrue(elevator.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
         oi.algaeAndSysIdGamepad.getPovIfAvailable(270).whileTrue(elevator.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-
+*/
         // Not used, but leaving these here as a sample of how to use a DeferredCommand
 //        oi.sysIdGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper)
 //                .whileTrue(new DeferredCommand(() -> drive.getActiveSwerveModuleSubsystem()

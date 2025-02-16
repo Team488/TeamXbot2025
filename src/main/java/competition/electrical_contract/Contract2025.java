@@ -54,7 +54,7 @@ public class Contract2025 extends ElectricalContract {
                 CANBusId.RIO,
                 25,
                 new CANMotorControllerOutputConfig()
-                        .withStatorCurrentLimit(Amps.of(5))
+                        .withStatorCurrentLimit(Amps.of(20))
                         .withNeutralMode(CANMotorControllerOutputConfig.NeutralMode.Brake)
         );
     }
