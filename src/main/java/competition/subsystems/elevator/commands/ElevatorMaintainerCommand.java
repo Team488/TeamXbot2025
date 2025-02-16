@@ -83,6 +83,12 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     }
 
     @Override
+    protected void initializeMachineControlAction() {
+        super.initializeMachineControlAction();
+        setpoint = elevator.getCurrentValue().in(Meters);
+    }
+
+    @Override
     protected void coastAction() {
         elevator.setPower(0);
     }

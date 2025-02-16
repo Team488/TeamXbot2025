@@ -21,6 +21,7 @@ public class ForceElevatorCalibratedCommand extends BaseCommand {
         log.info("Initializing..");
         elevator.setCalibrated(!calibrationSwitch);
         calibrationSwitch = !calibrationSwitch;
+        elevator.setTargetValue(elevator.getCurrentValue());
     }
 
     @Override
