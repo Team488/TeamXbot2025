@@ -7,7 +7,6 @@ import competition.subsystems.coral_arm.CoralArmSubsystem;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.units.measure.Angle;
 import xbot.common.command.BaseMaintainerCommand;
-import xbot.common.controls.actuators.XCANMotorController;
 import xbot.common.logic.HumanVsMachineDecider;
 import xbot.common.math.MathUtils;
 import xbot.common.properties.DoubleProperty;
@@ -15,10 +14,7 @@ import xbot.common.properties.Property;
 import xbot.common.properties.PropertyFactory;
 
 import javax.inject.Inject;
-import javax.naming.InitialContext;
-
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
@@ -80,6 +76,9 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
 
     @Override
     protected void calibratedMachineControlAction() { //manages and runs pid
+        // if the arm is being requested to go to a position that would cause a collision,
+        // move to a safe position instead until that changes
+        // var currentTarget = checkSubsystemCollisions() ? coralArm.humanLoadAngle.get()
         if(checkSubsystemCollisions()){
             profileManager.setTargetPosition(
                     coralArm.humanLoadAngle.get()/360,
@@ -89,12 +88,14 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
             );
         }
         else {
-            profileManager.setTargetPosition(
+            
+        }
+
+        profileManager.setTargetPosition(
                 coralArm.getTargetValue().in(Rotations),
                 coralArm.getCurrentValue().in(Rotations),
                 coralArm.getCurrentVelocity().in(RotationsPerSecond),
                 setpoint);
-        }
 
         setpoint = profileManager.getRecommendedPositionForTime();
 

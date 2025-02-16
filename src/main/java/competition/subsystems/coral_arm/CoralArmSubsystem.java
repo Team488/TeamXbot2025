@@ -36,8 +36,8 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     final Alert isNotCalibratedAlert = new Alert("CoralArm: not calibrated", Alert.AlertType.kWarning);
     private final DoubleProperty degreesPerRotations;
 
-    public final DoubleProperty scoreAngle;
-    public final DoubleProperty humanLoadAngle;
+    public final DoubleProperty scoreAngleDegrees;
+    public final DoubleProperty humanLoadAngleDegrees;
     public final DoubleProperty rangeOfMotionDegrees;
     public final DoubleProperty minArmPosition;
     public final DoubleProperty maxArmPosition;
@@ -92,8 +92,8 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
         this.rangeOfMotionDegrees = propertyFactory.createPersistentProperty("Range of Motion in Degrees", 125);
         this.minArmPosition = propertyFactory.createPersistentProperty("Min AbsEncoder Position in Degrees", 90);
         this.maxArmPosition = propertyFactory.createPersistentProperty("Max AbsEncoder Position in Degrees", 108);
-        this.scoreAngle = propertyFactory.createPersistentProperty("Scoring Angle in Degrees", 125);
-        this.humanLoadAngle = propertyFactory.createPersistentProperty("Human Loading Angle in Degrees", 0);
+        this.scoreAngleDegrees = propertyFactory.createPersistentProperty("Scoring Angle in Degrees", 125);
+        this.humanLoadAngleDegrees = propertyFactory.createPersistentProperty("Human Loading Angle in Degrees", 0);
         this.powerWhenNotCalibrated = propertyFactory.createPersistentProperty("Power When Not Calibrated", 0.05);
 
         this.minRotations = propertyFactory.createPersistentProperty("Min Rotations", 0);
@@ -173,11 +173,11 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
             case TWO:
             case THREE:
             case FOUR:
-                setTargetValue(Rotations.of(scoreAngle.get()));
+                setTargetValue(Rotations.of(scoreAngleDegrees.get()));
                 break;
             case COLLECTING:
             default:
-                setTargetValue(Rotations.of(humanLoadAngle.get()));
+                setTargetValue(Rotations.of(humanLoadAngleDegrees.get()));
                 break;
         }
     }
@@ -302,6 +302,11 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     }
   
     public boolean getIsTargetAngleScoring() {
-        return Degrees.of(scoreAngle.get()).isNear(targetAngle, Rotations.of(0.25));
+        return Degrees.of(scoreAngleDegrees.get()).isNear(targetAngle, Rotations.of(0.25));
+    }
+
+    
+    public Angle getHumanLoadAngle() {
+        return Degrees.of(this.humanLoadAngleDegrees.get());
     }
 }
