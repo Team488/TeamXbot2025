@@ -76,8 +76,8 @@ public class CoralArmSimulator {
         var armMotorRotations = armRelativeAngle.in(Radians) / CoralArmSimConstants.armEncoderAnglePerRotation.in(Radians);
         armMotor.setPosition(Rotations.of(armMotorRotations));
 
-        absoluteEncoder.setPosition_internal(getAbsoluteEncoderPosition(getArmAngle(), armPivotSubsystem.minArmPosition.get() / 360,
-                armPivotSubsystem.maxArmPosition.get() / 360));
+        absoluteEncoder.setPosition_internal(getAbsoluteEncoderPosition(getArmAngle(), armPivotSubsystem.minArmPositionDegrees.get() / 360,
+                armPivotSubsystem.maxArmPositionDegrees.get() / 360));
 
         // if the arm angle is lower than 10.8 degrees it will return true, otherwise return false
         lowSensor.setValue(getArmAngle().in(Degrees) < 10.8);
