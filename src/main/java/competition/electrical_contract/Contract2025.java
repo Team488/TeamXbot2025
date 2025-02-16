@@ -295,6 +295,7 @@ public class Contract2025 extends ElectricalContract {
                                 frontAprilCameraZDisplacement),
                                 new Rotation3d(0, frontAprilCameraPitch, frontAprilCameraYaw)),
                         EnumSet.of(CameraCapabilities.APRIL_TAG)),
+
                 new CameraInfo("Apriltag_FrontRight_Camera",
                         "AprilTagFrontRight",
                         new Transform3d(new Translation3d(
@@ -302,8 +303,16 @@ public class Contract2025 extends ElectricalContract {
                                 -frontAprilCameraYDisplacement,
                                 frontAprilCameraZDisplacement),
                                 new Rotation3d(0, frontAprilCameraPitch, frontAprilCameraYaw)),
+                        EnumSet.of(CameraCapabilities.APRIL_TAG)),
+
+                new CameraInfo("Apriltag_Back_Camera",
+                        "AprilTagBack",
+                        new Transform3d(new Translation3d(
+                                -frontAprilCameraXDisplacement,
+                                0,
+                                frontAprilCameraZDisplacement),
+                                new Rotation3d(0, Math.toRadians(-45), Math.PI)),
                         EnumSet.of(CameraCapabilities.APRIL_TAG))
-                
         };
     }
 

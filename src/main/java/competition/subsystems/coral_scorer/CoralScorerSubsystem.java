@@ -3,6 +3,7 @@ package competition.subsystems.coral_scorer;
 import competition.electrical_contract.ElectricalContract;
 import competition.subsystems.oracle.contracts.CoralCollectionInfoSource;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.wpilibj.Alert;
 import xbot.common.command.BaseSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
 import xbot.common.controls.sensors.XDigitalInput;
@@ -32,6 +33,7 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
     public final DoubleProperty hasCoralIntakePower;
     public final DoubleProperty scorePower;
     public final XDigitalInput coralSensor;
+    final Alert hasCoralAlert = new Alert("Confidently has coral", Alert.AlertType.kInfo);
     public final ElectricalContract electricalContract;
     private CoralScorerState coralScorerState;
     private double lastScoredTime = -Double.MAX_VALUE;
@@ -187,6 +189,7 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
         hasCoralValidator.checkStable(this.hasCoral() || coralLikelyJammed);
 
         aKitLog.record("coralPresentFromSensor", hasCoral());
+        hasCoralAlert.set(confidentlyHasCoral());
         aKitLog.record("coralPresentFromJamming", coralLikelyJammed);
         aKitLog.record("coralPresentStable", hasCoralValidator.peekStable());
         aKitLog.record("CoralConfidentlyScored", confidentlyHasScoredCoral());

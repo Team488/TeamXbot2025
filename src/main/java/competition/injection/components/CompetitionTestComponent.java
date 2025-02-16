@@ -3,8 +3,7 @@ package competition.injection.components;
 import javax.inject.Singleton;
 
 import competition.electrical_contract.ElectricalContract;
-import competition.injection.modules.CommonBinderModule;
-import competition.injection.modules.CommonProviderModule;
+import competition.injection.modules.CommonModule;
 import competition.injection.modules.UnitTestRobotModule;
 import dagger.BindsInstance;
 import dagger.Component;
@@ -14,7 +13,7 @@ import xbot.common.injection.modules.UnitTestModule;
 
 @Singleton
 @Component(modules = { UnitTestModule.class, MockDevicesModule.class, MockControlsModule.class,
-        CommonProviderModule.class, CommonBinderModule.class, UnitTestRobotModule.class})
+        CommonModule.class, UnitTestRobotModule.class})
 public abstract class CompetitionTestComponent extends BaseRobotComponent {
     @Component.Builder
     public abstract static class Builder {

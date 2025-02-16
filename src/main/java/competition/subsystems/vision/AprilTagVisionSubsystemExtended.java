@@ -4,9 +4,10 @@ import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.math.geometry.Translation3d;
 import xbot.common.injection.electrical_contract.XCameraElectricalContract;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.vision.AprilTagVisionIO;
@@ -16,10 +17,13 @@ import xbot.common.subsystems.vision.AprilTagVisionSubsystem;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.HashMap;
+import java.util.Optional;
 
 @Singleton
 public class AprilTagVisionSubsystemExtended extends AprilTagVisionSubsystem {
     HashMap<Pose2d, Integer> aprilTagIDHashMap = new HashMap<>();
+    private final AprilTagFieldLayout aprilTagFieldLayout;
+
     @Inject
     public AprilTagVisionSubsystemExtended(PropertyFactory pf,
                                            AprilTagFieldLayout fieldLayout, XCameraElectricalContract contract,
@@ -28,29 +32,41 @@ public class AprilTagVisionSubsystemExtended extends AprilTagVisionSubsystem {
 
         // Note: flipped april tag IDs across the y-midpoint of the field for blue alliance
         // map both blue and red alliance poses
-            aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueCloseLeftAlgae), 8);
-            aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueCloseAlgae), 7);
-            aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueCloseRightAlgae), 6);
-            aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueFarLeftAlgae), 9);
-            aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueFarAlgae), 10);
-            aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueFarRightAlgae), 11);
-            aprilTagIDHashMap.put(Landmarks.BlueCloseLeftAlgae, 19);
-            aprilTagIDHashMap.put(Landmarks.BlueCloseAlgae, 18);
-            aprilTagIDHashMap.put(Landmarks.BlueCloseRightAlgae, 17);
-            aprilTagIDHashMap.put(Landmarks.BlueFarLeftAlgae, 20);
-            aprilTagIDHashMap.put(Landmarks.BlueFarAlgae, 21);
-            aprilTagIDHashMap.put(Landmarks.BlueFarRightAlgae, 22);
+        aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueCloseLeftAlgae), 8);
+        aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueCloseAlgae), 7);
+        aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueCloseRightAlgae), 6);
+        aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueFarLeftAlgae), 9);
+        aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueFarAlgae), 10);
+        aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueFarRightAlgae), 11);
+        aprilTagIDHashMap.put(Landmarks.BlueCloseLeftAlgae, 19);
+        aprilTagIDHashMap.put(Landmarks.BlueCloseAlgae, 18);
+        aprilTagIDHashMap.put(Landmarks.BlueCloseRightAlgae, 17);
+        aprilTagIDHashMap.put(Landmarks.BlueFarLeftAlgae, 20);
+        aprilTagIDHashMap.put(Landmarks.BlueFarAlgae, 21);
+        aprilTagIDHashMap.put(Landmarks.BlueFarRightAlgae, 22);
 
+        aprilTagFieldLayout = fieldLayout;
     }
 
-    public Translation2d getReefAprilTagCameraData() {
-        Transform3d data = getLatestTargetObservation(0).cameraToTarget();
+    public Translation2d getRobotRelativeLocationOfBestDetectedAprilTag(int cameraToUse) {
+        Translation3d data = getLatestTargetObservation(cameraToUse).cameraToTarget().getTranslation().rotateBy(
+                getCameraPosition(cameraToUse).getRotation()
+        );
 
         return new Translation2d(data.getX(), data.getY());
     }
 
+    public Optional<Pose3d> getAprilTagFieldOrientedPose(int targetAprilTagID) {
+        return aprilTagFieldLayout.getTagPose(targetAprilTagID);
+    }
+
     public boolean reefAprilTagCameraHasCorrectTarget(int targetAprilTagID) {
         AprilTagVisionIO.TargetObservation targetObservation = getLatestTargetObservation(0);
+        return targetObservation.fiducialId() == targetAprilTagID;
+    }
+
+    public boolean doesCameraBestObservationHaveAprilTagId(int cameraToUse, int targetAprilTagID) {
+        AprilTagVisionIO.TargetObservation targetObservation = getLatestTargetObservation(cameraToUse);
         return targetObservation.fiducialId() == targetAprilTagID;
     }
 
