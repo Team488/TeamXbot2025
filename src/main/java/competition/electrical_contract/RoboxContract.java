@@ -2,9 +2,7 @@ package competition.electrical_contract;
 
 import xbot.common.injection.electrical_contract.CANBusId;
 import xbot.common.injection.electrical_contract.CANMotorControllerInfo;
-import xbot.common.injection.electrical_contract.CANMotorControllerOutputConfig;
 import xbot.common.injection.electrical_contract.CameraInfo;
-import xbot.common.injection.electrical_contract.MotorControllerType;
 
 import javax.inject.Inject;
 
@@ -26,12 +24,12 @@ public class RoboxContract extends Contract2025 {
 
     @Override
     public boolean isElevatorReady() {
-        return true;
+        return false;
     }
 
     @Override
     public boolean isCoralCollectionMotorReady() {
-        return true;
+        return false;
     }
 
     @Override
@@ -41,7 +39,7 @@ public class RoboxContract extends Contract2025 {
 
     @Override
     public boolean isCoralArmMotorReady() {
-        return true;
+        return false;
     }
 
     @Override
@@ -89,4 +87,6 @@ public class RoboxContract extends Contract2025 {
     public CameraInfo[] getCameraInfo() {
         return new CameraInfo[] {};
     }
+
+    public boolean isAlgaeCollectionReady() { return false; }
 }
