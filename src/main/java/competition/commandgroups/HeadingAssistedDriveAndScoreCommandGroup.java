@@ -6,18 +6,28 @@ import competition.subsystems.drive.commands.DriveToReefFaceFromAngleUntilDetect
 import competition.subsystems.drive.commands.MeasureDistanceBeforeScoringCommand;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedFactory;
+import dagger.assisted.AssistedInject;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import java.util.function.Supplier;
 
 public class HeadingAssistedDriveAndScoreCommandGroup extends SequentialCommandGroup {
     PoseSubsystem pose;
-    Landmarks.Branch branch;
 
-    @Inject
-    public HeadingAssistedDriveAndScoreCommandGroup(DriveToReefFaceFromAngleUntilDetectionCommand driveToReefFaceFromAngleCommand,
+
+    @AssistedFactory
+    public abstract static class Factory {
+        public abstract HeadingAssistedDriveAndScoreCommandGroup create(@Assisted Landmarks.Branch branch);
+    }
+
+    @AssistedInject
+    public HeadingAssistedDriveAndScoreCommandGroup(@Assisted Landmarks.Branch branch,
+                                                    DriveToReefFaceFromAngleUntilDetectionCommand driveToReefFaceFromAngleCommand,
                                                     PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
                                                     ScoreWhenReadyCommand scoreWhenReadyCommand,
                                                     Provider<AlignToReefWithAprilTagCommand> alignToReefWithAprilTagCommandProvider,
@@ -41,7 +51,5 @@ public class HeadingAssistedDriveAndScoreCommandGroup extends SequentialCommandG
         this.addCommands(scoreWhenReadyCommand);
     }
 
-    public void setBranch(Landmarks.Branch branch) {
-        this.branch = branch;
-    }
+
 }

@@ -52,7 +52,7 @@ public class OperatorCommandMap {
     public void setupDriverCommands(
             OperatorInterface operatorInterface,
             SetRobotHeadingCommand resetHeading,
-            AlignToReefWithAprilTagCommand alignToReefWithAprilTag,
+            Provider<AlignToReefWithAprilTagCommand> alignToReefWithAprilTagProvider,
             DriveAccordingToOracleCommand driveAccordingToOracle,
             SuperstructureAccordingToOracleCommand superstructureAccordingToOracle,
             DriveToWaypointsWithVisionCommand driveToWaypointsWithVisionCommand,
@@ -63,12 +63,18 @@ public class OperatorCommandMap {
             ScoreCoralCommand scoreCoralCommand,
             ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
             ForceCoralPivotCalibrated forceCoralPivotCalibratedCommand,
-            HeadingAssistedDriveAndScoreCommandGroup headingAssistedDriveAndScoreCommandGroup,
+            HeadingAssistedDriveAndScoreCommandGroup.Factory headingAssistedDriveAndScoreCommandGroup,
             PoseSubsystem pose) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(resetHeading);
-//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(alignToReefWithAprilTag);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).onTrue(driveToWaypointsWithVisionCommand);
+
+        var alignToReefWithAprilTagWithLeftCamera = alignToReefWithAprilTagProvider.get();
+        alignToReefWithAprilTagWithLeftCamera.setConfigurations(0, false, 0.5);
+//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(alignToReefWithAprilTagWithLeftCamera);
+
+        var alignToReefWithAprilTagWithRightCamera = alignToReefWithAprilTagProvider.get();
+        alignToReefWithAprilTagWithRightCamera.setConfigurations(1, false, 0.5);
+//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(alignToReefWithAprilTagWithRightCamera);
 
         var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Back).onTrue(forceCoralPivotCalibratedCommand);
@@ -83,9 +89,13 @@ public class OperatorCommandMap {
         var setL4 = pose.createSetTargetCoralLevelCommand(Landmarks.CoralLevel.FOUR);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(setL4);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(scoreCoralCommand);
-        var home = prepCoralSystemCommandGroupFactory.create(()-> Landmarks.CoralLevel.COLLECTING);
+        var rightBumperDriveAndScore = headingAssistedDriveAndScoreCommandGroup.create(Landmarks.Branch.B);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper)
-                .whileTrue(headingAssistedDriveAndScoreCommandGroup).onFalse(home);
+                .whileTrue(rightBumperDriveAndScore).onFalse(homed);
+        var leftBumperDriveAndScore = headingAssistedDriveAndScoreCommandGroup.create(Landmarks.Branch.A);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper)
+                .whileTrue(leftBumperDriveAndScore).onFalse(homed);
+
         // operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(scoreCoralCommand);
     }
 
