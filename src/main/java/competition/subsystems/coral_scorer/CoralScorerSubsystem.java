@@ -195,7 +195,6 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
         aKitLog.record("CoralConfidentlyScored", confidentlyHasScoredCoral());
         aKitLog.record("IntakeRPS", getMotorVelocity().in(RotationsPerSecond));
         aKitLog.record("coralScorerState", coralScorerState);
-        aKitLog.record("secondsSinceScoring", getSecondsSinceScoringStarted());
     }
 }
 
