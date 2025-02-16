@@ -157,7 +157,10 @@ public class Robot extends BaseRobot {
     public void sharedPeriodic() {
         super.sharedPeriodic();
         if(oi != null) {
+            double propertyStart = getPerformanceTimestampInMs();
             oi.periodic();
+            double propertyEnd = getPerformanceTimestampInMs();
+            org.littletonrobotics.junction.Logger.recordOutput("OI Periodic ms", propertyEnd - propertyStart);
         }
     }
 }

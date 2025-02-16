@@ -69,24 +69,24 @@ public class Contract2025 extends ElectricalContract {
                 new CANMotorControllerOutputConfig().withStatorCurrentLimit(Amps.of(20)));
     }
 
-    public boolean isCoralSensorReady() { return false; }
+    public boolean isCoralSensorReady() { return true; }
 
     @Override
     public DeviceInfo getCoralSensor() {
-        return new DeviceInfo("CoralSensor", 0);
+        return new DeviceInfo("CoralSensor", 0, true);
     }
 
-    public boolean isElevatorBottomSensorReady() { return false; }
+    public boolean isElevatorBottomSensorReady() { return true; }
 
     @Override
-    public DeviceInfo getElevatorBottomSensor() { return new DeviceInfo("ElevatorBottomSensor",3); }
+    public DeviceInfo getElevatorBottomSensor() { return new DeviceInfo("ElevatorBottomSensor",3, true); }
 
     @Override
     public boolean isAlgaeArmPivotMotorReady() {return true;}
 
     public boolean isAlgaeArmBottomSensorReady(){return false;}
 
-    public DeviceInfo getAlgaeArmBottomSensor() {return new DeviceInfo("AlgaeArmBottomSensor",2); }
+    public DeviceInfo getAlgaeArmBottomSensor() {return new DeviceInfo("AlgaeArmBottomSensor",2, true); }
 
     @Override
     public boolean isHumanLoadRampReady() {
@@ -118,9 +118,9 @@ public class Contract2025 extends ElectricalContract {
     public boolean isCoralArmPivotAbsoluteEncoderReady() { return false; }
 
     public DeviceInfo getCoralArmPivotLowSensor() {
-        return new DeviceInfo("ArmPivotLowSensor", 101);
+        return new DeviceInfo("ArmPivotLowSensor", 1, true);
     }
-    public boolean isCoralArmPivotLowSensorReady() { return false; }
+    public boolean isCoralArmPivotLowSensorReady() { return true; }
 
     @Override
     public boolean isElevatorReady() {

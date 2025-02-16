@@ -17,8 +17,10 @@ import javax.inject.Singleton;
 
 import static edu.wpi.first.units.Units.Degree;
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 @Singleton
 public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
@@ -48,6 +50,7 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
         ReefAlgaeHigh
     }
 
+    /*
     XDigitalInput dio0;
     XDigitalInput dio1;
     XDigitalInput dio2;
@@ -57,7 +60,7 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
     XDigitalInput dio6;
     XDigitalInput dio7;
     XDigitalInput dio8;
-    XDigitalInput dio9;
+    XDigitalInput dio9;*/
 
     @Inject
     public AlgaeArmSubsystem(ElectricalContract electricalContract,
@@ -90,6 +93,7 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
         this.reefHighSweepStart = propertyFactory.createPersistentProperty("ReefHighSweepStart", 110.0);
         this.reefHighSweepEnd = propertyFactory.createPersistentProperty("ReefHighSweepEnd", 150.0);
 
+        /*
         dio0 = xDigitalInputFactory.create(new DeviceInfo("Dio0", 0), this.getPrefix());
         dio1 = xDigitalInputFactory.create(new DeviceInfo("Dio1", 1), this.getPrefix());
         dio2 = xDigitalInputFactory.create(new DeviceInfo("Dio2", 2), this.getPrefix());
@@ -111,6 +115,7 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
         registerDataFrameRefreshable(dio7);
         registerDataFrameRefreshable(dio8);
         registerDataFrameRefreshable(dio9);
+        */
     }
 
     @Override
@@ -134,7 +139,9 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
     }
 
     public AngularVelocity getCurrentVelocity() {
-        return getMotorVelocity();
+        return DegreesPerSecond.of(
+                getMotorVelocity().in(RotationsPerSecond) * degreesPerRotation.get()
+        );
     }
 
     private AngularVelocity getMotorVelocity() {
@@ -227,7 +234,9 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
         aKitLog.record("Target Angle", this.getTargetValue().in(Degrees));
         aKitLog.record("Current Angle", this.getCurrentValue().in(Degrees));
         aKitLog.record("isCalibrated", this.isCalibrated());
+        aKitLog.record("Current Velocity", this.getCurrentVelocity().in(DegreesPerSecond));
 
+        /*
         aKitLog.record("dio0", dio0.get());
         aKitLog.record("dio1", dio1.get());
         aKitLog.record("dio2", dio2.get());
@@ -238,6 +247,8 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
         aKitLog.record("dio7", dio7.get());
         aKitLog.record("dio8", dio8.get());
         aKitLog.record("dio9", dio9.get());
+
+         */
     }
 }
 
