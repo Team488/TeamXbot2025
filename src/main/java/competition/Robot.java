@@ -48,6 +48,7 @@ public class Robot extends BaseRobot {
             simulator = getInjectorComponent().simulator();
         }
 
+
         dataFrameRefreshables.add(getInjectorComponent().driveSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().poseSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().coprocessorCommunicationSubsystem());
@@ -58,7 +59,7 @@ public class Robot extends BaseRobot {
         dataFrameRefreshables.add(getInjectorComponent().algaeCollectionSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().algaeArmSubsystem());
 
-        CanBridge.runTCP();
+        //CanBridge.runTCP();
     }
 
     protected BaseRobotComponent createDaggerComponent() {
