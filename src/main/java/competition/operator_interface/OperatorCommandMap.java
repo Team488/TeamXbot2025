@@ -23,6 +23,7 @@ import competition.subsystems.elevator.commands.ForceElevatorCalibratedCommand;
 import competition.subsystems.elevator.commands.SetElevatorTargetHeightCommand;
 import competition.subsystems.oracle.commands.DriveAccordingToOracleCommand;
 import competition.subsystems.oracle.commands.SuperstructureAccordingToOracleCommand;
+import competition.subsystems.pose.Cameras;
 import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -50,7 +51,7 @@ public class OperatorCommandMap {
     public void setupDriverCommands(
             OperatorInterface operatorInterface,
             SetRobotHeadingCommand resetHeading,
-            AlignToReefWithAprilTagCommand alignToReefWithAprilTag,
+            Provider<AlignToReefWithAprilTagCommand> alignToReefWithAprilTagProvider,
             DriveAccordingToOracleCommand driveAccordingToOracle,
             SuperstructureAccordingToOracleCommand superstructureAccordingToOracle,
             DriveToWaypointsWithVisionCommand driveToWaypointsWithVisionCommand,
@@ -63,8 +64,14 @@ public class OperatorCommandMap {
             ForceCoralPivotCalibrated forceCoralPivotCalibratedCommand) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(resetHeading);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(alignToReefWithAprilTag);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).onTrue(driveToWaypointsWithVisionCommand);
+
+        var alignToReefWithAprilTagWithLeftCamera = alignToReefWithAprilTagProvider.get();
+        alignToReefWithAprilTagWithLeftCamera.setConfigurations(Cameras.FRONT_LEFT_CAMERA.getIndex(), false, 0.5);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(alignToReefWithAprilTagWithLeftCamera);
+
+        var alignToReefWithAprilTagWithRightCamera = alignToReefWithAprilTagProvider.get();
+        alignToReefWithAprilTagWithRightCamera.setConfigurations(Cameras.FRONT_RIGHT_CAMERA.getIndex(), false, 0.5);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(alignToReefWithAprilTagWithRightCamera);
 
         var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Back).onTrue(forceCoralPivotCalibratedCommand);
