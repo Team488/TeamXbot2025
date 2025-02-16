@@ -6,6 +6,7 @@ import competition.subsystems.algae_arm.AlgaeArmSubsystem;
 import competition.subsystems.coral_arm.CoralArmSubsystem;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.Alert;
 import xbot.common.command.BaseMaintainerCommand;
 import xbot.common.logic.HumanVsMachineDecider;
 import xbot.common.math.MathUtils;
@@ -33,6 +34,8 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
     final DoubleProperty maxSafeArmAngleDegrees;
 
     final TrapezoidProfileManager profileManager;
+
+    final Alert collisionSafetiesEngaged = new Alert("Coral Arm: collision safeties engaged", Alert.AlertType.kWarning);
 
     @Inject
     public CoralArmMaintainerCommand(CoralArmSubsystem armPivotSubsystem, ElevatorSubsystem elevator,
@@ -67,7 +70,7 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
     }
 
     @Override
-    protected void coastAction() { 
+    protected void coastAction() {
         // rest when no human control and before pid
         coralArm.setPower(0);
     }
@@ -75,12 +78,14 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
     double setpoint = 0;
 
     @Override
-    protected void calibratedMachineControlAction() { 
+    protected void calibratedMachineControlAction() {
         // manages and runs pid
         // if the arm is being requested to go to a position that would cause a
         // collision,
         // move to a safe position instead until that changes
-        var currentTarget = wouldCollideWithAlgaeArm(coralArm.getTargetValue())
+        var wouldCollide = wouldCollideWithAlgaeArm(coralArm.getTargetValue());
+        collisionSafetiesEngaged.set(wouldCollide);
+        var currentTarget = wouldCollide
                 ? Degrees.of(this.maxSafeArmAngleDegrees.get())
                 : coralArm.getTargetValue();
 
@@ -99,9 +104,9 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
     private boolean wouldCollideWithAlgaeArm(Angle targetGoal) {
         var coralArmGoalAboveSafeLevel = targetGoal.gt(Degrees.of(this.maxSafeArmAngleDegrees.get()));
         var algaeArmRaised = algaeArm.getCurrentValue().in(Degrees) >= algaeArmCollisionAngleDegrees.get();
-        var elevatorBelowLevel2Height = elevator.getCurrentValue().lt(elevator.humanLoadHeight.get());
+        var elevatorBelowLevel2Height = elevator.getCurrentValue().lt(elevator.l2Height.get());
 
-        return coralArmGoalAboveSafeLevel && algaeArmRaised && elevatorBelowLevel2Height;
+        return coralArmGoalAboveSafeLevel && (algaeArmRaised || elevatorBelowLevel2Height);
     }
 
     @Override
@@ -127,7 +132,7 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
     }
 
     @Override
-    protected double getHumanInputMagnitude() { 
+    protected double getHumanInputMagnitude() {
         // turns values into absolute value
         return getHumanInput();
     }
