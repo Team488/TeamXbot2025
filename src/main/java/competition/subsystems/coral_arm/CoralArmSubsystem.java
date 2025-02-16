@@ -36,8 +36,8 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     final Alert isNotCalibratedAlert = new Alert("CoralArm: not calibrated", Alert.AlertType.kWarning);
     private final DoubleProperty degreesPerRotations;
 
-    public final DoubleProperty scoreAngle;
-    public final DoubleProperty humanLoadAngle;
+    public final DoubleProperty scoreAngleDegrees;
+    public final DoubleProperty humanLoadAngleDegrees;
     public final DoubleProperty rangeOfMotionDegrees;
     public final DoubleProperty powerWhenNotCalibrated;
 
@@ -84,8 +84,8 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
         this.degreesPerRotations = propertyFactory.createPersistentProperty("Degrees Per Rotations", 6.94444);
         this.rangeOfMotionDegrees = propertyFactory.createPersistentProperty("Range of Motion in Degrees", 125);
-        this.scoreAngle = propertyFactory.createPersistentProperty("Scoring Angle in Degrees", 125);
-        this.humanLoadAngle = propertyFactory.createPersistentProperty("Human Loading Angle in Degrees", 0);
+        this.scoreAngleDegrees = propertyFactory.createPersistentProperty("Scoring Angle in Degrees", 125);
+        this.humanLoadAngleDegrees = propertyFactory.createPersistentProperty("Human Loading Angle in Degrees", 0);
         this.powerWhenNotCalibrated = propertyFactory.createPersistentProperty("Power When Not Calibrated", 0.05);
     }
 
@@ -162,11 +162,11 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
             case TWO:
             case THREE:
             case FOUR:
-                setTargetValue(Degrees.of(scoreAngle.get()));
+                setTargetValue(Degrees.of(scoreAngleDegrees.get()));
                 break;
             case COLLECTING:
             default:
-                setTargetValue(Degrees.of(humanLoadAngle.get()));
+                setTargetValue(Degrees.of(humanLoadAngleDegrees.get()));
                 break;
         }
     }
@@ -295,6 +295,11 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     }
   
     public boolean getIsTargetAngleScoring() {
-        return Degrees.of(scoreAngle.get()).isNear(targetAngle, Rotations.of(0.25));
+        return Degrees.of(scoreAngleDegrees.get()).isNear(targetAngle, Rotations.of(0.25));
+    }
+
+    
+    public Angle getHumanLoadAngle() {
+        return Degrees.of(this.humanLoadAngleDegrees.get());
     }
 }
