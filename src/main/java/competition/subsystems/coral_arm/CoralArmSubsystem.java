@@ -292,10 +292,11 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
         if(electricalContract.isAlgaeArmBottomSensorReady()) {
             aKitLog.record("lowSensor Status", lowSensor.get());
         }
+
     }
   
     public boolean getIsTargetAngleScoring() {
-        return Degrees.of(scoreAngleDegrees.get()).isNear(targetAngle, Rotations.of(0.25));
+        return Degrees.of(scoreAngleDegrees.get()).isNear(targetAngle, Degrees.of(0.25));
     }
 
     
