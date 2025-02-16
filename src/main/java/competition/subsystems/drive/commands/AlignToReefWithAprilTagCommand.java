@@ -33,23 +33,12 @@ public class AlignToReefWithAprilTagCommand extends AlignToTagGlobalMovementWith
 
     @Override
     public void initialize() {
-        Pose2d targetReefFacePose = pose.getClosestReefFacePose();
         super.setConfigurations(
                 cameraToUse,
-                aprilTagVisionSubsystem.getTargetAprilTagID(targetReefFacePose),
+                aprilTagVisionSubsystem.getTargetAprilTagID(pose.getClosestReefFacePose()),
                 isCameraBackwards,
                 offsetInInches
         );
         super.initialize();
-    }
-
-    @Override
-    public void execute() {
-        super.execute();
-    }
-
-    @Override
-    public boolean isFinished() {
-        return super.isFinished();
     }
 }
