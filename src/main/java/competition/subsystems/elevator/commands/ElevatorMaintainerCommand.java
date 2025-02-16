@@ -22,6 +22,7 @@ import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
+import static xbot.common.logic.CalibrationDecider.CalibrationMode.GaveUp;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -118,9 +119,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     //defaults humanControlAction if there is no bottom sensor
     @Override
     protected void uncalibratedMachineControlAction() {
-        var mode = contract.isElevatorBottomSensorReady()
-                ? calibrationDecider.decideMode(elevator.isCalibrated())
-                : CalibrationDecider.CalibrationMode.GaveUp;
+        var mode = GaveUp;
 
         switch (mode){
             case Calibrated -> calibratedMachineControlAction();

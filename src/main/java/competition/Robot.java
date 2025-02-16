@@ -55,6 +55,8 @@ public class Robot extends BaseRobot {
         dataFrameRefreshables.add(getInjectorComponent().armPivotSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().elevatorSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().coralScorerSubsystem());
+        dataFrameRefreshables.add(getInjectorComponent().algaeCollectionSubsystem());
+        dataFrameRefreshables.add(getInjectorComponent().algaeArmSubsystem());
 
         CanBridge.runTCP();
     }

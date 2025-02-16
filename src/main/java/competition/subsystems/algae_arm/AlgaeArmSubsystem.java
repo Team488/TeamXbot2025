@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.Alert;
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
 import xbot.common.controls.sensors.XDigitalInput;
+import xbot.common.injection.electrical_contract.DeviceInfo;
 import xbot.common.math.MathUtils;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
@@ -47,6 +48,17 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
         ReefAlgaeHigh
     }
 
+    XDigitalInput dio0;
+    XDigitalInput dio1;
+    XDigitalInput dio2;
+    XDigitalInput dio3;
+    XDigitalInput dio4;
+    XDigitalInput dio5;
+    XDigitalInput dio6;
+    XDigitalInput dio7;
+    XDigitalInput dio8;
+    XDigitalInput dio9;
+
     @Inject
     public AlgaeArmSubsystem(ElectricalContract electricalContract,
                              XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
@@ -58,14 +70,14 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
             this.armMotor = xcanMotorControllerFactory.create(electricalContract.getAlgaeArmPivotMotor(),
                     getPrefix(), "AlgaeArmPivotMotor");
             this.registerDataFrameRefreshable(this.armMotor);
-        } else{
-            this.armMotor=null;
+        } else {
+            this.armMotor = null;
         }
 
-        if (electricalContract.isAlgaeArmBottomSensorReady()){
-            this.bottomSensor= xDigitalInputFactory.create(electricalContract.getAlgaeArmBottomSensor(), this.getPrefix());
-        } else{
-            this.bottomSensor=null;
+        if (electricalContract.isAlgaeArmBottomSensorReady()) {
+            this.bottomSensor = xDigitalInputFactory.create(electricalContract.getAlgaeArmBottomSensor(), this.getPrefix());
+        } else {
+            this.bottomSensor = null;
         }
         this.degreesPerRotation = propertyFactory.createPersistentProperty("DegreesPerRotation", 1);
 
@@ -77,6 +89,28 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
         this.reefLowTopToBottomSweepEnd = propertyFactory.createPersistentProperty("ReefLowTopToBottomSweepEnd", 90.0);
         this.reefHighSweepStart = propertyFactory.createPersistentProperty("ReefHighSweepStart", 110.0);
         this.reefHighSweepEnd = propertyFactory.createPersistentProperty("ReefHighSweepEnd", 150.0);
+
+        dio0 = xDigitalInputFactory.create(new DeviceInfo("Dio0", 0), this.getPrefix());
+        dio1 = xDigitalInputFactory.create(new DeviceInfo("Dio1", 1), this.getPrefix());
+        dio2 = xDigitalInputFactory.create(new DeviceInfo("Dio2", 2), this.getPrefix());
+        dio3 = xDigitalInputFactory.create(new DeviceInfo("Dio3", 3), this.getPrefix());
+        dio4 = xDigitalInputFactory.create(new DeviceInfo("Dio4", 4), this.getPrefix());
+        dio5 = xDigitalInputFactory.create(new DeviceInfo("Dio5", 5), this.getPrefix());
+        dio6 = xDigitalInputFactory.create(new DeviceInfo("Dio6", 6), this.getPrefix());
+        dio7 = xDigitalInputFactory.create(new DeviceInfo("Dio7", 7), this.getPrefix());
+        dio8 = xDigitalInputFactory.create(new DeviceInfo("Dio8", 8), this.getPrefix());
+        dio9 = xDigitalInputFactory.create(new DeviceInfo("Dio9", 9), this.getPrefix());
+
+        registerDataFrameRefreshable(dio0);
+        registerDataFrameRefreshable(dio1);
+        registerDataFrameRefreshable(dio2);
+        registerDataFrameRefreshable(dio3);
+        registerDataFrameRefreshable(dio4);
+        registerDataFrameRefreshable(dio5);
+        registerDataFrameRefreshable(dio6);
+        registerDataFrameRefreshable(dio7);
+        registerDataFrameRefreshable(dio8);
+        registerDataFrameRefreshable(dio9);
     }
 
     @Override
@@ -193,6 +227,17 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
         aKitLog.record("Target Angle", this.getTargetValue().in(Degrees));
         aKitLog.record("Current Angle", this.getCurrentValue().in(Degrees));
         aKitLog.record("isCalibrated", this.isCalibrated());
+
+        aKitLog.record("dio0", dio0.get());
+        aKitLog.record("dio1", dio1.get());
+        aKitLog.record("dio2", dio2.get());
+        aKitLog.record("dio3", dio3.get());
+        aKitLog.record("dio4", dio4.get());
+        aKitLog.record("dio5", dio5.get());
+        aKitLog.record("dio6", dio6.get());
+        aKitLog.record("dio7", dio7.get());
+        aKitLog.record("dio8", dio8.get());
+        aKitLog.record("dio9", dio9.get());
     }
 }
 

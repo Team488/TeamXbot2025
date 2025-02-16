@@ -69,14 +69,14 @@ public class Contract2025 extends ElectricalContract {
                 new CANMotorControllerOutputConfig().withStatorCurrentLimit(Amps.of(20)));
     }
 
-    public boolean isCoralSensorReady() { return true; }
+    public boolean isCoralSensorReady() { return false; }
 
     @Override
     public DeviceInfo getCoralSensor() {
         return new DeviceInfo("CoralSensor", 0);
     }
 
-    public boolean isElevatorBottomSensorReady() { return true; }
+    public boolean isElevatorBottomSensorReady() { return false; }
 
     @Override
     public DeviceInfo getElevatorBottomSensor() { return new DeviceInfo("ElevatorBottomSensor",3); }
