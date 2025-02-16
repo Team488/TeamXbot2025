@@ -75,7 +75,7 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
         );
         setpoint = profileManager.getRecommendedPositionForTime();
 
-        aKitLog.record("coralArmProfileTarget", setpoint);
+        aKitLog.record("ProfileTarget", setpoint);
 
         coralArm.setPositionalGoalIncludingOffset(Degrees.of(setpoint));
     }

@@ -69,7 +69,7 @@ public class AlgaeArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
         );
         setpoint = profileManager.getRecommendedPositionForTime();
 
-        aKitLog.record("AlgaeArmProfileTarget", setpoint);
+        aKitLog.record("ProfileTarget", setpoint);
 
         algaeArm.setPositionalGoalIncludingOffset(Degrees.of(setpoint));
     }
