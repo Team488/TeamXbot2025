@@ -2,7 +2,9 @@ package competition.operator_interface;
 
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
 import competition.simulation.commands.ResetSimulatedPose;
+import competition.subsystems.algae_arm.AlgaeArmSubsystem;
 import competition.subsystems.algae_arm.commands.ForceAlgaeArmCalibrated;
+import competition.subsystems.algae_arm.commands.SetAlgaeArmSetpointToTargetPosition;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionIntakeCommand;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionOutputCommand;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionStopCommand;
@@ -165,10 +167,27 @@ public class OperatorCommandMap {
     public void setupAlgaeCommands(OperatorInterface oi,
                                    ForceAlgaeArmCalibrated forceAlgaeArmCalibrated,
                                    AlgaeCollectionIntakeCommand algaeCollectionIntakeCommand,
-                                   AlgaeCollectionOutputCommand algaeCollectionOutputCommand) {
+                                   AlgaeCollectionOutputCommand algaeCollectionOutputCommand,
+                                   Provider<SetAlgaeArmSetpointToTargetPosition> setAlgaeArmSetpointToTargetPositionProvider) {
         oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(forceAlgaeArmCalibrated);
-        oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(algaeCollectionIntakeCommand);
-        oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(algaeCollectionOutputCommand);
+        oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(algaeCollectionIntakeCommand);
+        oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(algaeCollectionOutputCommand);
+
+        var retract = setAlgaeArmSetpointToTargetPositionProvider.get();
+        retract.setTargetPosition(AlgaeArmSubsystem.AlgaeArmPositions.FullyRetracted);
+        oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(retract);
+
+        var ground = setAlgaeArmSetpointToTargetPositionProvider.get();
+        ground.setTargetPosition(AlgaeArmSubsystem.AlgaeArmPositions.GroundCollection);
+        oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(ground);
+
+        var low = setAlgaeArmSetpointToTargetPositionProvider.get();
+        low.setTargetPosition(AlgaeArmSubsystem.AlgaeArmPositions.ReefAlgaeLow);
+        oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(low);
+
+        var high = setAlgaeArmSetpointToTargetPositionProvider.get();
+        high.setTargetPosition(AlgaeArmSubsystem.AlgaeArmPositions.ReefAlgaeHigh);
+        oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(high);
     }
 
     @Inject

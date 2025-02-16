@@ -29,8 +29,8 @@ public class AlgaeCollectionSubsystem extends BaseSubsystem {
             this.motor = null;
         }
 
-        this.intakePower = propertyFactory.createPersistentProperty("Intake Power", .1);
-        this.outputPower = propertyFactory.createPersistentProperty("Output Power", -.1);
+        this.intakePower = propertyFactory.createPersistentProperty("Intake Power", 1);
+        this.outputPower = propertyFactory.createPersistentProperty("Output Power", -1);
     }
 
     public void intake() {

@@ -40,6 +40,13 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
     final Alert isNotCalibratedAlert = new Alert("AlgaeArm: not calibrated", Alert.AlertType.kWarning);
 
+    public enum AlgaeArmPositions {
+        FullyRetracted,
+        GroundCollection,
+        ReefAlgaeLow,
+        ReefAlgaeHigh
+    }
+
     @Inject
     public AlgaeArmSubsystem(ElectricalContract electricalContract,
                              XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
@@ -111,6 +118,15 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
     @Override
     public void setTargetValue(Angle value) {
         targetAngle = value;
+    }
+
+    public void setTargetValue(AlgaeArmPositions position) {
+        switch (position) {
+            case GroundCollection -> setTargetValue(Degrees.of(groundCollectionDegrees.get()));
+            case ReefAlgaeLow -> setTargetValue(Degrees.of(reefLowBottomToTopSweepStart.get()));
+            case ReefAlgaeHigh -> setTargetValue(Degrees.of(reefHighSweepStart.get()));
+            default -> setTargetValue(Degrees.of(0));
+        }
     }
 
     public void setPositionalGoalIncludingOffset(Angle setpoint) {

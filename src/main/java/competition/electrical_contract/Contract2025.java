@@ -69,17 +69,17 @@ public class Contract2025 extends ElectricalContract {
                 new CANMotorControllerOutputConfig().withStatorCurrentLimit(Amps.of(20)));
     }
 
-    public boolean isCoralSensorReady() { return false; }
+    public boolean isCoralSensorReady() { return true; }
 
     @Override
     public DeviceInfo getCoralSensor() {
         return new DeviceInfo("CoralSensor", 0);
     }
 
-    public boolean isElevatorBottomSensorReady() { return false; }
+    public boolean isElevatorBottomSensorReady() { return true; }
 
     @Override
-    public DeviceInfo getElevatorBottomSensor() { return new DeviceInfo("ElevatorBottomSensor",1); }
+    public DeviceInfo getElevatorBottomSensor() { return new DeviceInfo("ElevatorBottomSensor",3); }
 
     @Override
     public boolean isAlgaeArmPivotMotorReady() {return true;}
@@ -144,7 +144,7 @@ public class Contract2025 extends ElectricalContract {
 
     @Override
     public boolean isElevatorDistanceSensorReady() {
-        return false;
+        return true;
     }
 
     @Override
@@ -179,14 +179,14 @@ public class Contract2025 extends ElectricalContract {
     @Override
     public CANMotorControllerInfo getDriveMotor(SwerveInstance swerveInstance) {
                 return switch (swerveInstance.label()) {
-            case "RearRightDrive" ->
+            case "FrontRightDrive" ->
                     new CANMotorControllerInfo(
                             getDriveControllerName(swerveInstance),
                             MotorControllerType.TalonFx,
                             CANBusId.DefaultCanivore,
                             39,
                             regularDriveMotorConfig);
-            case "FrontLeftDrive" ->
+            case "RearRightDrive" ->
                     new CANMotorControllerInfo(
                             getDriveControllerName(swerveInstance),
                             MotorControllerType.TalonFx,
@@ -200,7 +200,7 @@ public class Contract2025 extends ElectricalContract {
                             CANBusId.DefaultCanivore,
                             20,
                             regularDriveMotorConfig);
-            case "FrontRightDrive" ->
+            case "FrontLeftDrive" ->
                     new CANMotorControllerInfo(
                             getDriveControllerName(swerveInstance),
                             MotorControllerType.TalonFx,
@@ -221,14 +221,14 @@ public class Contract2025 extends ElectricalContract {
                         .withNeutralMode(CANMotorControllerOutputConfig.NeutralMode.Brake);
 
         return switch (swerveInstance.label()) {
-            case "RearRightDrive" ->
+            case "FrontRightDrive" ->
                     new CANMotorControllerInfo(
                             getSteeringControllerName(swerveInstance),
                             MotorControllerType.TalonFx,
                             CANBusId.DefaultCanivore,
                             38,
                             invertedSteeringMotorConfig);
-            case "FrontLeftDrive" ->
+            case "RearRightDrive" ->
                     new CANMotorControllerInfo(
                             getSteeringControllerName(swerveInstance),
                             MotorControllerType.TalonFx,
@@ -242,7 +242,7 @@ public class Contract2025 extends ElectricalContract {
                             CANBusId.DefaultCanivore,
                             21,
                             invertedSteeringMotorConfig);
-            case "FrontRightDrive" ->
+            case "FrontLeftDrive" ->
                     new CANMotorControllerInfo(
                             getSteeringControllerName(swerveInstance),
                             MotorControllerType.TalonFx,
@@ -258,13 +258,13 @@ public class Contract2025 extends ElectricalContract {
         double simulationScalingValue = 1.0;
 
         return switch (swerveInstance.label()) {
-            case "RearRightDrive" ->
+            case "FrontRightDrive" ->
                     new DeviceInfo(getSteeringEncoderControllerName(swerveInstance), CANBusId.DefaultCanivore, 54, false);
-            case "FrontLeftDrive" ->
+            case "RearRightDrive" ->
                     new DeviceInfo(getSteeringEncoderControllerName(swerveInstance), CANBusId.DefaultCanivore, 53, false);
             case "RearLeftDrive" ->
                     new DeviceInfo(getSteeringEncoderControllerName(swerveInstance), CANBusId.DefaultCanivore,52, false);
-            case "FrontRightDrive" ->
+            case "FrontLeftDrive" ->
                     new DeviceInfo(getSteeringEncoderControllerName(swerveInstance), CANBusId.DefaultCanivore,51, false);
             default -> null;
         };
@@ -289,8 +289,8 @@ public class Contract2025 extends ElectricalContract {
     private static double frontAprilCameraYaw = Math.toRadians(0);
 
     public CameraInfo[] getCameraInfo() {
-        return new CameraInfo[] {};
-        /*
+        return new CameraInfo[] {// {};
+
                 new CameraInfo("Apriltag_FrontLeft_Camera",
                         "AprilTagFrontLeft",
                         new Transform3d(new Translation3d(
@@ -307,8 +307,8 @@ public class Contract2025 extends ElectricalContract {
                                 -frontAprilCameraYDisplacement,
                                 frontAprilCameraZDisplacement),
                                 new Rotation3d(0, frontAprilCameraPitch, frontAprilCameraYaw)),
-                        EnumSet.of(CameraCapabilities.APRIL_TAG)),
-
+                        EnumSet.of(CameraCapabilities.APRIL_TAG))
+/*
                 new CameraInfo("Apriltag_Back_Camera",
                         "AprilTagBack",
                         new Transform3d(new Translation3d(
@@ -316,9 +316,9 @@ public class Contract2025 extends ElectricalContract {
                                 0,
                                 frontAprilCameraZDisplacement),
                                 new Rotation3d(0, Math.toRadians(-45), Math.PI)),
-                        EnumSet.of(CameraCapabilities.APRIL_TAG))
+                        EnumSet.of(CameraCapabilities.APRIL_TAG))*/
         };
-        */
+
     }
 
     @Override
