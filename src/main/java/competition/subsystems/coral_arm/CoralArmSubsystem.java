@@ -209,7 +209,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
     public Angle getArmAngle() {
         if (electricalContract.isCoralArmPivotAbsoluteEncoderReady() && electricalContract.isCoralArmPivotLowSensorReady()) {
-            return getArmAngle(minArmPositionDegrees.get() / 360, maxArmPositionDegrees.get() / 360,
+            return getArmAngle(0, rangeOfMotionDegrees.get() / 360,
                     armAbsoluteEncoder.getAbsolutePosition(), lowSensor.get(), rangeOfMotionDegrees.get());
         }
         return Angle.ofBaseUnits(0, Degrees);
