@@ -19,14 +19,15 @@ import javax.inject.Inject;
 import static edu.wpi.first.units.Units.Degree;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.Inches;
 
 public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
 
-    CoralArmSubsystem coralArm;
-    AlgaeArmSubsystem algaeArm;
-    ElevatorSubsystem elevator;
+    final CoralArmSubsystem coralArm;
+    final AlgaeArmSubsystem algaeArm;
+    final ElevatorSubsystem elevator;
 
-    OperatorInterface oi;
+    final OperatorInterface oi;
     final DoubleProperty humanMaxPower;
     final DoubleProperty humanMinPower;
 
@@ -44,7 +45,7 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
             TrapezoidProfileManager.Factory trapzoidProfileManagerFactory,
             OperatorInterface oi) {
 
-        super(armPivotSubsystem, pf, hvmFactory, 1, 1);
+        super(armPivotSubsystem, pf, hvmFactory, 2, 0.25);
         this.coralArm = armPivotSubsystem;
         this.algaeArm = algaeArm;
         this.elevator = elevator;
@@ -104,7 +105,7 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
     private boolean wouldCollideWithAlgaeArm(Angle targetGoal) {
         var coralArmGoalAboveSafeLevel = targetGoal.gt(Degrees.of(this.maxSafeArmAngleDegrees.get()));
         var algaeArmRaised = algaeArm.getCurrentValue().in(Degrees) >= algaeArmCollisionAngleDegrees.get();
-        var elevatorBelowLevel2Height = elevator.getCurrentValue().lt(elevator.l2Height.get());
+        var elevatorBelowLevel2Height = elevator.getCurrentValue().lt(elevator.l2Height.get().minus(Inches.of(0.25)));
 
         return coralArmGoalAboveSafeLevel && (algaeArmRaised || elevatorBelowLevel2Height);
     }
