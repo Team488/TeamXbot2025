@@ -18,7 +18,7 @@ public class ScoreWhenReadyCommand extends BaseCommand {
         this.coralScorerSubsystem = coralScorerSubsystem;
         this.armPivotSubsystem = armPivotSubsystem;
         this.elevatorSubsystem = elevatorSubsystem;
-        addRequirements(coralScorerSubsystem, armPivotSubsystem, elevatorSubsystem);
+        addRequirements(coralScorerSubsystem);
     }
 
     @Override
@@ -30,12 +30,12 @@ public class ScoreWhenReadyCommand extends BaseCommand {
     public void execute() {
         var hasCoral = coralScorerSubsystem.hasCoral();
         var getIsTargetAngleScoring = armPivotSubsystem.getIsTargetAngleScoring();
-        var armMaintainer = armPivotSubsystem.isMaintainerAtGoal();
-        var elevatorMaintainer = elevatorSubsystem.isMaintainerAtGoal();
-        if (hasCoral && getIsTargetAngleScoring && armMaintainer && elevatorMaintainer) {
+        var armMaintainerAtGoal = armPivotSubsystem.isMaintainerAtGoal();
+        var elevatorMaintainerAtGoal = elevatorSubsystem.isMaintainerAtGoal();
+        if (hasCoral && getIsTargetAngleScoring && armMaintainerAtGoal && elevatorMaintainerAtGoal) {
             coralScorerSubsystem.setCoralScorerState(CoralScorerSubsystem.CoralScorerState.SCORING);
-
         }
+
     }
 
     @Override
