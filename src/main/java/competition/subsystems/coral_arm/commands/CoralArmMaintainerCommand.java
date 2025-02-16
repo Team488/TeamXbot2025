@@ -32,6 +32,8 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
 
    final TrapezoidProfileManager profileManager;
 
+   double setpoint = 0;
+
    @Inject
    public CoralArmMaintainerCommand(CoralArmSubsystem armPivotSubsystem, PropertyFactory pf,
                                     HumanVsMachineDecider.HumanVsMachineDeciderFactory hvmFactory,
@@ -62,8 +64,6 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
     protected void coastAction() { //rest when no human control and before pid
         coralArm.setPower(0);
     }
-
-    double setpoint = 0;
 
     @Override
     protected void calibratedMachineControlAction() { //manages and runs pid

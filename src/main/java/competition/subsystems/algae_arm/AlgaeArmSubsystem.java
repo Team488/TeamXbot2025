@@ -2,19 +2,21 @@ package competition.subsystems.algae_arm;
 
 import competition.electrical_contract.ElectricalContract;
 import edu.wpi.first.units.measure.Angle;
-import xbot.common.advantage.AKitLogger;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.wpilibj.Alert;
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
 import xbot.common.controls.sensors.XDigitalInput;
+import xbot.common.math.MathUtils;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import static competition.simulation.elevator.ElevatorSimConstants.rotationsAtZero;
 import static edu.wpi.first.units.Units.Degree;
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 
 @Singleton
@@ -22,10 +24,21 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
     public final XCANMotorController armMotor;
     Angle targetAngle = Degree.of(0);
     final ElectricalContract electricalContract;
-    final DoubleProperty degreesPerRotation;
     double rotationsAtZero;
     final boolean isCalibrated = false;
     public final XDigitalInput bottomSensor;
+
+    final DoubleProperty degreesPerRotation;
+    final DoubleProperty rangeOfMotionInDegrees;
+    final DoubleProperty groundCollectionDegrees;
+    final DoubleProperty reefLowBottomToTopSweepStart;
+    final DoubleProperty reefLowBottomToTopSweepEnd;
+    final DoubleProperty reefLowTopToBottomSweepStart;
+    final DoubleProperty reefLowTopToBottomSweepEnd;
+    final DoubleProperty reefHighSweepStart;
+    final DoubleProperty reefHighSweepEnd;
+
+    final Alert isNotCalibratedAlert = new Alert("AlgaeArm: not calibrated", Alert.AlertType.kWarning);
 
     @Inject
     public AlgaeArmSubsystem(ElectricalContract electricalContract,
@@ -48,21 +61,46 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
             this.bottomSensor=null;
         }
         this.degreesPerRotation = propertyFactory.createPersistentProperty("DegreesPerRotation", 1);
+
+        this.rangeOfMotionInDegrees = propertyFactory.createPersistentProperty("RangeOfMotionInDegrees", 160.0);
+        this.groundCollectionDegrees = propertyFactory.createPersistentProperty("GroundCollectionDegrees", 45.0);
+        this.reefLowBottomToTopSweepStart = propertyFactory.createPersistentProperty("ReefLowBottomToTopSweepStart", 90.0);
+        this.reefLowBottomToTopSweepEnd = propertyFactory.createPersistentProperty("ReefLowBottomToTopSweepEnd", 150.0);
+        this.reefLowTopToBottomSweepStart = propertyFactory.createPersistentProperty("ReefLowTopToBottomSweepStart", 150.0);
+        this.reefLowTopToBottomSweepEnd = propertyFactory.createPersistentProperty("ReefLowTopToBottomSweepEnd", 90.0);
+        this.reefHighSweepStart = propertyFactory.createPersistentProperty("ReefHighSweepStart", 110.0);
+        this.reefHighSweepEnd = propertyFactory.createPersistentProperty("ReefHighSweepEnd", 150.0);
     }
-
-
-
-
 
     @Override
     public Angle getCurrentValue() {
         double currentAngle = 0;
         if (electricalContract.isAlgaeArmPivotMotorReady()) {
-            currentAngle = (this.armMotor.getPosition().in(Rotations) - rotationsAtZero) * degreesPerRotation.get();
+            currentAngle = getCalibratedPosition().in(Rotations) * degreesPerRotation.get();
         }
-        //double currentAngle = getMotorPositionFromZeroOffset().in(Rotations) * degreesPerRotations.get();
         return Degrees.of(currentAngle);
+    }
 
+    private Angle getCalibratedPosition() {
+        return getMotorPosition().minus(Rotations.of(rotationsAtZero));
+    }
+
+    private Angle getMotorPosition() {
+        if (electricalContract.isAlgaeArmPivotMotorReady()) {
+            return this.armMotor.getPosition();
+        }
+        return Rotations.of(0);
+    }
+
+    public AngularVelocity getCurrentVelocity() {
+        return getMotorVelocity();
+    }
+
+    private AngularVelocity getMotorVelocity() {
+        if (electricalContract.isAlgaeArmPivotMotorReady()) {
+            return this.armMotor.getVelocity();
+        }
+        return RadiansPerSecond.zero();
     }
 
     @Override
@@ -75,9 +113,30 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
         targetAngle = value;
     }
 
+    public void setPositionalGoalIncludingOffset(Angle setpoint) {
+        armMotor.setPositionTarget(
+                Rotations.of(setpoint.in(Degrees) / degreesPerRotation.get() + rotationsAtZero),
+                XCANMotorController.MotorPidMode.Voltage);
+    }
+
     @Override
     public void setPower(double power) {
         if (electricalContract.isAlgaeArmPivotMotorReady()) {
+
+            if (isCalibrated) {
+                double currentAngle = getCurrentValue().in(Degrees);
+                if (currentAngle < 0) {
+                    power = MathUtils.constrainDouble(power, 0, 1);
+                }
+                if (currentAngle > rangeOfMotionInDegrees.get()) {
+                    power = MathUtils.constrainDouble(power, -1, 0);
+                }
+            }
+
+            if (isTouchingBottom()) {
+                power = MathUtils.constrainDouble(power, 0, 1);
+            }
+
             this.armMotor.setPower(power);
         }
 
@@ -102,7 +161,13 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
     @Override
     public void periodic() {
-        armMotor.periodic();
+        if (electricalContract.isAlgaeArmPivotMotorReady()) {
+            armMotor.periodic();
+        }
+        isNotCalibratedAlert.set(!isCalibrated());
+        aKitLog.record("Target Angle", this.getTargetValue().in(Degrees));
+        aKitLog.record("Current Angle", this.getCurrentValue().in(Degrees));
+        aKitLog.record("isCalibrated", this.isCalibrated());
     }
 }
 
