@@ -80,22 +80,27 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
 
     @Override
     protected void calibratedMachineControlAction() { //manages and runs pid
-        profileManager.setTargetPosition(
-            coralArm.getTargetValue().in(Rotations),
-            coralArm.getCurrentValue().in(Rotations),
-            coralArm.getCurrentVelocity().in(RotationsPerSecond),
-            setpoint
-        );
+        if(checkSubsystemCollisions()){
+            profileManager.setTargetPosition(
+                    coralArm.humanLoadAngle.get()/360,
+                    coralArm.getCurrentValue().in(Rotations),
+                    coralArm.getCurrentVelocity().in(RotationsPerSecond),
+                    setpoint
+            );
+        }
+        else {
+            profileManager.setTargetPosition(
+                coralArm.getTargetValue().in(Rotations),
+                coralArm.getCurrentValue().in(Rotations),
+                coralArm.getCurrentVelocity().in(RotationsPerSecond),
+                setpoint);
+        }
+
         setpoint = profileManager.getRecommendedPositionForTime();
 
         aKitLog.record("coralArmProfileTarget", setpoint);
 
-        if(checkSubsystemCollisions()){
-            coralArm.setPositionalGoalIncludingOffset(Rotations.of(coralArm.humanLoadAngle.get()));
-        }
-        else {
-            coralArm.setPositionalGoalIncludingOffset(Rotations.of(setpoint));
-        }
+        coralArm.setPositionalGoalIncludingOffset(Rotations.of(setpoint));
     }
 
     private boolean checkSubsystemCollisions(){
