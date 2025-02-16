@@ -56,8 +56,7 @@ public class AlgaeArmSimulator {
         MotorInternalPIDHelper.updateInternalPID(armMotor, pidManager);
 
         if(DriverStation.isEnabled()) {
-            // invert power because the simulated arm is going "backwards"
-            armSim.setInput(this.armMotor.getPower() * RobotController.getBatteryVoltage() * -1.0);
+            armSim.setInput(this.armMotor.getPower() * RobotController.getBatteryVoltage());
         } else {
             armSim.setInput(0.0);
         }
