@@ -84,7 +84,8 @@ public class OperatorCommandMap {
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(setL4);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(scoreCoralCommand);
         var home = prepCoralSystemCommandGroupFactory.create(()-> Landmarks.CoralLevel.COLLECTING);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(headingAssistedDriveAndScoreCommandGroup).onFalse(home);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper)
+                .whileTrue(headingAssistedDriveAndScoreCommandGroup).onFalse(home);
         // operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(scoreCoralCommand);
     }
 

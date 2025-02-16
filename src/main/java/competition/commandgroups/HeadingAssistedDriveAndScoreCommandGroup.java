@@ -10,27 +10,38 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 public class HeadingAssistedDriveAndScoreCommandGroup extends SequentialCommandGroup {
     PoseSubsystem pose;
+    Landmarks.Branch branch;
 
     @Inject
     public HeadingAssistedDriveAndScoreCommandGroup(DriveToReefFaceFromAngleUntilDetectionCommand driveToReefFaceFromAngleCommand,
                                                     PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
                                                     ScoreWhenReadyCommand scoreWhenReadyCommand,
-                                                    AlignToReefWithAprilTagCommand alignToReefWithAprilTagCommand,
+                                                    Provider<AlignToReefWithAprilTagCommand> alignToReefWithAprilTagCommandProvider,
                                                     MeasureDistanceBeforeScoringCommand measureDistanceBeforeScoringCommand,
                                                     PoseSubsystem pose) {
         this.pose = pose;
         this.addCommands(driveToReefFaceFromAngleCommand);
         var prep = prepCoralSystemCommandGroupFactory.create(pose::getTargetCoralLevel);
+        var alignToReefWithAprilTagWithCamera = alignToReefWithAprilTagCommandProvider.get();
+
+        if (branch == Landmarks.Branch.A) {
+            alignToReefWithAprilTagWithCamera.setConfigurations(1, false, 0.5);
+        }
+        else {
+            alignToReefWithAprilTagWithCamera.setConfigurations(0, false, 0.5);
+        }
 
         var measureDistanceBeforePrep = new SequentialCommandGroup(measureDistanceBeforeScoringCommand, prep);
-        var alignWhilePrepping = new ParallelCommandGroup(alignToReefWithAprilTagCommand, measureDistanceBeforePrep);
+        var alignWhilePrepping = new ParallelCommandGroup(alignToReefWithAprilTagWithCamera, measureDistanceBeforePrep);
         this.addCommands(alignWhilePrepping);
-//        this.addCommands(scoreWhenReadyCommand);
+        this.addCommands(scoreWhenReadyCommand);
+    }
 
-        var home = prepCoralSystemCommandGroupFactory.create(()-> Landmarks.CoralLevel.COLLECTING);
-        this.addCommands(home);
+    public void setBranch(Landmarks.Branch branch) {
+        this.branch = branch;
     }
 }
