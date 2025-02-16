@@ -17,6 +17,7 @@ import xbot.common.properties.PropertyFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import static edu.wpi.first.units.Units.Degree;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
@@ -173,11 +174,11 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
             case TWO:
             case THREE:
             case FOUR:
-                setTargetValue(Rotations.of(scoreAngleDegrees.get()));
+                setTargetValue(Degrees.of(scoreAngleDegrees.get()));
                 break;
             case COLLECTING:
             default:
-                setTargetValue(Rotations.of(humanLoadAngleDegrees.get()));
+                setTargetValue(Degrees.of(humanLoadAngleDegrees.get()));
                 break;
         }
     }
@@ -279,7 +280,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
     public void setPositionalGoalIncludingOffset(Angle setpoint) {
         armMotor.setPositionTarget(
-                Rotations.of(setpoint.in(Rotations) + rotationsAtZero),
+                Rotations.of(setpoint.in(Degrees) / degreesPerRotations.get() + rotationsAtZero),
                 XCANMotorController.MotorPidMode.Voltage);
     }
 
@@ -289,8 +290,8 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
             armMotor.periodic();
         }
 
-        aKitLog.record("Target Angle", this.getTargetValue().in(Rotations));
-        aKitLog.record("Current Angle", this.getCurrentValue().in(Rotations));
+        aKitLog.record("Target Angle", this.getTargetValue().in(Degrees));
+        aKitLog.record("Current Angle", this.getCurrentValue().in(Degrees));
         aKitLog.record("isCalibrated", this.isCalibrated());
         isNotCalibratedAlert.set(!isCalibrated());
         if (electricalContract.isCoralArmPivotAbsoluteEncoderReady()) {
