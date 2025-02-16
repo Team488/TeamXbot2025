@@ -43,7 +43,7 @@ public class AlignToTagGlobalMovementWithCalculator extends BaseCommand {
         addRequirements(drive);
     }
 
-    public void setConfigurations(int targetCameraID, int targetAprilTagID, boolean isCameraBackwards, int offsetInInches) {
+    public void setConfigurations(int targetCameraID, int targetAprilTagID, boolean isCameraBackwards, double offsetInInches) {
         this.targetCameraID = targetCameraID;
         this.targetAprilTagID = targetAprilTagID;
         this.isCameraBackwards = isCameraBackwards;
