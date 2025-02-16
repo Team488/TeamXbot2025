@@ -39,8 +39,6 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     public final DoubleProperty scoreAngle;
     public final DoubleProperty humanLoadAngle;
     public final DoubleProperty rangeOfMotionDegrees;
-    public final DoubleProperty minArmPositionDegrees;
-    public final DoubleProperty maxArmPositionDegrees;
     public final DoubleProperty powerWhenNotCalibrated;
 
     @Inject
@@ -86,8 +84,6 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
         this.degreesPerRotations = propertyFactory.createPersistentProperty("Degrees Per Rotations", 6.94444);
         this.rangeOfMotionDegrees = propertyFactory.createPersistentProperty("Range of Motion in Degrees", 125);
-        this.minArmPositionDegrees = propertyFactory.createPersistentProperty("Min Position in Degrees", 90);
-        this.maxArmPositionDegrees = propertyFactory.createPersistentProperty("Max Position in Degrees", 108);
         this.scoreAngle = propertyFactory.createPersistentProperty("Scoring Angle in Degrees", 125);
         this.humanLoadAngle = propertyFactory.createPersistentProperty("Human Loading Angle in Degrees", 0);
         this.powerWhenNotCalibrated = propertyFactory.createPersistentProperty("Power When Not Calibrated", 0.05);
@@ -181,11 +177,11 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
             double currentLocationInDegrees = getCurrentValue().in(Degrees);
 
-            if (currentLocationInDegrees > maxArmPositionDegrees.get()) {
+            if (currentLocationInDegrees > rangeOfMotionDegrees.get()) {
                 MathUtils.constrainDouble(power, -1, 0);
             }
 
-            if (currentLocationInDegrees < minArmPositionDegrees.get()) {
+            if (currentLocationInDegrees < 0) {
                 MathUtils.constrainDouble(power, 0, 1);
             }
 
