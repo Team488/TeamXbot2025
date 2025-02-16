@@ -61,7 +61,10 @@ public class OperatorCommandMap {
             SetCoralArmTargetAngleCommand setCoralArmTargetAngleCommand,
             ScoreCoralCommand scoreCoralCommand,
             ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
-            ForceCoralPivotCalibrated forceCoralPivotCalibratedCommand) {
+            ForceCoralPivotCalibrated forceCoralPivotCalibratedCommand,
+            DebugSwerveModuleCommand debugModule,
+            ChangeActiveSwerveModuleCommand changeActiveModule,
+            SwerveDriveWithJoysticksCommand typicalSwerveDrive) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(resetHeading);
 
@@ -81,9 +84,12 @@ public class OperatorCommandMap {
         // for basic scoring control to make it easier to demo solo. These can all be removed later.
         var prepL4 = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.FOUR);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
-
         var homed = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.COLLECTING);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
+
+        operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
+        operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(changeActiveModule);
+        operatorInterface.driverGamepad.getPovIfAvailable(180).onTrue(typicalSwerveDrive);
 
 //        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(intakeCoralCommand);
         // operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(scoreCoralCommand);
@@ -120,9 +126,6 @@ public class OperatorCommandMap {
     @Inject
     public void setupProgrammerCommands(
             OperatorInterface oi,
-            DebugSwerveModuleCommand debugModule,
-            ChangeActiveSwerveModuleCommand changeActiveModule,
-            SwerveDriveWithJoysticksCommand typicalSwerveDrive,
             IntakeCoralCommand intakeCoralCommand,
             ScoreCoralCommand scoreCoralCommand,
             StopCoralCommand stopCoralCommand,
@@ -166,8 +169,8 @@ public class OperatorCommandMap {
 
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.Back).onTrue(forceCoralPivotCalibratedCommand);
 
-//        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(algaeCollectionIntakeCommand);
-//        oi.programmerGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(algaeCollectionOutputCommand);
+        oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(algaeCollectionIntakeCommand);
+        oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(algaeCollectionOutputCommand);
 
     }
 
@@ -177,7 +180,7 @@ public class OperatorCommandMap {
         DriveSubsystem drive,
         ElevatorSubsystem elevator
     ) {
-
+/*
         oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.A)
                 .whileTrue(drive.sysIdQuasistaticRotation(SysIdRoutine.Direction.kForward)
                         .andThen(new WaitCommand(Seconds.of(1)))
@@ -199,7 +202,7 @@ public class OperatorCommandMap {
         oi.algaeAndSysIdGamepad.getPovIfAvailable(90).whileTrue(elevator.sysIdDynamic(SysIdRoutine.Direction.kReverse));
         oi.algaeAndSysIdGamepad.getPovIfAvailable(180).whileTrue(elevator.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
         oi.algaeAndSysIdGamepad.getPovIfAvailable(270).whileTrue(elevator.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-
+*/
         // Not used, but leaving these here as a sample of how to use a DeferredCommand
 //        oi.sysIdGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper)
 //                .whileTrue(new DeferredCommand(() -> drive.getActiveSwerveModuleSubsystem()

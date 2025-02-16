@@ -36,15 +36,10 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     final Alert isNotCalibratedAlert = new Alert("CoralArm: not calibrated", Alert.AlertType.kWarning);
     private final DoubleProperty degreesPerRotations;
 
-    public final DoubleProperty scoreAngle;
-    public final DoubleProperty humanLoadAngle;
+    public final DoubleProperty scoreAngleDegrees;
+    public final DoubleProperty humanLoadAngleDegrees;
     public final DoubleProperty rangeOfMotionDegrees;
-    public final DoubleProperty minArmPosition;
-    public final DoubleProperty maxArmPosition;
     public final DoubleProperty powerWhenNotCalibrated;
-
-    private final DoubleProperty minRotations;
-    private final DoubleProperty maxRotations;
 
     @Inject
     public CoralArmSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
@@ -88,16 +83,10 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
         }
 
         this.degreesPerRotations = propertyFactory.createPersistentProperty("Degrees Per Rotations", 6.94444);
-
         this.rangeOfMotionDegrees = propertyFactory.createPersistentProperty("Range of Motion in Degrees", 125);
-        this.minArmPosition = propertyFactory.createPersistentProperty("Min AbsEncoder Position in Degrees", 90);
-        this.maxArmPosition = propertyFactory.createPersistentProperty("Max AbsEncoder Position in Degrees", 108);
-        this.scoreAngle = propertyFactory.createPersistentProperty("Scoring Angle in Degrees", 125);
-        this.humanLoadAngle = propertyFactory.createPersistentProperty("Human Loading Angle in Degrees", 0);
+        this.scoreAngleDegrees = propertyFactory.createPersistentProperty("Scoring Angle in Degrees", 125);
+        this.humanLoadAngleDegrees = propertyFactory.createPersistentProperty("Human Loading Angle in Degrees", 0);
         this.powerWhenNotCalibrated = propertyFactory.createPersistentProperty("Power When Not Calibrated", 0.05);
-
-        this.minRotations = propertyFactory.createPersistentProperty("Min Rotations", 0);
-        this.maxRotations = propertyFactory.createPersistentProperty("Max Rotations", 23);
     }
 
     @Override
@@ -173,11 +162,11 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
             case TWO:
             case THREE:
             case FOUR:
-                setTargetValue(Degrees.of(scoreAngle.get()));
+                setTargetValue(Degrees.of(scoreAngleDegrees.get()));
                 break;
             case COLLECTING:
             default:
-                setTargetValue(Degrees.of(humanLoadAngle.get()));
+                setTargetValue(Degrees.of(humanLoadAngleDegrees.get()));
                 break;
         }
     }
@@ -185,13 +174,17 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     @Override
     public void setPower(double power) {
         if (electricalContract.isCoralArmMotorReady()) {
-            if (getCurrentValue().in(Rotations) < minRotations.get()) {
-                power = MathUtils.constrainDouble(power, 0, 1);
-            }
-            if (getCurrentValue().in(Rotations) > maxRotations.get()) {
-                power = MathUtils.constrainDouble(power, -1, 0);
-            }
-            if (!isCalibrated()) {
+            if (isCalibrated) {
+                double currentLocationInDegrees = getCurrentValue().in(Degrees);
+
+                if (currentLocationInDegrees > rangeOfMotionDegrees.get()) {
+                    MathUtils.constrainDouble(power, -1, 0);
+                }
+
+                if (currentLocationInDegrees < 0) {
+                    MathUtils.constrainDouble(power, 0, 1);
+                }
+            } else {
                 power = MathUtils.constrainDouble(power, -powerWhenNotCalibrated.get(), powerWhenNotCalibrated.get());
             }
 
@@ -215,7 +208,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
     public Angle getArmAngle() {
         if (electricalContract.isCoralArmPivotAbsoluteEncoderReady() && electricalContract.isCoralArmPivotLowSensorReady()) {
-            return getArmAngle(minArmPosition.get() / 360, maxArmPosition.get() / 360,
+            return getArmAngle(0, rangeOfMotionDegrees.get() / 360,
                     armAbsoluteEncoder.getAbsolutePosition(), lowSensor.get(), rangeOfMotionDegrees.get());
         }
         return Angle.ofBaseUnits(0, Degrees);
@@ -279,7 +272,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
     public void setPositionalGoalIncludingOffset(Angle setpoint) {
         armMotor.setPositionTarget(
-                Rotations.of(setpoint.in(Rotations) + rotationsAtZero),
+                Rotations.of(setpoint.in(Degrees) / degreesPerRotations.get() + rotationsAtZero),
                 XCANMotorController.MotorPidMode.Voltage);
     }
 
@@ -301,12 +294,15 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
         if(electricalContract.isAlgaeArmBottomSensorReady()) {
             aKitLog.record("lowSensor Status", lowSensor.get());
         }
-        aKitLog.record("Target Angle 2", this.targetAngle.in(Degrees));
-        aKitLog.record("Score Angle", this.scoreAngle.get());
 
     }
   
     public boolean getIsTargetAngleScoring() {
-        return Degrees.of(scoreAngle.get()).isNear(targetAngle, Degrees.of(0.25));
+        return Degrees.of(scoreAngleDegrees.get()).isNear(targetAngle, Degrees.of(0.25));
+    }
+
+    
+    public Angle getHumanLoadAngle() {
+        return Degrees.of(this.humanLoadAngleDegrees.get());
     }
 }
