@@ -1,5 +1,6 @@
 package competition.simulation;
 
+import competition.electrical_contract.ElectricalContract;
 import competition.simulation.algae_arm.AlgaeArmSimulator;
 import competition.simulation.coral_arm.CoralArmSimulator;
 import competition.simulation.coral_scorer.CoralScorerSimulator;
@@ -14,12 +15,17 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Distance;
+import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
+import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 import xbot.common.advantage.AKitLogger;
 import xbot.common.controls.sensors.mock_adapters.MockGyro;
 
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Volts;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -29,6 +35,7 @@ import org.ironmaple.simulation.drivesims.SelfControlledSwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoral;
+import xbot.common.injection.electrical_contract.XSwerveDriveElectricalContract;
 
 @Singleton
 public class MapleSimulator implements BaseSimulator {
@@ -56,9 +63,9 @@ public class MapleSimulator implements BaseSimulator {
 
     @Inject
     public MapleSimulator(PoseSubsystem pose, DriveSubsystem drive, ElevatorSimulator elevatorSimulator,
-                          CoralArmSimulator armSimulator, ReefSimulator reefSimulator, 
+                          CoralArmSimulator armSimulator, ReefSimulator reefSimulator,
                           CoralScorerSimulator coralScorerSimulator, AlgaeArmSimulator algaeArmSimulator,
-                          LightsSimulator lightsSimulator) {
+                          LightsSimulator lightsSimulator, ElectricalContract electricalContract) {
         this.pose = pose;
         this.drive = drive;
         this.elevatorSimulator = elevatorSimulator;
@@ -77,12 +84,25 @@ public class MapleSimulator implements BaseSimulator {
         arena = SimulatedArena.getInstance();
         arena.resetFieldForAuto();
         // TODO: custom things to provide here like motor ratios and what have you
-        config = DriveTrainSimulationConfig.Default().withCustomModuleTranslations(new Translation2d[] {
-                drive.getFrontLeftSwerveModuleSubsystem().getModuleTranslation(),
-                drive.getFrontRightSwerveModuleSubsystem().getModuleTranslation(),
-                drive.getRearLeftSwerveModuleSubsystem().getModuleTranslation(),
-                drive.getRearRightSwerveModuleSubsystem().getModuleTranslation()
-        });
+        config = DriveTrainSimulationConfig
+                .Default()
+                .withCustomModuleTranslations(new Translation2d[]{
+                        drive.getFrontLeftSwerveModuleSubsystem().getModuleTranslation(),
+                        drive.getFrontRightSwerveModuleSubsystem().getModuleTranslation(),
+                        drive.getRearLeftSwerveModuleSubsystem().getModuleTranslation(),
+                        drive.getRearRightSwerveModuleSubsystem().getModuleTranslation()
+                })
+                .withSwerveModule(() -> new SwerveModuleSimulation(new SwerveModuleSimulationConfig(
+                        DCMotor.getKrakenX60(1),
+                        DCMotor.getKrakenX60(1),
+                        electricalContract.getDriveGearRatio(),
+                        electricalContract.getSteeringGearRatio(),
+                        Volts.of(2.0),
+                        Volts.of(2.0),
+                        electricalContract.getDriveWheelDiameter().div(2),
+                        KilogramSquareMeters.of(0.1),
+                        0.899
+                )));
 
         // starting middle ish of the field on blue
         var startingPose = new Pose2d(6, 4, new Rotation2d());
@@ -107,7 +127,7 @@ public class MapleSimulator implements BaseSimulator {
         this.updateCoralScorerSensor();
         this.updateSuperstructureMechanism();
     }
-    
+
     void updateSuperstructureMechanism() {
         superstructureMechanism.setElevatorHeight(elevatorSimulator.getCurrentHeight());
         superstructureMechanism.setCoralArmAngle(coralArmSimulator.getArmAngle());
@@ -125,7 +145,7 @@ public class MapleSimulator implements BaseSimulator {
         // simulate scoring a piece of coral on the reef
 
         // for now this is just some quick hacky logic, whenever we outtake just score coral to closest spot on reef
-        if(coralScorerSimulator.isScoring()) {
+        if (coralScorerSimulator.isScoring()) {
             coralScorerSimulator.simulateCoralUnload();
             // get the front center of the robot as a proxy for where the stinger is in space
             var currentPose = this.getGroundTruthPose();
@@ -135,9 +155,9 @@ public class MapleSimulator implements BaseSimulator {
             // TODO: more math around where the arm actually is in space and the orientation of the robot
             var elevatorBaseHeightM = 0.57;
             var aproxScorerTranslation3d = new Translation3d(
-                frontOfRobot.getX(), 
-                frontOfRobot.getY(), 
-                elevatorSimulator.getCurrentHeight().in(Meters) + elevatorBaseHeightM
+                    frontOfRobot.getX(),
+                    frontOfRobot.getY(),
+                    elevatorSimulator.getCurrentHeight().in(Meters) + elevatorBaseHeightM
             );
 
             var closetCoralKey = reefSimulator.findNearestCoral(aproxScorerTranslation3d);
@@ -148,7 +168,7 @@ public class MapleSimulator implements BaseSimulator {
             double distanceToReef = aproxScorerTranslation3d.getDistance(closetCoralPose.getTranslation());
 
             System.out.println("Distance from closest reef: " + distanceToReef);
-            if(distanceToReef > 0.3 || coralAlreadyScored) {
+            if (distanceToReef > 0.3 || coralAlreadyScored) {
                 if (coralAlreadyScored) {
                     System.out.println("Coral already scored, dropping on ground");
                 } else {
@@ -162,7 +182,7 @@ public class MapleSimulator implements BaseSimulator {
                 reefSimulator.scoreCoral(closetCoralKey);
             }
 
-            
+
         }
     }
 
@@ -172,12 +192,12 @@ public class MapleSimulator implements BaseSimulator {
         var armAtCollectionAngle = coralArmSimulator.isAtCollectionAngle();
         Pose2d[] coralStations = {Landmarks.BlueLeftCoralStationMid, Landmarks.BlueRightCoralStationMid};
         var currentPose = this.getGroundTruthPose();
-        var robotNearHumanLoading = false; 
+        var robotNearHumanLoading = false;
         for (Pose2d station : coralStations) {
             if (currentPose.getTranslation().getDistance(station.getTranslation()) < humanLoadingDistanceThreshold.in(Meters)) {
                 // verify robot angle aligns with the station
                 var angleThresholdDegrees = 10;
-                if(Math.abs(currentPose.getRotation().getDegrees() - station.getRotation().getDegrees()) < angleThresholdDegrees) {
+                if (Math.abs(currentPose.getRotation().getDegrees() - station.getRotation().getDegrees()) < angleThresholdDegrees) {
                     robotNearHumanLoading = true;
                     break;
                 }
@@ -191,7 +211,7 @@ public class MapleSimulator implements BaseSimulator {
 
     protected void updateDriveSimulation() {
         // drive simulated robot from requested robot commands
-        swerveDriveSimulation.runSwerveStates(new SwerveModuleState[] {
+        swerveDriveSimulation.runSwerveStates(new SwerveModuleState[]{
                 drive.getFrontLeftSwerveModuleSubsystem().getTargetState(),
                 drive.getFrontRightSwerveModuleSubsystem().getTargetState(),
                 drive.getRearLeftSwerveModuleSubsystem().getTargetState(),

@@ -100,7 +100,8 @@ public class OperatorCommandMap {
     public void setUpOperatorCommands(OperatorInterface oi,
                                       PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
                                       ScoreCoralCommand scoreCoralCommand, IntakeUntilCoralCollectedCommand intakeUntilCoralCollectedCommand,
-                                      ScoreWhenReadyCommand scoreWhenReadyCommand) {
+                                      ScoreWhenReadyCommand scoreWhenReadyCommand, ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
+                                      ForceCoralPivotCalibrated forceCoralPivotCalibratedCommand) {
         var prepL4 = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.FOUR);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
 
@@ -116,6 +117,9 @@ public class OperatorCommandMap {
 
 //        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreWhenReadyCommand);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreCoralCommand);
+
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(forceElevatorCalibratedCommand);
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Back).onTrue(forceCoralPivotCalibratedCommand);
 
     }
 
