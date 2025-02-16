@@ -38,13 +38,14 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
 
     final Alert collisionSafetiesEngaged = new Alert("Coral Arm: collision safeties engaged", Alert.AlertType.kWarning);
 
+    double setpoint = 0;
+
     @Inject
     public CoralArmMaintainerCommand(CoralArmSubsystem armPivotSubsystem, ElevatorSubsystem elevator,
-            AlgaeArmSubsystem algaeArm, PropertyFactory pf,
-            HumanVsMachineDecider.HumanVsMachineDeciderFactory hvmFactory,
-            TrapezoidProfileManager.Factory trapzoidProfileManagerFactory,
-            OperatorInterface oi) {
-
+                                     AlgaeArmSubsystem algaeArm, PropertyFactory pf,
+                                     HumanVsMachineDecider.HumanVsMachineDeciderFactory hvmFactory,
+                                     TrapezoidProfileManager.Factory trapzoidProfileManagerFactory,
+                                     OperatorInterface oi) {
         super(armPivotSubsystem, pf, hvmFactory, 2, 0.25);
         this.coralArm = armPivotSubsystem;
         this.algaeArm = algaeArm;
@@ -76,8 +77,6 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
         coralArm.setPower(0);
     }
 
-    double setpoint = 0;
-
     @Override
     protected void calibratedMachineControlAction() {
         // manages and runs pid
@@ -97,7 +96,7 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
                 setpoint);
         setpoint = profileManager.getRecommendedPositionForTime();
 
-        aKitLog.record("coralArmProfileTarget", setpoint);
+        aKitLog.record("ProfileTarget", setpoint);
 
         coralArm.setPositionalGoalIncludingOffset(Degrees.of(setpoint));
     }

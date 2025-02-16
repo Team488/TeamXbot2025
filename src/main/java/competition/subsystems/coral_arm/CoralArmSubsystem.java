@@ -19,6 +19,7 @@ import javax.inject.Singleton;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
@@ -139,16 +140,10 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     }
 
     private AngularVelocity getMotorVelocity() {
-        return armMotor.getVelocity();
-    }
-
-    public double getDegreesPerRotation() {
-        return degreesPerRotations.get();
-    }
-
-    public double getRotationsPerDegree() {
-        // if the degreesPerRotations is 0, return 0 to avoid division by zero
-        return degreesPerRotations.get() == 0 ? 0 : 1 / degreesPerRotations.get();
+        if (electricalContract.isCoralArmMotorReady()) {
+            return this.armMotor.getVelocity();
+        }
+        return RadiansPerSecond.zero();
     }
 
     @Override

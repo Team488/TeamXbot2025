@@ -2,6 +2,7 @@ package competition.operator_interface;
 
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
 import competition.simulation.commands.ResetSimulatedPose;
+import competition.subsystems.algae_arm.commands.ForceAlgaeArmCalibrated;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionIntakeCommand;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionOutputCommand;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionStopCommand;
@@ -26,8 +27,6 @@ import competition.subsystems.oracle.commands.SuperstructureAccordingToOracleCom
 import competition.subsystems.pose.Cameras;
 import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import xbot.common.controls.sensors.XXboxController;
 import xbot.common.subsystems.drive.swerve.commands.ChangeActiveSwerveModuleCommand;
 import xbot.common.subsystems.pose.commands.SetRobotHeadingCommand;
@@ -35,8 +34,6 @@ import xbot.common.subsystems.pose.commands.SetRobotHeadingCommand;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
-
-import static edu.wpi.first.units.Units.Seconds;
 
 /**
  * Maps operator interface buttons to commands
@@ -124,14 +121,10 @@ public class OperatorCommandMap {
     // and many do dangerous things like bypass various safeties or force the robot into states that aren't useful
     // (e.g. only driving a single swerve module at a time for testing purposes).
     @Inject
-    public void setupProgrammerCommands(
+    public void setupSuperstructureGamepadCommands(
             OperatorInterface oi,
             IntakeCoralCommand intakeCoralCommand,
             ScoreCoralCommand scoreCoralCommand,
-            StopCoralCommand stopCoralCommand,
-            AlgaeCollectionIntakeCommand algaeCollectionIntakeCommand,
-            AlgaeCollectionOutputCommand algaeCollectionOutputCommand,
-            AlgaeCollectionStopCommand algaeCollectionStopCommand,
             Provider<SetCoralArmTargetAngleCommand> setArmTargetAngleCommandProvider,
             Provider<SetElevatorTargetHeightCommand> setElevatorTargetHeightCommandProvider,
             ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
@@ -151,11 +144,6 @@ public class OperatorCommandMap {
         var lowerToHumanLoad = setArmTargetAngleCommandProvider.get();
         lowerToHumanLoad.setAngle(Landmarks.CoralLevel.COLLECTING);
 
-        /*
-        oi.superstructureGamepad.getPovIfAvailable(0).onTrue(changeActiveModule);
-        oi.superstructureGamepad.getPovIfAvailable(90).onTrue(debugModule);
-        oi.superstructureGamepad.getPovIfAvailable(180).onTrue(typicalSwerveDrive);
-        */
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeCoralCommand);
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreCoralCommand);
 
@@ -169,14 +157,23 @@ public class OperatorCommandMap {
 
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.Back).onTrue(forceCoralPivotCalibratedCommand);
 
-        oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(algaeCollectionIntakeCommand);
-        oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(algaeCollectionOutputCommand);
+
 
     }
 
     @Inject
+    public void setupAlgaeCommands(OperatorInterface oi,
+                                   ForceAlgaeArmCalibrated forceAlgaeArmCalibrated,
+                                   AlgaeCollectionIntakeCommand algaeCollectionIntakeCommand,
+                                   AlgaeCollectionOutputCommand algaeCollectionOutputCommand) {
+        oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(forceAlgaeArmCalibrated);
+        oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(algaeCollectionIntakeCommand);
+        oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(algaeCollectionOutputCommand);
+    }
+
+    @Inject
     public void setupSysIdCommands(
-        OperatorInterface oi,
+
         DriveSubsystem drive,
         ElevatorSubsystem elevator
     ) {
