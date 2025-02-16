@@ -31,6 +31,8 @@ public class DriveToCoralStationWithVisionCommand extends DriveToWaypointsWithVi
     @Override
     public void initialize() {
         var radiusOfRobot = Math.sqrt(Math.pow(this.distanceToOuterBumerInMeters, 2.0) * 2.0);
+        // TODO: Add additional logic after next test to swithc to deciding based on DriverStation
+        // and which coral station is clossest.
         var coralStationPose = Landmarks.getCoralStationSectionPose(Landmarks.CoralStation.LEFT,
                 Landmarks.CoralStationSection.MID);
         var deltaTranslation = new Translation2d(radiusOfRobot, coralStationPose.getRotation());
