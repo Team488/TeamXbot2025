@@ -48,12 +48,6 @@ public class AprilTagVisionSubsystemExtended extends AprilTagVisionSubsystem {
         aprilTagFieldLayout = fieldLayout;
     }
 
-    public Translation2d getReefAprilTagCameraData() {
-        Transform3d data = getLatestTargetObservation(0).cameraToTarget();
-
-        return new Translation2d(data.getX(), data.getY());
-    }
-
     public Translation2d getRobotRelativeLocationOfBestDetectedAprilTag(int cameraToUse) {
         Translation3d data = getLatestTargetObservation(cameraToUse).cameraToTarget().getTranslation().rotateBy(
                 getCameraPosition(cameraToUse).getRotation()
