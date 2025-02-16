@@ -70,14 +70,16 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
     }
 
     @Override
-    protected void coastAction() { // rest when no human control and before pid
+    protected void coastAction() { 
+        // rest when no human control and before pid
         coralArm.setPower(0);
     }
 
     double setpoint = 0;
 
     @Override
-    protected void calibratedMachineControlAction() { // manages and runs pid
+    protected void calibratedMachineControlAction() { 
+        // manages and runs pid
         // if the arm is being requested to go to a position that would cause a
         // collision,
         // move to a safe position instead until that changes
