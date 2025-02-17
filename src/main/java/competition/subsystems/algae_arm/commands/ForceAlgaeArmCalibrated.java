@@ -19,6 +19,7 @@ public class ForceAlgaeArmCalibrated extends BaseCommand {
         log.info("Initializing");
         algaeArmSubsystem.forceCalibratedHere();
         algaeArmSubsystem.setTargetValue(algaeArmSubsystem.getCurrentValue());
+        this.setRunsWhenDisabled(true);
     }
 
     @Override
