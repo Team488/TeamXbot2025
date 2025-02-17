@@ -128,19 +128,19 @@ public class OperatorCommandMap {
         // Algae system buttons
         var removeLowAlgae = setAlgaeArmProvider.get();
         removeLowAlgae.setTargetPosition(AlgaeArmSubsystem.AlgaeArmPositions.ReefAlgaeLow);
-        oi.operatorGamepad.getPovIfAvailable(270).onTrue(removeLowAlgae);
+        oi.operatorGamepad.getPovIfAvailable(180).onTrue(removeLowAlgae);
 
         var removeHighAlgae = setAlgaeArmProvider.get();
         removeHighAlgae.setTargetPosition(AlgaeArmSubsystem.AlgaeArmPositions.ReefAlgaeHigh);
-        oi.operatorGamepad.getPovIfAvailable(90).onTrue(removeHighAlgae);
+        oi.operatorGamepad.getPovIfAvailable(0).onTrue(removeHighAlgae);
 
         var collectGroundAlgae = setAlgaeArmProvider.get();
         collectGroundAlgae.setTargetPosition(AlgaeArmSubsystem.AlgaeArmPositions.GroundCollection);
-        oi.operatorGamepad.getPovIfAvailable(0).onTrue(collectGroundAlgae);
+        oi.operatorGamepad.getPovIfAvailable(270).onTrue(collectGroundAlgae);
 
         var homeAlgaeArm = setAlgaeArmProvider.get();
         homeAlgaeArm.setTargetPosition(AlgaeArmSubsystem.AlgaeArmPositions.FullyRetracted);
-        oi.operatorGamepad.getPovIfAvailable(180).onTrue(homeAlgaeArm);
+        oi.operatorGamepad.getPovIfAvailable(90).onTrue(homeAlgaeArm);
 
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(intakeAlgae);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(ejectAlgae);
