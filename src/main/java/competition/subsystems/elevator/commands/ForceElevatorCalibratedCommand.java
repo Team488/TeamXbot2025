@@ -18,7 +18,7 @@ public class ForceElevatorCalibratedCommand extends BaseCommand {
     @Override
     public void initialize() {
         log.info("Initializing..");
-        elevator.setCalibrated(true);
+        elevator.markElevatorAsCalibratedAgainstLowerLimit();
         elevator.setTargetValue(elevator.getCurrentValue());
     }
 

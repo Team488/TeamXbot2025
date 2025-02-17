@@ -68,7 +68,7 @@ public class Robot extends BaseRobot {
         dataFrameRefreshables.add(getInjectorComponent().algaeArmSubsystem());
 
         // Not needed unless we are actively configuring the LaserCAN.
-        //CanBridge.runTCP();
+        CanBridge.runTCP();
     }
 
     protected BaseRobotComponent createDaggerComponent() {

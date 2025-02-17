@@ -67,6 +67,7 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
         if (electricalContract.isAlgaeArmBottomSensorReady()) {
             this.bottomSensor = xDigitalInputFactory.create(electricalContract.getAlgaeArmBottomSensor(), this.getPrefix());
+            registerDataFrameRefreshable(this.bottomSensor);
         } else {
             this.bottomSensor = null;
         }
@@ -199,6 +200,7 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
         aKitLog.record("Current Angle", this.getCurrentValue().in(Degrees));
         aKitLog.record("isCalibrated", this.isCalibrated());
         aKitLog.record("Current Velocity", this.getCurrentVelocity().in(DegreesPerSecond));
+        aKitLog.record("Touching Bottom", this.isTouchingBottom());
     }
 }
 
