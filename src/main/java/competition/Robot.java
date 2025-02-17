@@ -33,6 +33,14 @@ public class Robot extends BaseRobot {
     ElectricalContract simulatorContract = new UnitTestContract2025();
     OperatorInterface oi;
 
+    Robot() {
+        // We currently can't keep up with 0.02s loop times, and the error reporting about loop
+        // overruns ironically makes the problem worse. For now, we're going to set the loop time
+        // to 0.04s to give us some breathing room and figure out some optimizations to bring us
+        // back down to 0.02s.
+        super(0.04);
+    }
+
     @Override
     protected void initializeSystems() {
         super.initializeSystems();
@@ -59,6 +67,7 @@ public class Robot extends BaseRobot {
         dataFrameRefreshables.add(getInjectorComponent().algaeCollectionSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().algaeArmSubsystem());
 
+        // Not needed unless we are actively configuring the LaserCAN.
         //CanBridge.runTCP();
     }
 

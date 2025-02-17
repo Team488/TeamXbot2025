@@ -308,7 +308,8 @@ public class Contract2025 extends ElectricalContract {
                                 frontAprilCameraZDisplacement),
                                 new Rotation3d(0, frontAprilCameraPitch, frontAprilCameraYaw)),
                         EnumSet.of(CameraCapabilities.APRIL_TAG))
-/*
+
+                /* Camera below does not exist yet:
                 new CameraInfo("Apriltag_Back_Camera",
                         "AprilTagBack",
                         new Transform3d(new Translation3d(
