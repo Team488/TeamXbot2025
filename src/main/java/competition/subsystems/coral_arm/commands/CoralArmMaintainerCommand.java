@@ -38,8 +38,6 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
 
     final Alert collisionSafetiesEngaged = new Alert("Coral Arm: collision safeties engaged", Alert.AlertType.kWarning);
 
-    double setpoint = 0;
-
     @Inject
     public CoralArmMaintainerCommand(CoralArmSubsystem armPivotSubsystem, ElevatorSubsystem elevator,
                                      AlgaeArmSubsystem algaeArm, PropertyFactory pf,
@@ -68,7 +66,6 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
     @Override
     public void initialize() {
         super.initialize();
-        setpoint = coralArm.getCurrentValue().in(Degrees);
     }
 
     @Override
@@ -92,9 +89,8 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
         profileManager.setTargetPosition(
                 currentTarget.in(Degrees),
                 coralArm.getCurrentValue().in(Degree),
-                coralArm.getCurrentVelocity().in(DegreesPerSecond),
-                setpoint);
-        setpoint = profileManager.getRecommendedPositionForTime();
+                coralArm.getCurrentVelocity().in(DegreesPerSecond));
+        var setpoint = profileManager.getRecommendedPositionForTime();
 
         aKitLog.record("ProfileTarget", setpoint);
 
