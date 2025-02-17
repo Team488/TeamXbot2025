@@ -37,6 +37,7 @@ public class AlignCameraToAprilTagCalculator {
     final double initialHeading;
     final Translation2d alignmentPointOffset;
     final Rotation3d cameraRotation;
+    Translation2d driveTarget = new Translation2d(0, 0);
 
     private TagAcquisitionState tagAcquisitionState = TagAcquisitionState.NeverSeen;
 
@@ -78,7 +79,6 @@ public class AlignCameraToAprilTagCalculator {
     }
 
     public Pose2d getXYPowersAlignToAprilTag(Pose2d currentPose) {
-        Translation2d driveTarget = new Translation2d(0, 0);
 
         if (aprilTagVisionSubsystem.doesCameraBestObservationHaveAprilTagId(targetCameraID, targetAprilTagID)) {
             tagAcquisitionState = TagAcquisitionState.LockedOn;

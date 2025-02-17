@@ -112,7 +112,8 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         // TODO: this is disabled for testing
         //handles pidding via motor controller and setting power to elevator
         elevator.masterMotor.setPositionTarget(
-                Rotations.of(setpoint * elevator.rotationsPerMeter.get()),
+                Rotations.of(setpoint * elevator.rotationsPerMeter.get()
+                        + elevator.getElevatorPositionOffsetInRotations()),
                 XCANMotorController.MotorPidMode.Voltage);
     }
 

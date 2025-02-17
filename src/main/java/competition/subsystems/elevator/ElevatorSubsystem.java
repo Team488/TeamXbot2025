@@ -151,8 +151,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         }
 
         if (contract.isElevatorReady() && contract.isElevatorBottomSensorReady()) {
-            this.masterMotor.setSoftwareReverseLimit(this::isTouchingBottom);
-            this.masterMotor.setSoftwareReverseLimit(() -> getCurrentValue().gt(upperHeightLimit.get()));
+            //this.masterMotor.setSoftwareReverseLimit(this::isTouchingBottom);
+            //this.masterMotor.setSoftwareReverseLimit(() -> getCurrentValue().gt(upperHeightLimit.get()));
         }
 
         setCalibrated(false);
@@ -185,6 +185,10 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         } else {
             elevatorPositionOffset = 0;
         }
+    }
+
+    public double getElevatorPositionOffsetInRotations() {
+        return elevatorPositionOffset;
     }
 
     @Override
@@ -294,6 +298,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         //bandage case: isTouchingBottom flashes true for one tick on startup, investigate later?
         if (this.isTouchingBottom() && periodicTickCounter >= 3) {
             markElevatorAsCalibratedAgainstLowerLimit();
+            setTargetValue(getCurrentValue());
         }
 
         aKitLog.record("ElevatorTargetHeight-m", elevatorTargetHeight);
