@@ -48,5 +48,6 @@ jobs:
         gradleWrapperFile: 'gradlew'
         gradleOptions: '-Xmx3072m'
         tasks: '--stop'
+        publishJUnitResults: false
       env:
         GRADLE_USER_HOME: $(GRADLE_USER_HOME)
