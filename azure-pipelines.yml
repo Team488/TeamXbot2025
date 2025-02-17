@@ -13,12 +13,19 @@ jobs:
  - job: Windows_64_Bit
    pool:
      vmImage: 'windows-latest'
+   variables:
+     GRADLE_USER_HOME: $(Build.SourcesDirectory)/build/.gradle
    steps:
     - task: JavaToolInstaller@0
       inputs:
         versionSpec: '17'
         jdkArchitectureOption: 'x64'
         jdkSourceOption: 'PreInstalled'
+    - task: Cache@2
+      inputs:
+        key: 'gradle | "$(Agent.OS)" | $(Build.SourcesDirectory)/build.gradle | $(Build.SourcesDirectory)/settings.gradle | $(Build.SourcesDirectory)/gradle/wrapper/gradle-wrapper.properties | $(Build.SourcesDirectory)/vendordeps/* | $(Build.SourcesDirectory)/SeriouslyCommonLib'
+        path: $(GRADLE_USER_HOME)
+      displayName: 'Cache Gradle dependencies'
     - task: Gradle@3
       inputs:
         gradleWrapperFile: 'gradlew'
@@ -27,10 +34,19 @@ jobs:
         testResultsFiles: '**/TEST-*.xml'
         tasks: 'build'
         options: '--warn'
-        # checkStyleRunAnalysis: true
-        # pmdRunAnalysis: true
+      env:
+        GRADLE_USER_HOME: $(GRADLE_USER_HOME)
     - task: PublishCodeCoverageResults@2
       inputs:
         codeCoverageTool: 'JaCoCo'
         summaryFileLocation: 'build/reports/jacoco/test/jacocoTestReport.xml'
         reportDirectory: 'build/reports/jacoco/test/html'
+    - task: Gradle@3
+      displayName: Stop gradle daemon
+      inputs:
+        workingDirectory: ''
+        gradleWrapperFile: 'gradlew'
+        gradleOptions: '-Xmx3072m'
+        tasks: '--stop'
+      env:
+        GRADLE_USER_HOME: $(GRADLE_USER_HOME)
