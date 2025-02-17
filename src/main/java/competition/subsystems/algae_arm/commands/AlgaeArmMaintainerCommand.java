@@ -61,7 +61,7 @@ public class AlgaeArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
         profileManager.setTargetPosition(
                 algaeArm.getTargetValue().in(Degrees),
                 algaeArm.getCurrentValue().in(Degree),
-                algaeArm.getCurrentVelocity().in(DegreesPerSecond),
+                algaeArm.getCurrentVelocity().in(DegreesPerSecond)
         );
         var setpoint = profileManager.getRecommendedPositionForTime();
 
