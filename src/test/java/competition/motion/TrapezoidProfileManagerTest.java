@@ -40,6 +40,8 @@ public class TrapezoidProfileManagerTest extends BaseCompetitionTest {
         recommendation = manager.getRecommendedPositionForTime();
         assertEquals(0.5198, recommendation, 0.001);
 
+        timer.advanceTimeInSecondsBy(1);
+
         manager.setTargetPosition(2, 1, 0.5);
         recommendation = manager.getRecommendedPositionForTime();
         assertEquals(1.0102, recommendation, 0.001);

@@ -33,7 +33,7 @@ public class TrapezoidProfileManager {
     TrapezoidProfile.Constraints constraints;
     TrapezoidProfile.State initialState;
     TrapezoidProfile.State goalState;
-    MutTime profileStartTime = Seconds.zero().mutableCopy();
+    MutTime profileStartTime = Seconds.of(-10000).mutableCopy();
     double previousSetpoint = 0;
     MutTime previousSetpointTime = Seconds.zero().mutableCopy();
 
