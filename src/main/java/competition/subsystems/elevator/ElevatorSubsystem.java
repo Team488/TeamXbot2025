@@ -5,6 +5,7 @@ import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import xbot.common.command.BaseSetpointSubsystem;
@@ -39,6 +40,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     // elevator starts uncalibrated because it could be in the middle of it's range and we have no idea where that is
     private boolean isCalibrated;
+    final Alert isNotCalibratedAlert = new Alert("Elevator: not calibrated", Alert.AlertType.kWarning);
     private double elevatorPositionOffset;
 
     public Distance elevatorTargetHeight;
@@ -82,9 +84,9 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         pf.setPrefix(this);
 
         //these are not real measured heights yet, just placeholders
-        l2Height = pf.createPersistentProperty("l2Height", Inches.of(1));
-        l3Height = pf.createPersistentProperty("l3Height", Inches.of(15.875));
-        l4Height = pf.createPersistentProperty("l4Height", Inches.of(40.651));
+        l2Height = pf.createPersistentProperty("l2Height", Inches.of(1.0));
+        l3Height = pf.createPersistentProperty("l3Height", Inches.of(17.875));
+        l4Height = pf.createPersistentProperty("l4Height", Inches.of(46.0));
         humanLoadHeight = pf.createPersistentProperty("humanLoadHeight", Inches.of(1));
         baseHeight = pf.createPersistentProperty("baseHeight", Inches.of(0));
 
@@ -150,7 +152,6 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
         if (contract.isElevatorReady() && contract.isElevatorBottomSensorReady()) {
             this.masterMotor.setSoftwareReverseLimit(this::isTouchingBottom);
-            this.masterMotor.setSoftwareReverseLimit(() -> getCurrentValue().gt(upperHeightLimit.get()));
         }
 
         setCalibrated(false);
@@ -183,6 +184,10 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         } else {
             elevatorPositionOffset = 0;
         }
+    }
+
+    public double getElevatorPositionOffsetInRotations() {
+        return elevatorPositionOffset;
     }
 
     @Override
@@ -290,14 +295,17 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
             masterMotor.periodic();
         }
         //bandage case: isTouchingBottom flashes true for one tick on startup, investigate later?
-        if (this.isTouchingBottom() && periodicTickCounter >= 3) {
+        if (this.isTouchingBottom() && periodicTickCounter >= 3 && !isCalibrated()) {
             markElevatorAsCalibratedAgainstLowerLimit();
+            setTargetValue(getCurrentValue());
         }
 
         aKitLog.record("ElevatorTargetHeight-m", elevatorTargetHeight);
         aKitLog.record("ElevatorCurrentHeight-m", getCurrentValue().in(Meters));
         aKitLog.record("ElevatorBottomSensor", this.isTouchingBottom());
         aKitLog.record("isElevatorCalibrated", isCalibrated());
+        aKitLog.record("isElevatorMaintainerAtGoal", this.isMaintainerAtGoal());
+        isNotCalibratedAlert.set(!isCalibrated());
         aKitLog.record("ElevatorDistanceSensor-m", getRawDistance().in(Meters));
 
         periodicTickCounter++;

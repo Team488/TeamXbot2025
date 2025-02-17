@@ -22,6 +22,7 @@ import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
+import static xbot.common.logic.CalibrationDecider.CalibrationMode.GaveUp;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -83,6 +84,12 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     }
 
     @Override
+    protected void initializeMachineControlAction() {
+        super.initializeMachineControlAction();
+        setpoint = elevator.getCurrentValue().in(Meters);
+    }
+
+    @Override
     protected void coastAction() {
         elevator.setPower(0);
     }
@@ -105,16 +112,15 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         // TODO: this is disabled for testing
         //handles pidding via motor controller and setting power to elevator
         elevator.masterMotor.setPositionTarget(
-                Rotations.of(setpoint * elevator.rotationsPerMeter.get()),
+                Rotations.of(setpoint * elevator.rotationsPerMeter.get()
+                        + elevator.getElevatorPositionOffsetInRotations()),
                 XCANMotorController.MotorPidMode.Voltage);
     }
 
     //defaults humanControlAction if there is no bottom sensor
     @Override
     protected void uncalibratedMachineControlAction() {
-        var mode = contract.isElevatorBottomSensorReady()
-                ? calibrationDecider.decideMode(elevator.isCalibrated())
-                : CalibrationDecider.CalibrationMode.GaveUp;
+        var mode = GaveUp;
 
         switch (mode){
             case Calibrated -> calibratedMachineControlAction();

@@ -2,7 +2,7 @@ import edu.wpi.first.gradlerio.deploy.roborio.RoboRIO
 
 plugins {
     id "java"
-    id "edu.wpi.first.GradleRIO" version "2025.2.1"
+    id "edu.wpi.first.GradleRIO" version "2025.3.1"
     id 'checkstyle'
     id 'jacoco'
     id 'org.hidetake.ssh' version "2.9.0"
@@ -31,6 +31,34 @@ deploy {
 
                 frcJava(getArtifactTypeClass('FRCJavaArtifact')) {
                 }
+
+                // Note - the commented block below has the various configuration settings needed
+                // to enable VisualVM analysis.
+                //frcJava(getArtifactTypeClass('FRCJavaArtifact')) {
+                //    // Enable VisualVM connection
+                //    jvmArgs.add("-Dcom.sun.management.jmxremote=true")
+                //    jvmArgs.add("-Dcom.sun.management.jmxremote.port=1198")
+                //    jvmArgs.add("-Dcom.sun.management.jmxremote.local.only=false")
+                //    jvmArgs.add("-Dcom.sun.management.jmxremote.ssl=false")
+                //    jvmArgs.add("-Dcom.sun.management.jmxremote.authenticate=false")
+                //    jvmArgs.add("-Djava.rmi.server.hostname=172.22.11.2") // Replace TE.AM with team number
+                //}
+
+                // Note - the commented block below has the various configuration settings suggested by
+                // the AdvantageKit team.
+                //frcJava(getArtifactTypeClass('FRCJavaArtifact')) {
+                    //jvmArgs.add("-XX:+UnlockExperimentalVMOptions")
+                    //jvmArgs.add("-XX:GCTimeRatio=5")
+                    //jvmArgs.add("-XX:+UseSerialGC")
+                    //jvmArgs.add("-XX:MaxGCPauseMillis=50")
+
+                    // The options below may improve performance, but should only be enabled on the RIO 2
+                    //
+                     //final MAX_JAVA_HEAP_SIZE_MB = 100;
+                     //jvmArgs.add("-Xmx" + MAX_JAVA_HEAP_SIZE_MB + "M")
+                     //jvmArgs.add("-Xms" + MAX_JAVA_HEAP_SIZE_MB + "M")
+                     //jvmArgs.add("-XX:+AlwaysPreTouch")
+                //}
 
                 // Static files artifact
                 frcStaticFileDeploy(getArtifactTypeClass('FileTreeArtifact')) {
