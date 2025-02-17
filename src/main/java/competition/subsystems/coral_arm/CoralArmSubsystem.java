@@ -83,11 +83,11 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
             this.lowSensor = null;
         }
 
-        this.degreesPerRotations = propertyFactory.createPersistentProperty("Degrees Per Rotations", 6.94444);
+        this.degreesPerRotations = propertyFactory.createPersistentProperty("Degrees Per Rotations", 5.790);
         this.rangeOfMotionDegrees = propertyFactory.createPersistentProperty("Range of Motion in Degrees", 125);
         this.scoreAngleDegrees = propertyFactory.createPersistentProperty("Scoring Angle in Degrees", 125);
         this.humanLoadAngleDegrees = propertyFactory.createPersistentProperty("Human Loading Angle in Degrees", 0);
-        this.powerWhenNotCalibrated = propertyFactory.createPersistentProperty("Power When Not Calibrated", 0.05);
+        this.powerWhenNotCalibrated = propertyFactory.createPersistentProperty("Power When Not Calibrated", 0.25);
     }
 
     @Override

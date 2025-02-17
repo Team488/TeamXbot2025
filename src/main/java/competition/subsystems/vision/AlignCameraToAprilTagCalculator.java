@@ -16,7 +16,6 @@ import xbot.common.subsystems.drive.control_logic.HeadingModule;
 
 import java.util.Optional;
 
-import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 
 public class AlignCameraToAprilTagCalculator {
@@ -37,6 +36,7 @@ public class AlignCameraToAprilTagCalculator {
     final double initialHeading;
     final Translation2d alignmentPointOffset;
     final Rotation3d cameraRotation;
+    Translation2d targetLocationOnField = new Translation2d(0, 0);
 
     private TagAcquisitionState tagAcquisitionState = TagAcquisitionState.NeverSeen;
 
@@ -78,7 +78,6 @@ public class AlignCameraToAprilTagCalculator {
     }
 
     public Pose2d getXYPowersAlignToAprilTag(Pose2d currentPose) {
-        Translation2d driveTarget = new Translation2d(0, 0);
 
         if (aprilTagVisionSubsystem.doesCameraBestObservationHaveAprilTagId(targetCameraID, targetAprilTagID)) {
             tagAcquisitionState = TagAcquisitionState.LockedOn;
@@ -93,7 +92,7 @@ public class AlignCameraToAprilTagCalculator {
             );
 
             // Move from robot-relative frame to field frame
-            driveTarget = currentPose.transformBy(relativeGoalTransform).getTranslation();
+            targetLocationOnField = currentPose.transformBy(relativeGoalTransform).getTranslation();
 
         } else {
             if (tagAcquisitionState == TagAcquisitionState.LockedOn) {
@@ -111,7 +110,7 @@ public class AlignCameraToAprilTagCalculator {
                 akitLog.record("desiredRotation", desiredRotation);
 
                 yield new Pose2d(
-                        drive.getPowerToAchieveFieldPosition(currentPose.getTranslation(), driveTarget),
+                        drive.getPowerToAchieveFieldPosition(currentPose.getTranslation(), targetLocationOnField),
                         Rotation2d.fromDegrees(headingModule.calculateHeadingPower(Math.toDegrees(desiredRotation))) // QUESTION: IS THIS HOW I DO IT?
                 );
             }
