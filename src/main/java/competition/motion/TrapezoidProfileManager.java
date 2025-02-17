@@ -33,9 +33,9 @@ public class TrapezoidProfileManager {
     TrapezoidProfile.Constraints constraints;
     TrapezoidProfile.State initialState;
     TrapezoidProfile.State goalState;
-    MutTime profileStartTime = Seconds.of(-10000).mutableCopy();
+    MutTime profileStartTime = Seconds.mutable(0);
     double previousSetpoint = 0;
-    MutTime previousSetpointTime = Seconds.zero().mutableCopy();
+    MutTime previousSetpointTime = Seconds.mutable(-10000);
 
     @AssistedInject
     public TrapezoidProfileManager(
