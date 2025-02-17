@@ -279,10 +279,10 @@ public class Contract2025 extends ElectricalContract {
         };
     }
 
-    private static double frontAprilCameraXDisplacement = 10.25 / PoseSubsystem.INCHES_IN_A_METER;
-    private static double frontAprilCameraYDisplacement = 6.5 / PoseSubsystem.INCHES_IN_A_METER;
-    private static double frontAprilCameraZDisplacement = 7 / PoseSubsystem.INCHES_IN_A_METER;
-    private static double frontAprilCameraPitch = Math.toRadians(-12);
+    private static double frontAprilCameraXDisplacement = 10.14 / PoseSubsystem.INCHES_IN_A_METER;
+    private static double frontAprilCameraYDisplacement = 6.535 / PoseSubsystem.INCHES_IN_A_METER;
+    private static double frontAprilCameraZDisplacement = 6.7 / PoseSubsystem.INCHES_IN_A_METER;
+    private static double frontAprilCameraPitch = Math.toRadians(-21);
     private static double frontAprilCameraYaw = Math.toRadians(0);
 
     public CameraInfo[] getCameraInfo() {
