@@ -2,17 +2,20 @@ package competition.motion;
 
 import static edu.wpi.first.units.Units.Seconds;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.MutTime;
-import edu.wpi.first.units.measure.Time;
 import xbot.common.controls.sensors.XTimer;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 
 public class TrapezoidProfileManager {
+    protected final Logger log;
 
     @AssistedFactory
     public abstract static class Factory {
@@ -42,6 +45,7 @@ public class TrapezoidProfileManager {
             @Assisted("defaultMaxAcceleration") double defaultMaxAcceleration,
             @Assisted("initialPosition") double initialPosition) {
         pf.setPrefix(name);
+        log = LogManager.getLogger(name + ": TrapezoidProfileManager");
         maxVelocity = pf.createPersistentProperty("maxVelocity", defaultMaxVelocity);
         maxAcceleration = pf.createPersistentProperty("maxAcceleration", defaultMaxAcceleration);
         constraints = new TrapezoidProfile.Constraints(maxVelocity.get(), maxAcceleration.get());
@@ -69,7 +73,6 @@ public class TrapezoidProfileManager {
             } else {
                 initialState = new TrapezoidProfile.State(currentValue, currentVelocity);
             }
-            initialState = new TrapezoidProfile.State(previousSetpoint, currentVelocity);
             goalState = new TrapezoidProfile.State(targetValue, 0);
             profileStartTime.mut_replace(XTimer.getFPGATimestampTime().minus(Seconds.of(0.02)));
         }
