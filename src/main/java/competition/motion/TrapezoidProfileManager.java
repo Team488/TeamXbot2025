@@ -6,6 +6,7 @@ import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.units.measure.MutTime;
 import edu.wpi.first.units.measure.Time;
 import xbot.common.controls.sensors.XTimer;
 import xbot.common.properties.DoubleProperty;
@@ -29,7 +30,9 @@ public class TrapezoidProfileManager {
     TrapezoidProfile.Constraints constraints;
     TrapezoidProfile.State initialState;
     TrapezoidProfile.State goalState;
-    Time profileStartTime = Seconds.zero(); 
+    MutTime profileStartTime = Seconds.zero().mutableCopy();
+    double previousSetpoint = 0;
+    MutTime previousSetpointTime = Seconds.zero().mutableCopy();
 
     @AssistedInject
     public TrapezoidProfileManager(
@@ -48,7 +51,7 @@ public class TrapezoidProfileManager {
         goalState = new TrapezoidProfile.State(initialPosition, 0);
     }
 
-    public void setTargetPosition(double targetValue, double currentValue, double currentVelocity, double previousSetpoint) {
+    public void setTargetPosition(double targetValue, double currentValue, double currentVelocity) {
         // if the profile's constraints properties have changed, recompute the profile
         // there's maybe a better place to do this but this should be fine since setTarget will be called
         // over and over again
@@ -59,9 +62,16 @@ public class TrapezoidProfileManager {
 
         // if the target has changed, recompute the goal and current states
         if(goalState.position != targetValue) {
+            // if the previousSentpoint we have is very recent, use it as the initial state to
+            // avoid discontinuities in the profile
+            if(XTimer.getFPGATimestampTime().minus(previousSetpointTime).in(Seconds) < 0.1) {
+                initialState = new TrapezoidProfile.State(previousSetpoint, currentVelocity);
+            } else {
+                initialState = new TrapezoidProfile.State(currentValue, currentVelocity);
+            }
             initialState = new TrapezoidProfile.State(previousSetpoint, currentVelocity);
             goalState = new TrapezoidProfile.State(targetValue, 0);
-            profileStartTime = XTimer.getFPGATimestampTime().minus(Seconds.of(0.02));
+            profileStartTime.mut_replace(XTimer.getFPGATimestampTime().minus(Seconds.of(0.02)));
         }
 
     }
@@ -69,6 +79,8 @@ public class TrapezoidProfileManager {
     // currently only doing position, but in theory this goal has a velocity associated with it too we could use
     public double getRecommendedPositionForTime() {
         var setpoint = profile.calculate(XTimer.getFPGATimestampTime().minus(profileStartTime).in(Seconds), initialState, goalState);
+        this.previousSetpointTime.mut_replace(XTimer.getFPGATimestampTime());
+        previousSetpoint = setpoint.position;
         return setpoint.position;
     }
     
