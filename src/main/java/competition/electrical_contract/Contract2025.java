@@ -166,7 +166,7 @@ public class Contract2025 extends ElectricalContract {
 
     CANMotorControllerOutputConfig regularDriveMotorConfig =
             new CANMotorControllerOutputConfig()
-                    .withInversionType(CANMotorControllerOutputConfig.InversionType.Inverted)
+                    .withInversionType(CANMotorControllerOutputConfig.InversionType.Normal)
                     .withStatorCurrentLimit(Amps.of(45))
                     .withNeutralMode(CANMotorControllerOutputConfig.NeutralMode.Brake);
 
