@@ -132,7 +132,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     }
 
     public AngularVelocity getCurrentVelocity() {
-        return getMotorVelocity();
+        return DegreesPerSecond.of(getMotorVelocity().in(RotationsPerSecond) * degreesPerRotations.get());
     }
 
     private AngularVelocity getAbsoluteVelocity() {
