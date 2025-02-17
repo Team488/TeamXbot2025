@@ -274,10 +274,10 @@ public class Contract2025 extends ElectricalContract {
     public XYPair getSwerveModuleOffsetsInInches(SwerveInstance swerveInstance) {
         // Update these XYPairs with the swerve module locations!!! (In inches)
         return switch (swerveInstance.label()) {
-            case "FrontLeftDrive" -> new XYPair(15, 15);
-            case "FrontRightDrive" -> new XYPair(15, -15);
-            case "RearLeftDrive" -> new XYPair(-15, 15);
-            case "RearRightDrive" -> new XYPair(-15, -15);
+            case "FrontLeftDrive" -> new XYPair(12, 12);
+            case "FrontRightDrive" -> new XYPair(12, -12);
+            case "RearLeftDrive" -> new XYPair(-12, 12);
+            case "RearRightDrive" -> new XYPair(-12, -12);
             default -> new XYPair(0, 0);
         };
     }
