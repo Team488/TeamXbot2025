@@ -26,8 +26,6 @@ public class AlgaeArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
 
     final TrapezoidProfileManager profileManager;
 
-    double setpoint = 0;
-
     @Inject
     public AlgaeArmMaintainerCommand(AlgaeArmSubsystem algaeArm, PropertyFactory pf,
                                      HumanVsMachineDecider.HumanVsMachineDeciderFactory hvm,
@@ -51,7 +49,6 @@ public class AlgaeArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
     @Override
     public void initialize() {
         log.info("Initializing");
-        setpoint = algaeArm.getCurrentValue().in(Degrees);
     }
 
     @Override
@@ -64,10 +61,9 @@ public class AlgaeArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
         profileManager.setTargetPosition(
                 algaeArm.getTargetValue().in(Degrees),
                 algaeArm.getCurrentValue().in(Degree),
-                algaeArm.getCurrentVelocity().in(DegreesPerSecond),
-                setpoint
+                algaeArm.getCurrentVelocity().in(DegreesPerSecond)
         );
-        setpoint = profileManager.getRecommendedPositionForTime();
+        var setpoint = profileManager.getRecommendedPositionForTime();
 
         aKitLog.record("ProfileTarget", setpoint);
 

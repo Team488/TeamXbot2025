@@ -274,18 +274,18 @@ public class Contract2025 extends ElectricalContract {
     public XYPair getSwerveModuleOffsetsInInches(SwerveInstance swerveInstance) {
         // Update these XYPairs with the swerve module locations!!! (In inches)
         return switch (swerveInstance.label()) {
-            case "FrontLeftDrive" -> new XYPair(15, 15);
-            case "FrontRightDrive" -> new XYPair(15, -15);
-            case "RearLeftDrive" -> new XYPair(-15, 15);
-            case "RearRightDrive" -> new XYPair(-15, -15);
+            case "FrontLeftDrive" -> new XYPair(12, 12);
+            case "FrontRightDrive" -> new XYPair(12, -12);
+            case "RearLeftDrive" -> new XYPair(-12, 12);
+            case "RearRightDrive" -> new XYPair(-12, -12);
             default -> new XYPair(0, 0);
         };
     }
 
-    private static double frontAprilCameraXDisplacement = 10.25 / PoseSubsystem.INCHES_IN_A_METER;
-    private static double frontAprilCameraYDisplacement = 6.5 / PoseSubsystem.INCHES_IN_A_METER;
-    private static double frontAprilCameraZDisplacement = 7 / PoseSubsystem.INCHES_IN_A_METER;
-    private static double frontAprilCameraPitch = Math.toRadians(-12);
+    private static double frontAprilCameraXDisplacement = 10.14 / PoseSubsystem.INCHES_IN_A_METER;
+    private static double frontAprilCameraYDisplacement = 6.535 / PoseSubsystem.INCHES_IN_A_METER;
+    private static double frontAprilCameraZDisplacement = 6.7 / PoseSubsystem.INCHES_IN_A_METER;
+    private static double frontAprilCameraPitch = Math.toRadians(-21);
     private static double frontAprilCameraYaw = Math.toRadians(0);
 
     public CameraInfo[] getCameraInfo() {

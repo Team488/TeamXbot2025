@@ -20,6 +20,7 @@ public class ForceElevatorCalibratedCommand extends BaseCommand {
         log.info("Initializing..");
         elevator.markElevatorAsCalibratedAgainstLowerLimit();
         elevator.setTargetValue(elevator.getCurrentValue());
+        this.setRunsWhenDisabled(true);
     }
 
     @Override

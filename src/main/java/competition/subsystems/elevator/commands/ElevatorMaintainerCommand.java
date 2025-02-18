@@ -74,22 +74,17 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     public void initialize() {
         super.initialize();
         calibrationDecider.reset();
-
-        setpoint = elevator.getCurrentValue().in(Meters);
     }
 
     @Override
     protected void initializeMachineControlAction() {
         super.initializeMachineControlAction();
-        setpoint = elevator.getCurrentValue().in(Meters);
     }
 
     @Override
     protected void coastAction() {
         elevator.setPower(0);
     }
-
-    double setpoint = 0;
 
     @Override
     protected void calibratedMachineControlAction() {
@@ -99,18 +94,15 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         profileManager.setTargetPosition(
             elevator.getTargetValue().in(Meters),
             currentValue.in(Meters),
-            elevator.getCurrentVelocity().in(MetersPerSecond),
-            setpoint
+            elevator.getCurrentVelocity().in(MetersPerSecond)
         );
-        setpoint = profileManager.getRecommendedPositionForTime();
+        var setpoint = profileManager.getRecommendedPositionForTime();
 
         var error = Meters.of(setpoint).minus(currentValue);
         elevator.setElevatorDeltaFromCurrentHeight(error);
 
         // it's helpful to log this to know where the robot is actually trying to get to in the moment
         aKitLog.record("elevatorProfileTarget", setpoint);
-
-
     }
 
     //defaults humanControlAction if there is no bottom sensor
