@@ -97,12 +97,9 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
             elevator.getCurrentVelocity().in(MetersPerSecond)
         );
         var setpoint = profileManager.getRecommendedPositionForTime();
-
-        var error = Meters.of(setpoint).minus(currentValue);
-        elevator.setElevatorDeltaFromCurrentHeight(error);
-
-        // it's helpful to log this to know where the robot is actually trying to get to in the moment
         aKitLog.record("elevatorProfileTarget", setpoint);
+
+        elevator.setElevatorHeightGoalOnMotor(setpoint);
     }
 
     //defaults humanControlAction if there is no bottom sensor

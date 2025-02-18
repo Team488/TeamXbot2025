@@ -2,6 +2,7 @@ package competition.subsystems.elevator;
 
 import competition.electrical_contract.ElectricalContract;
 import competition.subsystems.pose.Landmarks;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
@@ -42,7 +43,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     // elevator starts uncalibrated because it could be in the middle of it's range and we have no idea where that is
     private boolean isCalibrated;
     final Alert isNotCalibratedAlert = new Alert("Elevator: not calibrated", Alert.AlertType.kWarning);
-    private Distance elevatorPositionOffset;
+    private Distance laserCANPositionOffset;
+    private Angle elevatorMotorPositionOffset;
 
     public Distance elevatorTargetHeight;
 
@@ -71,6 +73,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     private final SysIdRoutine sysId;
 
+    private final DoubleProperty laserCANMaxTrustedHeight;
+
     @Inject
     public ElevatorSubsystem(XCANMotorController.XCANMotorControllerFactory motorFactory, PropertyFactory pf,
                              ElectricalContract contract, XDigitalInput.XDigitalInputFactory xDigitalInputFactory,
@@ -78,7 +82,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
         this.contract = contract;
 
-        this.elevatorPositionOffset = Meters.zero();
+        this.laserCANPositionOffset = Meters.zero();
+        this.elevatorMotorPositionOffset = Rotations.zero();
 
         this.elevatorTargetHeight = Inches.of(0);
 
@@ -108,6 +113,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         this.powerNearUpperLimitThreshold = pf.createPersistentProperty("powerNearUpperLimit", 0.0);
         this.powerNearLowerLimitThreshold = pf.createPersistentProperty("powerNearLowerLimit", 0.0);
         this.powerWhenBottomSensorHit = pf.createPersistentProperty("powerWhenBottomSensorHit", 0);
+        this.laserCANMaxTrustedHeight = pf.createPersistentProperty("laserCANMaxTrustedHeight", 0.05);
 
         this.sysId = new SysIdRoutine(
                 new SysIdRoutine.Config(
@@ -180,21 +186,30 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     public void markElevatorAsCalibratedAgainstLowerLimit() {
         isCalibrated = true;
         if (this.masterMotor != null) {
-            elevatorPositionOffset = getRawDistance();
+            laserCANPositionOffset = getRawLaserDistance();
         } else {
-            elevatorPositionOffset = Meters.zero();
+            laserCANPositionOffset = Meters.zero();
         }
     }
 
-    public double getElevatorPositionOffsetInMeters() {
-        return elevatorPositionOffset.in(Meters);
+    private void calibrateElevatorMotorOffsetViaLaserCAN() {
+        var laserDistance = getCalibratedLaserDistance();
+        var motorRotations = getRawMotorAngle();
+        var motorRotationsToZero = Rotations.of(laserDistance.in(Meters) / getMetersPerRotation().in(Meters));
+        elevatorMotorPositionOffset = motorRotations.minus(motorRotationsToZero);
     }
 
     @Override
     public Distance getCurrentValue() {
         Distance currentHeight = Meters.zero();
         if (contract.isElevatorDistanceSensorReady()){
-            currentHeight = getRawDistance().minus(elevatorPositionOffset);
+            if (getCalibratedLaserDistance().in(Meters) < laserCANMaxTrustedHeight.get()) {
+                aKitLog.record("DistanceSource", "LaserCAN");
+                return getCalibratedLaserDistance();
+            } else {
+                aKitLog.record("DistanceSource", "Motor");
+                return getCalibratedMotorDistance();
+            }
         }
         return currentHeight;
     }
@@ -247,7 +262,11 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         return isCalibrated;
     }
 
-    private Distance getRawDistance() {
+    private Distance getCalibratedLaserDistance() {
+        return getRawLaserDistance().minus(laserCANPositionOffset);
+    }
+
+    private Distance getRawLaserDistance() {
         if (contract.isElevatorDistanceSensorReady()) {
             var distance = distanceSensor.getDistance();
             if (distance != null) {
@@ -257,6 +276,21 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         return Meter.of(0);
     }
 
+    private Angle getRawMotorAngle() {
+        if (contract.isElevatorReady()) {
+            return masterMotor.getPosition();
+        }
+        return Rotations.zero();
+    }
+
+    private Angle getCalibratedMotorAngle() {
+        return getRawMotorAngle().minus(elevatorMotorPositionOffset);
+    }
+
+    private Distance getCalibratedMotorDistance() {
+        return Meters.of(getCalibratedMotorAngle().in(Rotations) * getMetersPerRotation().in(Meters));
+    }
+
     private Distance getMetersPerRotation() {
         return Meters.of(rotationsPerMeter.get() != 0 ? 1.0 / rotationsPerMeter.get() : 0);
     }
@@ -264,6 +298,28 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     @Override
     protected boolean areTwoTargetsEquivalent(Distance target1, Distance target2) {
         return target1.isEquivalent(target2);
+    }
+
+    public void setElevatorHeightGoalOnMotor(double heightInMeters) {
+        // If we are in the LaserCAN range, we use that information directly via a delta approach.
+
+        var targetRotations = Rotations.of(heightInMeters * rotationsPerMeter.get()
+                + elevatorMotorPositionOffset.in(Rotations));
+        masterMotor.setPositionTarget(targetRotations, XCANMotorController.MotorPidMode.Voltage);
+
+        /*
+        var currentHeight = getCurrentValue();
+        if (currentHeight.lt(Meters.of(laserCANMaxTrustedHeight.get()))) {
+            // We are in the lower part of the elevator where we can use the LaserCAN
+            // directly.
+            // compute the height delta:
+            var error = Meters.of(heightInMeters).minus(currentHeight);
+            // servo to that delta
+            setElevatorDeltaFromCurrentHeight(error);
+        } else {
+            // We are way up on the elevator. We need to use the onboard motor rotations instead.
+
+        }*/
     }
 
     public void setElevatorDeltaFromCurrentHeight(Distance heightDelta) {
@@ -309,13 +365,20 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
             setTargetValue(getCurrentValue());
         }
 
+        if (getCalibratedLaserDistance().in(Meters) < laserCANMaxTrustedHeight.get()) {
+            // While we are in the trusted range, continuously calibrate the motor.
+            calibrateElevatorMotorOffsetViaLaserCAN();
+        }
+
         aKitLog.record("ElevatorTargetHeight-m", elevatorTargetHeight);
         aKitLog.record("ElevatorCurrentHeight-m", getCurrentValue().in(Meters));
         aKitLog.record("ElevatorBottomSensor", this.isTouchingBottom());
         aKitLog.record("isElevatorCalibrated", isCalibrated());
         aKitLog.record("isElevatorMaintainerAtGoal", this.isMaintainerAtGoal());
         isNotCalibratedAlert.set(!isCalibrated());
-        aKitLog.record("ElevatorDistanceSensor-m", getRawDistance().in(Meters));
+        aKitLog.record("ElevatorDistanceSensor-m", getRawLaserDistance().in(Meters));
+        aKitLog.record("CalibratedElevatorDistanceSensor-m", getCalibratedLaserDistance().in(Meters));
+        aKitLog.record("MotorOffset-rotations", elevatorMotorPositionOffset.in(Rotations));
 
         periodicTickCounter++;
     }
