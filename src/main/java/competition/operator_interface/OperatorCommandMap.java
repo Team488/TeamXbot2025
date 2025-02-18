@@ -16,6 +16,7 @@ import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
 import competition.subsystems.drive.commands.DriveToWaypointsWithVisionCommand;
+import competition.subsystems.drive.commands.SwerveBezierTrajectoryCommand;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.drive.commands.TeleportToPositionCommand;
 import competition.subsystems.elevator.ElevatorSubsystem;
@@ -60,11 +61,12 @@ public class OperatorCommandMap {
             SetCoralArmTargetAngleCommand setCoralArmTargetAngleCommand,
             ScoreCoralCommand scoreCoralCommand,
             ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
+            SwerveBezierTrajectoryCommand sbtc,
             ForceCoralPivotCalibrated forceCoralPivotCalibratedCommand) {
         resetHeading.setHeadingToApply(0);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(resetHeading);
+//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(resetHeading);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(alignToReefWithAprilTag);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).onTrue(driveToWaypointsWithVisionCommand);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(sbtc);
 
         var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Back).onTrue(forceCoralPivotCalibratedCommand);
@@ -72,11 +74,11 @@ public class OperatorCommandMap {
 
         // since there are a lot of free buttons on the driver gamepad currently, let's map some
         // for basic scoring control to make it easier to demo solo. These can all be removed later.
-        var prepL4 = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.FOUR);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
-
-        var homed = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.COLLECTING);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
+//        var prepL4 = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.FOUR);
+//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
+//
+//        var homed = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.COLLECTING);
+//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
 
 //        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(intakeCoralCommand);
         // operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(scoreCoralCommand);
