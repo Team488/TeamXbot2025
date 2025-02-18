@@ -21,6 +21,7 @@ import xbot.common.properties.PropertyFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import static edu.wpi.first.units.Units.Hertz;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Meters;
@@ -41,7 +42,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     // elevator starts uncalibrated because it could be in the middle of it's range and we have no idea where that is
     private boolean isCalibrated;
     final Alert isNotCalibratedAlert = new Alert("Elevator: not calibrated", Alert.AlertType.kWarning);
-    private double elevatorPositionOffset;
+    private Distance elevatorPositionOffset;
 
     public Distance elevatorTargetHeight;
 
@@ -77,7 +78,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
         this.contract = contract;
 
-        this.elevatorPositionOffset = 0.0;
+        this.elevatorPositionOffset = Meters.zero();
 
         this.elevatorTargetHeight = Inches.of(0);
 
@@ -134,6 +135,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
                             -0.4)
                     );
             this.registerDataFrameRefreshable(masterMotor);
+            masterMotor.setPositionAndVelocityUpdateFrequency(Hertz.of(50));
         }
 
         if (contract.isElevatorBottomSensorReady()) {
@@ -153,8 +155,6 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         if (contract.isElevatorReady() && contract.isElevatorBottomSensorReady()) {
             this.masterMotor.setSoftwareReverseLimit(this::isTouchingBottom);
         }
-
-        setCalibrated(false);
     }
 
     @Override
@@ -180,22 +180,21 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     public void markElevatorAsCalibratedAgainstLowerLimit() {
         isCalibrated = true;
         if (this.masterMotor != null) {
-            elevatorPositionOffset = this.masterMotor.getPosition().in(Rotations);
+            elevatorPositionOffset = getRawDistance();
         } else {
-            elevatorPositionOffset = 0;
+            elevatorPositionOffset = Meters.zero();
         }
     }
 
-    public double getElevatorPositionOffsetInRotations() {
-        return elevatorPositionOffset;
+    public double getElevatorPositionOffsetInMeters() {
+        return elevatorPositionOffset.in(Meters);
     }
 
     @Override
     public Distance getCurrentValue() {
         Distance currentHeight = Meters.zero();
-        if (contract.isElevatorReady()){
-            currentHeight = Meters.of(
-                    (this.masterMotor.getPosition().in(Rotations) - elevatorPositionOffset) * getMetersPerRotation().in(Meters));
+        if (contract.isElevatorDistanceSensorReady()){
+            currentHeight = getRawDistance().minus(elevatorPositionOffset);
         }
         return currentHeight;
     }
@@ -243,10 +242,6 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         return getCurrentValue().in(Meters) < lowerHeightLimit.get().in(Meters);
     }
 
-    public void setCalibrated(boolean calibrated) {
-        isCalibrated = calibrated;
-    }
-
     @Override
     public boolean isCalibrated() {
         return isCalibrated;
@@ -254,10 +249,12 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     private Distance getRawDistance() {
         if (contract.isElevatorDistanceSensorReady()) {
-            return distanceSensor.getDistance();
-        } else {
-            return Meter.of(0);
+            var distance = distanceSensor.getDistance();
+            if (distance != null) {
+                return distance;
+            }
         }
+        return Meter.of(0);
     }
 
     private Distance getMetersPerRotation() {
@@ -267,6 +264,18 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     @Override
     protected boolean areTwoTargetsEquivalent(Distance target1, Distance target2) {
         return target1.isEquivalent(target2);
+    }
+
+    public void setElevatorDeltaFromCurrentHeight(Distance heightDelta) {
+        // Much like swerve steering, the maintainer will give us the error (e.g.
+        // "you need to move up 0.25 meters"). The elevator will need to first convert
+        // that to rotations, and then add it to its current number of rotations, and
+        // THAT value is set as a target for onboard PID.
+
+        var deltaRotations = Rotations.of(heightDelta.in(Meters) * rotationsPerMeter.get());
+        masterMotor.setPositionTarget(
+                masterMotor.getPosition().plus(deltaRotations),
+                XCANMotorController.MotorPidMode.Voltage);
     }
 
     /**
