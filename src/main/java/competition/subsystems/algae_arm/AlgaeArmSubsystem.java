@@ -6,6 +6,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.Alert;
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
+import xbot.common.controls.actuators.XCANMotorControllerPIDProperties;
 import xbot.common.controls.sensors.XDigitalInput;
 import xbot.common.injection.electrical_contract.DeviceInfo;
 import xbot.common.math.MathUtils;
@@ -59,7 +60,15 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
         this.electricalContract = electricalContract;
         if (electricalContract.isAlgaeArmPivotMotorReady()) {
             this.armMotor = xcanMotorControllerFactory.create(electricalContract.getAlgaeArmPivotMotor(),
-                    getPrefix(), "AlgaeArmPivotMotor");
+                    getPrefix(), "AlgaeArmPivotMotor",
+                    new XCANMotorControllerPIDProperties(
+                            2,
+                            0,
+                            0,
+                            0,
+                            0,
+                            1,
+                            -1));
             this.registerDataFrameRefreshable(this.armMotor);
         } else {
             this.armMotor = null;
