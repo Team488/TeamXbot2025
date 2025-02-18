@@ -3,12 +3,6 @@
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/java
 
-resources:
-  repositories:
-  - repository: self
-    checkoutOptions:
-      submodules: true
-
 jobs:
  - job: Windows_64_Bit
    pool:
@@ -16,6 +10,10 @@ jobs:
    variables:
      GRADLE_USER_HOME: $(Build.SourcesDirectory)/build/.gradle
    steps:
+    - checkout: self
+      displayName: 'Checkout sources'
+      submodules: true
+      clean: true
     - task: JavaToolInstaller@0
       inputs:
         versionSpec: '17'
