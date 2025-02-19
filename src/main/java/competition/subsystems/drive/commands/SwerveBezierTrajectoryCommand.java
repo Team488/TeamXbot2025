@@ -88,10 +88,8 @@ public class SwerveBezierTrajectoryCommand extends SwerveSimpleTrajectoryCommand
         // This variable holds the rotation at the start of the current segment.
         Rotation2d currentRotation = overallStartRotation;
 
-        // Use a counter to know which segment we're processing.
-        int segmentIndex = 0;
-
         // Iterate over each curve segment.
+        int segmentIndex = 0;
         for (XTableValues.BezierCurve segment : curvesProto.getCurvesList()) {
             segmentIndex++;
 
@@ -101,56 +99,50 @@ public class SwerveBezierTrajectoryCommand extends SwerveSimpleTrajectoryCommand
                 segmentControlPoints.add(new Translation2d(cp.getX(), cp.getY()));
             }
 
-            // If no control points, skip this segment.
-            if (segmentControlPoints.isEmpty()) {
-                continue;
-            }
+            if (segmentControlPoints.isEmpty()) continue;
 
             // Assume the last control point is the segment's end point.
             Translation2d segmentEndPoint = segmentControlPoints.get(segmentControlPoints.size() - 1);
 
-            // Any preceding points are treated as internal control points.
+            // Internal control points
             List<Translation2d> internalControlPoints = new ArrayList<>();
             if (segmentControlPoints.size() > 1) {
                 internalControlPoints.addAll(segmentControlPoints.subList(0, segmentControlPoints.size() - 1));
             }
 
-            // Build the full list of points for de Casteljau's algorithm:
-            // [start, internal control points..., end]
+            // Build the full list of points for de Casteljau's algorithm
             List<Translation2d> allPoints = new ArrayList<>();
             allPoints.add(currentStartPoint);
             allPoints.addAll(internalControlPoints);
             allPoints.add(segmentEndPoint);
 
-            // If we are past the last of the segments, simply use finalRotation for all steps.
-            if (totalSegments > 2 && (segmentIndex >= totalSegments - 2)) {
-                for (int i = 1; i <= STEPS_PER_SEGMENT; i++) {
-                    double lerpFraction = i / (double) STEPS_PER_SEGMENT;
-                    Translation2d pointTranslation = deCasteljauIterative(allPoints, lerpFraction);
-                    fullTrajectory.add(new XbotSwervePoint(pointTranslation, finalRotation, speedMps));
-                }
-                // For subsequent segments, the current rotation is now final.
-                currentRotation = finalRotation;
+            // Compute segmentFraction based on total progress
+            double segmentFraction = (double) segmentIndex / totalSegments;
+
+            // Compute the target rotation based on whether we are in the first or second half
+            double targetAngle;
+            if (segmentFraction <= 0.5) {
+                // First half: interpolate towards finalRotation
+                double progress = segmentFraction / 0.5; // Normalize 0 to 1
+                targetAngle = overallStartRotation.getRadians() + progress * (finalRotation.getRadians() - overallStartRotation.getRadians());
             } else {
-                // Compute the target rotation for this segment by interpolating between the overall start and final.
-                double segmentFraction = (double) segmentIndex / totalSegments;
-                double targetAngle = overallStartRotation.getRadians() + segmentFraction
-                        * (finalRotation.getRadians() - overallStartRotation.getRadians());
-                Rotation2d segmentTargetRotation = new Rotation2d(targetAngle);
-
-                // Interpolate the rotation gradually from currentRotation to segmentTargetRotation.
-                for (int i = 1; i <= STEPS_PER_SEGMENT; i++) {
-                    double lerpFraction = i / (double) STEPS_PER_SEGMENT;
-                    Translation2d pointTranslation = deCasteljauIterative(allPoints, lerpFraction);
-                    double interpolatedAngle = currentRotation.getRadians() + lerpFraction
-                            *   (segmentTargetRotation.getRadians() - currentRotation.getRadians());
-                    Rotation2d pointRotation = new Rotation2d(interpolatedAngle);
-                    fullTrajectory.add(new XbotSwervePoint(pointTranslation, pointRotation, speedMps));
-                }
-
-                // Update the current rotation to the segment's target rotation.
-                currentRotation = segmentTargetRotation;
+                // Second half: maintain finalRotation
+                targetAngle = finalRotation.getRadians();
             }
+
+            Rotation2d segmentTargetRotation = new Rotation2d(targetAngle);
+
+            // Interpolate the rotation gradually from currentRotation to segmentTargetRotation.
+            for (int i = 1; i <= STEPS_PER_SEGMENT; i++) {
+                double lerpFraction = i / (double) STEPS_PER_SEGMENT;
+                Translation2d pointTranslation = deCasteljauIterative(allPoints, lerpFraction);
+                double interpolatedAngle = currentRotation.getRadians() + lerpFraction * (segmentTargetRotation.getRadians() - currentRotation.getRadians());
+                Rotation2d pointRotation = new Rotation2d(interpolatedAngle);
+                fullTrajectory.add(new XbotSwervePoint(pointTranslation, pointRotation, speedMps));
+            }
+
+            // Update currentRotation for next segment.
+            currentRotation = segmentTargetRotation;
 
             // Update the start point for the next segment.
             currentStartPoint = segmentEndPoint;
