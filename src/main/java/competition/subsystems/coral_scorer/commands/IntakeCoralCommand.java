@@ -1,5 +1,7 @@
 package competition.subsystems.coral_scorer.commands;
 
+import competition.operator_interface.OperatorCommandMap;
+import competition.operator_interface.OperatorInterface;
 import competition.subsystems.coral_scorer.CoralScorerSubsystem;
 import xbot.common.command.BaseCommand;
 import xbot.common.properties.DoubleProperty;
@@ -11,6 +13,7 @@ import javax.inject.Inject;
 public class IntakeCoralCommand extends BaseCommand {
     CoralScorerSubsystem coral;
     RumbleManager rumble;
+    OperatorInterface oi;
 
     @Inject
     public IntakeCoralCommand(CoralScorerSubsystem coralScorerSubsystem, RumbleManager.RumbleManagerFactory rumbleManagerFactory) {
@@ -27,7 +30,7 @@ public class IntakeCoralCommand extends BaseCommand {
     @Override
     public void execute(){
         if (coral.confidentlyHasCoral()){
-            rumble.rumbleGamepad(100,100);
+            oi.operatorGamepad.getRumbleManager().rumbleGamepad(10000,1000000);
         }
     }
 
