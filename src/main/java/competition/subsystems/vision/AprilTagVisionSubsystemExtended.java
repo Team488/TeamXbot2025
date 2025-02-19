@@ -73,4 +73,9 @@ public class AprilTagVisionSubsystemExtended extends AprilTagVisionSubsystem {
     public int getTargetAprilTagID(Pose2d targetReefFacePose) {
         return aprilTagIDHashMap.get(targetReefFacePose);
     }
+
+    public int getTargetAprilTagID(Landmarks.ReefFace reefFace) {
+        Pose2d targetReefFacePose = Landmarks.getReefFacePose(reefFace);
+        return getTargetAprilTagID(targetReefFacePose);
+    }
 }

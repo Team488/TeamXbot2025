@@ -20,7 +20,7 @@ public class DriveToReefFaceUntilDetectionCommand extends SwerveSimpleTrajectory
 
     Pose2d targetReefFacePose;
     AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
-    boolean kinematics = false;
+    boolean kinematics = true;
 
     @Inject
     public DriveToReefFaceUntilDetectionCommand(DriveSubsystem drive, PoseSubsystem pose,

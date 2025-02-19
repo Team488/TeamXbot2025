@@ -1,33 +1,49 @@
 package competition.commandgroups;
 
 import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
+import competition.subsystems.drive.commands.AlignToTagGlobalMovementWithCalculator;
 import competition.subsystems.drive.commands.DriveToReefFaceUntilDetectionCommand;
+import competition.subsystems.pose.Cameras;
 import competition.subsystems.pose.Landmarks;
+import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import xbot.common.controls.sensors.XXboxController;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 
 public class DriveToReefFaceThenAlignCommandGroupFactory {
 
-    Provider<DriveToReefFaceUntilDetectionCommand> driveToReefFaceCommandProvider;
-    Provider<AlignToReefWithAprilTagCommand> alignToReefWithAprilTagCommandProvider;
+    DriveToReefFaceUntilDetectionCommand driveToReefFaceCommand;
+    AlignToTagGlobalMovementWithCalculator alignToReefWithAprilTagCommand;
+    AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
 
     @Inject
-    public DriveToReefFaceThenAlignCommandGroupFactory(Provider<DriveToReefFaceUntilDetectionCommand> driveToReefFaceCommandProvider,
-                                                       Provider<AlignToReefWithAprilTagCommand> alignToReefWithAprilTagCommandProvider) {
-        this.driveToReefFaceCommandProvider = driveToReefFaceCommandProvider;
-        this.alignToReefWithAprilTagCommandProvider = alignToReefWithAprilTagCommandProvider;
+    public DriveToReefFaceThenAlignCommandGroupFactory(DriveToReefFaceUntilDetectionCommand driveToReefFaceCommand,
+                                                       AlignToTagGlobalMovementWithCalculator alignToReefWithAprilTagCommand,
+                                                       AprilTagVisionSubsystemExtended aprilTagVisionSubsystem) {
+        this.driveToReefFaceCommand = driveToReefFaceCommand;
+        this.alignToReefWithAprilTagCommand = alignToReefWithAprilTagCommand;
+        this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
     }
 
-    public SequentialCommandGroup create(Landmarks.ReefFace targetReefFace) {
+    public void setBranch(Landmarks.ReefFace reefFace, Landmarks.Branch branch) {
+        if (branch == Landmarks.Branch.A) {
+            alignToReefWithAprilTagCommand.setConfigurations(Cameras.FRONT_RIGHT_CAMERA.getIndex(),
+                    aprilTagVisionSubsystem.getTargetAprilTagID(reefFace), false, 1);
+        }
+        else {
+            alignToReefWithAprilTagCommand.setConfigurations(Cameras.FRONT_LEFT_CAMERA.getIndex(),
+                    aprilTagVisionSubsystem.getTargetAprilTagID(reefFace), false, 1);
+        }
+    }
+
+    public SequentialCommandGroup create(Landmarks.ReefFace targetReefFace, Landmarks.Branch targetBranch) {
         var group = new SequentialCommandGroup();
 
-        var driveToReefFace = driveToReefFaceCommandProvider.get();
-        driveToReefFace.setTargetReefFacePose(targetReefFace);
-        var alignToReefWithAprilTag = alignToReefWithAprilTagCommandProvider.get();
-
-        group.addCommands(driveToReefFace, alignToReefWithAprilTag);
+        driveToReefFaceCommand.setTargetReefFacePose(targetReefFace);
+        setBranch(targetReefFace, targetBranch);
+        group.addCommands(driveToReefFaceCommand, alignToReefWithAprilTagCommand);
 
         return group;
     }
