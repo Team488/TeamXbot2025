@@ -16,7 +16,6 @@ import xbot.common.subsystems.drive.control_logic.HeadingModule;
 
 import java.util.Optional;
 
-import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 
 public class AlignCameraToAprilTagCalculator {
@@ -30,6 +29,7 @@ public class AlignCameraToAprilTagCalculator {
     final AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
     final HeadingModule headingModule;
     final DriveSubsystem drive;
+    final PoseSubsystem pose;
     final AKitLogger akitLog;
 
     final int targetAprilTagID;
@@ -37,6 +37,8 @@ public class AlignCameraToAprilTagCalculator {
     final double initialHeading;
     final Translation2d alignmentPointOffset;
     final Rotation3d cameraRotation;
+
+    final double distanceForExactAlignment = 0.75;
 
     private TagAcquisitionState tagAcquisitionState = TagAcquisitionState.NeverSeen;
 
@@ -60,6 +62,7 @@ public class AlignCameraToAprilTagCalculator {
         this.targetCameraID = targetCameraID;
         this.headingModule = headingModuleFactory.create(drive.getRotateToHeadingPid());
         this.drive = drive;
+        this.pose = pose;
         drive.getPositionalPid().reset();
 
         this.initialHeading = pose.getCurrentPose2d().getRotation().getDegrees();
@@ -78,8 +81,7 @@ public class AlignCameraToAprilTagCalculator {
     }
 
     public Pose2d getXYPowersAlignToAprilTag(Pose2d currentPose) {
-        Translation2d driveTarget = new Translation2d(0, 0);
-
+        Translation2d targetLocationOnField = new Translation2d(0, 0);
         if (aprilTagVisionSubsystem.doesCameraBestObservationHaveAprilTagId(targetCameraID, targetAprilTagID)) {
             tagAcquisitionState = TagAcquisitionState.LockedOn;
             Translation2d aprilTagData = aprilTagVisionSubsystem.getRobotRelativeLocationOfBestDetectedAprilTag(targetCameraID);
@@ -93,7 +95,7 @@ public class AlignCameraToAprilTagCalculator {
             );
 
             // Move from robot-relative frame to field frame
-            driveTarget = currentPose.transformBy(relativeGoalTransform).getTranslation();
+            targetLocationOnField = currentPose.transformBy(relativeGoalTransform).getTranslation();
 
         } else {
             if (tagAcquisitionState == TagAcquisitionState.LockedOn) {
@@ -105,18 +107,30 @@ public class AlignCameraToAprilTagCalculator {
             case LockedOn, Lost -> {
                 // Flip our desiredRotation if backwards
                 Optional<Pose3d> aprilTagPose = aprilTagVisionSubsystem.getAprilTagFieldOrientedPose(targetAprilTagID);
-                double desiredRotation = aprilTagPose.map(
-                        (tag) -> Math.PI + tag.getRotation().getZ() - cameraRotation.getZ()
-                ).orElse(initialHeading);
-                akitLog.record("desiredRotation", desiredRotation);
+                double desiredHeading = initialHeading; // Or should we use current heading to avoid possible oscillation?
+                if (aprilTagPose.isPresent()) {
+                    Translation2d aprilTagPosition = aprilTagPose.get().getTranslation().toTranslation2d();
+
+                    if (isCloseEnoughForExactAlignment(aprilTagPosition)) {
+                        desiredHeading = Math.PI + aprilTagPose.get().getRotation().getZ() - cameraRotation.getZ();
+                    } else {
+                        Translation2d currentTranslation = pose.getCurrentPose2d().getTranslation();
+                        desiredHeading = currentTranslation.minus(aprilTagPosition).getAngle().getRadians() + Math.PI;
+                    }
+                }
 
                 yield new Pose2d(
-                        drive.getPowerToAchieveFieldPosition(currentPose.getTranslation(), driveTarget),
-                        Rotation2d.fromDegrees(headingModule.calculateHeadingPower(Math.toDegrees(desiredRotation))) // QUESTION: IS THIS HOW I DO IT?
+                        drive.getPowerToAchieveFieldPosition(currentPose.getTranslation(), targetLocationOnField),
+                        Rotation2d.fromDegrees(headingModule.calculateHeadingPower(Math.toDegrees(desiredHeading)))
                 );
             }
             default -> new Pose2d(0, 0, new Rotation2d()); // How do we get here?
         };
+    }
+
+    private boolean isCloseEnoughForExactAlignment(Translation2d targetPosition) {
+        return targetPosition.getDistance(pose.getCurrentPose2d().getTranslation())
+                < (distanceForExactAlignment + alignmentPointOffset.getNorm());
     }
 
     public boolean recommendIsFinished() {
