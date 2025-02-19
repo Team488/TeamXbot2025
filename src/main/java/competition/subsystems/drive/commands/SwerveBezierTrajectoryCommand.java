@@ -29,7 +29,7 @@ public class SwerveBezierTrajectoryCommand extends SwerveSimpleTrajectoryCommand
     Pose2d endPoint;
     int steps;
 
-    private CoprocessorCommunicationSubsystem coprocessor;
+    private final CoprocessorCommunicationSubsystem coprocessor;
 
     // --- NEW CONSTANTS ---
     private static final int STEPS_PER_SEGMENT = 20;
