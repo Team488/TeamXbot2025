@@ -91,10 +91,10 @@ public class SwerveBezierTrajectoryCommand extends SwerveSimpleTrajectoryCommand
     }
 
     public void setSegmentedBezierCurve(XTableValues.BezierCurves bezierCurves, XTableValues.TraversalOptions options) {
-        this.logic.setKeyPoints(getSegmentedBezierCurve(bezierCurves, options));
+        this.logic.setKeyPoints(getSegmentedBezierCurveSwervePoints(bezierCurves, options));
     }
 
-    public List<XbotSwervePoint> getSegmentedBezierCurve(XTableValues.BezierCurves bezierCurves, XTableValues.TraversalOptions options) {
+    public List<XbotSwervePoint> getSegmentedBezierCurveSwervePoints(XTableValues.BezierCurves bezierCurves, XTableValues.TraversalOptions options) {
         List<XbotSwervePoint> fullTrajectory = new ArrayList<>();
 
         // Get the current robot pose.
