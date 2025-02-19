@@ -28,6 +28,7 @@ public class TrapezoidProfileManager {
 
     final DoubleProperty maxVelocity;
     final DoubleProperty maxAcceleration;
+    final DoubleProperty maxGapAllowed;
     
     TrapezoidProfile profile;
     TrapezoidProfile.Constraints constraints;
@@ -48,6 +49,7 @@ public class TrapezoidProfileManager {
         log = LogManager.getLogger(name + ": TrapezoidProfileManager");
         maxVelocity = pf.createPersistentProperty("maxVelocity", defaultMaxVelocity);
         maxAcceleration = pf.createPersistentProperty("maxAcceleration", defaultMaxAcceleration);
+        maxGapAllowed = pf.createPersistentProperty("maxGapAllowed", 0.5);
         constraints = new TrapezoidProfile.Constraints(maxVelocity.get(), maxAcceleration.get());
         profile = new TrapezoidProfile(constraints);
         // initialize states to current value
@@ -63,6 +65,10 @@ public class TrapezoidProfileManager {
             constraints = new TrapezoidProfile.Constraints(maxVelocity.get(), maxAcceleration.get());
             profile = new TrapezoidProfile(constraints);
         }
+
+//        if(previousSetpoint - currentValue > maxGapAllowed.get()){
+//            profile = new TrapezoidProfile(constraints);
+//        }
 
         // if the target has changed, recompute the goal and current states
         if(goalState.position != targetValue) {

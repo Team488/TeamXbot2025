@@ -1,19 +1,26 @@
 package competition.motion;
 
 import competition.BaseCompetitionTest;
+import competition.simulation.elevator.ElevatorSimulator;
+import competition.subsystems.elevator.ElevatorSubsystem;
 import org.junit.Test;
 
+import static edu.wpi.first.units.Units.Meters;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 public class TrapezoidProfileManagerTest extends BaseCompetitionTest {
 
     private TrapezoidProfileManager manager;
+    private ElevatorSubsystem elevator;
 
     @Override
     public void setUp() {
         super.setUp();
         manager = getInjectorComponent().trapezoidProfileManagerFactory()
                 .create("test", 1, 1, 0);
+
+        elevator = getInjectorComponent().elevatorSubsystem();
     }
 
     @Test
