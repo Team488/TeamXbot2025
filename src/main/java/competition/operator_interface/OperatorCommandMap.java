@@ -2,10 +2,7 @@ package competition.operator_interface;
 
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
 import competition.simulation.commands.ResetSimulatedPose;
-import competition.subsystems.algae_arm.commands.ForceAlgaeArmCalibrated;
-import competition.subsystems.algae_collection.commands.AlgaeCollectionIntakeCommand;
-import competition.subsystems.algae_collection.commands.AlgaeCollectionOutputCommand;
-import competition.subsystems.algae_collection.commands.AlgaeCollectionStopCommand;
+
 import competition.subsystems.coral_arm.commands.ForceCoralPivotCalibrated;
 import competition.subsystems.coral_arm.commands.SetCoralArmTargetAngleCommand;
 import competition.subsystems.coral_scorer.commands.IntakeCoralCommand;
@@ -17,6 +14,7 @@ import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
 import competition.subsystems.drive.commands.DriveToWaypointsWithVisionCommand;
+import competition.subsystems.drive.commands.SwerveBezierTrajectoryCommand;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.drive.commands.TeleportToPositionCommand;
 import competition.subsystems.elevator.ElevatorSubsystem;
@@ -24,7 +22,6 @@ import competition.subsystems.elevator.commands.ForceElevatorCalibratedCommand;
 import competition.subsystems.elevator.commands.SetElevatorTargetHeightCommand;
 import competition.subsystems.oracle.commands.DriveAccordingToOracleCommand;
 import competition.subsystems.oracle.commands.SuperstructureAccordingToOracleCommand;
-import competition.subsystems.pose.Cameras;
 import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.wpilibj2.command.Commands;
 import xbot.common.controls.sensors.XXboxController;
@@ -60,33 +57,32 @@ public class OperatorCommandMap {
             ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
             ForceCoralPivotCalibrated forceCoralPivotCalibratedCommand,
             DebugSwerveModuleCommand debugModule,
-            ChangeActiveSwerveModuleCommand changeActiveModule,
-            SwerveDriveWithJoysticksCommand typicalSwerveDrive) {
+            SwerveBezierTrajectoryCommand sbtc) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(resetHeading);
 
-        var alignToReefWithAprilTagWithLeftCamera = alignToReefWithAprilTagProvider.get();
-        alignToReefWithAprilTagWithLeftCamera.setConfigurations(Cameras.FRONT_LEFT_CAMERA.getIndex(), false, 0.5);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(alignToReefWithAprilTagWithLeftCamera);
+//        var alignToReefWithAprilTagWithLeftCamera = alignToReefWithAprilTagProvider.get();
+//        alignToReefWithAprilTagWithLeftCamera.setConfigurations(Cameras.FRONT_LEFT_CAMERA.getIndex(), false, 0.5);
+//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(alignToReefWithAprilTagWithLeftCamera);
 
-        var alignToReefWithAprilTagWithRightCamera = alignToReefWithAprilTagProvider.get();
-        alignToReefWithAprilTagWithRightCamera.setConfigurations(Cameras.FRONT_RIGHT_CAMERA.getIndex(), false, 0.5);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(alignToReefWithAprilTagWithRightCamera);
+//        var alignToReefWithAprilTagWithRightCamera = alignToReefWithAprilTagProvider.get();
+//        alignToReefWithAprilTagWithRightCamera.setConfigurations(Cameras.FRONT_RIGHT_CAMERA.getIndex(), false, 0.5);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(sbtc);
 
         var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Back).onTrue(forceCoralPivotCalibratedCommand);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(forceElevatorCalibratedCommand);
 
-        // since there are a lot of free buttons on the driver gamepad currently, let's map some
-        // for basic scoring control to make it easier to demo solo. These can all be removed later.
-        var prepL4 = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.FOUR);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
-        var homed = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.COLLECTING);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
+//        // since there are a lot of free buttons on the driver gamepad currently, let's map some
+//        // for basic scoring control to make it easier to demo solo. These can all be removed later.
+//        var prepL4 = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.FOUR);
+//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
+//        var homed = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.COLLECTING);
+//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
 
-        operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
-        operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(changeActiveModule);
-        operatorInterface.driverGamepad.getPovIfAvailable(180).onTrue(typicalSwerveDrive);
+//        operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
+////        operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(changeActiveModule);
+//        operatorInterface.driverGamepad.getPovIfAvailable(180).onTrue(typicalSwerveDrive);
 
 //        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(intakeCoralCommand);
         // operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(scoreCoralCommand);
@@ -165,15 +161,15 @@ public class OperatorCommandMap {
 
     }
 
-    @Inject
-    public void setupAlgaeCommands(OperatorInterface oi,
-                                   ForceAlgaeArmCalibrated forceAlgaeArmCalibrated,
-                                   AlgaeCollectionIntakeCommand algaeCollectionIntakeCommand,
-                                   AlgaeCollectionOutputCommand algaeCollectionOutputCommand) {
-        oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(forceAlgaeArmCalibrated);
-        oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(algaeCollectionIntakeCommand);
-        oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(algaeCollectionOutputCommand);
-    }
+//    @Inject
+//    public void setupAlgaeCommands(OperatorInterface oi,
+//                                   ForceAlgaeArmCalibrated forceAlgaeArmCalibrated,
+//                                   AlgaeCollectionIntakeCommand algaeCollectionIntakeCommand,
+//                                   AlgaeCollectionOutputCommand algaeCollectionOutputCommand) {
+//        oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(forceAlgaeArmCalibrated);
+//        oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(algaeCollectionIntakeCommand);
+//        oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(algaeCollectionOutputCommand);
+//    }
 
     @Inject
     public void setupSysIdCommands(

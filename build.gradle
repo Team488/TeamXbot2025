@@ -112,8 +112,8 @@ dependencies {
 
     testImplementation "org.mockito:mockito-core:3.+"
 
-    // xtables
-    implementation "org.kobe.xbot:xtables:5.2.9.6"
+    // XTABLES - The Matrix Vision
+    implementation "org.kobe.xbot:xtables:5.2.3-SNAPSHOT"
 
     def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
     annotationProcessor "org.littletonrobotics.akit:akit-autolog:$akitJson.version"

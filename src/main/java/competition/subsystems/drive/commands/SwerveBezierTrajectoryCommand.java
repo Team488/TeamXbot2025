@@ -1,7 +1,11 @@
 package competition.subsystems.drive.commands;
+
 import competition.subsystems.pose.EnumsToPose;
 import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
@@ -20,6 +24,7 @@ import xbot.common.trajectory.XbotSwervePoint;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class SwerveBezierTrajectoryCommand extends SwerveSimpleTrajectoryCommand {
 
@@ -30,11 +35,31 @@ public class SwerveBezierTrajectoryCommand extends SwerveSimpleTrajectoryCommand
     private static final int STEPS_PER_SEGMENT = 20;
     private static final double DEFAULT_ACCELERATION = 1.0;
     private static final double DEFAULT_METERS_PER_SECOND_VELOCITY = 2.0;
+    private final List<Pose2d> reefPoses;
+    private final AprilTagFieldLayout layout;
 
     @Inject
     public SwerveBezierTrajectoryCommand(BaseSwerveDriveSubsystem drive, BasePoseSubsystem pose, PropertyFactory pf, HeadingModule.HeadingModuleFactory headingModuleFactory, RobotAssertionManager assertionManager, CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem) {
         super(drive, pose, pf, headingModuleFactory, assertionManager);
         this.coprocessor = coprocessorCommunicationSubsystem;
+        this.layout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
+        this.reefPoses = new ArrayList<>();
+        final List<Optional<Pose3d>> optionalPoses = new ArrayList<>();
+        optionalPoses.add(this.layout.getTagPose(19));
+        optionalPoses.add(this.layout.getTagPose(18));
+        optionalPoses.add(this.layout.getTagPose(17));
+        optionalPoses.add(this.layout.getTagPose(20));
+        optionalPoses.add(this.layout.getTagPose(21));
+        optionalPoses.add(this.layout.getTagPose(22));
+        optionalPoses.add(this.layout.getTagPose(10));
+        optionalPoses.add(this.layout.getTagPose(11));
+        optionalPoses.add(this.layout.getTagPose(9));
+        optionalPoses.add(this.layout.getTagPose(8));
+        optionalPoses.add(this.layout.getTagPose(7));
+        optionalPoses.add(this.layout.getTagPose(6));
+        this.reefPoses.addAll(optionalPoses.stream().filter(Optional::isPresent)
+                .map(m -> m.get().toPose2d())
+                .toList());
     }
 
     @Override
@@ -65,8 +90,11 @@ public class SwerveBezierTrajectoryCommand extends SwerveSimpleTrajectoryCommand
         super.initialize();
     }
 
-
     public void setSegmentedBezierCurve(XTableValues.BezierCurves bezierCurves, XTableValues.TraversalOptions options) {
+        this.logic.setKeyPoints(getSegmentedBezierCurve(bezierCurves, options));
+    }
+
+    public List<XbotSwervePoint> getSegmentedBezierCurve(XTableValues.BezierCurves bezierCurves, XTableValues.TraversalOptions options) {
         List<XbotSwervePoint> fullTrajectory = new ArrayList<>();
 
         // Get the current robot pose.
@@ -86,25 +114,43 @@ public class SwerveBezierTrajectoryCommand extends SwerveSimpleTrajectoryCommand
         int totalSteps = totalSegments * STEPS_PER_SEGMENT;
         int globalStep = 0;
 
-        // AprilTag options.
+        // Boolean to indicate if we want to use AprilTag facing.
         boolean faceAprilTag = (options != null && options.hasFaceNearestReefAprilTag() && options.getFaceNearestReefAprilTag());
-        // The threshold percentage (e.g. 80.0) converted to fraction.
-        double aprilTagThreshold = (options != null && options.hasFaceNearestReefAprilTagPathThresholdPercentage())
-                ? options.getFaceNearestReefAprilTagPathThresholdPercentage() / 100.0
+        // When to start AprilTag lock (as fraction of total path)
+        double startAprilTagThreshold = (options != null && options.hasStartFaceNearestReefAprilTagPathThresholdPercentage())
+                ? options.getStartFaceNearestReefAprilTagPathThresholdPercentage() / 100.0
                 : 0.0;
-        // For non-AprilTag behavior, we use a default threshold (50%).
-        double originalThreshold = 0.5;
+        // When to end AprilTag lock (as fraction of total path)
+        double endAprilTagThreshold = (options != null && options.hasEndFaceNearestReefAprilTagPathThresholdPercentage())
+                ? options.getEndFaceNearestReefAprilTagPathThresholdPercentage() / 100.0
+                : 0.5; // Default to 50% if not provided
 
-        // How quickly to blend to the final rotation.
+        // Final rotation blending speed factor (for after the AprilTag phase)
         double turnSpeedFactor = (options != null && options.hasFinalRotationTurnSpeedFactor()) ? options.getFinalRotationTurnSpeedFactor() : 1.0;
+
+        // Should we instantly snap to the nearest AprilTag? (If false, we gradually turn.)
+        boolean snapToNearestAprilTag = (options != null && options.hasSnapToNearestAprilTag()) ? options.getSnapToNearestAprilTag() : true;
+
+        // If snapping is false, then use this many degrees per step as the max rotation delta.
+        double aprilTagTurnSpeedPerStepDegrees = (options != null && options.hasAprilTagRotationDegreesTurnSpeedFactorPerStep())
+                ? options.getAprilTagRotationDegreesTurnSpeedFactorPerStep()
+                : 10.0; // default value
 
         // Which direction to face the tag (default FRONT for 2025 robot).
         XTableValues.RobotDirection tagDirection = (options != null && options.hasFaceNearestReefAprilTagDirection())
                 ? options.getFaceNearestReefAprilTagDirection()
                 : XTableValues.RobotDirection.FRONT;
 
-        // This will capture the april tag–facing rotation at the threshold.
-        Rotation2d aprilTagRotationAtThreshold = null;
+        // ---------------------------
+        // State variables for AprilTag mode:
+        // ---------------------------
+        // When not snapping, we maintain the current AprilTag rotation to increment gradually.
+        Rotation2d currentAprilTagRotation = null;
+        // When leaving AprilTag mode we capture the last AprilTag-facing rotation to blend from.
+        Rotation2d aprilTagRotationAtEnd = null;
+
+        // For non-AprilTag behavior, we use a default threshold (50% progress).
+        double originalThreshold = 0.5;
 
         // Process each Bézier segment.
         for (XTableValues.BezierCurve segment : bezierCurves.getCurvesList()) {
@@ -139,39 +185,51 @@ public class SwerveBezierTrajectoryCommand extends SwerveSimpleTrajectoryCommand
                 double globalProgress = globalStep / (double) totalSteps;
 
                 Rotation2d targetRotation;
-                if (faceAprilTag && aprilTagThreshold > 0) {
-                    // --- APRIL TAG MODE ---
-                    if (globalProgress <= aprilTagThreshold) {
-                        // For the early portion, face the nearest AprilTag.
-                        double aprilTagAngle = computeAprilTagAngle(pointTranslation, tagDirection);
-                        targetRotation = new Rotation2d(aprilTagAngle);
 
-                        // Capture the rotation at the threshold (using the step that is closest to the threshold).
-                        if (Math.abs(globalProgress - aprilTagThreshold) < (1.0 / totalSteps) || Math.abs(globalProgress - aprilTagThreshold) < 1e-3) {
-                            aprilTagRotationAtThreshold = targetRotation;
-                        }
+                if (faceAprilTag && (globalProgress >= startAprilTagThreshold) && (globalProgress <= endAprilTagThreshold)) {
+                    // --- APRIL TAG ACTIVE REGION ---
+                    double desiredTagAngle = computeAprilTagAngle(pointTranslation, tagDirection);
+                    Rotation2d desiredTagRotation = new Rotation2d(desiredTagAngle);
+
+                    if (snapToNearestAprilTag) {
+                        // Instantly snap to the computed AprilTag angle.
+                        targetRotation = desiredTagRotation;
+                        currentAprilTagRotation = desiredTagRotation; // store for potential blending later
                     } else {
-                        // --- BLENDING MODE ---
-                        // If we haven’t yet stored the rotation at threshold, do so now.
-                        if (aprilTagRotationAtThreshold == null) {
-                            double aprilTagAngle = computeAprilTagAngle(pointTranslation, tagDirection);
-                            aprilTagRotationAtThreshold = new Rotation2d(aprilTagAngle);
+                        // Gradually adjust toward the desired AprilTag rotation.
+                        if (currentAprilTagRotation == null) {
+                            currentAprilTagRotation = overallStartRotation;
                         }
-                        // Determine how quickly to blend based on turnSpeedFactor.
-                        double interpolationEnd = aprilTagThreshold + (1 - aprilTagThreshold) / turnSpeedFactor;
-                        if (interpolationEnd > 1.0) {
-                            interpolationEnd = 1.0;
-                        }
-                        if (globalProgress < interpolationEnd) {
-                            double t = (globalProgress - aprilTagThreshold) / (interpolationEnd - aprilTagThreshold);
-                            targetRotation = interpolateRotation(aprilTagRotationAtThreshold, finalRotation, t);
+                        // Limit the change per step.
+                        double maxDelta = Units.degreesToRadians(aprilTagTurnSpeedPerStepDegrees);
+                        targetRotation = incrementRotationTowards(currentAprilTagRotation, desiredTagRotation, maxDelta);
+                        currentAprilTagRotation = targetRotation;
+                    }
+                } else if (faceAprilTag && (globalProgress > endAprilTagThreshold)) {
+                    // --- BLENDING REGION (after AprilTag active) ---
+                    if (aprilTagRotationAtEnd == null) {
+                        // Capture the last AprilTag rotation (if available)
+                        if (currentAprilTagRotation != null) {
+                            aprilTagRotationAtEnd = currentAprilTagRotation;
                         } else {
-                            targetRotation = finalRotation;
+                            double aprilTagAngle = computeAprilTagAngle(pointTranslation, tagDirection);
+                            aprilTagRotationAtEnd = new Rotation2d(aprilTagAngle);
                         }
                     }
+                    // Define an interpolation period that is shortened or lengthened by turnSpeedFactor.
+                    double interpolationEnd = endAprilTagThreshold + (1 - endAprilTagThreshold) / turnSpeedFactor;
+                    if (interpolationEnd > 1.0) {
+                        interpolationEnd = 1.0;
+                    }
+                    if (globalProgress < interpolationEnd) {
+                        double t = (globalProgress - endAprilTagThreshold) / (interpolationEnd - endAprilTagThreshold);
+                        targetRotation = interpolateRotation(aprilTagRotationAtEnd, finalRotation, t);
+                    } else {
+                        targetRotation = finalRotation;
+                    }
                 } else {
-                    // If not using AprilTag rotation options, we interpolate from the overall start rotation to
-                    // final rotation until reaching the default threshold (50% progress).
+                    // --- DEFAULT (NON-AprilTag) BEHAVIOR ---
+                    // This applies when faceAprilTag is false or before the start threshold.
                     if (globalProgress <= originalThreshold) {
                         double t = globalProgress / originalThreshold;
                         targetRotation = interpolateRotation(overallStartRotation, finalRotation, t);
@@ -186,9 +244,23 @@ public class SwerveBezierTrajectoryCommand extends SwerveSimpleTrajectoryCommand
             // Update the starting point for the next segment.
             currentStartPoint = segmentEndPoint;
         }
-        logic.setKeyPoints(fullTrajectory);
+        return fullTrajectory;
     }
 
+    /**
+     * Gradually increments the current rotation toward the target rotation,
+     * but never by more than maxDelta (in radians) per step.
+     */
+    private Rotation2d incrementRotationTowards(Rotation2d current, Rotation2d target, double maxDelta) {
+        double currentAngle = current.getRadians();
+        double targetAngle = target.getRadians();
+        // Calculate smallest angular difference, wrapped to [-PI, PI].
+        double delta = ((targetAngle - currentAngle + Math.PI) % (2 * Math.PI)) - Math.PI;
+        if (Math.abs(delta) > maxDelta) {
+            delta = Math.signum(delta) * maxDelta;
+        }
+        return new Rotation2d(currentAngle + delta);
+    }
 // ************************************************************************
 // HELPER METHODS
 // ************************************************************************
@@ -201,7 +273,7 @@ public class SwerveBezierTrajectoryCommand extends SwerveSimpleTrajectoryCommand
         // Assume pose2dHashMap exists and is populated.
         Pose2d nearestTag = null;
         double nearestDistance = Double.POSITIVE_INFINITY;
-        for (Pose2d tagPose : enumsToPose.getPose2dHashMap().values()) {
+        for (Pose2d tagPose : reefPoses) {
             double distance = robotPosition.getDistance(tagPose.getTranslation());
             if (distance < nearestDistance) {
                 nearestDistance = distance;
@@ -221,9 +293,10 @@ public class SwerveBezierTrajectoryCommand extends SwerveSimpleTrajectoryCommand
         return angle;
     }
 
+
     /**
      * Linearly interpolates between two rotations.
-     * Note: This simple interpolation assumes the angular difference is small.
+     * This simple interpolation accounts for angle wrap‐around.
      */
     private Rotation2d interpolateRotation(Rotation2d start, Rotation2d end, double t) {
         double startAngle = start.getRadians();
