@@ -366,6 +366,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         isNotCalibratedAlert.set(!isCalibrated());
         aKitLog.record("ElevatorDistanceSensor-m", getRawLaserDistance().in(Meters));
         aKitLog.record("CalibratedElevatorDistanceSensor-m", getCalibratedLaserDistance().in(Meters));
+        aKitLog.record("CalibratedElevatorMotorSensor-m", getCalibratedMotorDistance().in(Meters));
         aKitLog.record("MotorOffset-rotations", elevatorMotorPositionOffset.in(Rotations));
 
         periodicTickCounter++;
