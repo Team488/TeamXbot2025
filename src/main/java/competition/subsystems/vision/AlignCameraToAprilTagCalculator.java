@@ -38,7 +38,7 @@ public class AlignCameraToAprilTagCalculator {
     final Translation2d alignmentPointOffset;
     final Rotation3d cameraRotation;
 
-    final double distanceForExactAlignment = 0.75;
+    final double distanceForExactAlignment = 1;
 
     private TagAcquisitionState tagAcquisitionState = TagAcquisitionState.NeverSeen;
 
