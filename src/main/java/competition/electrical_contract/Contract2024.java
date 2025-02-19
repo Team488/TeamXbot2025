@@ -90,28 +90,28 @@ public class Contract2024 extends Contract2025 {
                             MotorControllerType.SparkMax,
                             CANBusId.RIO,
                             38,
-                            new CANMotorControllerOutputConfig());
+                            new CANMotorControllerOutputConfig().withNeutralMode(CANMotorControllerOutputConfig.NeutralMode.Brake));
             case "FrontRightDrive" ->
                     new CANMotorControllerInfo(
                             getSteeringControllerName(swerveInstance),
                             MotorControllerType.SparkMax,
                             CANBusId.RIO,
                             30,
-                            new CANMotorControllerOutputConfig());
+                            new CANMotorControllerOutputConfig().withNeutralMode(CANMotorControllerOutputConfig.NeutralMode.Brake));
             case "RearLeftDrive" ->
                     new CANMotorControllerInfo(
                             getSteeringControllerName(swerveInstance),
                             MotorControllerType.SparkMax,
                             CANBusId.RIO,
                             21,
-                            new CANMotorControllerOutputConfig());
+                            new CANMotorControllerOutputConfig().withNeutralMode(CANMotorControllerOutputConfig.NeutralMode.Brake));
             case "RearRightDrive" ->
                     new CANMotorControllerInfo(
                             getSteeringControllerName(swerveInstance),
                             MotorControllerType.SparkMax,
                             CANBusId.RIO,
                             28,
-                            new CANMotorControllerOutputConfig());
+                            new CANMotorControllerOutputConfig().withNeutralMode(CANMotorControllerOutputConfig.NeutralMode.Brake));
             default -> null;
         };
     }
@@ -179,22 +179,22 @@ public class Contract2024 extends Contract2025 {
 
     public CameraInfo[] getCameraInfo() {
         return new CameraInfo[] {
-                new CameraInfo("Apriltag_FrontLeft_Camera",
-                        "AprilTagFrontLeft",
-                        new Transform3d(new Translation3d(
-                                aprilCameraXDisplacement,
-                                aprilCameraYDisplacement,
-                                aprilCameraZDisplacement),
-                                new Rotation3d(0, aprilCameraPitch, aprilCameraYaw)),
-                        EnumSet.of(CameraCapabilities.APRIL_TAG)),
-                new CameraInfo("Apriltag_FrontRight_Camera",
-                        "AprilTagFrontRight",
-                        new Transform3d(new Translation3d(
-                                aprilCameraXDisplacement,
-                                -aprilCameraYDisplacement,
-                                aprilCameraZDisplacement),
-                                new Rotation3d(0, aprilCameraPitch, -aprilCameraYaw)),
-                        EnumSet.of(CameraCapabilities.APRIL_TAG)),
+//                new CameraInfo("Apriltag_FrontLeft_Camera",
+//                        "AprilTagFrontLeft",
+//                        new Transform3d(new Translation3d(
+//                                aprilCameraXDisplacement,
+//                                aprilCameraYDisplacement,
+//                                aprilCameraZDisplacement),
+//                                new Rotation3d(0, aprilCameraPitch, aprilCameraYaw)),
+//                        EnumSet.of(CameraCapabilities.APRIL_TAG)),
+//                new CameraInfo("Apriltag_FrontRight_Camera",
+//                        "AprilTagFrontRight",
+//                        new Transform3d(new Translation3d(
+//                                aprilCameraXDisplacement,
+//                                -aprilCameraYDisplacement,
+//                                aprilCameraZDisplacement),
+//                                new Rotation3d(0, aprilCameraPitch, -aprilCameraYaw)),
+//                        EnumSet.of(CameraCapabilities.APRIL_TAG)),
                 new CameraInfo("Apriltag_RearLeft_Camera",
                         "AprilTagRearLeft",
                         new Transform3d(new Translation3d(
