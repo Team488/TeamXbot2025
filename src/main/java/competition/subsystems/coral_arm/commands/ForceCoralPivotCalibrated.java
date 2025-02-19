@@ -18,6 +18,8 @@ public class ForceCoralPivotCalibrated extends BaseCommand {
     public void initialize() {
         log.info("Initializing");
         coralArmPivotSubsystem.forceCalibratedHere();
+        coralArmPivotSubsystem.setTargetValue(coralArmPivotSubsystem.getCurrentValue());
+        this.setRunsWhenDisabled(true);
     }
 
     @Override
