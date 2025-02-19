@@ -8,6 +8,7 @@ import xbot.common.properties.PropertyFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.time.Period;
 
 @Singleton
 public class AlgaeCollectionSubsystem extends BaseSubsystem {
@@ -29,8 +30,8 @@ public class AlgaeCollectionSubsystem extends BaseSubsystem {
             this.motor = null;
         }
 
-        this.intakePower = propertyFactory.createPersistentProperty("Intake Power", .1);
-        this.outputPower = propertyFactory.createPersistentProperty("Output Power", -.1);
+        this.intakePower = propertyFactory.createPersistentProperty("Intake Power", 1);
+        this.outputPower = propertyFactory.createPersistentProperty("Output Power", -1);
     }
 
     public void intake() {
@@ -48,6 +49,13 @@ public class AlgaeCollectionSubsystem extends BaseSubsystem {
     public void stop() {
         if (motor != null) {
             motor.setPower(0);
+        }
+    }
+
+    @Override
+    public void periodic() {
+        if (motor != null) {
+            motor.periodic();
         }
     }
 }

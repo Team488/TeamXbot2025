@@ -10,8 +10,8 @@ import competition.injection.components.DaggerRobotComponent2023;
 import competition.injection.components.DaggerRobotComponent2024;
 import competition.injection.components.DaggerRoboxComponent;
 import competition.injection.components.DaggerSimulationComponent;
+import competition.operator_interface.OperatorInterface;
 import competition.simulation.BaseSimulator;
-import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.wpilibj.Preferences;
 import org.apache.logging.log4j.LogManager;
@@ -31,6 +31,15 @@ public class Robot extends BaseRobot {
 
     BaseSimulator simulator;
     ElectricalContract simulatorContract = new UnitTestContract2025();
+    OperatorInterface oi;
+
+    Robot() {
+        // We currently can't keep up with 0.02s loop times, and the error reporting about loop
+        // overruns ironically makes the problem worse. For now, we're going to set the loop time
+        // to 0.04s to give us some breathing room and figure out some optimizations to bring us
+        // back down to 0.02s.
+        super(0.04);
+    }
 
     @Override
     protected void initializeSystems() {
@@ -41,10 +50,12 @@ public class Robot extends BaseRobot {
         getInjectorComponent().superstructureMechanismSubsystem();
         getInjectorComponent().oracleSubsystem();
         getInjectorComponent().lightSubsystem();
+        oi = getInjectorComponent().operatorInterface();
 
         if (BaseRobot.isSimulation()) {
             simulator = getInjectorComponent().simulator();
         }
+
 
         dataFrameRefreshables.add(getInjectorComponent().driveSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().poseSubsystem());
@@ -53,12 +64,20 @@ public class Robot extends BaseRobot {
         dataFrameRefreshables.add(getInjectorComponent().armPivotSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().elevatorSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().coralScorerSubsystem());
+        dataFrameRefreshables.add(getInjectorComponent().algaeCollectionSubsystem());
+        dataFrameRefreshables.add(getInjectorComponent().algaeArmSubsystem());
 
-        CanBridge.runTCP();
+        // Not needed unless we are actively configuring the LaserCAN.
+        //CanBridge.runTCP();
     }
 
     protected BaseRobotComponent createDaggerComponent() {
         if (BaseRobot.isReal()) {
+
+            if (!Preferences.containsKey("ContractToUse")) {
+                log.error("No contract set in Preferences! This is likely unexpected.");
+                log.info("Count of keys in the Preferences system: {}", Preferences.getKeys().size());
+            }
 
             String chosenContract = Preferences.getString("ContractToUse", "Competition");
 
@@ -100,6 +119,8 @@ public class Robot extends BaseRobot {
     public void disabledInit() {
         super.disabledInit();
         reachedDisabledInit.countDown();
+        var poseSub = getInjectorComponent().poseSubsystem();
+        poseSub.getResetTranslationToVisionEstimateCommand().schedule();
     }
 
     @Override
@@ -140,5 +161,16 @@ public class Robot extends BaseRobot {
 
     public XScheduler getScheduler() {
         return xScheduler;
+    }
+
+    @Override
+    public void sharedPeriodic() {
+        super.sharedPeriodic();
+        if(oi != null) {
+            double propertyStart = getPerformanceTimestampInMs();
+            oi.periodic();
+            double propertyEnd = getPerformanceTimestampInMs();
+            org.littletonrobotics.junction.Logger.recordOutput("OI Periodic ms", propertyEnd - propertyStart);
+        }
     }
 }

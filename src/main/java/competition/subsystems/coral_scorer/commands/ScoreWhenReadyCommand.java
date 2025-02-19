@@ -9,14 +9,14 @@ import javax.inject.Inject;
 
 public class ScoreWhenReadyCommand extends BaseCommand {
     CoralScorerSubsystem coralScorerSubsystem;
-    CoralArmSubsystem armPivotSubsystem;
+    CoralArmSubsystem coralArmSubsystem;
     ElevatorSubsystem elevatorSubsystem;
 
     @Inject
-    public ScoreWhenReadyCommand(CoralScorerSubsystem coralScorerSubsystem, CoralArmSubsystem armPivotSubsystem,
+    public ScoreWhenReadyCommand(CoralScorerSubsystem coralScorerSubsystem, CoralArmSubsystem coralArmSubsystem,
                                  ElevatorSubsystem elevatorSubsystem) {
         this.coralScorerSubsystem = coralScorerSubsystem;
-        this.armPivotSubsystem = armPivotSubsystem;
+        this.coralArmSubsystem = coralArmSubsystem;
         this.elevatorSubsystem = elevatorSubsystem;
         addRequirements(coralScorerSubsystem);
     }
@@ -28,10 +28,14 @@ public class ScoreWhenReadyCommand extends BaseCommand {
 
     @Override
     public void execute() {
-        if (coralScorerSubsystem.hasCoral() && armPivotSubsystem.getIsTargetAngleScoring()
-                && armPivotSubsystem.isMaintainerAtGoal() && elevatorSubsystem.isMaintainerAtGoal()) {
-            coralScorerSubsystem.scorer();
+        var hasCoral = coralScorerSubsystem.hasCoral();
+        var getIsTargetAngleScoring = coralArmSubsystem.getIsTargetAngleScoring();
+        var armMaintainerAtGoal = coralArmSubsystem.isMaintainerAtGoal();
+        var elevatorMaintainerAtGoal = elevatorSubsystem.isMaintainerAtGoal();
+        if (hasCoral && getIsTargetAngleScoring && armMaintainerAtGoal && elevatorMaintainerAtGoal) {
+            coralScorerSubsystem.setCoralScorerState(CoralScorerSubsystem.CoralScorerState.SCORING);
         }
+
     }
 
     @Override

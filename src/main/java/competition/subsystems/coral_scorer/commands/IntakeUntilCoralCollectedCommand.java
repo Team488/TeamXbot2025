@@ -5,25 +5,22 @@ import xbot.common.command.BaseCommand;
 
 import javax.inject.Inject;
 
-public class IntakeUntillCoral extends BaseCommand {
+public class IntakeUntilCoralCollectedCommand extends BaseCommand {
     CoralScorerSubsystem coral;
 
     @Inject
-    public IntakeUntillCoral (CoralScorerSubsystem coralScorerSubsystem){
+    public IntakeUntilCoralCollectedCommand(CoralScorerSubsystem coralScorerSubsystem){
         coral= coralScorerSubsystem;
         this.addRequirements(coral);
     }
+
     @Override
-    public void initialize(){}
+    public void initialize() {
+        coral.setCoralScorerState(CoralScorerSubsystem.CoralScorerState.INTAKING);
+    }
 
     @Override
     public boolean isFinished() {
-        if (this.coral.confidentlyHasCoral()) {
-            coral.motor.setPower(0);
-            return true;
-        } else {
-            coral.motor.setPower(coral.intakePower.get());
-            return false;
-        }
+        return this.coral.confidentlyHasCoral();
     }
 }

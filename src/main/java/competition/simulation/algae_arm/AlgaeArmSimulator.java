@@ -13,6 +13,7 @@ import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Rotations;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import xbot.common.advantage.AKitLogger;
@@ -54,8 +55,12 @@ public class AlgaeArmSimulator {
         // based on the motor state, potentially run internal PID if need be
         MotorInternalPIDHelper.updateInternalPID(armMotor, pidManager);
 
-        // invert power because the simulated arm is going "backwards"
-        armSim.setInput(this.armMotor.getPower() * RobotController.getBatteryVoltage() * -1.0);
+        if(DriverStation.isEnabled()) {
+            armSim.setInput(this.armMotor.getPower() * RobotController.getBatteryVoltage());
+        } else {
+            armSim.setInput(0.0);
+        }
+        
         armSim.update(SimulationConstants.loopPeriodSec); // 20ms
 
         // Read out the new arm position for rendering

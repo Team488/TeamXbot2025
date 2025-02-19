@@ -1,5 +1,6 @@
 package competition.subsystems.elevator.commands;
 
+import competition.electrical_contract.ElectricalContract;
 import competition.motion.TrapezoidProfileManager;
 import competition.operator_interface.OperatorInterface;
 import competition.subsystems.elevator.ElevatorSubsystem;
@@ -21,6 +22,7 @@ import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
+import static xbot.common.logic.CalibrationDecider.CalibrationMode.GaveUp;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -40,33 +42,48 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     final TrapezoidProfileManager profileManager;
 
+    final ElectricalContract contract;
+
     @Inject
     public ElevatorMaintainerCommand(ElevatorSubsystem elevator, PropertyFactory pf,
                                      HumanVsMachineDecider.HumanVsMachineDeciderFactory hvmFactory,
                                      CalibrationDecider.CalibrationDeciderFactory calibrationDeciderFactory,
                                      TrapezoidProfileManager.Factory trapezoidProfileManagerFactory,
                                      PIDManager.PIDManagerFactory pidf,
-                                     OperatorInterface oi){
+                                     OperatorInterface oi,
+                                     ElectricalContract contract){
         super(elevator, pf, hvmFactory, Inches.of(1).in(Meters), 0.2);
         pf.setPrefix(this);
         this.elevator = elevator;
-        profileManager = trapezoidProfileManagerFactory.create(getPrefix() + "trapezoidMotion", 1, 1, elevator.getCurrentValue().in(Meters));
+        profileManager = trapezoidProfileManagerFactory.create(
+                getPrefix() + "trapezoidMotion",
+                5,
+                3.5,
+                elevator.getCurrentValue().in(Meters));
 
         this.oi = oi;
+        this.contract = contract;
 
         calibrationDecider = calibrationDeciderFactory.create("calibrationDecider");
         calibrationDecider.reset();
 
-        this.humanMaxPowerGoingUp = pf.createPersistentProperty("maxPowerGoingUp", 1);
-        this.humanMaxPowerGoingDown = pf.createPersistentProperty("maxPowerGoingDown", -0.2);
+        this.humanMaxPowerGoingUp = pf.createPersistentProperty("humanMaxPowerGoingUp", 0.2);
+        this.humanMaxPowerGoingDown = pf.createPersistentProperty("humanMaxPowerGoingDown", -0.2);
 
-        this.gravityPIDConstantPower = pf.createPersistentProperty("gravityPIDConstant", 0.015);
+        this.gravityPIDConstantPower = pf.createPersistentProperty("gravityPIDConstant", 0.07416666);
+
+        decider.setDeadband(0.02);
     }
 
     @Override
     public void initialize() {
-        log.info("initializing");
+        super.initialize();
         calibrationDecider.reset();
+    }
+
+    @Override
+    protected void initializeMachineControlAction() {
+        super.initializeMachineControlAction();
     }
 
     @Override
@@ -86,20 +103,20 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         // it's helpful to log this to know where the robot is actually trying to get to in the moment
         aKitLog.record("elevatorProfileTarget", setpoint);
 
-        //handles pidding via motor controller and setting power to elevator
         elevator.masterMotor.setPositionTarget(
-                Rotations.of(setpoint * elevator.rotationsPerMeter.get()),
+                Rotations.of(setpoint * elevator.rotationsPerMeter.get()
+                        + elevator.getElevatorPositionOffsetInRotations()),
                 XCANMotorController.MotorPidMode.Voltage);
     }
 
+    //defaults humanControlAction if there is no bottom sensor
     @Override
     protected void uncalibratedMachineControlAction() {
-        var mode = calibrationDecider.decideMode(elevator.isCalibrated());
+        var mode = GaveUp;
 
         switch (mode){
             case Calibrated -> calibratedMachineControlAction();
             case Attempting -> attemptCalibration();
-            case GaveUp -> humanControlAction();
             default -> humanControlAction();
         }
     }
@@ -129,12 +146,16 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     @Override
     protected double getHumanInput() {
-        return MathUtils.constrainDouble(
+
+        double humanInput = MathUtils.constrainDouble(
                 MathUtils.deadband(
-                    oi.superstructureGamepad.getLeftVector().getY(),
-                    oi.getOperatorGamepadTypicalDeadband(),
-                    (a) -> (a)),
+                        oi.superstructureGamepad.getLeftStickY(),
+                        oi.getOperatorGamepadTypicalDeadband(),
+                        (a) -> MathUtils.exponentAndRetainSign(a, 3)),
                 humanMaxPowerGoingDown.get(), humanMaxPowerGoingUp.get());
+
+        aKitLog.record("elevatorHumanInput", humanInput);
+        return humanInput;
     }
 
     @Override

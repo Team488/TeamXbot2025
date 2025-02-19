@@ -81,7 +81,9 @@ public class CalibrateDriveCommand extends BaseCommand {
     }
 
     private double getDriveMotorPosition(SwerveModuleSubsystem module) {
-        return module.getDriveSubsystem().getMotorController().getPosition().in(Degrees) / 360;
+        return module.getDriveSubsystem().getMotorController()
+                .map(mc -> mc.getPosition().in(Degrees) / 360)
+                .orElse(0.0);
     }
 
     private double getDeltaPosition(SwerveModuleSubsystem module, double startingPosition) {
