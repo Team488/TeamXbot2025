@@ -294,25 +294,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     }
 
     public void setElevatorHeightGoalOnMotor(double heightInMeters) {
-        // If we are in the LaserCAN range, we use that information directly via a delta approach.
-
-        var targetRotations = Rotations.of(heightInMeters * rotationsPerMeter.get()
-                + elevatorMotorPositionOffset.in(Rotations));
-        masterMotor.setPositionTarget(targetRotations, XCANMotorController.MotorPidMode.Voltage);
-
-        /*
-        var currentHeight = getCurrentValue();
-        if (currentHeight.lt(Meters.of(laserCANMaxTrustedHeight.get()))) {
-            // We are in the lower part of the elevator where we can use the LaserCAN
-            // directly.
-            // compute the height delta:
-            var error = Meters.of(heightInMeters).minus(currentHeight);
-            // servo to that delta
-            setElevatorDeltaFromCurrentHeight(error);
-        } else {
-            // We are way up on the elevator. We need to use the onboard motor rotations instead.
-
-        }*/
+        setElevatorDeltaFromCurrentHeight(Meters.of(heightInMeters).minus(getCurrentValue()));
     }
 
     public void setElevatorDeltaFromCurrentHeight(Distance heightDelta) {
@@ -320,7 +302,6 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         // "you need to move up 0.25 meters"). The elevator will need to first convert
         // that to rotations, and then add it to its current number of rotations, and
         // THAT value is set as a target for onboard PID.
-
         var deltaRotations = Rotations.of(heightDelta.in(Meters) * rotationsPerMeter.get());
         masterMotor.setPositionTarget(
                 masterMotor.getPosition().plus(deltaRotations),
