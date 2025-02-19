@@ -67,9 +67,9 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
 
         this.coralScorerState = STOPPED;
 
-        this.intakePower = propertyFactory.createPersistentProperty("intakePower", 0.1);
+        this.intakePower = propertyFactory.createPersistentProperty("intakePower", 0.3);
         this.hasCoralIntakePower = propertyFactory.createPersistentProperty("hasCoralIntakePower", 0.05);
-        this.scorePower = propertyFactory.createPersistentProperty("scorerPower", -0.1);
+        this.scorePower = propertyFactory.createPersistentProperty("scorerPower", -0.8);
         this.waitTimeAfterScoring = propertyFactory.createPersistentProperty("waitTimeAfterScoring", 0.5);
         this.waitTimeAfterCollection = propertyFactory.createPersistentProperty("waitTimeAfterCollection", 0.1);
 
@@ -81,9 +81,10 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
     }
 
     public void setCoralScorerState(CoralScorerState state) {
-        if (state != coralScorerState) {
-            coralScorerState = state;
+        if (coralScorerState != SCORING && state == SCORING) {
+            lastScoredTime = XTimer.getFPGATimestamp();;
         }
+        coralScorerState = state;
     }
 
     private void setCoralScorerMotorPower(double power) {
@@ -119,7 +120,7 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
         setCoralScorerMotorPower(scorePower.get());
         if (coralScorerState != SCORING) {
             lastScoredTime = XTimer.getFPGATimestamp();
-        }
+    }
     }
 
     private void stop() {
@@ -151,9 +152,11 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
         return coralScorerState;
     }
 
+
     private boolean coralLikelyJammed() {
         return coralScorerState == CoralScorerState.INTAKING
                 && Math.abs(motor.getVelocity().in(RotationsPerSecond)) < intakeFreeSpeedRPSProperty.get();
+
     }
 
     public AngularVelocity getMotorVelocity() {
@@ -191,7 +194,7 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
         aKitLog.record("coralPresentStable", hasCoralValidator.peekStable());
         aKitLog.record("CoralConfidentlyScored", confidentlyHasScoredCoral());
         aKitLog.record("IntakeRPS", getMotorVelocity().in(RotationsPerSecond));
-
+        aKitLog.record("coralScorerState", coralScorerState);
     }
 }
 

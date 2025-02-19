@@ -6,6 +6,8 @@ import competition.operator_interface.OperatorCommandMap;
 import competition.operator_interface.OperatorInterface;
 import competition.simulation.BaseSimulator;
 import competition.subsystems.SubsystemDefaultCommandMap;
+import competition.subsystems.algae_arm.AlgaeArmSubsystem;
+import competition.subsystems.algae_collection.AlgaeCollectionSubsystem;
 import competition.subsystems.coral_arm.CoralArmSubsystem;
 import competition.subsystems.coral_scorer.CoralScorerSubsystem;
 import competition.subsystems.elevator.ElevatorSubsystem;
@@ -61,4 +63,8 @@ public abstract class BaseRobotComponent extends BaseComponent {
     public abstract OperatorInterface operatorInterface();
 
     public abstract GameField gameField();
+
+    public abstract AlgaeArmSubsystem algaeArmSubsystem();
+
+    public abstract AlgaeCollectionSubsystem algaeCollectionSubsystem();
 }

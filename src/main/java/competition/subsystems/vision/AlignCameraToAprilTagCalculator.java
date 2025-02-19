@@ -37,6 +37,7 @@ public class AlignCameraToAprilTagCalculator {
     final double initialHeading;
     final Translation2d alignmentPointOffset;
     final Rotation3d cameraRotation;
+    Translation2d targetLocationOnField = new Translation2d(0, 0);
 
     final double distanceForExactAlignment = 1;
 
