@@ -1,9 +1,6 @@
 package competition.subsystems.drive.commands;
-
-
-import competition.subsystems.pose.Landmarks;
+import competition.subsystems.pose.EnumsToPose;
 import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -29,125 +26,212 @@ public class SwerveBezierTrajectoryCommand extends SwerveSimpleTrajectoryCommand
     private final CoprocessorCommunicationSubsystem coprocessor;
 
     // --- NEW CONSTANTS ---
+    private final EnumsToPose enumsToPose = new EnumsToPose(); // not sure why yall made a class that reinits each time, this should be final.
     private static final int STEPS_PER_SEGMENT = 20;
+    private static final double DEFAULT_ACCELERATION = 1.0;
+    private static final double DEFAULT_METERS_PER_SECOND_VELOCITY = 2.0;
 
     @Inject
-    public SwerveBezierTrajectoryCommand(BaseSwerveDriveSubsystem drive,
-                                         BasePoseSubsystem pose, PropertyFactory pf,
-                                         HeadingModule.HeadingModuleFactory headingModuleFactory,
-                                         RobotAssertionManager assertionManager,
-                                         CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem) {
+    public SwerveBezierTrajectoryCommand(BaseSwerveDriveSubsystem drive, BasePoseSubsystem pose, PropertyFactory pf, HeadingModule.HeadingModuleFactory headingModuleFactory, RobotAssertionManager assertionManager, CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem) {
         super(drive, pose, pf, headingModuleFactory, assertionManager);
         this.coprocessor = coprocessorCommunicationSubsystem;
     }
 
     @Override
     public void initialize() {
+
+
         this.logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
         XTablesClient client = this.coprocessor.tryGetXTablesClient();
         if (client != null) {
-
             XTableValues.BezierCurves curves = client.getBezierCurves("bezier_path");
-            if (curves != null && curves.getPathFound()) {
-                // Use the new segmented integration method.
-                this.logic.setGlobalKinematicValues(new SwervePointKinematics(curves.getAccelerationMetersPerSecond(),
-                        0, 0, curves.getMetersPerSecond()));
-                setSegmentedBezierCurve(curves);
+            if (curves != null && !curves.getCurvesList().isEmpty()) {
+                final XTableValues.TraversalOptions options = curves.hasOptions() ? curves.getOptions() : null;
+                double acceleration = DEFAULT_ACCELERATION;
+                double metersPerSecond = DEFAULT_METERS_PER_SECOND_VELOCITY;
+                if (options != null) {
+                    if (options.hasMetersPerSecond()) {
+                        metersPerSecond = options.getMetersPerSecond();
+                    }
+                    if (options.hasAccelerationMetersPerSecond()) {
+                        acceleration = options.getAccelerationMetersPerSecond();
+                    }
+                }
+                this.logic.setGlobalKinematicValues(new SwervePointKinematics(acceleration,
+                        0, 0, metersPerSecond));
+                setSegmentedBezierCurve(curves, options);
             }
         }
         super.initialize();
-
     }
 
 
-    /**
-     * Integrates multiple Bézier curve segments from the XTableValues into a single trajectory.
-     * <p>
-     * This version ignores timeToTraverse, metersPerSecondSpeed, and tangent rotation. It uses:
-     * - A constant number of steps per segment (STEPS_PER_SEGMENT)
-     * - A constant speedMps (CONSTANT_SPEED)
-     * - A constant final rotation
-     * </p>
-     */
-    public void setSegmentedBezierCurve(XTableValues.BezierCurves bezierCurves) {
+    public void setSegmentedBezierCurve(XTableValues.BezierCurves bezierCurves, XTableValues.TraversalOptions options) {
         List<XbotSwervePoint> fullTrajectory = new ArrayList<>();
 
-        // Start at the robot's current position and rotation.
+        // Get the current robot pose.
         Translation2d currentStartPoint = pose.getCurrentPose2d().getTranslation();
-        Rotation2d overallStartRotation = pose.getCurrentPose2d().getRotation();
+        final Rotation2d overallStartRotation = pose.getCurrentPose2d().getRotation();
 
-        // Compute the final rotation from the proto (converted from degrees to radians).
-        Rotation2d finalRotation = new Rotation2d(Units.degreesToRadians(bezierCurves.getFinalRotationDegrees()));
+        // Final rotation comes from options (or defaults to 0°).
+        double finalRotationDegrees = (options != null && options.hasFinalRotationDegrees()) ? options.getFinalRotationDegrees() : 0;
+        Rotation2d finalRotation = new Rotation2d(Units.degreesToRadians(finalRotationDegrees));
 
-        // Total number of segments from the proto.
+        // Use metersPerSecond from options if provided.
+        double speed = (options != null && options.hasMetersPerSecond()) ? options.getMetersPerSecond() : DEFAULT_METERS_PER_SECOND_VELOCITY;
+
+        // Total number of segments and steps.
         int totalSegments = bezierCurves.getCurvesList().size();
+        final int STEPS_PER_SEGMENT = 20; // Adjust as needed.
+        int totalSteps = totalSegments * STEPS_PER_SEGMENT;
+        int globalStep = 0;
 
-        // This variable holds the rotation at the start of the current segment.
-        Rotation2d currentRotation = overallStartRotation;
+        // AprilTag options.
+        boolean faceAprilTag = (options != null && options.hasFaceNearestReefAprilTag() && options.getFaceNearestReefAprilTag());
+        // The threshold percentage (e.g. 80.0) converted to fraction.
+        double aprilTagThreshold = (options != null && options.hasFaceNearestReefAprilTagPathThresholdPercentage())
+                ? options.getFaceNearestReefAprilTagPathThresholdPercentage() / 100.0
+                : 0.0;
+        // For non-AprilTag behavior, we use a default threshold (50%).
+        double originalThreshold = 0.5;
 
-        // Iterate over each curve segment.
-        int segmentIndex = 0;
+        // How quickly to blend to the final rotation.
+        double turnSpeedFactor = (options != null && options.hasFinalRotationTurnSpeedFactor()) ? options.getFinalRotationTurnSpeedFactor() : 1.0;
+
+        // Which direction to face the tag (default FRONT for 2025 robot).
+        XTableValues.RobotDirection tagDirection = (options != null && options.hasFaceNearestReefAprilTagDirection())
+                ? options.getFaceNearestReefAprilTagDirection()
+                : XTableValues.RobotDirection.FRONT;
+
+        // This will capture the april tag–facing rotation at the threshold.
+        Rotation2d aprilTagRotationAtThreshold = null;
+
+        // Process each Bézier segment.
         for (XTableValues.BezierCurve segment : bezierCurves.getCurvesList()) {
-            segmentIndex++;
-
-            // Process control points for the segment.
+            // Gather control points.
             List<Translation2d> segmentControlPoints = new ArrayList<>();
             for (XTableValues.ControlPoint cp : segment.getControlPointsList()) {
                 segmentControlPoints.add(new Translation2d(cp.getX(), cp.getY()));
             }
-
             if (segmentControlPoints.isEmpty()) {
                 continue;
             }
-
-            // Assume the last control point is the segment's end point.
+            // The last control point is assumed to be the segment’s endpoint.
             Translation2d segmentEndPoint = segmentControlPoints.get(segmentControlPoints.size() - 1);
-
-            // Internal control points
             List<Translation2d> internalControlPoints = new ArrayList<>();
             if (segmentControlPoints.size() > 1) {
                 internalControlPoints.addAll(segmentControlPoints.subList(0, segmentControlPoints.size() - 1));
             }
 
-            // Build the full list of points for de Casteljau's algorithm
+            // Build the full list of points for de Casteljau’s algorithm.
             List<Translation2d> allPoints = new ArrayList<>();
             allPoints.add(currentStartPoint);
             allPoints.addAll(internalControlPoints);
             allPoints.add(segmentEndPoint);
 
-            // Compute segmentFraction based on total progress
-            double segmentFraction = (double) segmentIndex / totalSegments;
-
-            // Compute the target rotation based on whether we are in the first or second half
-            double targetAngle;
-            if (segmentFraction <= 0.5) {
-                // First half: interpolate towards finalRotation
-                double progress = segmentFraction / 0.5; // Normalize 0 to 1
-                targetAngle = overallStartRotation.getRadians() + progress * (finalRotation.getRadians() - overallStartRotation.getRadians());
-            } else {
-                // Second half: maintain finalRotation
-                targetAngle = finalRotation.getRadians();
-            }
-
-            Rotation2d segmentTargetRotation = new Rotation2d(targetAngle);
-
-            // Interpolate the rotation gradually from currentRotation to segmentTargetRotation.
+            // Process each step in the current segment.
             for (int i = 1; i <= STEPS_PER_SEGMENT; i++) {
+                globalStep++;
                 double lerpFraction = i / (double) STEPS_PER_SEGMENT;
                 Translation2d pointTranslation = deCasteljauIterative(allPoints, lerpFraction);
-                double interpolatedAngle = currentRotation.getRadians() + lerpFraction * (segmentTargetRotation.getRadians() - currentRotation.getRadians());
-                Rotation2d pointRotation = new Rotation2d(interpolatedAngle);
-                fullTrajectory.add(new XbotSwervePoint(pointTranslation, pointRotation, bezierCurves.getMetersPerSecond()));
+
+                // Compute global progress (0 to 1) along the entire trajectory.
+                double globalProgress = globalStep / (double) totalSteps;
+
+                Rotation2d targetRotation;
+                if (faceAprilTag && aprilTagThreshold > 0) {
+                    // --- APRIL TAG MODE ---
+                    if (globalProgress <= aprilTagThreshold) {
+                        // For the early portion, face the nearest AprilTag.
+                        double aprilTagAngle = computeAprilTagAngle(pointTranslation, tagDirection);
+                        targetRotation = new Rotation2d(aprilTagAngle);
+
+                        // Capture the rotation at the threshold (using the step that is closest to the threshold).
+                        if (Math.abs(globalProgress - aprilTagThreshold) < (1.0 / totalSteps) || Math.abs(globalProgress - aprilTagThreshold) < 1e-3) {
+                            aprilTagRotationAtThreshold = targetRotation;
+                        }
+                    } else {
+                        // --- BLENDING MODE ---
+                        // If we haven’t yet stored the rotation at threshold, do so now.
+                        if (aprilTagRotationAtThreshold == null) {
+                            double aprilTagAngle = computeAprilTagAngle(pointTranslation, tagDirection);
+                            aprilTagRotationAtThreshold = new Rotation2d(aprilTagAngle);
+                        }
+                        // Determine how quickly to blend based on turnSpeedFactor.
+                        double interpolationEnd = aprilTagThreshold + (1 - aprilTagThreshold) / turnSpeedFactor;
+                        if (interpolationEnd > 1.0) {
+                            interpolationEnd = 1.0;
+                        }
+                        if (globalProgress < interpolationEnd) {
+                            double t = (globalProgress - aprilTagThreshold) / (interpolationEnd - aprilTagThreshold);
+                            targetRotation = interpolateRotation(aprilTagRotationAtThreshold, finalRotation, t);
+                        } else {
+                            targetRotation = finalRotation;
+                        }
+                    }
+                } else {
+                    // If not using AprilTag rotation options, we interpolate from the overall start rotation to
+                    // final rotation until reaching the default threshold (50% progress).
+                    if (globalProgress <= originalThreshold) {
+                        double t = globalProgress / originalThreshold;
+                        targetRotation = interpolateRotation(overallStartRotation, finalRotation, t);
+                    } else {
+                        targetRotation = finalRotation;
+                    }
+                }
+
+                fullTrajectory.add(new XbotSwervePoint(pointTranslation, targetRotation, speed));
             }
 
-            // Update currentRotation for next segment.
-            currentRotation = segmentTargetRotation;
-
-            // Update the start point for the next segment.
+            // Update the starting point for the next segment.
             currentStartPoint = segmentEndPoint;
         }
-
         logic.setKeyPoints(fullTrajectory);
+    }
+
+// ************************************************************************
+// HELPER METHODS
+// ************************************************************************
+
+    /**
+     * Computes the rotation (in radians) the robot should have in order to face the nearest AprilTag.
+     * The robot’s current position is given by 'robotPosition'. If 'direction' is BACK, then 180° is added.
+     */
+    private double computeAprilTagAngle(Translation2d robotPosition, XTableValues.RobotDirection direction) {
+        // Assume pose2dHashMap exists and is populated.
+        Pose2d nearestTag = null;
+        double nearestDistance = Double.POSITIVE_INFINITY;
+        for (Pose2d tagPose : enumsToPose.getPose2dHashMap().values()) {
+            double distance = robotPosition.getDistance(tagPose.getTranslation());
+            if (distance < nearestDistance) {
+                nearestDistance = distance;
+                nearestTag = tagPose;
+            }
+        }
+        // Fallback: if no tag is found, simply return the robot’s current heading.
+        if (nearestTag == null) {
+            return pose.getCurrentPose2d().getRotation().getRadians();
+        }
+        double dx = nearestTag.getTranslation().getX() - robotPosition.getX();
+        double dy = nearestTag.getTranslation().getY() - robotPosition.getY();
+        double angle = Math.atan2(dy, dx);
+        if (direction == XTableValues.RobotDirection.BACK) {
+            angle += Math.PI;
+        }
+        return angle;
+    }
+
+    /**
+     * Linearly interpolates between two rotations.
+     * Note: This simple interpolation assumes the angular difference is small.
+     */
+    private Rotation2d interpolateRotation(Rotation2d start, Rotation2d end, double t) {
+        double startAngle = start.getRadians();
+        double endAngle = end.getRadians();
+        // Wrap the difference to [-PI, PI] for smooth interpolation.
+        double delta = ((endAngle - startAngle + Math.PI) % (2 * Math.PI)) - Math.PI;
+        double interpolatedAngle = startAngle + t * delta;
+        return new Rotation2d(interpolatedAngle);
     }
 
 

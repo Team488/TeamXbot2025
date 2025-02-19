@@ -28,14 +28,16 @@ public class EnumsToPose {
         addToMap(Landmarks.ReefFace.FAR_LEFT, Landmarks.BlueFarLeftAlgae);
         addToMap(Landmarks.ReefFace.FAR_RIGHT, Landmarks.BlueFarRightAlgae);
 
-        addToMap(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.CLOSE, Landmarks.BlueLeftCoralStationClose);
-        addToMap(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.MID, Landmarks.BlueLeftCoralStationMid);
-        addToMap(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.FAR, Landmarks.BlueLeftCoralStationFar);
-        addToMap(Landmarks.CoralStation.RIGHT, Landmarks.CoralStationSection.CLOSE, Landmarks.BlueRightCoralStationClose);
-        addToMap(Landmarks.CoralStation.RIGHT, Landmarks.CoralStationSection.MID, Landmarks.BlueRightCoralStationMid);
-        addToMap(Landmarks.CoralStation.RIGHT, Landmarks.CoralStationSection.FAR, Landmarks.BlueRightCoralStationFar);
+//        addToMap(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.CLOSE, Landmarks.BlueLeftCoralStationClose);
+//        addToMap(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.MID, Landmarks.BlueLeftCoralStationMid);
+//        addToMap(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.FAR, Landmarks.BlueLeftCoralStationFar);
+//        addToMap(Landmarks.CoralStation.RIGHT, Landmarks.CoralStationSection.CLOSE, Landmarks.BlueRightCoralStationClose);
+//        addToMap(Landmarks.CoralStation.RIGHT, Landmarks.CoralStationSection.MID, Landmarks.BlueRightCoralStationMid);
+//        addToMap(Landmarks.CoralStation.RIGHT, Landmarks.CoralStationSection.FAR, Landmarks.BlueRightCoralStationFar);
     }
-
+    public HashMap<String, Pose2d> getPose2dHashMap() {
+        return pose2dHashMap;
+    }
     // Add reef branch positions to hashmap
     public void addToMap(Landmarks.ReefFace reefFace, Landmarks.Branch branch, Pose2d pose) {
         pose2dHashMap.put(reefFace.toString() + branch.toString(), pose);
