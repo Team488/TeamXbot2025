@@ -282,6 +282,16 @@ public class Contract2025 extends ElectricalContract {
         };
     }
 
+    @Override
+    public double getSteeringGearRatio() {
+        return 12.1; // Documented value for WCP x2i.
+    }
+
+    @Override
+    public double getDriveGearRatio() {
+        return 6.48; // Documented value for WCP x2i with X3 10t gears.
+    }
+
     private static double frontAprilCameraXDisplacement = 10.14 / PoseSubsystem.INCHES_IN_A_METER;
     private static double frontAprilCameraYDisplacement = 6.535 / PoseSubsystem.INCHES_IN_A_METER;
     private static double frontAprilCameraZDisplacement = 6.7 / PoseSubsystem.INCHES_IN_A_METER;
