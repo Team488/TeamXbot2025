@@ -84,9 +84,9 @@ public class Contract2025 extends ElectricalContract {
     @Override
     public boolean isAlgaeArmPivotMotorReady() {return true;}
 
-    public boolean isAlgaeArmBottomSensorReady(){return false;}
+    public boolean isAlgaeArmBottomSensorReady(){return true;}
 
-    public DeviceInfo getAlgaeArmBottomSensor() {return new DeviceInfo("AlgaeArmBottomSensor",2, true); }
+    public DeviceInfo getAlgaeArmBottomSensor() {return new DeviceInfo("AlgaeArmBottomSensor",9, true); }
 
     @Override
     public boolean isHumanLoadRampReady() {
@@ -166,7 +166,7 @@ public class Contract2025 extends ElectricalContract {
 
     CANMotorControllerOutputConfig regularDriveMotorConfig =
             new CANMotorControllerOutputConfig()
-                    .withInversionType(CANMotorControllerOutputConfig.InversionType.Inverted)
+                    .withInversionType(CANMotorControllerOutputConfig.InversionType.Normal)
                     .withStatorCurrentLimit(Amps.of(45))
                     .withNeutralMode(CANMotorControllerOutputConfig.NeutralMode.Brake);
 
@@ -192,7 +192,7 @@ public class Contract2025 extends ElectricalContract {
                             MotorControllerType.TalonFx,
                             CANBusId.DefaultCanivore,
                             31,
-                            invertedDriveMotorConfig);
+                            regularDriveMotorConfig);
             case "RearLeftDrive" ->
                     new CANMotorControllerInfo(
                             getDriveControllerName(swerveInstance),
@@ -206,7 +206,7 @@ public class Contract2025 extends ElectricalContract {
                             MotorControllerType.TalonFx,
                             CANBusId.DefaultCanivore,
                             29,
-                            invertedDriveMotorConfig);
+                            regularDriveMotorConfig);
             default -> null;
         };
     }

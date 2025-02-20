@@ -186,7 +186,7 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
         }
 
         boolean coralLikelyJammed = coralLikelyJammed();
-        hasCoralValidator.checkStable(this.hasCoral() || coralLikelyJammed);
+        hasCoralValidator.checkStable(this.hasCoral() /*|| coralLikelyJammed*/);
 
         aKitLog.record("coralPresentFromSensor", hasCoral());
         hasCoralAlert.set(confidentlyHasCoral());
