@@ -5,6 +5,7 @@ import competition.operator_interface.OperatorInterface;
 import competition.subsystems.algae_arm.AlgaeArmSubsystem;
 import edu.wpi.first.units.measure.Angle;
 import xbot.common.command.BaseMaintainerCommand;
+import xbot.common.controls.sensors.XXboxController;
 import xbot.common.logic.HumanVsMachineDecider;
 import xbot.common.math.MathUtils;
 import xbot.common.math.PIDManager;
@@ -81,12 +82,15 @@ public class AlgaeArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
 
     @Override
     protected double getHumanInput() {
-        return MathUtils.constrainDouble(
-                MathUtils.deadband(
-                        oi.algaeAndSysIdGamepad.getRightStickY(),
-                        oi.getOperatorGamepadTypicalDeadband(),
-                        (a) -> MathUtils.exponentAndRetainSign(a, 3)),
-                humanMinPower.get(), humanMaxPower.get());
+        if (oi.operatorGamepad.getXboxButton(XXboxController.XboxButton.Back).getAsBoolean()) {
+            return MathUtils.constrainDouble(
+                    MathUtils.deadband(
+                            oi.operatorGamepad.getRightStickY(),
+                            oi.getOperatorGamepadTypicalDeadband(),
+                            (a) -> MathUtils.exponentAndRetainSign(a, 3)),
+                    humanMinPower.get(), humanMaxPower.get());
+        }
+        return 0;
     }
 
     @Override
