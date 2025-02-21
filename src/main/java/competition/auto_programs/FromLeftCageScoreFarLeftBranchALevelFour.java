@@ -8,14 +8,14 @@ import xbot.common.subsystems.autonomous.AutonomousCommandSelector;
 
 import javax.inject.Inject;
 
-public class FromLeftCageScoreFarLeftBranchA extends SequentialCommandGroup {
+public class FromLeftCageScoreFarLeftBranchALevelFour extends SequentialCommandGroup {
 
     final AutonomousCommandSelector autoSelector;
 
     @Inject
-    public FromLeftCageScoreFarLeftBranchA(AutonomousCommandSelector autoSelector,
-                                           PoseSubsystem pose,
-                                           DriveToFaceAndScoreCommandGroupFactory driveToFaceAndScoreFact) {
+    public FromLeftCageScoreFarLeftBranchALevelFour(AutonomousCommandSelector autoSelector,
+                                                    PoseSubsystem pose,
+                                                    DriveToFaceAndScoreCommandGroupFactory driveToFaceAndScoreFact) {
         this.autoSelector = autoSelector;
 
         // Force our location to start in front of left cage

@@ -1,5 +1,9 @@
 package competition.operator_interface;
 
+import competition.auto_programs.FromLeftCageScoreFarLeftBranchALevelFour;
+import competition.auto_programs.FromLeftCageScoreLeftFacesLevelFours;
+import competition.auto_programs.FromMidCageScoreFarLeftBranchALevelFour;
+import competition.auto_programs.FromRightCageScoreFarLeftBranchALevelFour;
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
 import competition.simulation.commands.ResetSimulatedPose;
 import competition.subsystems.algae_arm.AlgaeArmSubsystem;
@@ -30,6 +34,7 @@ import competition.subsystems.pose.Cameras;
 import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.wpilibj2.command.Commands;
 import xbot.common.controls.sensors.XXboxController;
+import xbot.common.subsystems.autonomous.SetAutonomousCommand;
 import xbot.common.subsystems.drive.swerve.commands.ChangeActiveSwerveModuleCommand;
 import xbot.common.subsystems.pose.commands.SetRobotHeadingCommand;
 
@@ -111,7 +116,7 @@ public class OperatorCommandMap {
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
 
         var prepL3 = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.THREE);
-        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(prepL3);
+//        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(prepL3);
 
         var prepL2 = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.TWO);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(prepL2);
@@ -263,9 +268,34 @@ public class OperatorCommandMap {
     }
 
     @Inject
+    public void setupAutonomousCommands(OperatorInterface oi,
+                                        Provider<SetAutonomousCommand> setAutonomousCommandProvider,
+                                        FromLeftCageScoreFarLeftBranchALevelFour fromLeftFarLeftBranchALevelFour,
+                                        FromMidCageScoreFarLeftBranchALevelFour fromMidFarLeftBranchALevelFour,
+                                        FromRightCageScoreFarLeftBranchALevelFour fromRightFarLeftBranchALevelFour) {
+        var setFromLeftFarLeftBranchALevelFour = setAutonomousCommandProvider.get();
+        setFromLeftFarLeftBranchALevelFour.setAutoCommand(fromLeftFarLeftBranchALevelFour);
+        oi.neoTrellis.getifAvailable(1).onTrue(setFromLeftFarLeftBranchALevelFour); // temporary button
+
+        var setFromMidFarLeftBranchALevelFour = setAutonomousCommandProvider.get();
+        setFromMidFarLeftBranchALevelFour.setAutoCommand(fromMidFarLeftBranchALevelFour);
+        oi.neoTrellis.getifAvailable(2).onTrue(setFromMidFarLeftBranchALevelFour); // temporary button
+
+        var setFromRightFarLeftBranchALevelFour = setAutonomousCommandProvider.get();
+        setFromRightFarLeftBranchALevelFour.setAutoCommand(fromRightFarLeftBranchALevelFour);
+        oi.neoTrellis.getifAvailable(3).onTrue(setFromRightFarLeftBranchALevelFour); // temporary button
+    }
+
+    @Inject
     public void setupSimulatorCommands(
         ResetSimulatedPose resetPose
     ) {
         resetPose.includeOnSmartDashboard();
+    }
+
+    @Inject
+    public void test(OperatorInterface oi,
+                     FromLeftCageScoreLeftFacesLevelFours fromLeftCageScoreLeftFacesLevelFours) {
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(fromLeftCageScoreLeftFacesLevelFours);
     }
 }
