@@ -92,6 +92,10 @@ public class SwerveBezierTrajectoryCommand extends SwerveSimpleTrajectoryCommand
         this.logic.setKeyPoints(getSegmentedBezierCurveSwervePoints(bezierCurves, options));
     }
 
+    public void setMultiSegmentedBezierCurve(List<XTableValues.BezierCurves> bezierCurves) {
+        this.logic.setKeyPoints(getMultiSegmentedBezierCurveSwervePoints(bezierCurves));
+    }
+
     public List<XbotSwervePoint> getSegmentedBezierCurveSwervePoints(XTableValues.BezierCurves bezierCurves, XTableValues.TraversalOptions options) {
         List<XbotSwervePoint> fullTrajectory = new ArrayList<>();
 
@@ -281,7 +285,7 @@ public class SwerveBezierTrajectoryCommand extends SwerveSimpleTrajectoryCommand
             double turnSpeedFactor = (options != null && options.hasFinalRotationTurnSpeedFactor()) ? options.getFinalRotationTurnSpeedFactor() : 1.0;
 
             // Should we instantly snap to the nearest AprilTag? (If false, we gradually turn.)
-            boolean snapToNearestAprilTag = (options != null && options.hasSnapToNearestAprilTag()) ? options.getSnapToNearestAprilTag() : true;
+            boolean snapToNearestAprilTag = options != null && options.hasSnapToNearestAprilTag() && options.getSnapToNearestAprilTag();
 
             // If snapping is false, then use this many degrees per step as the max rotation delta.
             double aprilTagTurnSpeedPerStepDegrees = (options != null && options.hasAprilTagRotationDegreesTurnSpeedFactorPerStep())
