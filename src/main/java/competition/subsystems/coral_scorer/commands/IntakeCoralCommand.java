@@ -36,12 +36,12 @@ public class IntakeCoralCommand extends BaseCommand {
     public void execute(){
         if (coral.confidentlyHasCoral()){
             System.out.println("Execute happened");
-            oi.superstructureGamepad.getRumbleManager().rumbleGamepad(OperatorGamePadRumblePrefrence.get(),.000001);
-            oi.driverGamepad.getRumbleManager().rumbleGamepad(driverGamePadRumblePrefrence.get(), .00001);
+            oi.superstructureGamepad.getRumbleManager().rumbleGamepad(OperatorGamePadRumblePrefrence.get(),1);
+            oi.driverGamepad.getRumbleManager().rumbleGamepad(driverGamePadRumblePrefrence.get(), 1);
         } else {
             System.out.println("Stopped>?"+1);
             oi.superstructureGamepad.getRumbleManager().rumbleGamepad(0, 0);
-            oi.driverGamepad.getRumbleManager().rumbleGamepad(0, 0);
+            oi.driverGamepad.getRumbleManager().rumbleGamepad(0, 0);git 
         }
     }
 
