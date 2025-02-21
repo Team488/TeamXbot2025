@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import xbot.common.advantage.AKitLogger;
 import xbot.common.controls.actuators.mock_adapters.MockCANMotorController;
+import xbot.common.controls.sensors.mock_adapters.MockLaserCAN;
 import xbot.common.math.PIDManager;
 import xbot.common.math.PIDManager.PIDManagerFactory;
 import xbot.common.properties.PropertyFactory;
@@ -40,6 +41,7 @@ public class ElevatorSimulator {
     final ElevatorSubsystem elevatorSubsystem;
     final MockCANMotorController motor;
     final MockDigitalInput bottomSensor;
+    final MockLaserCAN laserSensor;
 
     @Inject
     public ElevatorSimulator(ElevatorSubsystem elevatorSubsystem, PIDManagerFactory pidManagerFactory,
@@ -51,9 +53,11 @@ public class ElevatorSimulator {
         this.pidManager = pidManagerFactory.create("ElevatorSimulationPositionalPID", 0.05, 0.0, 0.0, 0.0, 1.0, -1.0);
         this.motor = (MockCANMotorController) elevatorSubsystem.masterMotor;
         this.bottomSensor = (MockDigitalInput) elevatorSubsystem.bottomSensor;
+        this.laserSensor = (MockLaserCAN) elevatorSubsystem.distanceSensor;
 
         // init motor position to our random home value
         motor.setPosition(ElevatorSimConstants.rotationsAtZero);
+        laserSensor.setDistance(ElevatorSimConstants.startingHeightMeters);
 
         this.elevatorSim = new ElevatorSim(
                 elevatorGearBox,
@@ -86,6 +90,7 @@ public class ElevatorSimulator {
 
         // Read out the new elevator position for rendering
         var elevatorCurrentHeight = getCurrentHeight();
+        laserSensor.setDistance(elevatorCurrentHeight.in(Meters));
 
         // update the motor encoder position based on the elevator height, add in the
         // random from zero offset
