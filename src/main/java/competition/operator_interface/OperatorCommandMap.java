@@ -29,6 +29,7 @@ import competition.subsystems.oracle.commands.SuperstructureAccordingToOracleCom
 import competition.subsystems.pose.Cameras;
 import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import xbot.common.controls.sensors.XXboxController;
 import xbot.common.subsystems.drive.swerve.commands.ChangeActiveSwerveModuleCommand;
 import xbot.common.subsystems.pose.commands.SetRobotHeadingCommand;
@@ -105,6 +106,7 @@ public class OperatorCommandMap {
                                       Provider<SetAlgaeArmSetpointToTargetPosition> setAlgaeArmProvider,
                                       AlgaeCollectionIntakeCommand intakeAlgae,
                                       AlgaeCollectionOutputCommand ejectAlgae) {
+                                        
         // Coral system buttons
         var prepL4 = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.FOUR);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
@@ -159,6 +161,7 @@ public class OperatorCommandMap {
             Provider<SetElevatorTargetHeightCommand> setElevatorTargetHeightCommandProvider,
             ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
             ForceCoralPivotCalibrated forceCoralPivotCalibratedCommand) {
+                var stopRumbling= new InstantCommand(() -> oi.operatorGamepad.getRumbleManager().stopGamepadRumble());
 
         var returnToBase = setElevatorTargetHeightCommandProvider.get();
         returnToBase.setHeight(Landmarks.CoralLevel.COLLECTING);
@@ -174,7 +177,7 @@ public class OperatorCommandMap {
         var lowerToHumanLoad = setArmTargetAngleCommandProvider.get();
         lowerToHumanLoad.setAngle(Landmarks.CoralLevel.COLLECTING);
 
-        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeCoralCommand);
+        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeCoralCommand).onFalse(stopRumbling);
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreCoralCommand);
 
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).onTrue(lowerToHumanLoad);
