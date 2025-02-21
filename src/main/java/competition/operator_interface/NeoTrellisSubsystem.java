@@ -40,11 +40,11 @@ public class NeoTrellisSubsystem extends BaseSubsystem {
     final XJoystick neoTrellis;
     final ScoringQueue scoringQueue;
 
-    HashMap<FaceBranch, Integer> locationsToButtonIndices;
-    HashMap<Landmarks.CoralLevel, Integer> levelsToButtonIndices;
+    final HashMap<FaceBranch, Integer> locationsToButtonIndices;
+    final HashMap<Landmarks.CoralLevel, Integer> levelsToButtonIndices;
 
-    HashMap<FaceBranch, AdvancedTrigger> locationsToButtons;
-    HashMap<Landmarks.CoralLevel, AdvancedTrigger> levelsToButtons;
+    final HashMap<FaceBranch, AdvancedTrigger> locationsToButtons;
+    final HashMap<Landmarks.CoralLevel, AdvancedTrigger> levelsToButtons;
     final AdvancedTrigger removeAlgaeButton;
     final AdvancedTrigger processAlgaeButton;
     final AdvancedTrigger resetQueueButton;
@@ -78,7 +78,7 @@ public class NeoTrellisSubsystem extends BaseSubsystem {
                 this::queueAppropriateAction);
     }
 
-    private void initializeLocationsAndLevels() {
+    protected void initializeLocationsAndLevels() {
         initializeLocationPair(Landmarks.ReefFace.CLOSE, 27, 28);
         initializeLocationPair(Landmarks.ReefFace.CLOSE_RIGHT, 29, 22);
         initializeLocationPair(Landmarks.ReefFace.FAR_RIGHT, 14, 5);
@@ -92,17 +92,17 @@ public class NeoTrellisSubsystem extends BaseSubsystem {
         initializeLevel(Landmarks.CoralLevel.FOUR, 8);
     }
 
-    private void initializeLevel(Landmarks.CoralLevel level, int buttonNumber) {
+    protected void initializeLevel(Landmarks.CoralLevel level, int buttonNumber) {
         levelsToButtons.put(level, neoTrellis.getifAvailable(buttonNumber));
         levelsToButtonIndices.put(level, buttonNumber);
     }
 
-    private void initializeLocationPair(Landmarks.ReefFace face, int buttonA, int buttonB) {
+    protected void initializeLocationPair(Landmarks.ReefFace face, int buttonA, int buttonB) {
         initializeLocation(face, Landmarks.Branch.A, buttonA);
         initializeLocation(face, Landmarks.Branch.B, buttonB);
     }
 
-    private void initializeLocation(Landmarks.ReefFace face, Landmarks.Branch branch, int buttonIndex) {
+    protected void initializeLocation(Landmarks.ReefFace face, Landmarks.Branch branch, int buttonIndex) {
         var faceBranch = new FaceBranch(face, branch);
         locationsToButtons.put(faceBranch, neoTrellis.getifAvailable(buttonIndex));
         locationsToButtonIndices.put(faceBranch, buttonIndex);
@@ -113,7 +113,7 @@ public class NeoTrellisSubsystem extends BaseSubsystem {
      * It should only take action on the "rising edge" of such an event to debounce the buttons.
      * @param e EdgeType (from the Latch)
      */
-    private void queueAppropriateAction(Latch.EdgeType e) {
+    protected void queueAppropriateAction(Latch.EdgeType e) {
         if (e != Latch.EdgeType.RisingEdge) {
             // If this is a falling edge, we don't care. We only want to act on the rising edge.
             return;
