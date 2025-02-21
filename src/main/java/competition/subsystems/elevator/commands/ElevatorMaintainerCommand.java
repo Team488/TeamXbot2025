@@ -4,7 +4,6 @@ import competition.electrical_contract.ElectricalContract;
 import competition.motion.TrapezoidProfileManager;
 import competition.operator_interface.OperatorInterface;
 import competition.subsystems.elevator.ElevatorSubsystem;
-import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import xbot.common.command.BaseMaintainerCommand;
 import xbot.common.controls.actuators.XCANMotorController;
@@ -15,17 +14,13 @@ import xbot.common.math.PIDManager;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 
-import static edu.wpi.first.units.Units.Degree;
-import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static xbot.common.logic.CalibrationDecider.CalibrationMode.GaveUp;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 
 public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
@@ -93,20 +88,18 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     @Override
     protected void calibratedMachineControlAction() {
+
+        var currentValue = elevator.getCurrentValue();
+
         profileManager.setTargetPosition(
             elevator.getTargetValue().in(Meters),
-            elevator.getCurrentValue().in(Meters),
+            currentValue.in(Meters),
             elevator.getCurrentVelocity().in(MetersPerSecond)
         );
         var setpoint = profileManager.getRecommendedPositionForTime();
-
-        // it's helpful to log this to know where the robot is actually trying to get to in the moment
         aKitLog.record("elevatorProfileTarget", setpoint);
 
-        elevator.masterMotor.setPositionTarget(
-                Rotations.of(setpoint * elevator.rotationsPerMeter.get()
-                        + elevator.getElevatorPositionOffsetInRotations()),
-                XCANMotorController.MotorPidMode.Voltage);
+        elevator.setElevatorHeightGoalOnMotor(setpoint);
     }
 
     //defaults humanControlAction if there is no bottom sensor
@@ -149,7 +142,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
         double humanInput = MathUtils.constrainDouble(
                 MathUtils.deadband(
-                        oi.superstructureGamepad.getLeftStickY(),
+                        oi.operatorGamepad.getLeftStickY(),
                         oi.getOperatorGamepadTypicalDeadband(),
                         (a) -> MathUtils.exponentAndRetainSign(a, 3)),
                 humanMaxPowerGoingDown.get(), humanMaxPowerGoingUp.get());
