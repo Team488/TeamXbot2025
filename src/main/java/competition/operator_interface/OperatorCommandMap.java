@@ -19,6 +19,8 @@ import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
 import competition.subsystems.drive.commands.DriveToCoralStationWithVisionCommand;
+import competition.subsystems.drive.commands.DriveToLocationWithPID;
+import competition.subsystems.drive.commands.RotateToHeadingWithHeadingModule;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.drive.commands.TeleportToPositionCommand;
 import competition.subsystems.elevator.ElevatorSubsystem;
@@ -46,6 +48,8 @@ import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
 
+import static edu.wpi.first.units.Units.Degree;
+
 /**
  * Maps operator interface buttons to commands
  */
@@ -61,10 +65,16 @@ public class OperatorCommandMap {
             SetRobotHeadingCommand resetHeading,
             Provider<AlignToReefWithAprilTagCommand> alignToReefWithAprilTagProvider,
             Provider<SwerveSimpleTrajectoryCommand> swerveSimpleTrajectoryCommandProvider,
-            Provider<ResetPoseCommand> resetPoseCommandProvider,
+            Provider<DriveToLocationWithPID> driveToLocationWithPIDProvider,
+            Provider<RotateToHeadingWithHeadingModule> rotationToHeadingWithHeadingModuleProvider,
+            ResetPoseCommand resetPoseCommand,
             DriveAccordingToOracleCommand driveAccordingToOracle,
             SuperstructureAccordingToOracleCommand superstructureAccordingToOracle,
             DriveToCoralStationWithVisionCommand driveToCoralStationWithVisionCommand,
+            IntakeCoralCommand intakeCoralCommand,
+            SetCoralArmTargetAngleCommand setCoralArmTargetAngleCommand,
+            ScoreCoralCommand scoreCoralCommand,
+            TeleportToPositionCommand teleportToPositionCommand,
             PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
             ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
             ForceCoralPivotCalibrated forceCoralPivotCalibratedCommand,
@@ -73,33 +83,35 @@ public class OperatorCommandMap {
             SwerveDriveWithJoysticksCommand typicalSwerveDrive) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(resetHeading);
-//
-//        var alignToReefWithAprilTagWithLeftCamera = alignToReefWithAprilTagProvider.get();
-//        alignToReefWithAprilTagWithLeftCamera.setConfigurations(Cameras.FRONT_LEFT_CAMERA.getIndex(), false, 1);
-//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(alignToReefWithAprilTagWithLeftCamera);
-//
-//        var alignToReefWithAprilTagWithRightCamera = alignToReefWithAprilTagProvider.get();
-//        alignToReefWithAprilTagWithRightCamera.setConfigurations(Cameras.FRONT_RIGHT_CAMERA.getIndex(), false, 1);
-//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(alignToReefWithAprilTagWithRightCamera);
-//
-//        var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
-//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Back).onTrue(forceCoralPivotCalibratedCommand);
-//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(forceElevatorCalibratedCommand);
-//
-//        // since there are a lot of free buttons on the driver gamepad currently, let's map some
-//        // for basic scoring control to make it easier to demo solo. These can all be removed later.
-//        var prepL4 = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.FOUR);
-//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
-//        var homed = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
-//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
-//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(driveToCoralStationWithVisionCommand);
-//
-//        operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
-//        operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(changeActiveModule);
-//        operatorInterface.driverGamepad.getPovIfAvailable(180).onTrue(typicalSwerveDrive);
-//
-////        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(intakeCoralCommand);
-//        // operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(scoreCoralCommand);
+
+        var alignToReefWithAprilTagWithLeftCamera = alignToReefWithAprilTagProvider.get();
+        alignToReefWithAprilTagWithLeftCamera.setConfigurations(Cameras.FRONT_LEFT_CAMERA.getIndex(), false, 1);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(alignToReefWithAprilTagWithLeftCamera);
+
+        var alignToReefWithAprilTagWithRightCamera = alignToReefWithAprilTagProvider.get();
+        alignToReefWithAprilTagWithRightCamera.setConfigurations(Cameras.FRONT_RIGHT_CAMERA.getIndex(), false, 1);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(alignToReefWithAprilTagWithRightCamera);
+
+        var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Back).onTrue(forceCoralPivotCalibratedCommand);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(forceElevatorCalibratedCommand);
+
+        // since there are a lot of free buttons on the driver gamepad currently, let's map some
+        // for basic scoring control to make it easier to demo solo. These can all be removed later.
+        var prepL4 = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.FOUR);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
+        var homed = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(driveToCoralStationWithVisionCommand);
+
+        operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
+        operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(changeActiveModule);
+        operatorInterface.driverGamepad.getPovIfAvailable(180).onTrue(typicalSwerveDrive);
+
+        // operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(intakeCoralCommand);
+        // operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(scoreCoralCommand);
+
+
 
         // (BLUE ALLIANCE) Below are different routes to test the SwerveSimpleTrajectoryCommand
         // I don't think createPotentiallyFilppedXbotSwervePoint works under OperatorCommandMap
@@ -126,8 +138,40 @@ public class OperatorCommandMap {
         backAndFourth.logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
         backAndFourth.logic.setKeyPoints(points2);
 
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(aroundBlueReef);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(backAndFourth);
+        aroundBlueReef.includeOnSmartDashboard("AroundReefTest");
+        backAndFourth.includeOnSmartDashboard("BackAndForthTest");
+
+        // Don't think this is needed anymore, I'll keep it just in case
+        resetPoseCommand.includeOnSmartDashboard("ResetPoseToOriginCommand");
+
+        var driveWithPidNear = driveToLocationWithPIDProvider.get();
+        driveWithPidNear.setLocationTarget(new Translation2d(1, 0));
+
+        var driveWithPidFar = driveToLocationWithPIDProvider.get();
+        driveWithPidFar.setLocationTarget(new Translation2d(3, 0));
+
+        var rotateTo5Degrees = rotationToHeadingWithHeadingModuleProvider.get();
+        rotateTo5Degrees.setTargetHeading(Degree.of(5));
+
+        var rotateTo10Degrees = rotationToHeadingWithHeadingModuleProvider.get();
+        rotateTo10Degrees.setTargetHeading(Degree.of(10));
+
+        var rotateTo45Degrees = rotationToHeadingWithHeadingModuleProvider.get();
+        rotateTo45Degrees.setTargetHeading(Degree.of(45));
+
+        var rotateTo90Degrees = rotationToHeadingWithHeadingModuleProvider.get();
+        rotateTo90Degrees.setTargetHeading(Degree.of(90));
+
+        var rotateTo180Degrees = rotationToHeadingWithHeadingModuleProvider.get();
+        rotateTo180Degrees.setTargetHeading(Degree.of(180));
+
+        driveWithPidNear.includeOnSmartDashboard("DriveToLocationWithPIDNear");
+        driveWithPidFar.includeOnSmartDashboard("DriveToLocationWithPIDFar");
+        rotateTo5Degrees.includeOnSmartDashboard("RotateTo5Degrees");
+        rotateTo10Degrees.includeOnSmartDashboard("RotateTo10Degrees");
+        rotateTo45Degrees.includeOnSmartDashboard("RotateTo45Degrees");
+        rotateTo90Degrees.includeOnSmartDashboard("RotateTo90Degrees");
+        rotateTo180Degrees.includeOnSmartDashboard("RotateTo180Degrees");
     }
 
 

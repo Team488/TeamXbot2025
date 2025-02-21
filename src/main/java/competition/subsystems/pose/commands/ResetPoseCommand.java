@@ -9,22 +9,22 @@ import javax.inject.Inject;
 
 public class ResetPoseCommand extends BaseCommand {
 
-    PoseSubsystem pose;
-    Pose2d poseToSet = new Pose2d(0, 0, new Rotation2d(0));
+    final PoseSubsystem pose;
+    Pose2d poseTarget = new Pose2d(0, 0, new Rotation2d(0));
 
     @Inject
     public ResetPoseCommand(PoseSubsystem pose) {
         this.pose = pose;
     }
 
-    public void setPose(Pose2d pose) {
-        this.poseToSet = pose;
+    public void setPoseTarget(Pose2d pose) {
+        this.poseTarget = pose;
     }
 
     @Override
     public void initialize() {
         log.info("Initializing");
-        pose.setCurrentPoseInMeters(poseToSet);
+        pose.setCurrentPoseInMeters(poseTarget);
     }
 
     @Override
