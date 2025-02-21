@@ -67,9 +67,9 @@ public class TrapezoidProfileManager {
             profile = new TrapezoidProfile(constraints);
         }
 
-//        if(previousSetpoint - currentValue > maxGapAllowed.get()){
+        if(previousSetpoint - currentValue > maxGapAllowed.get()){
             profile = new TrapezoidProfile(constraints);
-       // }
+        }
 
         // if the target has changed, recompute the goal and current states
         if(goalState.position != targetValue) {
