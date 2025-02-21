@@ -91,8 +91,6 @@ public class AlignCameraToAprilTagCalculator {
             tagAcquisitionState = TagAcquisitionState.LockedOn;
             Translation2d aprilTagData = aprilTagVisionSubsystem.getRobotRelativeLocationOfBestDetectedAprilTag(targetCameraID);
 
-            akitLog.record("AprilTagData", aprilTagData);
-
             // This transform will always be at rotation 0, since in its own frame, the robot is always facing forward.
             Transform2d relativeGoalTransform = new Transform2d(
                     aprilTagData.minus(alignmentPointOffset),
@@ -117,16 +115,13 @@ public class AlignCameraToAprilTagCalculator {
             // If we are close enough, we'll adjust to the "perfect/ideal" heading
             if (isCloseEnoughForExactAlignment(aprilTagPosition)) {
                 desiredHeading = Radians.of(Math.PI + aprilTagPose.get().getRotation().getZ() - cameraRotation.getZ());
-
             } else {
                 // Calculate the heading needed for the robot FRONT to stare at the targeted tag
+                // We'll need to flip the desired heading if the camera is backwards
                 Translation2d currentTranslation = pose.getCurrentPose2d().getTranslation();
                 desiredHeading = Radians.of(
                         currentTranslation.minus(aprilTagPosition).getAngle().getRadians() + Math.PI
-                );
-
-                // We'll need to flip the desired heading if the camera is backwards
-                desiredHeading.plus(Radians.of(isCameraBackwards ? Math.PI : 0));
+                ).plus(Radians.of(isCameraBackwards ? Math.PI : 0));
             }
         }
 
@@ -135,10 +130,10 @@ public class AlignCameraToAprilTagCalculator {
                     drive.getPowerToAchieveFieldPosition(currentPose.getTranslation(), targetLocationOnField),
                     Rotation2d.fromDegrees(headingModule.calculateHeadingPower(desiredHeading.in(Degrees)))
             );
-            // We'll just lock onto the tag by default
+            // We'll just try and look at the tag by default
             default -> new Pose2d(
-                    0, 0, Rotation2d.fromDegrees(headingModule.calculateHeadingPower(desiredHeading.in(Degrees))))
-            ;
+                    0, 0, Rotation2d.fromDegrees(headingModule.calculateHeadingPower(desiredHeading.in(Degrees)))
+            );
         };
     }
 
