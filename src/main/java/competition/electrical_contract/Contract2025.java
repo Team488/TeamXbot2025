@@ -326,7 +326,7 @@ public class Contract2025 extends ElectricalContract {
                                 -frontAprilCameraXDisplacement,
                                 0,
                                 frontAprilCameraZDisplacement),
-                                new Rotation3d(0, Math.toRadians(-45), Math.PI)),
+                                new Rotation3d(0, Math.toRadians(-60), Math.PI)),
                         EnumSet.of(CameraCapabilities.APRIL_TAG))*/
         };
 
@@ -335,5 +335,18 @@ public class Contract2025 extends ElectricalContract {
     @Override
     public Distance getDistanceFromCenterToOuterBumperX() {
         return Inches.of(18);
+    }
+
+    @Override
+    public boolean isClimberMotorReady() { return false; }
+
+    @Override
+    public CANMotorControllerInfo getClimberMotor() {
+        return new CANMotorControllerInfo("ClimberMotor",
+                MotorControllerType.TalonFx,
+                CANBusId.RIO,
+                35,
+                new CANMotorControllerOutputConfig()
+                        .withStatorCurrentLimit(Amps.of(20)));
     }
 }
