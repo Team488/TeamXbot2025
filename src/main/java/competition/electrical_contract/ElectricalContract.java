@@ -69,4 +69,8 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
     public abstract DeviceInfo getAlgaeArmBottomSensor();
 
     public abstract Distance getDistanceFromCenterToOuterBumperX();
+
+    public abstract CANMotorControllerInfo getClimberMotor();
+
+    public abstract  boolean isClimberMotorReady();
 }
