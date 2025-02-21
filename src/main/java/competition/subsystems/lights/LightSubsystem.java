@@ -2,6 +2,8 @@
 
 package competition.subsystems.lights;
 
+import java.nio.ByteBuffer;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -9,7 +11,7 @@ import competition.electrical_contract.ElectricalContract;
 import competition.subsystems.coral_scorer.CoralScorerSubsystem;
 import edu.wpi.first.wpilibj.DriverStation;
 import xbot.common.command.BaseSubsystem;
-import xbot.common.controls.actuators.XDigitalOutput.XDigitalOutputFactory;
+import xbot.common.controls.sensors.XSpiController;
 import xbot.common.subsystems.autonomous.AutonomousCommandSelector;
 
 
@@ -21,6 +23,8 @@ public class LightSubsystem extends BaseSubsystem {
 
     final AutonomousCommandSelector autonomousCommandSelector;
     final CoralScorerSubsystem coralScorerSubsystem;
+    
+    final XSpiController spiController;
 
     public enum LightsStateMessage{
         // we never send NoCode, it's implicit when the robot is off
@@ -61,12 +65,13 @@ public class LightSubsystem extends BaseSubsystem {
     }
 
     @Inject
-    public LightSubsystem(XDigitalOutputFactory digitalOutputFactory,
+    public LightSubsystem(XSpiController.XSpiControllerFactory spiFactory,
                           ElectricalContract contract,
                           AutonomousCommandSelector autonomousCommandSelector,
                           CoralScorerSubsystem coralScorerSubsystem) {
         this.autonomousCommandSelector = autonomousCommandSelector;
         this.coralScorerSubsystem = coralScorerSubsystem;
+        this.spiController = spiFactory.create(contract.getLightsMicrocontrollerSpiBus());
     }
 
     public LightsStateMessage getCurrentState() {
@@ -87,9 +92,16 @@ public class LightSubsystem extends BaseSubsystem {
         return currentState;
     }
 
-    public void sendState(LightsStateMessage state) {
-        var bits = convertIntToBits(state.getValue());
-        // TODO: decide on how communication will actually happen
+    public void sendState(LightsStateMessage state) {        
+        try {
+            ByteBuffer lightsState = ByteBuffer.allocate(Integer.BYTES);
+            lightsState.putInt(state.getValue());
+
+            spiController.write(lightsState, Integer.BYTES);
+        } catch(Exception e) {
+            spiController.close();
+            throw e;
+        }
     }
 
     /**

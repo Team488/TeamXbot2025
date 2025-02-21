@@ -1,7 +1,7 @@
 package competition.electrical_contract;
 
 import edu.wpi.first.units.measure.Distance;
-import xbot.common.controls.sensors.XDigitalInput;
+import edu.wpi.first.wpilibj.SPI;
 import xbot.common.injection.electrical_contract.CANMotorControllerInfo;
 import xbot.common.injection.electrical_contract.DeviceInfo;
 import xbot.common.injection.electrical_contract.XCameraElectricalContract;
@@ -66,5 +66,7 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
     public abstract boolean isAlgaeArmPivotMotorReady();
 
     public abstract Distance getDistanceFromCenterToOuterBumperX();
+
+    public abstract SPI.Port getLightsMicrocontrollerSpiBus();
 
 }

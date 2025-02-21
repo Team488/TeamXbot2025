@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.SPI.Port;
 import xbot.common.injection.electrical_contract.CANBusId;
 import xbot.common.injection.electrical_contract.CANMotorControllerInfo;
 import xbot.common.injection.electrical_contract.CANMotorControllerOutputConfig;
@@ -285,5 +286,10 @@ public class Contract2025 extends ElectricalContract {
     @Override
     public Distance getDistanceFromCenterToOuterBumperX() {
         return Inches.of(18);
+    }
+
+    @Override
+    public Port getLightsMicrocontrollerSpiBus() {
+        return Port.kOnboardCS0;
     }
 }
