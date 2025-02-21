@@ -56,6 +56,11 @@ public class AprilTagVisionSubsystemExtended extends AprilTagVisionSubsystem {
         return new Translation2d(data.getX(), data.getY());
     }
 
+    /**
+     * Returns the Pose3d of an april tag, given that it exists
+     * @param targetAprilTagID we are getting the pose for
+     * @return the Pose3d (AKA position) of the tag
+     */
     public Optional<Pose3d> getAprilTagFieldOrientedPose(int targetAprilTagID) {
         return aprilTagFieldLayout.getTagPose(targetAprilTagID);
     }
