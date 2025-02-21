@@ -8,13 +8,13 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 
 import javax.inject.Inject;
 
-public class PrepAlgaeSystemCommandGroup extends ParallelCommandGroup {
+public class PrepAlgaeSystemCommandGroupFactory extends ParallelCommandGroup {
     SetAlgaeArmSetpointToTargetPosition setAlgaeArmSetpointToTargetPosition;
     AlgaeCollectionOutputCommand algaeCollectionOutputCommand;
     AlgaeCollectionIntakeCommand algaeCollectionIntakeCommand;
 
     @Inject
-    public PrepAlgaeSystemCommandGroup(SetAlgaeArmSetpointToTargetPosition setAlgaeArmSetpointToTargetPosition,
+    public PrepAlgaeSystemCommandGroupFactory(SetAlgaeArmSetpointToTargetPosition setAlgaeArmSetpointToTargetPosition,
                                        AlgaeCollectionOutputCommand algaeCollectionOutputCommand,
                                        AlgaeCollectionIntakeCommand algaeCollectionIntakeCommand) {
         this.setAlgaeArmSetpointToTargetPosition = setAlgaeArmSetpointToTargetPosition;
