@@ -28,6 +28,7 @@ import competition.subsystems.oracle.commands.DriveAccordingToOracleCommand;
 import competition.subsystems.oracle.commands.SuperstructureAccordingToOracleCommand;
 import competition.subsystems.pose.Cameras;
 import competition.subsystems.pose.Landmarks;
+import competition.subsystems.pose.commands.ResetPoseCommand;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -60,6 +61,7 @@ public class OperatorCommandMap {
             SetRobotHeadingCommand resetHeading,
             Provider<AlignToReefWithAprilTagCommand> alignToReefWithAprilTagProvider,
             Provider<SwerveSimpleTrajectoryCommand> swerveSimpleTrajectoryCommandProvider,
+            Provider<ResetPoseCommand> resetPoseCommandProvider,
             DriveAccordingToOracleCommand driveAccordingToOracle,
             SuperstructureAccordingToOracleCommand superstructureAccordingToOracle,
             DriveToCoralStationWithVisionCommand driveToCoralStationWithVisionCommand,
