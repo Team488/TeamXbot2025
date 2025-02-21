@@ -74,11 +74,17 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     public void initialize() {
         super.initialize();
         calibrationDecider.reset();
+        profileManager.resetState(
+                elevator.getCurrentValue().in(Meters),
+                elevator.getCurrentVelocity().in(MetersPerSecond));
     }
 
     @Override
     protected void initializeMachineControlAction() {
         super.initializeMachineControlAction();
+        profileManager.resetState(
+                elevator.getCurrentValue().in(Meters),
+                elevator.getCurrentVelocity().in(MetersPerSecond));
     }
 
     @Override

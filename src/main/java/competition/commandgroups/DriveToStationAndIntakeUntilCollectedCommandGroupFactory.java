@@ -27,7 +27,7 @@ public class DriveToStationAndIntakeUntilCollectedCommandGroupFactory {
     public ParallelDeadlineGroup create(Landmarks.CoralStation station,
                                         Landmarks.CoralStationSection section) {
         var driveToCoralStationSectionWhilePrepping = new ParallelCommandGroup();
-        var prepCoralSystem = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.COLLECTING);
+        var prepCoralSystem = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
         driveToCoralStationSectionCommand.setTargetCoralStationSection(station, section);
         driveToCoralStationSectionWhilePrepping.addCommands(driveToCoralStationSectionCommand, prepCoralSystem);
 
