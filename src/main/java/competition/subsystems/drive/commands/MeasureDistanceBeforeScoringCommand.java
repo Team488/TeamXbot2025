@@ -8,11 +8,13 @@ import xbot.common.command.BaseCommand;
 
 import javax.inject.Inject;
 
+import java.util.function.Supplier;
+
 import static edu.wpi.first.units.Units.Meters;
 
 public class MeasureDistanceBeforeScoringCommand extends BaseCommand {
     PoseSubsystem pose;
-    Distance distanceThreshold = Meters.of(1);
+    Supplier<Distance> distanceThresholdSupplier;
     Landmarks.Branch branch = Landmarks.Branch.A;
     @Inject
     public MeasureDistanceBeforeScoringCommand(PoseSubsystem pose) {
@@ -34,8 +36,17 @@ public class MeasureDistanceBeforeScoringCommand extends BaseCommand {
                 .getDistance(targetReefFacePose.getTranslation()));
         aKitLog.record("branch", branch.name());
 
-        return pose.getCurrentPose2d().getTranslation().getDistance(targetReefFacePose.getTranslation()) < distanceThreshold.in(Meters);
+        return pose.getCurrentPose2d().getTranslation().getDistance(targetReefFacePose.getTranslation()) <
+                distanceThresholdSupplier.get().in(Meters);
 
+    }
+
+    public void setDistanceThresholdSupplier(Supplier<Distance> distanceThresholdSupplier) {
+        this.distanceThresholdSupplier = distanceThresholdSupplier;
+    }
+
+    public void setDistanceThreshold(Distance distanceThreshold) {
+        setDistanceThresholdSupplier(() -> distanceThreshold);
     }
 
     public void setBranch(Landmarks.Branch branch) {

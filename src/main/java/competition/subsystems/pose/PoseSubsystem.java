@@ -19,7 +19,6 @@ import edu.wpi.first.units.measure.Distance;
 import static edu.wpi.first.units.Units.Meters;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import org.kobe.xbot.JClient.XTablesClient;
 import org.kobe.xbot.Utilities.Entities.BatchedPushRequests;
@@ -49,8 +48,6 @@ public class PoseSubsystem extends BasePoseSubsystem {
 
     // only used when simulating the robot
     protected Optional<SwerveModulePosition[]> simulatedModulePositions = Optional.empty();
-
-    public Landmarks.CoralLevel targetCoralLevel;
 
     @Inject
     public PoseSubsystem(XGyroFactory gyroFactory, PropertyFactory propManager, DriveSubsystem drive,
@@ -319,16 +316,5 @@ public class PoseSubsystem extends BasePoseSubsystem {
         else {
             return Landmarks.ReefFace.FAR_LEFT;
         }
-    }
-
-    public Command createSetTargetCoralLevelCommand(Landmarks.CoralLevel coralLevel) {
-        return Commands.runOnce(() -> setTargetCoralLevel(coralLevel));
-    }
-    public void setTargetCoralLevel(Landmarks.CoralLevel coralLevel) {
-        this.targetCoralLevel = coralLevel;
-    }
-
-    public Landmarks.CoralLevel getTargetCoralLevel() {
-        return this.targetCoralLevel;
     }
 }

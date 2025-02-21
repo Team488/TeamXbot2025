@@ -1,5 +1,6 @@
 package competition.commandgroups;
 
+import competition.subsystems.coral_arm.CoralArmSubsystem;
 import competition.subsystems.coral_scorer.commands.ScoreWhenReadyCommand;
 import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.DriveToReefFaceFromAngleUntilDetectionCommand;
@@ -15,8 +16,10 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
 import javax.inject.Provider;
 
+import static edu.wpi.first.units.Units.Meters;
+
 public class HeadingAssistedDriveAndScoreCommandGroup extends SequentialCommandGroup {
-    PoseSubsystem pose;
+    CoralArmSubsystem coralArmSubsystem;
 
 
     @AssistedFactory
@@ -31,25 +34,20 @@ public class HeadingAssistedDriveAndScoreCommandGroup extends SequentialCommandG
                                                     ScoreWhenReadyCommand scoreWhenReadyCommand,
                                                     Provider<AlignToReefWithAprilTagCommand> alignToReefWithAprilTagCommandProvider,
                                                     MeasureDistanceBeforeScoringCommand measureDistanceBeforeScoringCommand,
-                                                    PoseSubsystem pose) {
-        this.pose = pose;
-        var prep = prepCoralSystemCommandGroupFactory.create(pose::getTargetCoralLevel);
+                                                    CoralArmSubsystem coralArmSubsystem) {
+        this.coralArmSubsystem = coralArmSubsystem;
+        var prep = prepCoralSystemCommandGroupFactory.create(coralArmSubsystem::getTargetCoralLevel);
         var alignToReefWithAprilTagWithCamera = alignToReefWithAprilTagCommandProvider.get();
 
-        if (branch == Landmarks.Branch.A) {
-            alignToReefWithAprilTagWithCamera.setConfigurations(Cameras.FRONT_RIGHT_CAMERA.getIndex(),
-                    false, 0.5);
-            driveToReefFaceFromAngleCommand.setAprilTagCamera(Cameras.FRONT_RIGHT_CAMERA);
-            measureDistanceBeforeScoringCommand.setBranch(Landmarks.Branch.A);
-        }
-        else {
-            alignToReefWithAprilTagWithCamera.setConfigurations(Cameras.FRONT_LEFT_CAMERA.getIndex(),
-                    false, 0.5);
-            driveToReefFaceFromAngleCommand.setAprilTagCamera(Cameras.FRONT_LEFT_CAMERA);
-            measureDistanceBeforeScoringCommand.setBranch(Landmarks.Branch.B);
-        }
+        Cameras camera = branch == Landmarks.Branch.A ? Cameras.FRONT_RIGHT_CAMERA : Cameras.FRONT_LEFT_CAMERA;
+
+        alignToReefWithAprilTagWithCamera.setConfigurations(camera.getIndex(),
+                false, 0.5);
+        driveToReefFaceFromAngleCommand.setAprilTagCamera(camera);
+        measureDistanceBeforeScoringCommand.setBranch(branch);
 
         this.addCommands(driveToReefFaceFromAngleCommand);
+        measureDistanceBeforeScoringCommand.setDistanceThreshold(Meters.of(1));
         var measureDistanceBeforePrep = new SequentialCommandGroup(measureDistanceBeforeScoringCommand, prep);
         var alignWhilePrepping = new ParallelCommandGroup(alignToReefWithAprilTagWithCamera, measureDistanceBeforePrep);
         this.addCommands(alignWhilePrepping);
