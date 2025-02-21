@@ -336,4 +336,17 @@ public class Contract2025 extends ElectricalContract {
     public Distance getDistanceFromCenterToOuterBumperX() {
         return Inches.of(18);
     }
+
+    @Override
+    public boolean isClimberMotorReady() { return false; }
+
+    @Override
+    public CANMotorControllerInfo getClimberMotor() {
+        return new CANMotorControllerInfo("ClimberMotor",
+                MotorControllerType.TalonFx,
+                CANBusId.RIO,
+                35,
+                new CANMotorControllerOutputConfig()
+                        .withStatorCurrentLimit(Amps.of(20)));
+    }
 }
