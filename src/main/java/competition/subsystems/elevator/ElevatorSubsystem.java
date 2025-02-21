@@ -1,10 +1,13 @@
 package competition.subsystems.elevator;
 
 import competition.electrical_contract.ElectricalContract;
+import competition.motion.ComplimentaryFilter;
 import competition.subsystems.pose.Landmarks;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import xbot.common.command.BaseSetpointSubsystem;
@@ -20,6 +23,7 @@ import xbot.common.properties.PropertyFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import static edu.wpi.first.units.Units.Hertz;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Meters;
@@ -39,7 +43,9 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     // elevator starts uncalibrated because it could be in the middle of it's range and we have no idea where that is
     private boolean isCalibrated;
-    private double elevatorPositionOffset;
+    final Alert isNotCalibratedAlert = new Alert("Elevator: not calibrated", Alert.AlertType.kWarning);
+    private Distance laserCANPositionOffset;
+    private Angle elevatorMotorPositionOffset;
 
     public Distance elevatorTargetHeight;
 
@@ -68,6 +74,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     private final SysIdRoutine sysId;
 
+    private final ComplimentaryFilter sensorFusionFilter;
+
     @Inject
     public ElevatorSubsystem(XCANMotorController.XCANMotorControllerFactory motorFactory, PropertyFactory pf,
                              ElectricalContract contract, XDigitalInput.XDigitalInputFactory xDigitalInputFactory,
@@ -75,16 +83,16 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
         this.contract = contract;
 
-        this.elevatorPositionOffset = 0.0;
-
+        this.laserCANPositionOffset = Meters.zero();
+        this.elevatorMotorPositionOffset = Rotations.zero();
         this.elevatorTargetHeight = Inches.of(0);
+        sensorFusionFilter = new ComplimentaryFilter(pf, this.getPrefix(), true, 0.5);
 
         pf.setPrefix(this);
 
-        //these are not real measured heights yet, just placeholders
-        l2Height = pf.createPersistentProperty("l2Height", Inches.of(1));
-        l3Height = pf.createPersistentProperty("l3Height", Inches.of(15.875));
-        l4Height = pf.createPersistentProperty("l4Height", Inches.of(40.651));
+        l2Height = pf.createPersistentProperty("l2Height", Inches.of(7.0));
+        l3Height = pf.createPersistentProperty("l3Height", Inches.of(23.0));
+        l4Height = pf.createPersistentProperty("l4Height", Inches.of(46.0));
         humanLoadHeight = pf.createPersistentProperty("humanLoadHeight", Inches.of(1));
         baseHeight = pf.createPersistentProperty("baseHeight", Inches.of(0));
 
@@ -132,6 +140,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
                             -0.4)
                     );
             this.registerDataFrameRefreshable(masterMotor);
+            masterMotor.setPositionAndVelocityUpdateFrequency(Hertz.of(50));
         }
 
         if (contract.isElevatorBottomSensorReady()) {
@@ -150,10 +159,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
         if (contract.isElevatorReady() && contract.isElevatorBottomSensorReady()) {
             this.masterMotor.setSoftwareReverseLimit(this::isTouchingBottom);
-            this.masterMotor.setSoftwareReverseLimit(() -> getCurrentValue().gt(upperHeightLimit.get()));
         }
-
-        setCalibrated(false);
     }
 
     @Override
@@ -179,20 +185,26 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     public void markElevatorAsCalibratedAgainstLowerLimit() {
         isCalibrated = true;
         if (this.masterMotor != null) {
-            elevatorPositionOffset = this.masterMotor.getPosition().in(Rotations);
+            laserCANPositionOffset = getRawLaserDistance();
+            elevatorMotorPositionOffset = getRawMotorAngle();
         } else {
-            elevatorPositionOffset = 0;
+            laserCANPositionOffset = Meters.zero();
+            elevatorMotorPositionOffset = Rotations.zero();
         }
+    }
+
+    private void calibrateElevatorMotorOffsetViaLaserCAN() {
+        var laserDistance = getCalibratedLaserDistance();
+        var motorRotations = getRawMotorAngle();
+        var motorRotationsToZero = Rotations.of(laserDistance.in(Meters) / getMetersPerRotation().in(Meters));
+        elevatorMotorPositionOffset = motorRotations.minus(motorRotationsToZero);
     }
 
     @Override
     public Distance getCurrentValue() {
-        Distance currentHeight = Meters.zero();
-        if (contract.isElevatorReady()){
-            currentHeight = Meters.of(
-                    (this.masterMotor.getPosition().in(Rotations) - elevatorPositionOffset) * getMetersPerRotation().in(Meters));
-        }
-        return currentHeight;
+        return Meters.of(sensorFusionFilter.calculateFilteredValue(
+                getCalibratedLaserDistance().in(Meters),
+                getCalibratedMotorDistance().in(Meters)));
     }
 
     public LinearVelocity getCurrentVelocity() {
@@ -238,21 +250,38 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         return getCurrentValue().in(Meters) < lowerHeightLimit.get().in(Meters);
     }
 
-    public void setCalibrated(boolean calibrated) {
-        isCalibrated = calibrated;
-    }
-
     @Override
     public boolean isCalibrated() {
         return isCalibrated;
     }
 
-    private Distance getRawDistance() {
+    private Distance getCalibratedLaserDistance() {
+        return getRawLaserDistance().minus(laserCANPositionOffset);
+    }
+
+    private Distance getRawLaserDistance() {
         if (contract.isElevatorDistanceSensorReady()) {
-            return distanceSensor.getDistance();
-        } else {
-            return Meter.of(0);
+            var distance = distanceSensor.getDistance();
+            if (distance != null) {
+                return distance;
+            }
         }
+        return Meter.of(0);
+    }
+
+    private Angle getRawMotorAngle() {
+        if (contract.isElevatorReady()) {
+            return masterMotor.getPosition();
+        }
+        return Rotations.zero();
+    }
+
+    private Angle getCalibratedMotorAngle() {
+        return getRawMotorAngle().minus(elevatorMotorPositionOffset);
+    }
+
+    private Distance getCalibratedMotorDistance() {
+        return Meters.of(getCalibratedMotorAngle().in(Rotations) * getMetersPerRotation().in(Meters));
     }
 
     private Distance getMetersPerRotation() {
@@ -262,6 +291,21 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     @Override
     protected boolean areTwoTargetsEquivalent(Distance target1, Distance target2) {
         return target1.isEquivalent(target2);
+    }
+
+    public void setElevatorHeightGoalOnMotor(double heightInMeters) {
+        setElevatorDeltaFromCurrentHeight(Meters.of(heightInMeters).minus(getCurrentValue()));
+    }
+
+    public void setElevatorDeltaFromCurrentHeight(Distance heightDelta) {
+        // Much like swerve steering, the maintainer will give us the error (e.g.
+        // "you need to move up 0.25 meters"). The elevator will need to first convert
+        // that to rotations, and then add it to its current number of rotations, and
+        // THAT value is set as a target for onboard PID.
+        var deltaRotations = Rotations.of(heightDelta.in(Meters) * rotationsPerMeter.get());
+        masterMotor.setPositionTarget(
+                masterMotor.getPosition().plus(deltaRotations),
+                XCANMotorController.MotorPidMode.Voltage);
     }
 
     /**
@@ -290,15 +334,21 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
             masterMotor.periodic();
         }
         //bandage case: isTouchingBottom flashes true for one tick on startup, investigate later?
-        if (this.isTouchingBottom() && periodicTickCounter >= 3) {
+        if (this.isTouchingBottom() && periodicTickCounter >= 3 && !isCalibrated()) {
             markElevatorAsCalibratedAgainstLowerLimit();
+            setTargetValue(getCurrentValue());
         }
 
         aKitLog.record("ElevatorTargetHeight-m", elevatorTargetHeight);
         aKitLog.record("ElevatorCurrentHeight-m", getCurrentValue().in(Meters));
         aKitLog.record("ElevatorBottomSensor", this.isTouchingBottom());
         aKitLog.record("isElevatorCalibrated", isCalibrated());
-        aKitLog.record("ElevatorDistanceSensor-m", getRawDistance().in(Meters));
+        aKitLog.record("isElevatorMaintainerAtGoal", this.isMaintainerAtGoal());
+        isNotCalibratedAlert.set(!isCalibrated());
+        aKitLog.record("ElevatorDistanceSensor-m", getRawLaserDistance().in(Meters));
+        aKitLog.record("CalibratedElevatorDistanceSensor-m", getCalibratedLaserDistance().in(Meters));
+        aKitLog.record("CalibratedElevatorMotorSensor-m", getCalibratedMotorDistance().in(Meters));
+        aKitLog.record("MotorOffset-rotations", elevatorMotorPositionOffset.in(Rotations));
 
         periodicTickCounter++;
     }

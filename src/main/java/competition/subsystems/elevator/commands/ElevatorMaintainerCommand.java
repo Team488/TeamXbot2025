@@ -4,7 +4,6 @@ import competition.electrical_contract.ElectricalContract;
 import competition.motion.TrapezoidProfileManager;
 import competition.operator_interface.OperatorInterface;
 import competition.subsystems.elevator.ElevatorSubsystem;
-import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import xbot.common.command.BaseMaintainerCommand;
 import xbot.common.controls.actuators.XCANMotorController;
@@ -15,16 +14,13 @@ import xbot.common.math.PIDManager;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 
-import static edu.wpi.first.units.Units.Degree;
-import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
+import static xbot.common.logic.CalibrationDecider.CalibrationMode.GaveUp;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 
 public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
@@ -78,8 +74,11 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     public void initialize() {
         super.initialize();
         calibrationDecider.reset();
+    }
 
-        setpoint = elevator.getCurrentValue().in(Meters);
+    @Override
+    protected void initializeMachineControlAction() {
+        super.initializeMachineControlAction();
     }
 
     @Override
@@ -87,34 +86,26 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         elevator.setPower(0);
     }
 
-    double setpoint = 0;
-
     @Override
     protected void calibratedMachineControlAction() {
+
+        var currentValue = elevator.getCurrentValue();
+
         profileManager.setTargetPosition(
             elevator.getTargetValue().in(Meters),
-            elevator.getCurrentValue().in(Meters),
-            elevator.getCurrentVelocity().in(MetersPerSecond),
-            setpoint
+            currentValue.in(Meters),
+            elevator.getCurrentVelocity().in(MetersPerSecond)
         );
-        setpoint = profileManager.getRecommendedPositionForTime();
-
-        // it's helpful to log this to know where the robot is actually trying to get to in the moment
+        var setpoint = profileManager.getRecommendedPositionForTime();
         aKitLog.record("elevatorProfileTarget", setpoint);
 
-        // TODO: this is disabled for testing
-        //handles pidding via motor controller and setting power to elevator
-        elevator.masterMotor.setPositionTarget(
-                Rotations.of(setpoint * elevator.rotationsPerMeter.get()),
-                XCANMotorController.MotorPidMode.Voltage);
+        elevator.setElevatorHeightGoalOnMotor(setpoint);
     }
 
     //defaults humanControlAction if there is no bottom sensor
     @Override
     protected void uncalibratedMachineControlAction() {
-        var mode = contract.isElevatorBottomSensorReady()
-                ? calibrationDecider.decideMode(elevator.isCalibrated())
-                : CalibrationDecider.CalibrationMode.GaveUp;
+        var mode = GaveUp;
 
         switch (mode){
             case Calibrated -> calibratedMachineControlAction();
@@ -151,7 +142,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
         double humanInput = MathUtils.constrainDouble(
                 MathUtils.deadband(
-                        oi.superstructureGamepad.getLeftStickY(),
+                        oi.operatorGamepad.getLeftStickY(),
                         oi.getOperatorGamepadTypicalDeadband(),
                         (a) -> MathUtils.exponentAndRetainSign(a, 3)),
                 humanMaxPowerGoingDown.get(), humanMaxPowerGoingUp.get());
