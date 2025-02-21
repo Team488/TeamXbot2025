@@ -36,8 +36,8 @@ public class MeasureDistanceBeforeScoringCommand extends BaseCommand {
                 .getDistance(targetReefFacePose.getTranslation()));
         aKitLog.record("branch", branch.name());
 
-        return pose.getCurrentPose2d().getTranslation().getDistance(targetReefFacePose.getTranslation()) <
-                distanceThresholdSupplier.get().in(Meters);
+        return pose.getCurrentPose2d().getTranslation().getDistance(targetReefFacePose.getTranslation())
+                < distanceThresholdSupplier.get().in(Meters);
 
     }
 
