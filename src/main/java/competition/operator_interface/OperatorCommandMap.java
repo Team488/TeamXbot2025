@@ -116,7 +116,7 @@ public class OperatorCommandMap {
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
 
         var prepL3 = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.THREE);
-//        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(prepL3);
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(prepL3);
 
         var prepL2 = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.TWO);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(prepL2);
@@ -272,18 +272,27 @@ public class OperatorCommandMap {
                                         Provider<SetAutonomousCommand> setAutonomousCommandProvider,
                                         FromLeftCageScoreFarLeftBranchALevelFour fromLeftFarLeftBranchALevelFour,
                                         FromMidCageScoreFarLeftBranchALevelFour fromMidFarLeftBranchALevelFour,
-                                        FromRightCageScoreFarLeftBranchALevelFour fromRightFarLeftBranchALevelFour) {
+                                        FromRightCageScoreFarLeftBranchALevelFour fromRightFarLeftBranchALevelFour,
+                                        FromLeftCageScoreLeftFacesLevelFours fromLeftCageScoreLeftFacesLevelFours) {
         var setFromLeftFarLeftBranchALevelFour = setAutonomousCommandProvider.get();
         setFromLeftFarLeftBranchALevelFour.setAutoCommand(fromLeftFarLeftBranchALevelFour);
         oi.neoTrellis.getifAvailable(1).onTrue(setFromLeftFarLeftBranchALevelFour); // temporary button
+        setFromLeftFarLeftBranchALevelFour.includeOnSmartDashboard("From Left Score Far Left Branch A Level 4 Auto");
 
         var setFromMidFarLeftBranchALevelFour = setAutonomousCommandProvider.get();
         setFromMidFarLeftBranchALevelFour.setAutoCommand(fromMidFarLeftBranchALevelFour);
         oi.neoTrellis.getifAvailable(2).onTrue(setFromMidFarLeftBranchALevelFour); // temporary button
+        setFromMidFarLeftBranchALevelFour.includeOnSmartDashboard("From Mid Score Far Left Branch A Level 4 Auto");
 
         var setFromRightFarLeftBranchALevelFour = setAutonomousCommandProvider.get();
         setFromRightFarLeftBranchALevelFour.setAutoCommand(fromRightFarLeftBranchALevelFour);
         oi.neoTrellis.getifAvailable(3).onTrue(setFromRightFarLeftBranchALevelFour); // temporary button
+        setFromRightFarLeftBranchALevelFour.includeOnSmartDashboard("From Right Score Far Left Branch A Level 4 Auto");
+
+        var setFromLeftCageScoreLeftFacesLevelFours = setAutonomousCommandProvider.get();
+        setFromLeftCageScoreLeftFacesLevelFours.setAutoCommand(fromLeftCageScoreLeftFacesLevelFours);
+        oi.neoTrellis.getifAvailable(4).onTrue(setFromLeftCageScoreLeftFacesLevelFours); // temporary button
+        setFromLeftCageScoreLeftFacesLevelFours.includeOnSmartDashboard("From Left Score Left Face's Level Fours Auto");
     }
 
     @Inject
@@ -291,11 +300,5 @@ public class OperatorCommandMap {
         ResetSimulatedPose resetPose
     ) {
         resetPose.includeOnSmartDashboard();
-    }
-
-    @Inject
-    public void test(OperatorInterface oi,
-                     FromLeftCageScoreLeftFacesLevelFours fromLeftCageScoreLeftFacesLevelFours) {
-        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(fromLeftCageScoreLeftFacesLevelFours);
     }
 }
