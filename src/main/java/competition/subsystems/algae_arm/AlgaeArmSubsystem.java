@@ -76,10 +76,11 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
         if (electricalContract.isAlgaeArmBottomSensorReady()) {
             this.bottomSensor = xDigitalInputFactory.create(electricalContract.getAlgaeArmBottomSensor(), this.getPrefix());
+            registerDataFrameRefreshable(this.bottomSensor);
         } else {
             this.bottomSensor = null;
         }
-        this.degreesPerRotation = propertyFactory.createPersistentProperty("DegreesPerRotation", 1);
+        this.degreesPerRotation = propertyFactory.createPersistentProperty("DegreesPerRotation", 13.523);
 
         this.rangeOfMotionInDegrees = propertyFactory.createPersistentProperty("RangeOfMotionInDegrees", 160.0);
         this.groundCollectionDegrees = propertyFactory.createPersistentProperty("GroundCollectionDegrees", 45.0);
@@ -203,11 +204,17 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
         if (electricalContract.isAlgaeArmPivotMotorReady()) {
             armMotor.periodic();
         }
+
+        if (this.isTouchingBottom()) {
+            forceCalibratedHere();
+        }
+
         isNotCalibratedAlert.set(!isCalibrated());
         aKitLog.record("Target Angle", this.getTargetValue().in(Degrees));
         aKitLog.record("Current Angle", this.getCurrentValue().in(Degrees));
         aKitLog.record("isCalibrated", this.isCalibrated());
         aKitLog.record("Current Velocity", this.getCurrentVelocity().in(DegreesPerSecond));
+        aKitLog.record("Touching Bottom", this.isTouchingBottom());
     }
 }
 

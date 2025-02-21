@@ -81,9 +81,9 @@ public class OperatorCommandMap {
 
         // since there are a lot of free buttons on the driver gamepad currently, let's map some
         // for basic scoring control to make it easier to demo solo. These can all be removed later.
-        var prepL4 = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.FOUR);
+        var prepL4 = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.FOUR);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
-        var homed = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.COLLECTING);
+        var homed = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(driveToCoralStationWithVisionCommand);
 
@@ -103,28 +103,31 @@ public class OperatorCommandMap {
                                       ScoreCoralCommand scoreCoralCommand, IntakeUntilCoralCollectedCommand intakeUntilCoralCollectedCommand,
                                       ScoreWhenReadyCommand scoreWhenReadyCommand, ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
                                       ForceCoralPivotCalibrated forceCoralPivotCalibratedCommand,
+                                      ForceAlgaeArmCalibrated forceAlgaeArmCalibrated,
                                       Provider<SetAlgaeArmSetpointToTargetPosition> setAlgaeArmProvider,
                                       AlgaeCollectionIntakeCommand intakeAlgae,
                                       AlgaeCollectionOutputCommand ejectAlgae) {
         // Coral system buttons
-        var prepL4 = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.FOUR);
+        var prepL4 = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.FOUR);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
 
-        var prepL3 = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.THREE);
+        var prepL3 = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.THREE);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(prepL3);
 
-        var prepL2 = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.TWO);
+        var prepL2 = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.TWO);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(prepL2);
 
-        var homed = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.COLLECTING);
+        var homed = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeUntilCoralCollectedCommand);
-
-//        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreWhenReadyCommand);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreCoralCommand);
 
-        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(forceElevatorCalibratedCommand);
-        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Back).onTrue(forceCoralPivotCalibratedCommand);
+        // combine all three claibration commands into one parallal command group
+        var calibrateAll = Commands.parallel(
+                forceElevatorCalibratedCommand,
+                forceCoralPivotCalibratedCommand,
+                forceAlgaeArmCalibrated).ignoringDisable(true);
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(calibrateAll);
 
         // Algae system buttons
         var removeLowAlgae = setAlgaeArmProvider.get();
@@ -222,8 +225,8 @@ public class OperatorCommandMap {
     @Inject
     public void setupSysIdCommands(
 
-        DriveSubsystem drive,
-        ElevatorSubsystem elevator
+            DriveSubsystem drive,
+            ElevatorSubsystem elevator
     ) {
 /*
         oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.A)
@@ -262,7 +265,7 @@ public class OperatorCommandMap {
 
     @Inject
     public void setupSimulatorCommands(
-        ResetSimulatedPose resetPose
+            ResetSimulatedPose resetPose
     ) {
         resetPose.includeOnSmartDashboard();
     }

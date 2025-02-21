@@ -42,8 +42,9 @@ public class SwerveDriveWithJoysticksCommand extends BaseCommand {
         this.oi = oi;
         this.headingModule = headingModuleFactory.create(drive.getRotateToHeadingPid());
         this.hvmDecider = hvmFactory.create(pf.getPrefix());
-        this.advisor = new SwerveDriveRotationAdvisor(pose, drive, pf, hvmDecider);
+        this.advisor = new SwerveDriveRotationAdvisor(pose, drive, pf, hvmDecider, 0.001);
         pf.setDefaultLevel(Property.PropertyLevel.Important);
+        pf.setPrefix(this);
         this.overallDrivingPowerScale = pf.createPersistentProperty("DrivingPowerScale", 1.0);
         this.overallTurningPowerScale = pf.createPersistentProperty("TurningPowerScale", 1.0);
         this.addRequirements(drive);
@@ -83,10 +84,9 @@ public class SwerveDriveWithJoysticksCommand extends BaseCommand {
     }
 
     private XYPair getRawHumanTranslationIntent() {
-        double xIntent = MathUtils.deadband(oi.driverGamepad.getLeftVector().getX(), 0.15);
-        double yIntent = MathUtils.deadband(oi.driverGamepad.getLeftVector().getY(), 0.15);
-
-        XYPair translationIntent = new XYPair(xIntent, yIntent);
+        XYPair translationIntent = new XYPair(
+                oi.driverGamepad.getLeftVector().getX(),
+                oi.driverGamepad.getLeftVector().getY());
 
         if (DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red) {
             translationIntent.rotate(180);
@@ -98,8 +98,8 @@ public class SwerveDriveWithJoysticksCommand extends BaseCommand {
 
     private double getRawHumanRotationIntent() {
         // Deadband is to prevent buggy joysticks/triggers
-        double rotateLeftIntent = MathUtils.deadband(oi.driverGamepad.getLeftTrigger(), 0.05);
-        double rotateRightIntent = MathUtils.deadband(oi.driverGamepad.getRightTrigger(), 0.05);
+        double rotateLeftIntent = MathUtils.deadband(oi.driverGamepad.getLeftTrigger(), 0.05, (x) -> MathUtils.exponentAndRetainSign(x, 2));
+        double rotateRightIntent = MathUtils.deadband(oi.driverGamepad.getRightTrigger(), 0.05, (x) -> MathUtils.exponentAndRetainSign(x, 2));
 
         // Merge the two trigger values together in case of conflicts
         // Rotate left = positive, right = negative
@@ -117,19 +117,32 @@ public class SwerveDriveWithJoysticksCommand extends BaseCommand {
     }
 
     private XYPair getSuggestedTranslationIntent(XYPair intent) {
-        // Process translation: normalize & scale translationIntent, prevent diagonal movement being faster
-        // This is needed even if isUnlockFullDrivePowerActive == true
-        if (intent.getMagnitude() != 0) {
-            double x = intent.x;
-            double y = intent.y;
 
-            // Normalize the intent
-            intent = intent.scale(1 / intent.getMagnitude());
+        aKitLog.record("RawTranslationIntent", intent);
 
-            // Scale the intent so that it reflects on how far the joystick is (assuming the values are -1 to 1)
-            // (So that it will not always be the same speed as long as magnitude is > 1)
-            intent = intent.scale(Math.abs(x), Math.abs(y));
+        // The intent has no deadband applied yet. Check to see if we are below deadband; if so, just return 0.
+        double magnitude = intent.getMagnitude();
+        if (intent.getMagnitude() < oi.getDriverGamepadTypicalDeadband()) {
+            return new XYPair(0, 0);
         }
+
+        aKitLog.record("Magnitude", magnitude);
+
+        // If we're here, then the joystick is deflected enough we need to take action. Take the magnitude and
+        // apply the advanced deadband function to it.
+        double scaledMagnitude = MathUtils.deadband(
+                magnitude,
+                oi.getDriverGamepadTypicalDeadband(),
+                (x) -> MathUtils.exponentAndRetainSign(x, 3));
+
+        aKitLog.record("ScaledMagnitude", scaledMagnitude);
+
+        // Now that we have the scaled magnitude, we need to apply it to the direction of the intent.
+        // This is done by taking the unit vector of the intent and multiplying it by the scaled magnitude.
+        intent = XYPair.fromPolar(intent.getAngle(), scaledMagnitude);
+
+        aKitLog.record("ScaledTranslationIntent", intent);
+
 
         if (!drive.isUnlockFullDrivePowerActive()) {
             // Scale translationIntent if precision modes active, values from XBot2024 repository

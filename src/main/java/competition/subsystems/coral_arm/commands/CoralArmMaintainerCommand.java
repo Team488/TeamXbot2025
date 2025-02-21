@@ -8,6 +8,7 @@ import competition.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.Alert;
 import xbot.common.command.BaseMaintainerCommand;
+import xbot.common.controls.sensors.XXboxController;
 import xbot.common.logic.HumanVsMachineDecider;
 import xbot.common.math.MathUtils;
 import xbot.common.properties.DoubleProperty;
@@ -52,7 +53,7 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
         this.oi = oi;
         pf.setPrefix(this);
         profileManager = trapzoidProfileManagerFactory.create(getPrefix() + "trapezoidMotion",
-                60, 100, armPivotSubsystem.getCurrentValue().in(Degrees));
+                1500, 1200, armPivotSubsystem.getCurrentValue().in(Degrees));
         pf.setDefaultLevel(Property.PropertyLevel.Important);
 
         humanMaxPower = pf.createPersistentProperty("HumanMaxPower", .20);
@@ -119,12 +120,16 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
     protected double getHumanInput() {
         // gamepad controls: Left joy stick up/down & Left bumper to switch between
         // elevator/arm
-        return MathUtils.constrainDouble(
-                MathUtils.deadband(
-                        oi.superstructureGamepad.getRightStickY(),
-                        oi.getOperatorGamepadTypicalDeadband(),
-                        (a) -> MathUtils.exponentAndRetainSign(a, 3)),
-                humanMinPower.get(), humanMaxPower.get());
+        if (!oi.operatorGamepad.getXboxButton(XXboxController.XboxButton.Back).getAsBoolean()) {
+            return MathUtils.constrainDouble(
+                    MathUtils.deadband(
+                            oi.operatorGamepad.getRightStickY(),
+                            oi.getOperatorGamepadTypicalDeadband(),
+                            (a) -> MathUtils.exponentAndRetainSign(a, 3)),
+                    humanMinPower.get(), humanMaxPower.get());
+
+        }
+        return 0;
     }
 
     @Override
