@@ -10,6 +10,7 @@ import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.MutTime;
+import xbot.common.advantage.AKitLogger;
 import xbot.common.controls.sensors.XTimer;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
@@ -49,7 +50,7 @@ public class TrapezoidProfileManager {
         log = LogManager.getLogger(name + ": TrapezoidProfileManager");
         maxVelocity = pf.createPersistentProperty("maxVelocity", defaultMaxVelocity);
         maxAcceleration = pf.createPersistentProperty("maxAcceleration", defaultMaxAcceleration);
-        maxGapAllowed = pf.createPersistentProperty("maxGapAllowed", 0.5);
+        maxGapAllowed = pf.createPersistentProperty("maxGapAllowed", 0.1);
         constraints = new TrapezoidProfile.Constraints(maxVelocity.get(), maxAcceleration.get());
         profile = new TrapezoidProfile(constraints);
         // initialize states to current value
@@ -67,8 +68,8 @@ public class TrapezoidProfileManager {
         }
 
 //        if(previousSetpoint - currentValue > maxGapAllowed.get()){
-//            profile = new TrapezoidProfile(constraints);
-//        }
+            profile = new TrapezoidProfile(constraints);
+       // }
 
         // if the target has changed, recompute the goal and current states
         if(goalState.position != targetValue) {
