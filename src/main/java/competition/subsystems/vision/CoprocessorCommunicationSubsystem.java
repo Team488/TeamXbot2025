@@ -23,6 +23,7 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
     final RobotAssertionManager assertionManager;
 
     // xtables properties
+    final StringProperty xtablesTargetPose;
     final StringProperty xtablesCoordinateLocation;
     final StringProperty xtablesHeadingLocation;
 
@@ -35,6 +36,7 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
         this.assertionManager = assertionManager;
         pf.setPrefix(this);
 
+        xtablesTargetPose = pf.createPersistentProperty("Xtables Target Pose", "target_pose");
         xtablesCoordinateLocation = pf.createPersistentProperty("Xtables Coordinate Location", "target_waypoints");
         xtablesHeadingLocation = pf.createPersistentProperty("Xtables Heading Location", "target_heading");
 
@@ -57,5 +59,9 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
 
     public String getXtablesHeadingLocation(){
         return xtablesHeadingLocation.get();
+    }
+
+    public String getXtablesTargetPose() {
+        return xtablesTargetPose.get();
     }
 }
