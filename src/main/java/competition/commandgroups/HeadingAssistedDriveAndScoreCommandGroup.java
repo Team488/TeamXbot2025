@@ -36,20 +36,22 @@ public class HeadingAssistedDriveAndScoreCommandGroup extends SequentialCommandG
                                                     MeasureDistanceBeforeScoringCommand measureDistanceBeforeScoringCommand,
                                                     CoralArmSubsystem coralArmSubsystem) {
         this.coralArmSubsystem = coralArmSubsystem;
-        var prep = prepCoralSystemCommandGroupFactory.create(coralArmSubsystem::getTargetCoralLevel);
-        var alignToReefWithAprilTagWithCamera = alignToReefWithAprilTagCommandProvider.get();
+        var prepCoralSystemCommandGroup = prepCoralSystemCommandGroupFactory.create(coralArmSubsystem::getTargetCoralLevel);
+        var alignToReefWithAprilTagWithCameraCommand = alignToReefWithAprilTagCommandProvider.get();
 
         Cameras camera = branch == Landmarks.Branch.A ? Cameras.FRONT_RIGHT_CAMERA : Cameras.FRONT_LEFT_CAMERA;
 
-        alignToReefWithAprilTagWithCamera.setConfigurations(camera.getIndex(),
+        alignToReefWithAprilTagWithCameraCommand.setConfigurations(camera.getIndex(),
                 false, 0.5);
         driveToReefFaceFromAngleCommand.setAprilTagCamera(camera);
         measureDistanceBeforeScoringCommand.setBranch(branch);
 
         this.addCommands(driveToReefFaceFromAngleCommand);
         measureDistanceBeforeScoringCommand.setDistanceThreshold(Meters.of(1));
-        var measureDistanceBeforePrep = new SequentialCommandGroup(measureDistanceBeforeScoringCommand, prep);
-        var alignWhilePrepping = new ParallelCommandGroup(alignToReefWithAprilTagWithCamera, measureDistanceBeforePrep);
+        var measureDistanceBeforePreppingCoralSystem = new SequentialCommandGroup(measureDistanceBeforeScoringCommand,
+                prepCoralSystemCommandGroup);
+        var alignWhilePrepping = new ParallelCommandGroup(alignToReefWithAprilTagWithCameraCommand,
+                measureDistanceBeforePreppingCoralSystem);
         this.addCommands(alignWhilePrepping);
         this.addCommands(scoreWhenReadyCommand);
     }
