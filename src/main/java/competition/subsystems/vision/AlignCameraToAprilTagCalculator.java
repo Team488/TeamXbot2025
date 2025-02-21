@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import xbot.common.advantage.AKitLogger;
 import xbot.common.injection.electrical_contract.CameraInfo;
@@ -16,7 +17,10 @@ import xbot.common.subsystems.drive.control_logic.HeadingModule;
 
 import java.util.Optional;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Rotation;
 
 public class AlignCameraToAprilTagCalculator {
 
@@ -29,6 +33,7 @@ public class AlignCameraToAprilTagCalculator {
     final AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
     final HeadingModule headingModule;
     final DriveSubsystem drive;
+    final PoseSubsystem pose;
     final AKitLogger akitLog;
 
     final int targetAprilTagID;
@@ -36,8 +41,9 @@ public class AlignCameraToAprilTagCalculator {
     final double initialHeading;
     final Translation2d alignmentPointOffset;
     final Rotation3d cameraRotation;
-    Translation2d targetLocationOnField = new Translation2d(0, 0);
 
+    final Distance distanceForExactAlignment = Meters.of(1);
+    private boolean isCameraBackwards = false;
     private TagAcquisitionState tagAcquisitionState = TagAcquisitionState.NeverSeen;
 
     public static Translation2d generateAlignmentPointOffset(Distance robotCenterToOuterBumperX, CameraInfo cameraInfo,
@@ -60,9 +66,11 @@ public class AlignCameraToAprilTagCalculator {
         this.targetCameraID = targetCameraID;
         this.headingModule = headingModuleFactory.create(drive.getRotateToHeadingPid());
         this.drive = drive;
+        this.pose = pose;
         drive.getPositionalPid().reset();
 
         this.initialHeading = pose.getCurrentPose2d().getRotation().getDegrees();
+        this.isCameraBackwards = isCameraBackwards;
 
         CameraInfo cameraInfo = electricalContract.getCameraInfo()[targetCameraID];
         this.cameraRotation = cameraInfo.position().getRotation();
@@ -78,12 +86,10 @@ public class AlignCameraToAprilTagCalculator {
     }
 
     public Pose2d getXYPowersAlignToAprilTag(Pose2d currentPose) {
-
+        Translation2d targetLocationOnField = new Translation2d(0, 0);
         if (aprilTagVisionSubsystem.doesCameraBestObservationHaveAprilTagId(targetCameraID, targetAprilTagID)) {
             tagAcquisitionState = TagAcquisitionState.LockedOn;
             Translation2d aprilTagData = aprilTagVisionSubsystem.getRobotRelativeLocationOfBestDetectedAprilTag(targetCameraID);
-
-            akitLog.record("AprilTagData", aprilTagData);
 
             // This transform will always be at rotation 0, since in its own frame, the robot is always facing forward.
             Transform2d relativeGoalTransform = new Transform2d(
@@ -100,22 +106,40 @@ public class AlignCameraToAprilTagCalculator {
             }
         }
 
-        return switch (tagAcquisitionState) {
-            case LockedOn, Lost -> {
-                // Flip our desiredRotation if backwards
-                Optional<Pose3d> aprilTagPose = aprilTagVisionSubsystem.getAprilTagFieldOrientedPose(targetAprilTagID);
-                double desiredRotation = aprilTagPose.map(
-                        (tag) -> Math.PI + tag.getRotation().getZ() - cameraRotation.getZ()
-                ).orElse(initialHeading);
-                akitLog.record("desiredRotation", desiredRotation);
+        // If the aprilTag doesn't even exist... let's maintain our current heading!
+        Optional<Pose3d> aprilTagPose = aprilTagVisionSubsystem.getAprilTagFieldOrientedPose(targetAprilTagID);
+        Angle desiredHeading = Radians.of(pose.getCurrentPose2d().getRotation().getRadians());
+        if (aprilTagPose.isPresent()) {
+            Translation2d aprilTagPosition = aprilTagPose.get().getTranslation().toTranslation2d();
 
-                yield new Pose2d(
-                        drive.getPowerToAchieveFieldPosition(currentPose.getTranslation(), targetLocationOnField),
-                        Rotation2d.fromDegrees(headingModule.calculateHeadingPower(Math.toDegrees(desiredRotation))) // QUESTION: IS THIS HOW I DO IT?
-                );
+            // If we are close enough, we'll adjust to the "perfect/ideal" heading
+            if (isCloseEnoughForExactAlignment(aprilTagPosition)) {
+                desiredHeading = Radians.of(Math.PI + aprilTagPose.get().getRotation().getZ() - cameraRotation.getZ());
+            } else {
+                // Calculate the heading needed for the robot FRONT to stare at the targeted tag
+                // We'll need to flip the desired heading if the camera is backwards
+                Translation2d currentTranslation = pose.getCurrentPose2d().getTranslation();
+                desiredHeading = Radians.of(
+                        currentTranslation.minus(aprilTagPosition).getAngle().getRadians() + Math.PI
+                ).plus(Radians.of(isCameraBackwards ? Math.PI : 0));
             }
-            default -> new Pose2d(0, 0, new Rotation2d()); // How do we get here?
+        }
+
+        return switch (tagAcquisitionState) {
+            case LockedOn, Lost -> new Pose2d(
+                    drive.getPowerToAchieveFieldPosition(currentPose.getTranslation(), targetLocationOnField),
+                    Rotation2d.fromDegrees(headingModule.calculateHeadingPower(desiredHeading.in(Degrees)))
+            );
+            // We'll just try and look at the tag by default
+            default -> new Pose2d(
+                    0, 0, Rotation2d.fromDegrees(headingModule.calculateHeadingPower(desiredHeading.in(Degrees)))
+            );
         };
+    }
+
+    private boolean isCloseEnoughForExactAlignment(Translation2d targetPosition) {
+        return targetPosition.getDistance(pose.getCurrentPose2d().getTranslation())
+                < (distanceForExactAlignment.in(Meters) + alignmentPointOffset.getNorm());
     }
 
     public boolean recommendIsFinished() {
