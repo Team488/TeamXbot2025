@@ -35,6 +35,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     double rotationsAtZero = 0;
     boolean isCalibrated = false;
     final Alert isNotCalibratedAlert = new Alert("CoralArm: not calibrated", Alert.AlertType.kWarning);
+    private double lastCalibratedTime = -Double.MAX_VALUE;
     private final DoubleProperty degreesPerRotations;
 
     public final DoubleProperty scoreAngleDegrees;
@@ -75,8 +76,8 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
             this.armAbsoluteEncoder = null;
         }
 
-        if (electricalContract.isCoralArmPivotLowSensorReady()) {
-            this.lowSensor = xDigitalInputFactory.create(electricalContract.getCoralArmPivotLowSensor(),
+        if (electricalContract.isCoralArmLowSensorReady()) {
+            this.lowSensor = xDigitalInputFactory.create(electricalContract.getCoralArmLowSensor(),
                     this.getPrefix());
             this.registerDataFrameRefreshable(this.lowSensor);
         } else {
@@ -166,6 +167,13 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
         }
     }
 
+    public boolean isTouchingBottom() {
+        if (electricalContract.isCoralArmLowSensorReady()) {
+            return this.lowSensor.get();
+        }
+        return false;
+    }
+
     @Override
     public void setPower(double power) {
         if (electricalContract.isCoralArmMotorReady()) {
@@ -173,11 +181,11 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
                 double currentLocationInDegrees = getCurrentValue().in(Degrees);
 
                 if (currentLocationInDegrees > rangeOfMotionDegrees.get()) {
-                    MathUtils.constrainDouble(power, -1, 0);
+                    power = MathUtils.constrainDouble(power, -1, 0);
                 }
 
                 if (currentLocationInDegrees < 0) {
-                    MathUtils.constrainDouble(power, 0, 1);
+                    power = MathUtils.constrainDouble(power, 0, 1);
                 }
             } else {
                 power = MathUtils.constrainDouble(power, -powerWhenNotCalibrated.get(), powerWhenNotCalibrated.get());
@@ -189,6 +197,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
     @Override
     public boolean isCalibrated() {
+        
         return isCalibrated;
     }
 
@@ -202,7 +211,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     }
 
     public Angle getArmAngle() {
-        if (electricalContract.isCoralArmPivotAbsoluteEncoderReady() && electricalContract.isCoralArmPivotLowSensorReady()) {
+        if (electricalContract.isCoralArmPivotAbsoluteEncoderReady() && electricalContract.isCoralArmLowSensorReady()) {
             return getArmAngle(0, rangeOfMotionDegrees.get() / 360,
                     armAbsoluteEncoder.getAbsolutePosition(), lowSensor.get(), rangeOfMotionDegrees.get());
         }
