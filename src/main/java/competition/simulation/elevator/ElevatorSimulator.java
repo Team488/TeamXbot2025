@@ -37,6 +37,7 @@ public class ElevatorSimulator {
     final PIDManager pidManager;
     final ElectricalContract electricalContract;
     final double gravityFeedForward = 0.02;
+    final double laserNoiseInMeters = 0.01;
 
     final ElevatorSubsystem elevatorSubsystem;
     final MockCANMotorController motor;
@@ -90,7 +91,7 @@ public class ElevatorSimulator {
 
         // Read out the new elevator position for rendering
         var elevatorCurrentHeight = getCurrentHeight();
-        laserSensor.setDistance(elevatorCurrentHeight.in(Meters));
+        laserSensor.setDistance(elevatorCurrentHeight.in(Meters) + ((Math.random() - 0.5) * laserNoiseInMeters*2));
 
         // update the motor encoder position based on the elevator height, add in the
         // random from zero offset
