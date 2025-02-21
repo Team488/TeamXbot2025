@@ -1,0 +1,108 @@
+{
+  "version": 1.0,
+  "grid_size": 128,
+  "tabs": [
+    {
+      "name": "AutonomousSelection",
+      "grid_layout": {
+        "layouts": [
+          {
+            "title": "AutonomousCommandSelector",
+            "x": 0.0,
+            "y": 384.0,
+            "width": 512.0,
+            "height": 256.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Auto Program State",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/AdvantageKit/RealOutputs/AutonomousCommandSelector/Auto Program State",
+                  "period": 0.06,
+                  "data_type": "string",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Current autonomous command name",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/AdvantageKit/RealOutputs/AutonomousCommandSelector/Current autonomous command name",
+                  "period": 0.06,
+                  "data_type": "string",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          }
+        ],
+        "containers": [
+          {
+            "title": "From Left Score Far Left Branch A Level 4 Auto",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 512.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/From Left Score Far Left Branch A Level 4 Auto",
+              "period": 0.06,
+              "show_type": true
+            }
+          },
+          {
+            "title": "From Mid Score Far Left Branch A Level 4 Auto",
+            "x": 512.0,
+            "y": 0.0,
+            "width": 512.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/From Mid Score Far Left Branch A Level 4 Auto",
+              "period": 0.06,
+              "show_type": true
+            }
+          },
+          {
+            "title": "From Right Score Far Left Branch A Level 4 Auto",
+            "x": 1024.0,
+            "y": 0.0,
+            "width": 512.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/From Right Score Far Left Branch A Level 4 Auto",
+              "period": 0.06,
+              "show_type": true
+            }
+          },
+          {
+            "title": "From Left Score Left Face's Level Fours Auto",
+            "x": 0.0,
+            "y": 128.0,
+            "width": 512.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/From Left Score Left Face's Level Fours Auto",
+              "period": 0.06,
+              "show_type": true
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

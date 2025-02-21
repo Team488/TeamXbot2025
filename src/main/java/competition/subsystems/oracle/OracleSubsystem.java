@@ -32,8 +32,8 @@ public class OracleSubsystem extends BaseSubsystem {
 
     public enum ScoringSubstage {
         Travel,
-        Approach,
-        Scoring
+        PrepareSuperstructure,
+        ReleaseCoral
     }
 
     final PoseSubsystem pose;
@@ -103,15 +103,15 @@ public class OracleSubsystem extends BaseSubsystem {
 
         var penultimateWaypoint = reefCoordinateGenerator.getPoseRelativeToReefFaceAndBranch(
                 DriverStation.Alliance.Blue,
-                activeScoringTask.reefFace(),
-                activeScoringTask.branch(),
+                activeScoringTask.reefFace().get(),
+                activeScoringTask.branch().get(),
                 Meters.of(1),
                 Meters.of(0));
         var finalWaypoint = reefCoordinateGenerator.getTypicalScoringLocationForFaceBranchLevel(
                 DriverStation.Alliance.Blue,
-                activeScoringTask.reefFace(),
-                activeScoringTask.branch(),
-                activeScoringTask.coralLevel());
+                activeScoringTask.reefFace().get(),
+                activeScoringTask.branch().get(),
+                activeScoringTask.coralLevel().get());
 
         var route = blueReefRoutingCircle.generateSwervePoints(pose.getCurrentPose2d(), penultimateWaypoint);
         route.add(new XbotSwervePoint(finalWaypoint, 10));
@@ -186,32 +186,38 @@ public class OracleSubsystem extends BaseSubsystem {
     // -In the approach stage, we raise the elevator and arm to scoring position
     // -In the scoring stage, we run the scorer until we've confidently scored
     private void evaluateScoringSubstage() {
+
+        if (!ScoringQueue.isTaskWellFormed(scoringQueue.getActiveTask())) {
+            // Incomplete information, we can't proceed
+            return;
+        }
+
         switch (currentScoringSubstage) {
             case Travel:
                 if (isScoringSubstageInitilizationRequired()) {
-                    setSuperstructureAdvice(Landmarks.CoralLevel.COLLECTING, CoralScorerSubsystem.CoralScorerState.STOPPED);
+                    setSuperstructureAdvice(Landmarks.CoralLevel.COLLECTING, CoralScorerSubsystem.CoralScorerState.INTAKING);
                     setScoringSubstageInitilizationFinished();
                 }
 
                 // Check if we're close enough to the goal to start scoring
                 if (pose.getCurrentPose2d().getTranslation().getDistance(goalPose.getTranslation()) < rangeToStartMovingSuperstructureMeters.get()) {
-                    setNextScoringSubstage(ScoringSubstage.Approach);
+                    setNextScoringSubstage(ScoringSubstage.PrepareSuperstructure);
                 }
                 break;
-            case Approach:
+            case PrepareSuperstructure:
                 if (isScoringSubstageInitilizationRequired()) {
-                    setSuperstructureAdvice(scoringQueue.getActiveTask().coralLevel(), CoralScorerSubsystem.CoralScorerState.STOPPED);
+                    setSuperstructureAdvice(scoringQueue.getActiveTask().coralLevel().get(), CoralScorerSubsystem.CoralScorerState.INTAKING);
                     setScoringSubstageInitilizationFinished();
                 }
 
                 // Check if we're at the scoring position
-                if (pose.getCurrentPose2d().getTranslation().getDistance(goalPose.getTranslation()) < rangeToStartMovingSuperstructureMeters.get()) {
-                    setNextScoringSubstage(ScoringSubstage.Scoring);
+                if (pose.getCurrentPose2d().getTranslation().getDistance(goalPose.getTranslation()) < rangeToActivateScorerMeters.get()) {
+                    setNextScoringSubstage(ScoringSubstage.ReleaseCoral);
                 }
                 break;
-            case Scoring:
+            case ReleaseCoral:
                 if (isScoringSubstageInitilizationRequired()) {
-                    setSuperstructureAdvice(scoringQueue.getActiveTask().coralLevel(), CoralScorerSubsystem.CoralScorerState.SCORING);
+                    setSuperstructureAdvice(scoringQueue.getActiveTask().coralLevel().get(), CoralScorerSubsystem.CoralScorerState.SCORING);
                     setScoringSubstageInitilizationFinished();
                 }
 
