@@ -1,5 +1,6 @@
 package competition.electrical_contract;
 
+import edu.wpi.first.units.measure.Distance;
 import xbot.common.injection.electrical_contract.CANMotorControllerInfo;
 import xbot.common.injection.electrical_contract.DeviceInfo;
 import xbot.common.injection.electrical_contract.XCameraElectricalContract;
@@ -25,6 +26,10 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
 
     public abstract CANMotorControllerInfo getElevatorMotor();
 
+    public abstract boolean isElevatorDistanceSensorReady();
+
+    public abstract DeviceInfo getElevatorDistanceSensor();
+
     public abstract boolean isAlgaeCollectionReady();
 
     public abstract CANMotorControllerInfo getAlgaeCollectionMotor();
@@ -33,7 +38,39 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
 
     public abstract CANMotorControllerInfo getCoralCollectionMotor();
 
-    public abstract boolean isArmPivotMotorReady();
+    public abstract boolean isCoralArmMotorReady();
 
-    public abstract CANMotorControllerInfo getArmPivotMotor();
+    public abstract CANMotorControllerInfo getCoralArmPivotMotor();
+
+    public abstract boolean isCoralArmPivotAbsoluteEncoderReady();
+
+    public abstract DeviceInfo getCoralArmPivotAbsoluteEncoder();
+
+    public abstract boolean isCoralArmPivotLowSensorReady();
+
+    public abstract DeviceInfo getCoralArmPivotLowSensor();
+
+    public abstract boolean isCoralSensorReady();
+
+    public abstract DeviceInfo getCoralSensor();
+
+    public abstract boolean isElevatorBottomSensorReady();
+
+    public abstract DeviceInfo getElevatorBottomSensor();
+
+    public abstract boolean isHumanLoadRampReady();
+
+    public abstract CANMotorControllerInfo getAlgaeArmPivotMotor();
+
+    public abstract boolean isAlgaeArmPivotMotorReady();
+
+    public abstract boolean isAlgaeArmBottomSensorReady();
+
+    public abstract DeviceInfo getAlgaeArmBottomSensor();
+
+    public abstract Distance getDistanceFromCenterToOuterBumperX();
+
+    public abstract CANMotorControllerInfo getClimberMotor();
+
+    public abstract  boolean isClimberMotorReady();
 }

@@ -11,7 +11,7 @@ import javax.inject.Singleton;
 
 @Singleton
 @Component(modules = { RobotModule.class, RealDevicesModule.class, RealControlsModule.class,
-        Module2024.class, CommonModule.class})
+        Module2024.class, CommonModule.class })
 public abstract class RobotComponent2024 extends BaseRobotComponent {
     
 }
