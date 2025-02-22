@@ -2,6 +2,7 @@ package competition.motion;
 
 import static edu.wpi.first.units.Units.Seconds;
 
+import edu.wpi.first.units.measure.Power;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -37,10 +38,14 @@ public class TrapezoidProfileManager {
     double previousSetpoint = 0;
     MutTime previousSetpointTime = Seconds.mutable(-10000);
 
+    PowerManager powerManager;
+    double multiplier;
+
     @AssistedInject
     public TrapezoidProfileManager(
             @Assisted String name,
             PropertyFactory pf,
+            PowerManager powerManager,
             @Assisted("defaultMaxVelocity") double defaultMaxVelocity,
             @Assisted("defaultMaxAcceleration") double defaultMaxAcceleration,
             @Assisted("initialPosition") double initialPosition) {
@@ -53,6 +58,7 @@ public class TrapezoidProfileManager {
         // initialize states to current value
         initialState = new TrapezoidProfile.State(initialPosition, 0);
         goalState = new TrapezoidProfile.State(initialPosition, 0);
+        this.powerManager = powerManager;
     }
 
     public void resetState(double currentValue, double currentVelocity) {
@@ -63,30 +69,31 @@ public class TrapezoidProfileManager {
     }
 
     private double getMaxVelocity() {
-        return maxVelocity.get();
+        return maxVelocity.get() * multiplier;
     }
 
     private double getMaxAcceleration() {
-        return maxAcceleration.get();
+        return maxAcceleration.get() * multiplier;
     }
 
     public void setTargetPosition(double targetValue, double currentValue, double currentVelocity) {
         // if the profile's constraints properties have changed, recompute the profile
         // there's maybe a better place to do this but this should be fine since setTarget will be called
         // over and over again
+        multiplier = powerManager.getMultiplier();
         double maxVelocity = getMaxVelocity();
         double maxAcceleration = getMaxAcceleration();
 
-        if(constraints.maxVelocity != maxVelocity || constraints.maxAcceleration != maxAcceleration) {
+        if (constraints.maxVelocity != maxVelocity || constraints.maxAcceleration != maxAcceleration) {
             constraints = new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration);
             profile = new TrapezoidProfile(constraints);
         }
 
         // if the target has changed, recompute the goal and current states
-        if(goalState.position != targetValue) {
+        if (goalState.position != targetValue) {
             // if the previousSentpoint we have is very recent, use it as the initial state to
             // avoid discontinuities in the profile
-            if(XTimer.getFPGATimestampTime().minus(previousSetpointTime).in(Seconds) < 0.1) {
+            if (XTimer.getFPGATimestampTime().minus(previousSetpointTime).in(Seconds) < 0.1) {
                 initialState = new TrapezoidProfile.State(previousSetpoint, currentVelocity);
             } else {
                 initialState = new TrapezoidProfile.State(currentValue, currentVelocity);
