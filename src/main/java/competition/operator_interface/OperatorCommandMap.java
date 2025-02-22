@@ -7,14 +7,12 @@ import competition.subsystems.algae_arm.commands.ForceAlgaeArmCalibrated;
 import competition.subsystems.algae_arm.commands.SetAlgaeArmSetpointToTargetPosition;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionIntakeCommand;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionOutputCommand;
-import competition.subsystems.algae_collection.commands.AlgaeCollectionStopCommand;
-import competition.subsystems.coral_arm.commands.ForceCoralPivotCalibrated;
+import competition.subsystems.coral_arm.commands.ForceCoralArmCalibratedCommand;
 import competition.subsystems.coral_arm.commands.SetCoralArmTargetAngleCommand;
 import competition.subsystems.coral_scorer.commands.IntakeCoralCommand;
 import competition.subsystems.coral_scorer.commands.IntakeUntilCoralCollectedCommand;
 import competition.subsystems.coral_scorer.commands.ScoreCoralCommand;
 import competition.subsystems.coral_scorer.commands.ScoreWhenReadyCommand;
-import competition.subsystems.coral_scorer.commands.StopCoralCommand;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
@@ -77,7 +75,7 @@ public class OperatorCommandMap {
             TeleportToPositionCommand teleportToPositionCommand,
             PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
             ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
-            ForceCoralPivotCalibrated forceCoralPivotCalibratedCommand,
+            ForceCoralArmCalibratedCommand forceCoralPivotCalibratedCommand,
             DebugSwerveModuleCommand debugModule,
             ChangeActiveSwerveModuleCommand changeActiveModule,
             SwerveDriveWithJoysticksCommand typicalSwerveDrive) {
@@ -181,7 +179,7 @@ public class OperatorCommandMap {
                                       PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
                                       ScoreCoralCommand scoreCoralCommand, IntakeUntilCoralCollectedCommand intakeUntilCoralCollectedCommand,
                                       ScoreWhenReadyCommand scoreWhenReadyCommand, ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
-                                      ForceCoralPivotCalibrated forceCoralPivotCalibratedCommand,
+                                      ForceCoralArmCalibratedCommand forceCoralPivotCalibratedCommand,
                                       ForceAlgaeArmCalibrated forceAlgaeArmCalibrated,
                                       Provider<SetAlgaeArmSetpointToTargetPosition> setAlgaeArmProvider,
                                       AlgaeCollectionIntakeCommand intakeAlgae,
@@ -241,7 +239,7 @@ public class OperatorCommandMap {
             Provider<SetCoralArmTargetAngleCommand> setArmTargetAngleCommandProvider,
             Provider<SetElevatorTargetHeightCommand> setElevatorTargetHeightCommandProvider,
             ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
-            ForceCoralPivotCalibrated forceCoralPivotCalibratedCommand) {
+            ForceCoralArmCalibratedCommand forceCoralArmCalibratedCommand) {
 
         var returnToBase = setElevatorTargetHeightCommandProvider.get();
         returnToBase.setHeight(Landmarks.CoralLevel.COLLECTING);
@@ -268,7 +266,7 @@ public class OperatorCommandMap {
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(riseToL3);
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(riseToL4);
 
-        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.Back).onTrue(forceCoralPivotCalibratedCommand);
+        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.Back).onTrue(forceCoralArmCalibratedCommand);
 
 
 
