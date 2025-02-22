@@ -1,0 +1,246 @@
+{
+  "version": 1.0,
+  "grid_size": 128,
+  "tabs": [
+    {
+      "name": "AutonomousSelection",
+      "grid_layout": {
+        "layouts": [
+          {
+            "title": "AutonomousCommandSelector",
+            "x": 0.0,
+            "y": 384.0,
+            "width": 512.0,
+            "height": 256.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Auto Program State",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/AdvantageKit/RealOutputs/AutonomousCommandSelector/Auto Program State",
+                  "period": 0.06,
+                  "data_type": "string",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Current autonomous command name",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/AdvantageKit/RealOutputs/AutonomousCommandSelector/Current autonomous command name",
+                  "period": 0.06,
+                  "data_type": "string",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          }
+        ],
+        "containers": [
+          {
+            "title": "From Left Score Far Left Branch A Level 4 Auto",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 512.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/From Left Score Far Left Branch A Level 4 Auto",
+              "period": 0.06,
+              "show_type": true
+            }
+          },
+          {
+            "title": "From Mid Score Far Left Branch A Level 4 Auto",
+            "x": 512.0,
+            "y": 0.0,
+            "width": 512.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/From Mid Score Far Left Branch A Level 4 Auto",
+              "period": 0.06,
+              "show_type": true
+            }
+          },
+          {
+            "title": "From Right Score Far Left Branch A Level 4 Auto",
+            "x": 1024.0,
+            "y": 0.0,
+            "width": 512.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/From Right Score Far Left Branch A Level 4 Auto",
+              "period": 0.06,
+              "show_type": true
+            }
+          },
+          {
+            "title": "From Left Score Left Face's Level Fours Auto",
+            "x": 0.0,
+            "y": 128.0,
+            "width": 512.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/From Left Score Left Face's Level Fours Auto",
+              "period": 0.06,
+              "show_type": true
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Field Testing",
+      "grid_layout": {
+        "layouts": [],
+        "containers": [
+          {
+            "title": "ResetPoseToOriginCommand",
+            "x": 1280.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/ResetPoseToOriginCommand",
+              "period": 0.06,
+              "show_type": true
+            }
+          },
+          {
+            "title": "RotateTo5Degrees",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/RotateTo5Degrees",
+              "period": 0.06,
+              "show_type": true
+            }
+          },
+          {
+            "title": "RotateTo10Degrees",
+            "x": 0.0,
+            "y": 128.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/RotateTo10Degrees",
+              "period": 0.06,
+              "show_type": true
+            }
+          },
+          {
+            "title": "RotateTo45Degrees",
+            "x": 0.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/RotateTo45Degrees",
+              "period": 0.06,
+              "show_type": true
+            }
+          },
+          {
+            "title": "RotateTo90Degrees",
+            "x": 0.0,
+            "y": 384.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/RotateTo90Degrees",
+              "period": 0.06,
+              "show_type": true
+            }
+          },
+          {
+            "title": "RotateTo180Degrees",
+            "x": 0.0,
+            "y": 512.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/RotateTo180Degrees",
+              "period": 0.06,
+              "show_type": true
+            }
+          },
+          {
+            "title": "DriveToLocationWithPIDNear",
+            "x": 256.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/DriveToLocationWithPIDNear",
+              "period": 0.06,
+              "show_type": true
+            }
+          },
+          {
+            "title": "DriveToLocationWithPIDFar",
+            "x": 256.0,
+            "y": 128.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/DriveToLocationWithPIDFar",
+              "period": 0.06,
+              "show_type": true
+            }
+          },
+          {
+            "title": "BackAndForthTest",
+            "x": 512.0,
+            "y": 128.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/BackAndForthTest",
+              "period": 0.06,
+              "show_type": true
+            }
+          },
+          {
+            "title": "AroundReefTest",
+            "x": 512.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/AroundReefTest",
+              "period": 0.06,
+              "show_type": true
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
