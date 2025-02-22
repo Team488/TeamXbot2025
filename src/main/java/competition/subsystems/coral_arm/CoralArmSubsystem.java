@@ -12,6 +12,7 @@ import xbot.common.controls.actuators.XCANMotorController;
 import xbot.common.controls.actuators.XCANMotorControllerPIDProperties;
 import xbot.common.controls.sensors.XAbsoluteEncoder;
 import xbot.common.controls.sensors.XDigitalInput;
+import xbot.common.controls.sensors.XDutyCycleEncoder;
 import xbot.common.math.MathUtils;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
@@ -29,7 +30,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
     public final XCANMotorController armMotor;
-    public final XAbsoluteEncoder armAbsoluteEncoder;
+    public final XDutyCycleEncoder armAbsoluteEncoder;
     public final XDigitalInput lowSensor;
     Angle targetAngle = Degrees.of(0);
     ElectricalContract electricalContract;
@@ -49,7 +50,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     @Inject
     public CoralArmSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
                              ElectricalContract electricalContract, PropertyFactory propertyFactory,
-                             XAbsoluteEncoder.XAbsoluteEncoderFactory xAbsoluteEncoderFactory,
+                             XDutyCycleEncoder.XDutyCycleEncoderFactory xDutyCycleEncoderFactory,
                              XDigitalInput.XDigitalInputFactory xDigitalInputFactory) {
         propertyFactory.setPrefix(this);
 
@@ -72,8 +73,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
         }
 
         if (electricalContract.isCoralArmPivotAbsoluteEncoderReady()) {
-            this.armAbsoluteEncoder = xAbsoluteEncoderFactory.create(electricalContract.getCoralArmPivotAbsoluteEncoder(),
-                    this.getPrefix());
+            this.armAbsoluteEncoder = xDutyCycleEncoderFactory.create(electricalContract.getCoralArmPivotAbsoluteEncoder());
             this.registerDataFrameRefreshable(this.armAbsoluteEncoder);
         } else {
             this.armAbsoluteEncoder = null;
@@ -208,7 +208,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     public Angle getArmAngle() {
         if (electricalContract.isCoralArmPivotAbsoluteEncoderReady() && electricalContract.isCoralArmPivotLowSensorReady()) {
             return getArmAngle(0, rangeOfMotionDegrees.get() / 360,
-                    armAbsoluteEncoder.getAbsolutePosition(), lowSensor.get(), rangeOfMotionDegrees.get());
+                    Degrees.of(armAbsoluteEncoder.getAbsoluteDegrees()), lowSensor.get(), rangeOfMotionDegrees.get());
         }
         return Angle.ofBaseUnits(0, Degrees);
     }
