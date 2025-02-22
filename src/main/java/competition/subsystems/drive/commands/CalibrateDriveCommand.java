@@ -11,15 +11,13 @@ import xbot.common.subsystems.drive.swerve.SwerveModuleSubsystem;
 
 import javax.inject.Inject;
 
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Rotation;
 import static edu.wpi.first.units.Units.Rotations;
 
 public class CalibrateDriveCommand extends BaseCommand {
     DriveSubsystem drive;
     PoseSubsystem pose;
     Timer timer = new Timer();
-    double power = 0.1;
+    double speed = 0.66;
     double frontLeftModuleStartPosition;
     double frontRightModuleStartPosition;
     double rearLeftModuleStartPosition;
@@ -74,7 +72,7 @@ public class CalibrateDriveCommand extends BaseCommand {
                 }
                 break;
             case DriveForwardForTime:
-                drive.setAllSwerveModulesToTargetState(new SwerveModuleState(power, new Rotation2d(0)));
+                drive.setAllSwerveModulesToTargetState(new SwerveModuleState(speed, new Rotation2d(0)));
                 logDeltaPositions();
                 if (timer.hasElapsed(10)) {
                     mode = CalibrationMode.DecelerateAndWait;
