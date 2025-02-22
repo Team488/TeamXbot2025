@@ -12,7 +12,7 @@ public class IntakeCoralCommand extends BaseCommand {
     final CoralScorerSubsystem coral;
     final OperatorInterface oi;
     final DoubleProperty driverGamePadRumblePrefrence;
-    final DoubleProperty OperatorGamePadRumblePrefrence;
+    final DoubleProperty operatorGamePadRumblePrefrence;
 
 
     @Inject
@@ -22,7 +22,7 @@ public class IntakeCoralCommand extends BaseCommand {
         this.addRequirements(coral);
         pf.setPrefix(this);
         driverGamePadRumblePrefrence = pf.createPersistentProperty("John/Driver Gamepad rumble level prefrence", .25);
-        OperatorGamePadRumblePrefrence = pf.createPersistentProperty("Anthony/Opreator Gamepad rumble level prefrence", .5);
+        operatorGamePadRumblePrefrence = pf.createPersistentProperty("Anthony/Opreator Gamepad rumble level prefrence", .5);
 
 
     }
@@ -36,12 +36,12 @@ public class IntakeCoralCommand extends BaseCommand {
     public void execute(){
         if (coral.confidentlyHasCoral()){
             System.out.println("Execute happened");
-            oi.superstructureGamepad.getRumbleManager().rumbleGamepad(OperatorGamePadRumblePrefrence.get(),1);
+            oi.superstructureGamepad.getRumbleManager().rumbleGamepad(operatorGamePadRumblePrefrence.get(),1);
             oi.driverGamepad.getRumbleManager().rumbleGamepad(driverGamePadRumblePrefrence.get(), 1);
         } else {
             System.out.println("Stopped>?"+1);
             oi.superstructureGamepad.getRumbleManager().rumbleGamepad(0, 0);
-            oi.driverGamepad.getRumbleManager().rumbleGamepad(0, 0);git 
+            oi.driverGamepad.getRumbleManager().rumbleGamepad(0, 0);
         }
     }
 
