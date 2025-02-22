@@ -62,12 +62,23 @@ public class TrapezoidProfileManager {
         profileStartTime.mut_replace(XTimer.getFPGATimestampTime().minus(Seconds.of(0.02)));
     }
 
+    private double getMaxVelocity() {
+        return maxVelocity.get();
+    }
+
+    private double getMaxAcceleration() {
+        return maxAcceleration.get();
+    }
+
     public void setTargetPosition(double targetValue, double currentValue, double currentVelocity) {
         // if the profile's constraints properties have changed, recompute the profile
         // there's maybe a better place to do this but this should be fine since setTarget will be called
         // over and over again
-        if(constraints.maxVelocity != maxVelocity.get() || constraints.maxAcceleration != maxAcceleration.get()) {
-            constraints = new TrapezoidProfile.Constraints(maxVelocity.get(), maxAcceleration.get());
+        double maxVelocity = getMaxVelocity();
+        double maxAcceleration = getMaxAcceleration();
+
+        if(constraints.maxVelocity != maxVelocity || constraints.maxAcceleration != maxAcceleration) {
+            constraints = new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration);
             profile = new TrapezoidProfile(constraints);
         }
 
