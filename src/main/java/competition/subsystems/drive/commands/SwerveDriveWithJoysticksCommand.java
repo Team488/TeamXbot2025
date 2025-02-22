@@ -42,7 +42,7 @@ public class SwerveDriveWithJoysticksCommand extends BaseCommand {
         this.oi = oi;
         this.headingModule = headingModuleFactory.create(drive.getRotateToHeadingPid());
         this.hvmDecider = hvmFactory.create(pf.getPrefix());
-        this.advisor = new SwerveDriveRotationAdvisor(pose, drive, pf, hvmDecider);
+        this.advisor = new SwerveDriveRotationAdvisor(pose, drive, pf, hvmDecider, 0.001);
         pf.setDefaultLevel(Property.PropertyLevel.Important);
         pf.setPrefix(this);
         this.overallDrivingPowerScale = pf.createPersistentProperty("DrivingPowerScale", 1.0);
@@ -98,8 +98,8 @@ public class SwerveDriveWithJoysticksCommand extends BaseCommand {
 
     private double getRawHumanRotationIntent() {
         // Deadband is to prevent buggy joysticks/triggers
-        double rotateLeftIntent = MathUtils.deadband(oi.driverGamepad.getLeftTrigger(), 0.05);
-        double rotateRightIntent = MathUtils.deadband(oi.driverGamepad.getRightTrigger(), 0.05);
+        double rotateLeftIntent = MathUtils.deadband(oi.driverGamepad.getLeftTrigger(), 0.05, (x) -> MathUtils.exponentAndRetainSign(x, 2));
+        double rotateRightIntent = MathUtils.deadband(oi.driverGamepad.getRightTrigger(), 0.05, (x) -> MathUtils.exponentAndRetainSign(x, 2));
 
         // Merge the two trigger values together in case of conflicts
         // Rotate left = positive, right = negative

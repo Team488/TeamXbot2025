@@ -204,6 +204,11 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
         if (electricalContract.isAlgaeArmPivotMotorReady()) {
             armMotor.periodic();
         }
+
+        if (this.isTouchingBottom()) {
+            forceCalibratedHere();
+        }
+
         isNotCalibratedAlert.set(!isCalibrated());
         aKitLog.record("Target Angle", this.getTargetValue().in(Degrees));
         aKitLog.record("Current Angle", this.getCurrentValue().in(Degrees));
