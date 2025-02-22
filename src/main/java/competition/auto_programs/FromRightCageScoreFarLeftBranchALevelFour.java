@@ -20,7 +20,7 @@ public class FromRightCageScoreFarLeftBranchALevelFour extends SequentialCommand
 
         // Force our location to start in front of right cage
         var startInFrontOfRightCage = pose.createSetPositionCommand(
-                () -> Landmarks.BlueRightStartingLine
+                () -> PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueRightStartingLine)
         );
         this.addCommands(startInFrontOfRightCage);
 

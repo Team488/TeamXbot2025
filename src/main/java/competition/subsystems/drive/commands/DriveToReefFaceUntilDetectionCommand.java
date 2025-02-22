@@ -34,6 +34,7 @@ public class DriveToReefFaceUntilDetectionCommand extends SwerveSimpleTrajectory
 
     public void setTargetReefFacePose(Landmarks.ReefFace targetReefFace) {
         this.targetReefFacePose = Landmarks.getReefFacePose(targetReefFace);
+        System.out.println(targetReefFacePose);
     }
 
     @Override

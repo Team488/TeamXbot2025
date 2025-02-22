@@ -25,7 +25,7 @@ public class FromLeftCageScoreLeftFacesLevelFours extends SequentialCommandGroup
 
         // Force our location to start in front of left cage
         var startInFrontOfLeftCage = pose.createSetPositionCommand(
-                () -> Landmarks.BlueLeftStartingLine
+                () -> PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueLeftStartingLine)
         );
         this.addCommands(startInFrontOfLeftCage);
 

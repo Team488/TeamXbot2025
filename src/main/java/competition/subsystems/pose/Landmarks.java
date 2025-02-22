@@ -124,16 +124,16 @@ public class Landmarks {
 
     public static Pose2d getBranchPose(ReefFace reefFace, Branch branch) {
         EnumsToPose enumsToPose = new EnumsToPose();
-        return enumsToPose.getBranchPose(reefFace, branch);
+        return PoseSubsystem.convertBlueToRedIfNeeded(enumsToPose.getBranchPose(reefFace, branch));
     }
 
     public static Pose2d getReefFacePose(ReefFace reefFace) {
         EnumsToPose enumsToPose = new EnumsToPose();
-        return enumsToPose.getReefFacePose(reefFace);
+        return PoseSubsystem.convertBlueToRedIfNeeded(enumsToPose.getReefFacePose(reefFace));
     }
 
     public static Pose2d getCoralStationSectionPose(CoralStation station, CoralStationSection section) {
         EnumsToPose enumsToPose = new EnumsToPose();
-        return enumsToPose.getCoralStationPose(station, section);
+        return PoseSubsystem.convertBlueToRedIfNeeded(enumsToPose.getCoralStationPose(station, section));
     }
 }

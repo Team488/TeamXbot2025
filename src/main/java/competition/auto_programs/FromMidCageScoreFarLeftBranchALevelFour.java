@@ -20,7 +20,7 @@ public class FromMidCageScoreFarLeftBranchALevelFour extends SequentialCommandGr
 
         // Force our location to start in front of mid cage
         var startInFrontOfMidCage = pose.createSetPositionCommand(
-                () -> Landmarks.BlueMidStartingLine
+                () -> PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueMidStartingLine)
         );
         this.addCommands(startInFrontOfMidCage);
 
