@@ -30,8 +30,10 @@ public class DriveToFaceAndScoreCommandGroupFactory {
         var driveToFaceAndScoreCommandGroup = new SequentialCommandGroup();
 
         var driveToReefWhilePrepping = new ParallelCommandGroup();
+
         var driveToReefFaceThenAlign = driveToReefFaceThenAlignCommandGroupFactory.create(targetReefFace, targetBranch);
         var prepCoralSystem = prepCoralSystemFactory.create(targetLevel);
+
         driveToReefWhilePrepping.addCommands(driveToReefFaceThenAlign, prepCoralSystem);
 
         var scoreWhenReady = scoreWhenReadyProvider.get();

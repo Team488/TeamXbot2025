@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import java.util.function.Supplier;
 
 public class PrepCoralSystemCommandGroupFactory {
 
@@ -21,13 +22,13 @@ public class PrepCoralSystemCommandGroupFactory {
         this.setCoralArmTargetAngleCommandProvider = setCoralArmTargetAngleCommandProvider;
     }
 
-    public ParallelCommandGroup create(Landmarks.CoralLevel coralGoal) {
+    public ParallelCommandGroup create(Supplier<Landmarks.CoralLevel> coralLevelSupplier) {
         var group = new ParallelCommandGroup();
 
         var setElevatorTargetHeightCommand = setElevatorTargetHeightCommandProvider.get();
-        setElevatorTargetHeightCommand.setHeight(coralGoal);
+        setElevatorTargetHeightCommand.setHeightSupplier(coralLevelSupplier);
         var setCoralArmTargetAngleCommand = setCoralArmTargetAngleCommandProvider.get();
-        setCoralArmTargetAngleCommand.setAngle(coralGoal);
+        setCoralArmTargetAngleCommand.setAngleSupplier(coralLevelSupplier);
 
         group.addCommands(setElevatorTargetHeightCommand, setCoralArmTargetAngleCommand);
 
