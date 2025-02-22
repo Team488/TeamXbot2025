@@ -11,6 +11,7 @@ import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.units.measure.Distance;
@@ -28,9 +29,12 @@ import xbot.common.properties.Property;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.pose.BasePoseSubsystem;
 import xbot.common.subsystems.vision.AprilTagVisionSubsystem;
+import competition.subsystems.deadwheel.DeadWheelSubsystem;
 
 @Singleton
 public class PoseSubsystem extends BasePoseSubsystem {
+
+
 
     final SwerveDrivePoseEstimator onlyWheelsGyroSwerveOdometry;
     final SwerveDrivePoseEstimator fullSwerveOdometry;
@@ -40,6 +44,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
     private final BooleanProperty useVisionAssistedPose;
     private final BooleanProperty reportCameraPoses;
     private final CoprocessorCommunicationSubsystem coprocessorComms;
+    private final DeadWheelSubsystem deadWheelOdometry;
 
     public static final Distance fieldXMidpointInMeters = Meters.of(8.7785);
     public static final Distance fieldYMidpointInMeters = Meters.of(4.025);
@@ -50,11 +55,13 @@ public class PoseSubsystem extends BasePoseSubsystem {
 
     @Inject
     public PoseSubsystem(XGyroFactory gyroFactory, PropertyFactory propManager, DriveSubsystem drive,
-                         AprilTagVisionSubsystem aprilTagVisionSubsystem, CoprocessorCommunicationSubsystem coprocessorComms) {
+                         AprilTagVisionSubsystem aprilTagVisionSubsystem, CoprocessorCommunicationSubsystem coprocessorComms,
+                         DeadWheelSubsystem deadWheelOdometry) {
         super(gyroFactory, propManager);
         this.drive = drive;
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
         this.coprocessorComms = coprocessorComms;
+        this.deadWheelOdometry = deadWheelOdometry;
 
         onlyWheelsGyroSwerveOdometry = initializeSwerveOdometry();
         fullSwerveOdometry = initializeSwerveOdometry();
@@ -84,7 +91,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
     }
 
     @Override
-    protected Pose2d updateOdometry() {
+    protected void updateOdometry() {
         XTablesClient xTablesClient = this.coprocessorComms.getXTablesManager().getOrNull();
         String xtablesPrefix = "PoseSubsystem";
         // Package all requests into single message to ensure all data is synchronized and updated at once.
@@ -155,7 +162,6 @@ public class PoseSubsystem extends BasePoseSubsystem {
         this.velocityX = ((totalDistanceX - prevTotalDistanceX));
         this.velocityY = ((totalDistanceY - prevTotalDistanceY));
         this.totalVelocity = (Math.sqrt(Math.pow(velocityX, 2.0) + Math.pow(velocityY, 2.0))); // Unnecessary?
-        return estimatedPosition;
     }
 
     public double getAbsoluteVelocity() {

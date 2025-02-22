@@ -1,7 +1,6 @@
 package competition.subsystems.deadwheel;
 import xbot.common.controls.sensors.XEncoder;
-import xbot.common.controls.sensors.XGyro;
-import xbot.common.subsystems.pose.BasePoseSubsystem;
+import xbot.common.command.BaseSubsystem;
 import xbot.common.controls.sensors.XEncoder.XEncoderFactory;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -13,13 +12,14 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
-public class DeadWheelSubsystem extends BasePoseSubsystem {
+public class DeadWheelSubsystem extends BaseSubsystem {
 
     private final XEncoder leftEncoder;
     private final XEncoder rightEncoder;
     private final XEncoder frontEncoder;
     private final XEncoder rearEncoder;
     private final DoubleProperty trackWidth;
+
 
     private Pose2d currentPose = new Pose2d();
     private double prevLeftDistance = 0;
@@ -28,15 +28,17 @@ public class DeadWheelSubsystem extends BasePoseSubsystem {
     private double prevRearDistance = 0;
 
     @Inject
-    public DeadWheelSubsystem(XGyro.XGyroFactory gyroFactory, XEncoderFactory encoderFactory, PropertyFactory propManager,
-                              int pulsesPerRevolution) {
-        super(gyroFactory, propManager);
+    public DeadWheelSubsystem(XEncoderFactory encoderFactory, PropertyFactory propManager)
+    {
+        super();
         propManager.setPrefix(this);
         propManager.setDefaultLevel(Property.PropertyLevel.Important);
         DoubleProperty wheelDiameterMeters = propManager.createPersistentProperty("wheelDiameterMeters", 0.032);
+        DoubleProperty pulsesPerRevolution = propManager.createPersistentProperty("pulsesPerRevolution", 0.032);
+
         this.trackWidth = propManager.createPersistentProperty("TrackWidth", 0.5);
 
-        double distancePerPulse = (Math.PI * wheelDiameterMeters.get()) / pulsesPerRevolution;
+        double distancePerPulse = (Math.PI * wheelDiameterMeters.get()) / pulsesPerRevolution.get();
 
         leftEncoder = encoderFactory.create("LeftDeadwheelEncoder",
                 21,20, distancePerPulse);
@@ -49,20 +51,12 @@ public class DeadWheelSubsystem extends BasePoseSubsystem {
 
     }
 
-    @Override
-    protected double getLeftDriveDistance() {
-        //return drive.getLeftTotalDistance();
-        return 0;
+
+    public void setPose(Pose2d pose) {
+        currentPose = pose;
     }
 
-    @Override
-    protected double getRightDriveDistance() {
-        //return drive.getRightTotalDistance();
-        return 0;
-    }
-
-    @Override
-    public Pose2d updateOdometry() {
+    public void updateOdometry() {
         double leftDistance = leftEncoder.getAdjustedDistance();
         double rightDistance = rightEncoder.getAdjustedDistance();
         double frontDistance = frontEncoder.getAdjustedDistance();
@@ -93,7 +87,5 @@ public class DeadWheelSubsystem extends BasePoseSubsystem {
             currentPose.getY() + d_y,
             currentPose.getRotation().plus(new Rotation2d(d_theta))
         );
-
-        return currentPose;
     }
 }
