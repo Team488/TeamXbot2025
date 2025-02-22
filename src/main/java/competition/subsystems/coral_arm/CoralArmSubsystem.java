@@ -5,6 +5,8 @@ import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
 import xbot.common.controls.actuators.XCANMotorControllerPIDProperties;
@@ -42,6 +44,8 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     public final DoubleProperty humanLoadAngleDegrees;
     public final DoubleProperty rangeOfMotionDegrees;
     public final DoubleProperty powerWhenNotCalibrated;
+
+    public Landmarks.CoralLevel targetCoralLevel;
 
     @Inject
     public CoralArmSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
@@ -306,5 +310,16 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     
     public Angle getHumanLoadAngle() {
         return Degrees.of(this.humanLoadAngleDegrees.get());
+    }
+
+    public Command createSetTargetCoralLevelCommand(Landmarks.CoralLevel coralLevel) {
+        return Commands.runOnce(() -> setTargetCoralLevel(coralLevel));
+    }
+    public void setTargetCoralLevel(Landmarks.CoralLevel coralLevel) {
+        this.targetCoralLevel = coralLevel;
+    }
+
+    public Landmarks.CoralLevel getTargetCoralLevel() {
+        return this.targetCoralLevel;
     }
 }

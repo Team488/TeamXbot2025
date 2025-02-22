@@ -326,7 +326,7 @@ public class Contract2025 extends ElectricalContract {
                                 -frontAprilCameraXDisplacement,
                                 0,
                                 frontAprilCameraZDisplacement),
-                                new Rotation3d(0, Math.toRadians(-45), Math.PI)),
+                                new Rotation3d(0, Math.toRadians(-60), Math.PI)),
                         EnumSet.of(CameraCapabilities.APRIL_TAG))*/
         };
 
