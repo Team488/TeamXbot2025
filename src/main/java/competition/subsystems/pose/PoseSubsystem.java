@@ -11,7 +11,6 @@ import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.units.measure.Distance;
@@ -92,7 +91,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
 
     @Override
     protected void updateOdometry() {
-        XTablesClient xTablesClient = this.coprocessorComms.getXTablesManager().getOrNull();
+
         String xtablesPrefix = "PoseSubsystem";
         // Package all requests into single message to ensure all data is synchronized and updated at once.
         BatchedPushRequests batchedPushRequests = new BatchedPushRequests();
@@ -104,6 +103,9 @@ public class PoseSubsystem extends BasePoseSubsystem {
         );
         aKitLog.record("WheelsOnlyEstimate", onlyWheelsGyroSwerveOdometry.getEstimatedPosition());
 
+        // DeadWheel pose estimator
+        deadWheelOdometry.update();
+        aKitLog.record("DeadWheelEstimate", deadWheelOdometry.getEstimatedPosition());
 
         batchedPushRequests.putPose2d(xtablesPrefix + ".WheelsOnlyEstimate", onlyWheelsGyroSwerveOdometry.getEstimatedPosition());
         fullSwerveOdometry.update(
@@ -119,6 +121,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
         });
 
         // Report poses
+
         Pose2d estimatedPosition = new Pose2d(
                 onlyWheelsGyroSwerveOdometry.getEstimatedPosition().getTranslation(),
                 getCurrentHeadingGyroOnly()
@@ -133,9 +136,15 @@ public class PoseSubsystem extends BasePoseSubsystem {
         aKitLog.record("VisionEnhancedPose", visionEnhancedPosition);
         batchedPushRequests.putPose2d(xtablesPrefix + ".VisionEnhancedPose", visionEnhancedPosition);
 
+        Pose2d deadWheelPosition = deadWheelOdometry.getEstimatedPosition();
+        aKitLog.record("DeadWheelPosition", deadWheelPosition);
+        batchedPushRequests.putPose2d(xtablesPrefix + ".DeadWheelPose", deadWheelPosition);
+
         Pose2d robotPose = this.useVisionAssistedPose.get() ? visionEnhancedPosition : estimatedPosition;
         aKitLog.record("RobotPose", robotPose);
         batchedPushRequests.putPose2d(xtablesPrefix + ".RobotPose", robotPose);
+
+        XTablesClient xTablesClient = this.coprocessorComms.getXTablesManager().getOrNull();
         if (xTablesClient != null) {
             // This is asynchronous - does not block & sends all updates in a single "packet"
             xTablesClient.sendBatchedPushRequests(batchedPushRequests);
@@ -194,6 +203,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
     private void resetPoseEstimator(Pose2d pose) {
         this.fullSwerveOdometry.resetPose(pose);
         this.onlyWheelsGyroSwerveOdometry.resetPose(pose);
+        this.deadWheelOdometry.resetPose(pose);
     }
 
     private SwerveModulePosition[] getSwerveModulePositions() {

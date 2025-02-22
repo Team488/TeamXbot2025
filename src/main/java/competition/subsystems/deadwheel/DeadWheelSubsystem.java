@@ -34,7 +34,7 @@ public class DeadWheelSubsystem extends BaseSubsystem {
         propManager.setPrefix(this);
         propManager.setDefaultLevel(Property.PropertyLevel.Important);
         DoubleProperty wheelDiameterMeters = propManager.createPersistentProperty("wheelDiameterMeters", 0.032);
-        DoubleProperty pulsesPerRevolution = propManager.createPersistentProperty("pulsesPerRevolution", 0.032);
+        DoubleProperty pulsesPerRevolution = propManager.createPersistentProperty("pulsesPerRevolution", 2000.0);
 
         this.trackWidth = propManager.createPersistentProperty("TrackWidth", 0.5);
 
@@ -52,11 +52,15 @@ public class DeadWheelSubsystem extends BaseSubsystem {
     }
 
 
-    public void setPose(Pose2d pose) {
+    public void resetPose(Pose2d pose) {
         currentPose = pose;
     }
 
-    public void updateOdometry() {
+    public Pose2d getEstimatedPosition() {
+        return currentPose;
+    }
+
+    public void update() {
         double leftDistance = leftEncoder.getAdjustedDistance();
         double rightDistance = rightEncoder.getAdjustedDistance();
         double frontDistance = frontEncoder.getAdjustedDistance();
