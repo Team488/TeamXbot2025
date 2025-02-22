@@ -139,6 +139,15 @@ public class OperatorCommandMap {
         backAndFourth.logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
         backAndFourth.logic.setKeyPoints(points2);
 
+        var oneLength = swerveSimpleTrajectoryCommandProvider.get();
+        List<XbotSwervePoint> points3 = new ArrayList<>();
+        points3.add(new XbotSwervePoint(new Translation2d(3, 0), new Rotation2d(0), 10));
+        oneLength.logic.setGlobalKinematicValues(kinematicValuesForTesting);
+        oneLength.logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
+        oneLength.logic.setKeyPoints(points3);
+
+        oneLength.includeOnSmartDashboard("OneLengthTest");
+
         aroundBlueReef.includeOnSmartDashboard("AroundReefTest");
         backAndFourth.includeOnSmartDashboard("BackAndForthTest");
 
