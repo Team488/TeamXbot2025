@@ -1,3 +1,16 @@
+package competition.subsystems.deadwheel;
+import xbot.common.controls.sensors.XEncoder;
+import xbot.common.command.BaseSubsystem;
+import xbot.common.controls.sensors.XEncoder.XEncoderFactory;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import xbot.common.properties.DoubleProperty;
+import xbot.common.properties.Property;
+import xbot.common.properties.PropertyFactory;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 @Singleton
 public class DeadWheelSubsystem extends BaseSubsystem {
 
@@ -11,6 +24,7 @@ public class DeadWheelSubsystem extends BaseSubsystem {
     private final int pulsesPerRevolution;
     private final double distancePerPulse;
 
+
     private Pose2d currentPose = new Pose2d();
     private double prevLeftDistance = 0;
     private double prevRightDistance = 0;
@@ -18,19 +32,26 @@ public class DeadWheelSubsystem extends BaseSubsystem {
     private double prevRearDistance = 0;
 
     @Inject
-    public DeadWheelSubsystem(XEncoderFactory encoderFactory, PropertyFactory propFactory,
-                              @Named("TrackWidth") double trackWidth, 
-                              @Named("WheelDiameterMeters") double wheelDiameterMeters, 
-                              @Named("PulsesPerRevolution") int pulsesPerRevolution) {
-        leftEncoder = encoderFactory.create("LeftDeadwheelEncoder");
-        rightEncoder = encoderFactory.create("RightDeadwheelEncoder");
-        frontEncoder = encoderFactory.create("FrontDeadwheelEncoder");
-        rearEncoder = encoderFactory.create("RearDeadwheelEncoder");
+    public DeadWheelSubsystem(XEncoderFactory encoderFactory, PropertyFactory propManager)
+    {
+        super();
+        propManager.setPrefix(this);
+        propManager.setDefaultLevel(Property.PropertyLevel.Important);
+        DoubleProperty wheelDiameterMeters = propManager.createPersistentProperty("wheelDiameterMeters", 0.032);
+        DoubleProperty pulsesPerRevolution = propManager.createPersistentProperty("pulsesPerRevolution", 0.032);
 
-        this.wheelDiameterMeters = wheelDiameterMeters;
-        this.pulsesPerRevolution = pulsesPerRevolution;
-        this.trackWidth = trackWidth;
-        this.distancePerPulse = (Math.PI * wheelDiameterMeters) / pulsesPerRevolution;
+        this.trackWidth = propManager.createPersistentProperty("TrackWidth", 0.5);
+
+        double distancePerPulse = (Math.PI * wheelDiameterMeters.get()) / pulsesPerRevolution.get();
+
+        leftEncoder = encoderFactory.create("LeftDeadwheelEncoder",
+                21,20, distancePerPulse);
+        rightEncoder = encoderFactory.create("RightDeadwheelEncoder",
+                7,8, distancePerPulse);
+        frontEncoder = encoderFactory.create("FrontDeadwheelEncoder",
+                19,18, distancePerPulse);
+        rearEncoder = encoderFactory.create("RearDeadwheelEncoder",
+                5,6, distancePerPulse);
 
         leftEncoder.setDistancePerPulse(distancePerPulse);
         rightEncoder.setDistancePerPulse(distancePerPulse);
@@ -38,11 +59,16 @@ public class DeadWheelSubsystem extends BaseSubsystem {
         rearEncoder.setDistancePerPulse(distancePerPulse);
     }
 
-    public Pose2d updateOdometry() {
-        double leftDistance = leftEncoder.getDistance();
-        double rightDistance = rightEncoder.getDistance();
-        double frontDistance = frontEncoder.getDistance();
-        double rearDistance = rearEncoder.getDistance();
+
+    public void setPose(Pose2d pose) {
+        currentPose = pose;
+    }
+
+    public void updateOdometry() {
+        double leftDistance = leftEncoder.getAdjustedDistance();
+        double rightDistance = rightEncoder.getAdjustedDistance();
+        double frontDistance = frontEncoder.getAdjustedDistance();
+        double rearDistance = rearEncoder.getAdjustedDistance();
 
         double d_left = leftDistance - prevLeftDistance;
         double d_right = rightDistance - prevRightDistance;
@@ -69,7 +95,5 @@ public class DeadWheelSubsystem extends BaseSubsystem {
             currentPose.getY() + d_y,
             currentPose.getRotation().plus(new Rotation2d(d_theta))
         );
-
-        return currentPose;
     }
 }

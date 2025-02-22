@@ -379,4 +379,7 @@ public class Contract2025 extends ElectricalContract {
     public DeviceInfo getLightsDio3() {
         return new DeviceInfo("Lights3", 13);
     }
+
+    @Override
+    public boolean isDeadWheelOdometryReady() { return true; }
 }
