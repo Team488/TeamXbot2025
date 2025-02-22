@@ -5,6 +5,7 @@ import competition.motion.TrapezoidProfileManager;
 import competition.operator_interface.OperatorInterface;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.units.measure.Distance;
+import xbot.common.advantage.AKitLogger;
 import xbot.common.command.BaseMaintainerCommand;
 import xbot.common.controls.actuators.XCANMotorController;
 import xbot.common.logic.CalibrationDecider;
@@ -35,7 +36,8 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     final DoubleProperty gravityPIDConstantPower;
 
-    final TrapezoidProfileManager profileManager;
+    final TrapezoidProfileManager.Factory trapezoidProfileManagerFactory;
+    TrapezoidProfileManager profileManager;
 
     final ElectricalContract contract;
 
@@ -50,11 +52,8 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         super(elevator, pf, hvmFactory, Inches.of(1).in(Meters), 0.2);
         pf.setPrefix(this);
         this.elevator = elevator;
-        profileManager = trapezoidProfileManagerFactory.create(
-                getPrefix() + "trapezoidMotion",
-                5,
-                3.5,
-                elevator.getCurrentValue().in(Meters));
+        this.trapezoidProfileManagerFactory = trapezoidProfileManagerFactory;
+        createNewProfileManager();
 
         this.oi = oi;
         this.contract = contract;
@@ -70,15 +69,31 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         decider.setDeadband(0.02);
     }
 
+    private void createNewProfileManager(){
+        profileManager = trapezoidProfileManagerFactory.create(
+                getPrefix() + "trapezoidMotion",
+                1, // 5 for competition
+                1, // 3.5 for competition
+                elevator.getCurrentValue().in(Meters));
+    }
+
     @Override
     public void initialize() {
         super.initialize();
         calibrationDecider.reset();
+        /*profileManager.resetState(
+                elevator.getCurrentValue().in(Meters),
+                elevator.getCurrentVelocity().in(MetersPerSecond));*/
+        createNewProfileManager();
     }
 
     @Override
     protected void initializeMachineControlAction() {
         super.initializeMachineControlAction();
+        /*profileManager.resetState(
+                elevator.getCurrentValue().in(Meters),
+                elevator.getCurrentVelocity().in(MetersPerSecond));*/
+        createNewProfileManager();
     }
 
     @Override
@@ -90,6 +105,12 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     protected void calibratedMachineControlAction() {
 
         var currentValue = elevator.getCurrentValue();
+
+        aKitLog.setLogLevel(AKitLogger.LogLevel.DEBUG);
+        aKitLog.record("PM-TargetValue", elevator.getTargetValue().in(Meters));
+        aKitLog.record("PM-CurrentValue", currentValue.in(Meters));
+        aKitLog.record("PM-CurrentVelocity", elevator.getCurrentVelocity().in(MetersPerSecond));
+        aKitLog.setLogLevel(AKitLogger.LogLevel.INFO);
 
         profileManager.setTargetPosition(
             elevator.getTargetValue().in(Meters),
@@ -149,6 +170,13 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
         aKitLog.record("elevatorHumanInput", humanInput);
         return humanInput;
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        if (interrupted) {
+            elevator.setPower(0);
+        }
     }
 
     @Override
