@@ -44,12 +44,12 @@ public class DriveToLocationWithPID extends BaseCommand {
                 new XYPair(power.getX(), power.getY()),
                 0,
                 pose.getCurrentHeading().getDegrees(),
-                false // Not sure if we should normalize
+                true
         );
     }
 
     @Override
     public boolean isFinished() {
-        return false;
+        return drive.getPositionalPid().isOnTarget();
     }
 }

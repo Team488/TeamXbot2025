@@ -45,12 +45,12 @@ public class RotateToHeadingWithHeadingModule extends BaseCommand {
                 new XYPair(0, 0),
                 degreeTarget,
                 pose.getCurrentHeading().getDegrees(),
-                false // Not sure if we should normalize
+                true
         );
     }
 
     @Override
     public boolean isFinished() {
-        return false;
+        return headingModule.isOnTarget();
     }
 }
