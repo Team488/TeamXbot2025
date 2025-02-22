@@ -21,6 +21,7 @@ import competition.subsystems.drive.commands.CalibrateDriveCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
 import competition.subsystems.drive.commands.DriveToCoralStationWithVisionCommand;
 import competition.subsystems.drive.commands.DriveToLocationWithPID;
+import competition.subsystems.drive.commands.EmergencyAutonomusCommand;
 import competition.subsystems.drive.commands.RotateToHeadingWithHeadingModule;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.drive.commands.TeleportToPositionCommand;
@@ -36,6 +37,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Commands;
 import xbot.common.controls.sensors.XXboxController;
+import xbot.common.subsystems.autonomous.SetAutonomousCommand;
 import xbot.common.subsystems.drive.SwervePointKinematics;
 import xbot.common.subsystems.drive.SwerveSimpleTrajectoryCommand;
 import xbot.common.subsystems.drive.SwerveSimpleTrajectoryMode;
@@ -305,6 +307,26 @@ public class OperatorCommandMap {
         var high = setAlgaeArmSetpointToTargetPositionProvider.get();
         high.setTargetPosition(AlgaeArmSubsystem.AlgaeArmPositions.ReefAlgaeHigh);
         oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(high);
+    }
+
+    @Inject
+    public void setupAutonomousCommandsSelection(OperatorInterface oi,
+                                                 Provider<SetAutonomousCommand> setAutonomousCommandProvider,
+                                                 DriveToLocationWithPID driveToLocationWithPID,
+                                                 EmergencyAutonomusCommand emergencyAutonomusCommand
+                                                 ){
+
+        var setEmergencyAutonomousCommand = setAutonomousCommandProvider.get();
+        setEmergencyAutonomousCommand.setAutoCommand(emergencyAutonomusCommand);
+        oi.neoTrellis.getifAvailable(31).onTrue(emergencyAutonomusCommand);
+        setEmergencyAutonomousCommand.includeOnSmartDashboard
+                ("EMERGENCYAUTO");
+
+
+
+
+
+
     }
 
     @Inject
