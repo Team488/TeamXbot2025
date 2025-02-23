@@ -262,7 +262,7 @@ public class AlignCameraToAprilTagCalculator {
 
                 // We know the ideal angle the robot will be pointing at, so we can quickly construct a shove vector
                 // in that direction.
-                driveIntent = new XYPair(idealFinalHeadingDegrees, shovePower.get());
+                driveIntent = XYPair.fromPolar(idealFinalHeadingDegrees, shovePower.get());
                 rotationIntent = headingModule.calculateHeadingPower(idealFinalHeadingDegrees);
 
                 // If we've been shoving for a while, we're done.
