@@ -66,11 +66,13 @@ public class AlignCameraToAprilTagCalculator {
     private Activity activity = Activity.Searching;
     Translation2d targetLocationOnField = new Translation2d(0, 0);
 
+    final DoubleProperty interstitialDistance;
     final DoubleProperty distanceFromInterstitialToAdvance;
     final DoubleProperty approachSpeedFactor;
     final DoubleProperty distanceToStartShoving;
     final DoubleProperty shovePower;
     final DoubleProperty shoveDuration;
+
 
     double shoveStartTime = 0;
 
@@ -105,6 +107,7 @@ public class AlignCameraToAprilTagCalculator {
         this.akitLog = new AKitLogger(prefix);
 
         pf.setPrefix(prefix);
+        interstitialDistance = pf.createPersistentProperty("InterstitialDistance-m", 2.0);
         distanceFromInterstitialToAdvance = pf.createPersistentProperty("DistanceFromInterstitialToAdvance-m", 0.2);
         approachSpeedFactor = pf.createPersistentProperty("ApproachSpeedFactor", 0.75);
         distanceToStartShoving = pf.createPersistentProperty("DistanceToStartShoving-m", 0.0762); // 3 inches
@@ -159,7 +162,7 @@ public class AlignCameraToAprilTagCalculator {
                             DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue),
                             Landmarks.getReefFaceFromTagId(targetAprilTagID),
                             isLeft ? Landmarks.Branch.B : Landmarks.Branch.A,
-                            Meters.of(2),
+                            Meters.of(interstitialDistance.get()),
                             Meters.zero()
                     );
         } else if (elementType == Landmarks.FieldElementType.CORAL_STATION) {
@@ -198,7 +201,10 @@ public class AlignCameraToAprilTagCalculator {
             } else {
                 // We don't see the tag, so point at where it might be. Nothing else can be done,
                 // so tell the caller to point at the april tag. Maybe we will see it in future loops.
-                return new AlignCameraToAprilTagAdvice(driveIntent, headingToPointAtAprilTag, tagAcquisitionState, activity);
+                return new AlignCameraToAprilTagAdvice(
+                        driveIntent,
+                        headingModule.calculateHeadingPower(headingToPointAtAprilTag),
+                        tagAcquisitionState, activity);
             }
         }
 
