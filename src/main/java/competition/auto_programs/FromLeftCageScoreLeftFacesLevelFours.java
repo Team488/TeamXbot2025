@@ -2,9 +2,12 @@ package competition.auto_programs;
 
 import competition.commandgroups.DriveToFaceAndScoreCommandGroupFactory;
 import competition.commandgroups.DriveToStationAndIntakeUntilCollectedCommandGroupFactory;
+import competition.simulation.MapleSimulator;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import org.apache.logging.log4j.core.time.Instant;
 import xbot.common.subsystems.autonomous.AutonomousCommandSelector;
 
 import javax.inject.Inject;
@@ -20,7 +23,8 @@ public class FromLeftCageScoreLeftFacesLevelFours extends SequentialCommandGroup
                                                 DriveToFaceAndScoreCommandGroupFactory driveToFaceAndScoreFact,
                                                 DriveToStationAndIntakeUntilCollectedCommandGroupFactory driveToStationAndIntakeFact,
                                                 Provider<DriveToFaceAndScoreCommandGroupFactory> driveToFaceAndScoreFactProv,
-                                                Provider<DriveToStationAndIntakeUntilCollectedCommandGroupFactory> driveToStationAndIntakeFactProv) {
+                                                Provider<DriveToStationAndIntakeUntilCollectedCommandGroupFactory> driveToStationAndIntakeFactProv,
+                                                MapleSimulator mapleSimulator) {
         this.autoSelector = autoSelector;
 
         // Force our location to start in front of left cage
@@ -28,6 +32,10 @@ public class FromLeftCageScoreLeftFacesLevelFours extends SequentialCommandGroup
                 () -> PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueLeftStartingLine)
         );
         this.addCommands(startInFrontOfLeftCage);
+
+        var resetMapleSim = new InstantCommand(() -> mapleSimulator.resetPosition(PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueLeftStartingLine)));
+        this.addCommands(resetMapleSim);
+
 
         // Drive to far left, branch A and score level four
         queueMessageToAutoSelector("Drive to far left, branch A and score level four");

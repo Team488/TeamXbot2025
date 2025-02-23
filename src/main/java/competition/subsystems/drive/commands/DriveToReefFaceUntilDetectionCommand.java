@@ -40,8 +40,7 @@ public class DriveToReefFaceUntilDetectionCommand extends SwerveSimpleTrajectory
     public void initialize() {
         log.info("Initializing");
         ArrayList<XbotSwervePoint> swervePoints = new ArrayList<>();
-        targetReefFacePose = PoseSubsystem.convertBlueToRedIfNeeded(targetReefFacePose);
-        swervePoints.add(new XbotSwervePoint(targetReefFacePose, 10));
+        swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(targetReefFacePose), 10));
         this.logic.setKeyPoints(swervePoints);
         if (kinematics) {
             this.logic.setGlobalKinematicValues(new SwervePointKinematics(.5, 0, 0, 2));

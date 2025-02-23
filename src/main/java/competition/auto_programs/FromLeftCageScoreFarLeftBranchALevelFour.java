@@ -20,22 +20,17 @@ public class FromLeftCageScoreFarLeftBranchALevelFour extends SequentialCommandG
     @Inject
     public FromLeftCageScoreFarLeftBranchALevelFour(AutonomousCommandSelector autoSelector,
                                                     PoseSubsystem pose, DriveSubsystem drive,
-                                                    DriveToFaceAndScoreCommandGroupFactory driveToFaceAndScoreFact,
-                                                    MapleSimulator mapleSimulator) {
+                                                    DriveToFaceAndScoreCommandGroupFactory driveToFaceAndScoreFact) {
         this.autoSelector = autoSelector;
-
-        var resetMapleSim = new InstantCommand(() -> mapleSimulator.resetPosition(PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueLeftStartingLine)));
 
         // Force our location to start in front of left cage
         var startInFrontOfLeftCage = pose.createSetPositionCommand(
                 () -> PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueLeftStartingLine)
         );
         this.addCommands(startInFrontOfLeftCage);
-        this.addCommands(resetMapleSim);
 
         // Drive to far left, branch A and score level four
         queueMessageToAutoSelector("Drive to far left, branch A and score level four");
-
         var driveAndScoreFarLeftBranchALevelFour = driveToFaceAndScoreFact.create(Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR);
         this.addCommands(driveAndScoreFarLeftBranchALevelFour);
     }
