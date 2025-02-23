@@ -14,7 +14,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import xbot.common.advantage.AKitLogger;
@@ -117,14 +116,16 @@ public class AlignCameraToAprilTagCalculator {
         reset();
     }
 
-    public void reset() {
+    private void reset() {
         drive.getPositionalPid().reset();
         tagAcquisitionState = TagAcquisitionState.NeverSeen;
         activity = Activity.Searching;
     }
 
-    public void configure(int targetAprilTagID, int targetCameraID, Distance offset,
-                          boolean isCameraBackwards) {
+    public void configureAndReset(int targetAprilTagID, int targetCameraID, Distance offset,
+                                  boolean isCameraBackwards) {
+        reset();
+
         this.targetAprilTagID = targetAprilTagID;
         this.targetCameraID = targetCameraID;
         this.isCameraBackwards = isCameraBackwards;

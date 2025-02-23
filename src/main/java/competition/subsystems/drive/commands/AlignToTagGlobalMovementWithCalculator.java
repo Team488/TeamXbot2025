@@ -5,10 +5,8 @@ import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.drive.logic.AlignCameraToAprilTagCalculator;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.units.measure.Distance;
 import xbot.common.command.BaseCommand;
-import xbot.common.math.XYPair;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
 
 import javax.inject.Inject;
@@ -53,8 +51,7 @@ public class AlignToTagGlobalMovementWithCalculator extends BaseCommand {
     @Override
     public void initialize() {
         log.info("Initializing");
-        calculator.reset();
-        calculator.configure(targetAprilTagID, targetCameraID, offset, isCameraBackwards);
+        calculator.configureAndReset(targetAprilTagID, targetCameraID, offset, isCameraBackwards);
     }
 
     @Override
