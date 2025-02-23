@@ -38,7 +38,10 @@ public class SwerveBezierTrajectoryCommand extends SwerveSimpleBezierCommand {
     private final AprilTagFieldLayout layout;
 
     @Inject
-    public SwerveBezierTrajectoryCommand(BaseSwerveDriveSubsystem drive, BasePoseSubsystem pose, PropertyFactory pf, HeadingModule.HeadingModuleFactory headingModuleFactory, RobotAssertionManager assertionManager, CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem) {
+    public SwerveBezierTrajectoryCommand(BaseSwerveDriveSubsystem drive, BasePoseSubsystem pose,
+                                         PropertyFactory pf, HeadingModule.HeadingModuleFactory headingModuleFactory,
+                                         RobotAssertionManager assertionManager,
+                                         CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem) {
         super(drive, pose, pf, headingModuleFactory, assertionManager);
         this.coprocessor = coprocessorCommunicationSubsystem;
         this.layout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
