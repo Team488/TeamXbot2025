@@ -91,6 +91,7 @@ public class AlignCameraToAprilTagCalculator {
             tagAcquisitionState = TagAcquisitionState.LockedOn;
             Translation2d aprilTagData = aprilTagVisionSubsystem.getRobotRelativeLocationOfBestDetectedAprilTag(targetCameraID);
 
+            akitLog.record("AprilTagData", aprilTagData);
             // This transform will always be at rotation 0, since in its own frame, the robot is always facing forward.
             Transform2d relativeGoalTransform = new Transform2d(
                     aprilTagData.minus(alignmentPointOffset),
