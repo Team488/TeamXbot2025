@@ -252,7 +252,7 @@ public class AlignCameraToAprilTagCalculator {
 
                 // Now, drive to that final point with locked-on heading.
                 var powers = drive.getPowerToAchieveFieldPosition(currentPose.getTranslation(), targetLocationOnField);
-                driveIntent = new XYPair(powers.getX(), powers.getY());
+                driveIntent = new XYPair(powers.getX(), powers.getY()).scale(approachSpeedFactor.get());
                 rotationIntent = headingModule.calculateHeadingPower(idealFinalHeadingDegrees);
 
                 // If we're quite close to the final point, advance to shoving into the reef or coral station.
