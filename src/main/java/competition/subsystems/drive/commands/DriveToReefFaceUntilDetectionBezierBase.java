@@ -35,7 +35,7 @@ public class DriveToReefFaceUntilDetectionBezierBase extends SwerveBezierTraject
                                                    CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem) {
         super(drive, pose, pf, headingModuleFactory, robotAssertionManager, coprocessorCommunicationSubsystem);
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
-        this.commander = new VisionCoprocessorCommander(VisionCoprocessor.LOCALHOST); // Connect to ORIN-3
+        this.commander = new VisionCoprocessorCommander(VisionCoprocessor.ORIN3); // Connect to ORIN-3
 
     }
 
