@@ -349,4 +349,7 @@ public class Contract2025 extends ElectricalContract {
                 new CANMotorControllerOutputConfig()
                         .withStatorCurrentLimit(Amps.of(60)));
     }
+
+    @Override
+    public boolean isDeadWheelOdometryReady() { return true; }
 }

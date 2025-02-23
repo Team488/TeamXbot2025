@@ -1,7 +1,6 @@
 
 package competition;
 
-import au.grapplerobotics.CanBridge;
 import competition.electrical_contract.ElectricalContract;
 import competition.electrical_contract.UnitTestContract2025;
 import competition.injection.components.BaseRobotComponent;
@@ -66,6 +65,7 @@ public class Robot extends BaseRobot {
         dataFrameRefreshables.add(getInjectorComponent().coralScorerSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().algaeCollectionSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().algaeArmSubsystem());
+        dataFrameRefreshables.add(getInjectorComponent().deadWheelSubsystem());
 
         // Not needed unless we are actively configuring the LaserCAN.
         //CanBridge.runTCP();

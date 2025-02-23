@@ -240,4 +240,7 @@ public class Contract2024 extends Contract2025 {
                         EnumSet.of(CameraCapabilities.GAME_SPECIFIC))*/
         };
     }
+
+    @Override
+    public boolean isDeadWheelOdometryReady() { return false; }
 }
