@@ -60,7 +60,39 @@ public class DeadWheelSubsystem extends BaseSubsystem {
         return currentPose;
     }
 
+    public double getLeftEncoder() {
+        return calculateValues().leftDistance();
+    }
+
+    public double getRightEncoder() {
+        return calculateValues().rightDistance();
+    }
+
+
+    public double getFrontEncoder() {
+        return calculateValues().frontDistance();
+    }
+
+    public double getRearEncoder() {
+        return calculateValues().rearDistance();
+    }
+
     public void update() {
+        EncoderValues result = calculateValues();
+
+        prevLeftDistance = result.leftDistance();
+        prevRightDistance = result.rightDistance();
+        prevFrontDistance = result.frontDistance();
+        prevRearDistance = result.rearDistance();
+
+        currentPose = new Pose2d(
+            currentPose.getX() + result.d_x(),
+            currentPose.getY() + result.d_y(),
+            currentPose.getRotation().plus(new Rotation2d(result.d_theta()))
+        );
+    }
+
+    public EncoderValues calculateValues() {
         double leftDistance = leftEncoder.getAdjustedDistance();
         double rightDistance = rightEncoder.getAdjustedDistance();
         double frontDistance = frontEncoder.getAdjustedDistance();
@@ -80,16 +112,9 @@ public class DeadWheelSubsystem extends BaseSubsystem {
 
         double d_x = avg_distance_x * Math.cos(currentPose.getRotation().getRadians());
         double d_y = avg_distance_y * Math.sin(currentPose.getRotation().getRadians());
+        return new EncoderValues(leftDistance, rightDistance, frontDistance, rearDistance, d_theta, d_x, d_y);
+    }
 
-        prevLeftDistance = leftDistance;
-        prevRightDistance = rightDistance;
-        prevFrontDistance = frontDistance;
-        prevRearDistance = rearDistance;
-
-        currentPose = new Pose2d(
-            currentPose.getX() + d_x,
-            currentPose.getY() + d_y,
-            currentPose.getRotation().plus(new Rotation2d(d_theta))
-        );
+    public record EncoderValues(double leftDistance, double rightDistance, double frontDistance, double rearDistance, double d_theta, double d_x, double d_y) {
     }
 }

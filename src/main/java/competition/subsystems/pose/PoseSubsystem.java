@@ -139,8 +139,14 @@ public class PoseSubsystem extends BasePoseSubsystem {
         batchedPushRequests.putPose2d(xtablesPrefix + ".VisionEnhancedPose", visionEnhancedPosition);
 
         Pose2d deadWheelPosition = deadWheelOdometry.getEstimatedPosition();
+        DeadWheelSubsystem.EncoderValues values = deadWheelOdometry.calculateValues();
         aKitLog.record("DeadWheelPosition", deadWheelPosition);
         batchedPushRequests.putPose2d(xtablesPrefix + ".DeadWheelPose", deadWheelPosition);
+        batchedPushRequests.putDouble(xtablesPrefix + ".DeadWheelPose.Right", values.rightDistance());
+        batchedPushRequests.putDouble(xtablesPrefix + ".DeadWheelPose.Left", values.leftDistance());
+        batchedPushRequests.putDouble(xtablesPrefix + ".DeadWheelPose.Front", values.frontDistance());
+        batchedPushRequests.putDouble(xtablesPrefix + ".DeadWheelPose.Rear", values.rearDistance());
+
 
         Pose2d robotPose = this.useVisionAssistedPose.get() ? visionEnhancedPosition : estimatedPosition;
         aKitLog.record("RobotPose", robotPose);
