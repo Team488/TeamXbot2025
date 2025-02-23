@@ -14,7 +14,6 @@ import org.kobe.xbot.Utilities.Entities.XTableValues;
 import xbot.common.logging.RobotAssertionManager;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.drive.BaseSwerveDriveSubsystem;
-import xbot.common.subsystems.drive.SwervePointKinematics;
 import xbot.common.subsystems.drive.SwerveSimpleBezierCommand;
 import xbot.common.subsystems.drive.SwerveSimpleTrajectoryMode;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
@@ -26,16 +25,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
-
 public class SwerveBezierTrajectoryCommand extends SwerveSimpleBezierCommand {
 
     private final CoprocessorCommunicationSubsystem coprocessor;
 
     // --- NEW CONSTANTS ---
     private final EnumsToPose enumsToPose = new EnumsToPose(); // not sure why yall made a class that reinits each time, this should be final.
-    private static final int STEPS_PER_SEGMENT = 10;
+    private static final int STEPS_PER_SEGMENT = 20;
     private static final double DEFAULT_ACCELERATION = 1.0;
     private static final double DEFAULT_METERS_PER_SECOND_VELOCITY = 2.0;
     private final List<Pose2d> reefPoses;
@@ -67,25 +63,25 @@ public class SwerveBezierTrajectoryCommand extends SwerveSimpleBezierCommand {
 
     @Override
     public void initialize() {
-        this.logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
-        XTablesClient client = this.coprocessor.tryGetXTablesClient();
-        if (client != null) {
-            XTableValues.BezierCurves curves = client.getBezierCurves("bezier_path");
-            if (curves != null && !curves.getCurvesList().isEmpty()) {
-                final XTableValues.TraversalOptions options = curves.hasOptions() ? curves.getOptions() : null;
-                double acceleration = DEFAULT_ACCELERATION;
-                double metersPerSecond = DEFAULT_METERS_PER_SECOND_VELOCITY;
-                if (options != null) {
-                    if (options.hasMetersPerSecond()) {
-                        metersPerSecond = options.getMetersPerSecond();
-                    }
-                    if (options.hasAccelerationMetersPerSecond()) {
-                        acceleration = options.getAccelerationMetersPerSecond();
-                    }
-                }
-                setSegmentedBezierCurve(curves, options);
-            }
-        }
+        this.logic.setVelocityMode(SwerveSimpleTrajectoryMode.ConstantVelocity);
+//        XTablesClient client = this.coprocessor.tryGetXTablesClient();
+//        if (client != null) {
+//            XTableValues.BezierCurves curves = client.getBezierCurves("bezier_path");
+//            if (curves != null && !curves.getCurvesList().isEmpty()) {
+//                final XTableValues.TraversalOptions options = curves.hasOptions() ? curves.getOptions() : null;
+//                double acceleration = DEFAULT_ACCELERATION;
+//                double metersPerSecond = DEFAULT_METERS_PER_SECOND_VELOCITY;
+//                if (options != null) {
+//                    if (options.hasMetersPerSecond()) {
+//                        metersPerSecond = options.getMetersPerSecond();
+//                    }
+//                    if (options.hasAccelerationMetersPerSecond()) {
+//                        acceleration = options.getAccelerationMetersPerSecond();
+//                    }
+//                }
+//                setSegmentedBezierCurve(curves, options);
+//            }
+//        }
         super.initialize();
     }
 
@@ -247,6 +243,11 @@ public class SwerveBezierTrajectoryCommand extends SwerveSimpleBezierCommand {
             currentStartPoint = segmentEndPoint;
         }
         return fullTrajectory;
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        super.end(interrupted);
     }
 
     public List<XbotSwervePoint> getMultiSegmentedBezierCurveSwervePoints(List<XTableValues.BezierCurves> multiBezierCurves) {

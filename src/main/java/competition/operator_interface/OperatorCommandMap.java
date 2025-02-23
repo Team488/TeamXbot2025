@@ -1,5 +1,6 @@
 package competition.operator_interface;
 
+import competition.auto_programs.FromCurrentPositionScoreFarLeftBranchALevelFour;
 import competition.auto_programs.FromLeftCageScoreFarLeftBranchALevelFour;
 import competition.auto_programs.FromLeftCageScoreLeftFacesLevelFours;
 import competition.auto_programs.FromMidCageScoreFarLeftBranchALevelFour;
@@ -25,6 +26,8 @@ import competition.subsystems.drive.commands.CalibrateDriveCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
 import competition.subsystems.drive.commands.DriveToCoralStationWithVisionCommand;
 import competition.subsystems.drive.commands.DriveToLocationWithPID;
+import competition.subsystems.drive.commands.DriveToReefFaceUntilDetectionBezierCommand;
+
 import competition.subsystems.drive.commands.RotateToHeadingWithHeadingModule;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.drive.commands.TeleportToPositionCommand;
@@ -86,17 +89,18 @@ public class OperatorCommandMap {
             ForceCoralPivotCalibrated forceCoralPivotCalibratedCommand,
             DebugSwerveModuleCommand debugModule,
             ChangeActiveSwerveModuleCommand changeActiveModule,
+            DriveToReefFaceUntilDetectionBezierCommand driveToReefFaceUntilDetectionBezierCommand,
             SwerveDriveWithJoysticksCommand typicalSwerveDrive) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(resetHeading);
 
         var alignToReefWithAprilTagWithLeftCamera = alignToReefWithAprilTagProvider.get();
         alignToReefWithAprilTagWithLeftCamera.setConfigurations(Cameras.FRONT_LEFT_CAMERA.getIndex(), false, 1);
-//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(alignToReefWithAprilTagWithLeftCamera);
 
         var alignToReefWithAprilTagWithRightCamera = alignToReefWithAprilTagProvider.get();
         alignToReefWithAprilTagWithRightCamera.setConfigurations(Cameras.FRONT_RIGHT_CAMERA.getIndex(), false, 1);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(alignToReefWithAprilTagWithRightCamera);
+        driveToReefFaceUntilDetectionBezierCommand.setTargetReefFacePose(Landmarks.ReefFace.FAR_LEFT);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(driveToReefFaceUntilDetectionBezierCommand);
 
         var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Back).onTrue(forceCoralPivotCalibratedCommand);
@@ -108,7 +112,7 @@ public class OperatorCommandMap {
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
         var homed = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(driveToCoralStationWithVisionCommand);
+//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(driveToCoralStationWithVisionCommand);
 
         operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
         operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(changeActiveModule);
@@ -359,7 +363,8 @@ public class OperatorCommandMap {
                                         FromLeftCageScoreFarLeftBranchALevelFour fromLeftFarLeftBranchALevelFour,
                                         FromMidCageScoreFarLeftBranchALevelFour fromMidFarLeftBranchALevelFour,
                                         FromRightCageScoreFarLeftBranchALevelFour fromRightFarLeftBranchALevelFour,
-                                        FromLeftCageScoreLeftFacesLevelFours fromLeftCageScoreLeftFacesLevelFours) {
+                                        FromLeftCageScoreLeftFacesLevelFours fromLeftCageScoreLeftFacesLevelFours,
+                                        FromCurrentPositionScoreFarLeftBranchALevelFour fromCurrentPositionScoreFarLeftBranchALevelFour) {
         var setFromLeftFarLeftBranchALevelFour = setAutonomousCommandProvider.get();
         setFromLeftFarLeftBranchALevelFour.setAutoCommand(fromLeftFarLeftBranchALevelFour);
         oi.neoTrellis.getifAvailable(1).onTrue(setFromLeftFarLeftBranchALevelFour); // temporary button
@@ -379,6 +384,11 @@ public class OperatorCommandMap {
         setFromLeftCageScoreLeftFacesLevelFours.setAutoCommand(fromLeftCageScoreLeftFacesLevelFours);
         oi.neoTrellis.getifAvailable(4).onTrue(setFromLeftCageScoreLeftFacesLevelFours); // temporary button
         setFromLeftCageScoreLeftFacesLevelFours.includeOnSmartDashboard("From Left Score Left Face's Level Fours Auto");
+
+        var setCurrentPathToFarLeftBranchALevelFour = setAutonomousCommandProvider.get();
+        setCurrentPathToFarLeftBranchALevelFour.setAutoCommand(fromCurrentPositionScoreFarLeftBranchALevelFour);
+        oi.neoTrellis.getifAvailable(5).onTrue(fromCurrentPositionScoreFarLeftBranchALevelFour); // temporary button
+        setCurrentPathToFarLeftBranchALevelFour.includeOnSmartDashboard("Path Current Position Score Left Face's Level Fours Auto");
     }
 
     @Inject
