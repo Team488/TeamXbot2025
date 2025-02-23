@@ -5,6 +5,8 @@ import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Power;
 
+import javax.inject.Inject;
+
 
 public class EmergencyAutonomusCommand extends DriveToLocationWithPID {
     DriveSubsystem driveSubsystem;
@@ -16,13 +18,14 @@ public class EmergencyAutonomusCommand extends DriveToLocationWithPID {
     double currentPostion;
     double oldPostion;
 
+    @Inject
     public EmergencyAutonomusCommand(DriveSubsystem drive, PoseSubsystem pose) {
         super(drive, pose);
 
         setLocationTarget(locationTarget);
 
 
-        
+
     }
 
 
