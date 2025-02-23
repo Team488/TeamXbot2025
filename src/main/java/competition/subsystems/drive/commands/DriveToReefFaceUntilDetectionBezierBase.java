@@ -80,7 +80,8 @@ public class DriveToReefFaceUntilDetectionBezierBase extends SwerveBezierTraject
     @Override
     public boolean isFinished() {
         return (aprilTagVisionSubsystem.doesCameraBestObservationHaveAprilTagId(camera.getIndex(),
-                aprilTagVisionSubsystem.getTargetAprilTagID(targetReefFacePose)) && pose.getCurrentPose2d().getTranslation().getDistance(targetReefFacePose.getTranslation()) <= minimumDistanceMeters )
+                aprilTagVisionSubsystem.getTargetAprilTagID(targetReefFacePose)) && pose.getCurrentPose2d()
+                .getTranslation().getDistance(targetReefFacePose.getTranslation()) <= minimumDistanceMeters )
                 || logic.recommendIsFinished(pose.getCurrentPose2d(), drive.getPositionalPid(), headingModule) || super.isFinished();
     }
 

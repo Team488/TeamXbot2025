@@ -69,10 +69,10 @@ public class Contract2025 extends ElectricalContract {
                 new CANMotorControllerOutputConfig().withStatorCurrentLimit(Amps.of(20)));
     }
 
-    public boolean isCoralSensorReady() { return true; }
+    public boolean isCoralScorerSensorReady() { return true; }
 
     @Override
-    public DeviceInfo getCoralSensor() {
+    public DeviceInfo getCoralScorerSensor() {
         return new DeviceInfo("CoralSensor", 0, true);
     }
 
@@ -117,10 +117,10 @@ public class Contract2025 extends ElectricalContract {
 
     public boolean isCoralArmPivotAbsoluteEncoderReady() { return false; }
 
-    public DeviceInfo getCoralArmPivotLowSensor() {
+    public DeviceInfo getCoralArmLowSensor() {
         return new DeviceInfo("ArmPivotLowSensor", 1, true);
     }
-    public boolean isCoralArmPivotLowSensorReady() { return true; }
+    public boolean isCoralArmLowSensorReady() { return true; }
 
     @Override
     public boolean isElevatorReady() {
@@ -347,6 +347,6 @@ public class Contract2025 extends ElectricalContract {
                 CANBusId.RIO,
                 35,
                 new CANMotorControllerOutputConfig()
-                        .withStatorCurrentLimit(Amps.of(20)));
+                        .withStatorCurrentLimit(Amps.of(60)));
     }
 }

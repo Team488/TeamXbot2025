@@ -32,7 +32,8 @@ public class FromCurrentPositionScoreFarLeftBranchALevelFour extends SequentialC
 
         // Drive to far left, branch A and score level four
         queueMessageToAutoSelector("Path curve to far left, branch A and score level four");
-        var pathAndCurveScoreFarLeftBranchALevelFour = driveToFaceAndScoreFact.create(Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.TWO);
+        var pathAndCurveScoreFarLeftBranchALevelFour = driveToFaceAndScoreFact.create(Landmarks.ReefFace.FAR_LEFT,
+                Landmarks.Branch.A, Landmarks.CoralLevel.TWO);
         this.addCommands(pathAndCurveScoreFarLeftBranchALevelFour);
     }
 

@@ -17,7 +17,7 @@ public class CalibrateDriveCommand extends BaseCommand {
     DriveSubsystem drive;
     PoseSubsystem pose;
     Timer timer = new Timer();
-    double speed = 0.66;
+    double speed = 1;
     double frontLeftModuleStartPosition;
     double frontRightModuleStartPosition;
     double rearLeftModuleStartPosition;
