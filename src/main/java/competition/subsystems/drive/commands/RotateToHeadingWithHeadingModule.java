@@ -26,6 +26,7 @@ public class RotateToHeadingWithHeadingModule extends BaseCommand {
         this.headingModule = headingModuleFactory.create(drive.getRotateToHeadingPid());
         this.drive = drive;
         this.pose = pose;
+        this.addRequirements(drive);
     }
 
     public void setTargetHeading(Angle targetHeading) {
@@ -40,10 +41,10 @@ public class RotateToHeadingWithHeadingModule extends BaseCommand {
 
     @Override
     public void execute() {
-        double degreeTarget = headingModule.calculateHeadingPower(targetHeading.in(Degrees));
+        double rotationalPower = headingModule.calculateHeadingPower(targetHeading.in(Degrees));
         drive.fieldOrientedDrive(
                 new XYPair(0, 0),
-                degreeTarget,
+                rotationalPower,
                 pose.getCurrentHeading().getDegrees(),
                 true
         );

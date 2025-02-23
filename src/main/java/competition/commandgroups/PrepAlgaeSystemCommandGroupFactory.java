@@ -7,30 +7,36 @@ import competition.subsystems.algae_collection.commands.AlgaeCollectionOutputCom
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 public class PrepAlgaeSystemCommandGroupFactory extends ParallelCommandGroup {
-    SetAlgaeArmSetpointToTargetPosition setAlgaeArmSetpointToTargetPosition;
-    AlgaeCollectionOutputCommand algaeCollectionOutputCommand;
-    AlgaeCollectionIntakeCommand algaeCollectionIntakeCommand;
+    Provider<SetAlgaeArmSetpointToTargetPosition> setAlgaeArmSetpointToTargetPositionProvider;
+    Provider<AlgaeCollectionOutputCommand> algaeCollectionOutputCommandProvider;
+    Provider<AlgaeCollectionIntakeCommand> algaeCollectionIntakeCommandProvider;
 
     @Inject
-    public PrepAlgaeSystemCommandGroupFactory(SetAlgaeArmSetpointToTargetPosition setAlgaeArmSetpointToTargetPosition,
-                                       AlgaeCollectionOutputCommand algaeCollectionOutputCommand,
-                                       AlgaeCollectionIntakeCommand algaeCollectionIntakeCommand) {
-        this.setAlgaeArmSetpointToTargetPosition = setAlgaeArmSetpointToTargetPosition;
-        this.algaeCollectionOutputCommand = algaeCollectionOutputCommand;
-        this.algaeCollectionIntakeCommand = algaeCollectionIntakeCommand;
+    public PrepAlgaeSystemCommandGroupFactory(Provider<SetAlgaeArmSetpointToTargetPosition> setAlgaeArmSetpointToTargetPositionProvider,
+                                              Provider<AlgaeCollectionOutputCommand> algaeCollectionOutputCommandProvider,
+                                       Provider<AlgaeCollectionIntakeCommand> algaeCollectionIntakeCommandProvider) {
+        this.setAlgaeArmSetpointToTargetPositionProvider = setAlgaeArmSetpointToTargetPositionProvider;
+        this.algaeCollectionOutputCommandProvider = algaeCollectionOutputCommandProvider;
+        this.algaeCollectionIntakeCommandProvider = algaeCollectionIntakeCommandProvider;
     }
 
     public ParallelCommandGroup create(AlgaeArmSubsystem.AlgaeArmPositions algaeArmPositions) {
         var group  = new ParallelCommandGroup();
 
-        setAlgaeArmSetpointToTargetPosition.setTargetPosition(algaeArmPositions);
+        var setAlgaeArmSetpointToTarget = setAlgaeArmSetpointToTargetPositionProvider.get();
+        setAlgaeArmSetpointToTarget.setTargetPosition(algaeArmPositions);
+
+        var algaeCollectionOutput = algaeCollectionOutputCommandProvider.get();
+        var algaeCollectionIntake = algaeCollectionIntakeCommandProvider.get();
+
         if (algaeArmPositions == AlgaeArmSubsystem.AlgaeArmPositions.GroundCollection) {
-            group.addCommands(setAlgaeArmSetpointToTargetPosition, algaeCollectionIntakeCommand);
+            group.addCommands(setAlgaeArmSetpointToTarget, algaeCollectionIntake);
         }
         else {
-            group.addCommands(setAlgaeArmSetpointToTargetPosition, algaeCollectionOutputCommand);
+            group.addCommands(setAlgaeArmSetpointToTarget, algaeCollectionOutput);
         }
         return group;
     }
