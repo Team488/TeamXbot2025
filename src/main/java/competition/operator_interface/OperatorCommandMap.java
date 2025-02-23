@@ -84,11 +84,11 @@ public class OperatorCommandMap {
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(resetHeading);
 
         var alignToReefWithAprilTagWithLeftCamera = alignToReefWithAprilTagProvider.get();
-        alignToReefWithAprilTagWithLeftCamera.setConfigurations(Cameras.FRONT_LEFT_CAMERA.getIndex(), false, 1);
+        alignToReefWithAprilTagWithLeftCamera.setConfigurations(Cameras.FRONT_LEFT_CAMERA.getIndex(), false, -2);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(alignToReefWithAprilTagWithLeftCamera);
 
         var alignToReefWithAprilTagWithRightCamera = alignToReefWithAprilTagProvider.get();
-        alignToReefWithAprilTagWithRightCamera.setConfigurations(Cameras.FRONT_RIGHT_CAMERA.getIndex(), false, 1);
+        alignToReefWithAprilTagWithRightCamera.setConfigurations(Cameras.FRONT_RIGHT_CAMERA.getIndex(), false, -2);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(alignToReefWithAprilTagWithRightCamera);
 
         var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
@@ -136,6 +136,15 @@ public class OperatorCommandMap {
         backAndFourth.logic.setGlobalKinematicValues(kinematicValuesForTesting);
         backAndFourth.logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
         backAndFourth.logic.setKeyPoints(points2);
+
+        var oneLength = swerveSimpleTrajectoryCommandProvider.get();
+        List<XbotSwervePoint> points3 = new ArrayList<>();
+        points3.add(new XbotSwervePoint(new Translation2d(3, 0), new Rotation2d(0), 10));
+        oneLength.logic.setGlobalKinematicValues(kinematicValuesForTesting);
+        oneLength.logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
+        oneLength.logic.setKeyPoints(points3);
+
+        oneLength.includeOnSmartDashboard("OneLengthTest");
 
         aroundBlueReef.includeOnSmartDashboard("AroundReefTest");
         backAndFourth.includeOnSmartDashboard("BackAndForthTest");

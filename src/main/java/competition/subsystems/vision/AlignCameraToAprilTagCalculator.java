@@ -45,6 +45,7 @@ public class AlignCameraToAprilTagCalculator {
     final Distance distanceForExactAlignment = Meters.of(1);
     private boolean isCameraBackwards = false;
     private TagAcquisitionState tagAcquisitionState = TagAcquisitionState.NeverSeen;
+    Translation2d targetLocationOnField = new Translation2d(0, 0);
 
     public static Translation2d generateAlignmentPointOffset(Distance robotCenterToOuterBumperX, CameraInfo cameraInfo,
                                                              Distance offset, boolean isCameraBackwards) {
@@ -86,11 +87,11 @@ public class AlignCameraToAprilTagCalculator {
     }
 
     public Pose2d getXYPowersAlignToAprilTag(Pose2d currentPose) {
-        Translation2d targetLocationOnField = new Translation2d(0, 0);
         if (aprilTagVisionSubsystem.doesCameraBestObservationHaveAprilTagId(targetCameraID, targetAprilTagID)) {
             tagAcquisitionState = TagAcquisitionState.LockedOn;
             Translation2d aprilTagData = aprilTagVisionSubsystem.getRobotRelativeLocationOfBestDetectedAprilTag(targetCameraID);
 
+            akitLog.record("AprilTagData", aprilTagData);
             // This transform will always be at rotation 0, since in its own frame, the robot is always facing forward.
             Transform2d relativeGoalTransform = new Transform2d(
                     aprilTagData.minus(alignmentPointOffset),
@@ -124,6 +125,10 @@ public class AlignCameraToAprilTagCalculator {
                 ).plus(Radians.of(isCameraBackwards ? Math.PI : 0));
             }
         }
+
+        akitLog.record("TargetLocationOnField", new Pose2d(
+                targetLocationOnField,
+                Rotation2d.fromDegrees(desiredHeading.in(Degrees))));
 
         return switch (tagAcquisitionState) {
             case LockedOn, Lost -> new Pose2d(
