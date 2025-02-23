@@ -17,7 +17,7 @@ import xbot.common.subsystems.drive.control_logic.HeadingModule;
 import javax.inject.Inject;
 import java.util.concurrent.TimeUnit;
 
-public class DriveToReefFaceUntilDetectionBezierCommand extends SwerveBezierTrajectoryCommand {
+public class DriveToReefFaceUntilDetectionBezierBase extends SwerveBezierTrajectoryBase {
 
     Pose2d targetReefFacePose;
     AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
@@ -27,19 +27,19 @@ public class DriveToReefFaceUntilDetectionBezierCommand extends SwerveBezierTraj
     private final VisionCoprocessorCommander commander;
 
     @Inject
-    public DriveToReefFaceUntilDetectionBezierCommand(BaseSwerveDriveSubsystem drive, PoseSubsystem pose,
-                                                      PropertyFactory pf,
-                                                      HeadingModule.HeadingModuleFactory headingModuleFactory,
-                                                      AprilTagVisionSubsystemExtended aprilTagVisionSubsystem,
-                                                      RobotAssertionManager robotAssertionManager,
-                                                      CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem) {
+    public DriveToReefFaceUntilDetectionBezierBase(BaseSwerveDriveSubsystem drive, PoseSubsystem pose,
+                                                   PropertyFactory pf,
+                                                   HeadingModule.HeadingModuleFactory headingModuleFactory,
+                                                   AprilTagVisionSubsystemExtended aprilTagVisionSubsystem,
+                                                   RobotAssertionManager robotAssertionManager,
+                                                   CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem) {
         super(drive, pose, pf, headingModuleFactory, robotAssertionManager, coprocessorCommunicationSubsystem);
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
         this.commander = new VisionCoprocessorCommander(VisionCoprocessor.LOCALHOST); // Connect to ORIN-3
 
     }
 
-    public DriveToReefFaceUntilDetectionBezierCommand setTargetReefFacePose(Landmarks.ReefFace targetReefFace) {
+    public DriveToReefFaceUntilDetectionBezierBase setTargetReefFacePose(Landmarks.ReefFace targetReefFace) {
         this.targetReefFacePose = Landmarks.getReefFacePose(targetReefFace);
         return this;
     }

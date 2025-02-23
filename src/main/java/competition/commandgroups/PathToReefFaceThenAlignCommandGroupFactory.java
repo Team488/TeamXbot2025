@@ -1,8 +1,7 @@
 package competition.commandgroups;
 
 import competition.subsystems.drive.commands.AlignToTagGlobalMovementWithCalculator;
-import competition.subsystems.drive.commands.DriveToReefFaceUntilDetectionBezierCommand;
-import competition.subsystems.drive.commands.DriveToReefFaceUntilDetectionCommand;
+import competition.subsystems.drive.commands.DriveToReefFaceUntilDetectionBezierBase;
 import competition.subsystems.pose.Cameras;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
@@ -12,12 +11,12 @@ import javax.inject.Inject;
 
 public class PathToReefFaceThenAlignCommandGroupFactory {
 
-    DriveToReefFaceUntilDetectionBezierCommand driveToReefFaceCommand;
+    DriveToReefFaceUntilDetectionBezierBase driveToReefFaceCommand;
     AlignToTagGlobalMovementWithCalculator alignToReefWithAprilTagCommand;
     AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
 
     @Inject
-    public PathToReefFaceThenAlignCommandGroupFactory(DriveToReefFaceUntilDetectionBezierCommand driveToReefFaceCommand,
+    public PathToReefFaceThenAlignCommandGroupFactory(DriveToReefFaceUntilDetectionBezierBase driveToReefFaceCommand,
                                                       AlignToTagGlobalMovementWithCalculator alignToReefWithAprilTagCommand,
                                                       AprilTagVisionSubsystemExtended aprilTagVisionSubsystem) {
         this.driveToReefFaceCommand = driveToReefFaceCommand;

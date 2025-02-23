@@ -1,7 +1,6 @@
 package competition.auto_programs;
 
 import competition.commandgroups.PathToFaceAndScoreCommandGroupFactory;
-import competition.subsystems.drive.commands.DriveToReefFaceUntilDetectionBezierCommand;
 import competition.simulation.MapleSimulator;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
