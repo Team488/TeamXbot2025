@@ -298,6 +298,11 @@ public class Contract2025 extends ElectricalContract {
     private static double frontAprilCameraPitch = Math.toRadians(-21);
     private static double frontAprilCameraYaw = Math.toRadians(0);
 
+    private static double rearAprilCameraXDisplacement = -0.33782; //meters
+    private static double rearAprilCameraYDisplacement = 0.0; //meters
+    private static double rearAprilCameraZDisplacement = -.146558; //meters
+    private static double rearAprilCameraPitch = Math.toRadians(-44.53);
+
     public CameraInfo[] getCameraInfo() {
         return new CameraInfo[] {// {};
 
@@ -317,19 +322,16 @@ public class Contract2025 extends ElectricalContract {
                                 -frontAprilCameraYDisplacement,
                                 frontAprilCameraZDisplacement),
                                 new Rotation3d(0, frontAprilCameraPitch, frontAprilCameraYaw)),
-                        EnumSet.of(CameraCapabilities.APRIL_TAG))
-
-                /* Camera below does not exist yet:
+                        EnumSet.of(CameraCapabilities.APRIL_TAG)),
                 new CameraInfo("Apriltag_Back_Camera",
                         "AprilTagBack",
                         new Transform3d(new Translation3d(
-                                -frontAprilCameraXDisplacement,
+                                rearAprilCameraXDisplacement,
                                 0,
-                                frontAprilCameraZDisplacement),
-                                new Rotation3d(0, Math.toRadians(-60), Math.PI)),
-                        EnumSet.of(CameraCapabilities.APRIL_TAG))*/
+                                rearAprilCameraZDisplacement),
+                                new Rotation3d(0, rearAprilCameraPitch, Math.PI)),
+                        EnumSet.of(CameraCapabilities.APRIL_TAG))
         };
-
     }
 
     @Override
