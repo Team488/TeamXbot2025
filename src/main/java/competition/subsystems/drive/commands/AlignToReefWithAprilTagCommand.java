@@ -2,6 +2,7 @@ package competition.subsystems.drive.commands;
 
 import competition.electrical_contract.ElectricalContract;
 import competition.subsystems.drive.DriveSubsystem;
+import competition.subsystems.drive.logic.AlignCameraToAprilTagCalculator;
 import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -19,8 +20,9 @@ public class AlignToReefWithAprilTagCommand extends AlignToTagGlobalMovementWith
     @Inject
     public AlignToReefWithAprilTagCommand(AprilTagVisionSubsystemExtended aprilTagVisionSubsystem, DriveSubsystem drive,
                                           HeadingModule.HeadingModuleFactory headingModuleFactory, PoseSubsystem pose,
-                                          ElectricalContract electricalContract) {
-        super(aprilTagVisionSubsystem, drive, headingModuleFactory, pose, electricalContract);
+                                          ElectricalContract electricalContract,
+                                          AlignCameraToAprilTagCalculator.AlignCameraToAprilTagCalculatorFactory calculatorFactory) {
+        super(aprilTagVisionSubsystem, drive, headingModuleFactory, pose, electricalContract, calculatorFactory);
 
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
     }
