@@ -6,11 +6,13 @@ import competition.subsystems.drive.commands.DriveToReefFaceUntilDetectionComman
 import competition.subsystems.pose.Cameras;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
+import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import xbot.common.controls.sensors.XXboxController;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import java.util.Set;
 
 public class DriveToReefFaceThenAlignCommandGroupFactory {
 
@@ -42,8 +44,13 @@ public class DriveToReefFaceThenAlignCommandGroupFactory {
         var group = new SequentialCommandGroup();
 
         driveToReefFaceCommand.setTargetReefFacePose(targetReefFace);
-        setBranch(targetReefFace, targetBranch);
-        group.addCommands(driveToReefFaceCommand, alignToReefWithAprilTagCommand);
+        var alignToReefCommand = new DeferredCommand(
+                () -> {
+                    setBranch(targetReefFace, targetBranch);
+                    return alignToReefWithAprilTagCommand;
+                }, Set.of()
+        );
+        group.addCommands(driveToReefFaceCommand, alignToReefCommand);
 
         return group;
     }
