@@ -35,10 +35,8 @@ public class FromLeftCageScoreFarLeftBranchALevelFour extends SequentialCommandG
 
         // Drive to far left, branch A and score level four
         queueMessageToAutoSelector("Drive to far left, branch A and score level four");
-        var driveAndScoreFarLeftBranchALevelFour = new DeferredCommand(
-                () -> driveToFaceAndScoreFact.create(Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR), Set.of(drive)
-        );
 
+        var driveAndScoreFarLeftBranchALevelFour = driveToFaceAndScoreFact.create(Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR);
         this.addCommands(driveAndScoreFarLeftBranchALevelFour);
     }
 
