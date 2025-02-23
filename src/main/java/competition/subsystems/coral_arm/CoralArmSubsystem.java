@@ -288,11 +288,15 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
         if (electricalContract.isCoralArmMotorReady()) {
             armMotor.periodic();
         }
-        if (this.isTouchingBottom() && periodicTickCounter >= 200 && !isCalibrated()) { //200 ticks is about 10 seconds
-            forceCalibratedHere();
-            setTargetValue(getCurrentValue());
-            periodicTickCounter = 0;
+
+        if (!isCalibrated) {
+            periodicTickCounter++;
+            if (this.isTouchingBottom() && periodicTickCounter >= 20) {
+                forceCalibratedHere();
+                setTargetValue(getCurrentValue());
+            }
         }
+
         aKitLog.record("Target Angle", this.getTargetValue().in(Degrees));
         aKitLog.record("Current Angle", this.getCurrentValue().in(Degrees));
         aKitLog.record("isCalibrated", this.isCalibrated());
@@ -304,9 +308,6 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
             aKitLog.record("lowSensor Status", lowSensor.get());
         }
         aKitLog.record("Is Sensor Active", this.isTouchingBottom());
-        aKitLog.record("Periodic Ticks", this.periodicTickCounter);
-
-        periodicTickCounter++;
     }
   
     public boolean getIsTargetAngleScoring() {
