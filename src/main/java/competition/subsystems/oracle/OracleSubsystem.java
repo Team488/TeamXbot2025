@@ -1,6 +1,7 @@
 package competition.subsystems.oracle;
 
 import competition.subsystems.coral_scorer.CoralScorerSubsystem;
+import competition.subsystems.drive.logic.AlignCameraToAprilTagCalculator;
 import competition.subsystems.oracle.contracts.CoralCollectionInfoSource;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
@@ -36,6 +37,11 @@ public class OracleSubsystem extends BaseSubsystem {
         ReleaseCoral
     }
 
+    public enum DriveAdviceMode {
+        FollowTrajectory,
+        UseInstantaneousPower
+    }
+
     final PoseSubsystem pose;
     final RobotAssertionManager assertionManager;
     final ReefCoordinateGenerator reefCoordinateGenerator;
@@ -68,15 +74,19 @@ public class OracleSubsystem extends BaseSubsystem {
     final DoubleProperty rangeToStartMovingSuperstructureMeters;
     final DoubleProperty rangeToActivateScorerMeters;
 
+    private final AlignCameraToAprilTagCalculator alignCameraToAprilTagCalculator;
+
     @Inject
     public OracleSubsystem(PoseSubsystem pose, CoralCollectionInfoSource coralInfoSource,
                            ScoringQueue scoringQueue, ReefCoordinateGenerator generator, PropertyFactory pf,
-                           RobotAssertionManager assertionManager) {
+                           RobotAssertionManager assertionManager,
+                           AlignCameraToAprilTagCalculator.AlignCameraToAprilTagCalculatorFactory alignCameraToAprilTagCalculatorFactory) {
         this.pose = pose;
         this.assertionManager = assertionManager;
         this.coralInfoSource = coralInfoSource;
         this.scoringQueue = scoringQueue;
         this.reefCoordinateGenerator = generator;
+        this.alignCameraToAprilTagCalculator = alignCameraToAprilTagCalculatorFactory.create();
         pf.setPrefix(this);
 
         rangeToStartMovingSuperstructureMeters = pf.createPersistentProperty("RangeToStartMovingSuperstructure-m", 1);
@@ -97,23 +107,35 @@ public class OracleSubsystem extends BaseSubsystem {
         aKitLog.record("BlueRoutingCircle", blueReefRoutingCircle.visualizeOuterRoutingCircleAsTrajectory());
     }
 
+    private ReefRoutingCircle getRoutingCircle() {
+        if (DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue) == DriverStation.Alliance.Blue) {
+            return blueReefRoutingCircle;
+        } else {
+            return redReefRoutingCircle;
+        }
+    }
+
+    private DriverStation.Alliance getCurrentAlliance() {
+        return DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
+    }
+
     public List<XbotSwervePoint> getRecommendedScoringTrajectory() {
 
         ScoringTask activeScoringTask = scoringQueue.getActiveTask();
 
         var penultimateWaypoint = reefCoordinateGenerator.getPoseRelativeToReefFaceAndBranch(
-                DriverStation.Alliance.Blue,
+                getCurrentAlliance(),
                 activeScoringTask.reefFace().get(),
                 activeScoringTask.branch().get(),
                 Meters.of(1),
                 Meters.of(0));
         var finalWaypoint = reefCoordinateGenerator.getTypicalScoringLocationForFaceBranchLevel(
-                DriverStation.Alliance.Blue,
+                getCurrentAlliance(),
                 activeScoringTask.reefFace().get(),
                 activeScoringTask.branch().get(),
                 activeScoringTask.coralLevel().get());
 
-        var route = blueReefRoutingCircle.generateSwervePoints(pose.getCurrentPose2d(), penultimateWaypoint);
+        var route = getRoutingCircle().generateSwervePoints(pose.getCurrentPose2d(), penultimateWaypoint);
         route.add(new XbotSwervePoint(finalWaypoint, 10));
 
         aKitLog.record("RecommendedRoute", XbotSwervePoint.generateTrajectory(route));
@@ -123,7 +145,7 @@ public class OracleSubsystem extends BaseSubsystem {
 
     public List<XbotSwervePoint> getRecommendedCoralPickupTrajectory() {
         var goalCoralStation = getCoralStation(pose.getCurrentPose2d());
-        var route = blueReefRoutingCircle.generateSwervePoints(pose.getCurrentPose2d(), goalCoralStation);
+        var route = getRoutingCircle().generateSwervePoints(pose.getCurrentPose2d(), goalCoralStation);
         aKitLog.record("RecommendedRoute", XbotSwervePoint.generateTrajectory(route));
         return route;
     }
@@ -286,7 +308,8 @@ public class OracleSubsystem extends BaseSubsystem {
                 // Check for first run or reevaluation
                 if (isPrimaryActivityInitilizationRequired() || reevaluationRequested) {
                     // Command the drive
-                    var newDriveAdvice = new OracleDriveAdvice(getNextInstructionNumber(), getRecommendedCoralPickupTrajectory());
+                    var newDriveAdvice = new OracleDriveAdvice(getNextInstructionNumber(), DriveAdviceMode.FollowTrajectory,
+                            getRecommendedCoralPickupTrajectory(), new FieldOrientedDriveData());
                     goalPose = newDriveAdvice.path().get(newDriveAdvice.path().size() - 1).keyPose;
                     setCurrentDriveAdvice(newDriveAdvice);
                     // Command the superstructure
@@ -324,9 +347,15 @@ public class OracleSubsystem extends BaseSubsystem {
 
                 // Check for first run or reevaluation
                 if (isPrimaryActivityInitilizationRequired() || reevaluationRequested) {
+                    alignCameraToAprilTagCalculator.configureAndReset(
+                            Landmarks.getAprilTagIdForReefFace(scoringQueue.getActiveTask().reefFace().get(), getCurrentAlliance()),
+
+                    );
+
                     currentScoringSubstage = ScoringSubstage.Travel;
                     // Command the drive
-                    var newDriveAdvice = new OracleDriveAdvice(getNextInstructionNumber(), getRecommendedScoringTrajectory());
+                    var newDriveAdvice = new OracleDriveAdvice(getNextInstructionNumber(), DriveAdviceMode.FollowTrajectory,
+                            getRecommendedScoringTrajectory(), new FieldOrientedDriveData());
                     setCurrentDriveAdvice(newDriveAdvice);
                     goalPose = newDriveAdvice.path().get(newDriveAdvice.path().size() - 1).keyPose;
 

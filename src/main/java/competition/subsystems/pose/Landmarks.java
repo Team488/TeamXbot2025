@@ -164,4 +164,15 @@ public class Landmarks {
             default -> FieldElementType.REEF_FACE;
         };
     }
+
+    public static int getAprilTagIdForReefFace(ReefFace reefFace, DriverStation.Alliance alliance) {
+        return switch (reefFace) {
+            case CLOSE -> alliance == DriverStation.Alliance.Blue ? 7 : 18;
+            case CLOSE_LEFT -> alliance == DriverStation.Alliance.Blue ? 6 : 19;
+            case FAR_LEFT -> alliance == DriverStation.Alliance.Blue ? 11 : 20;
+            case FAR -> alliance == DriverStation.Alliance.Blue ? 10 : 21;
+            case FAR_RIGHT -> alliance == DriverStation.Alliance.Blue ? 9 : 22;
+            case CLOSE_RIGHT -> alliance == DriverStation.Alliance.Blue ? 8 : 17;
+        };
+    }
 }
