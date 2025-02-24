@@ -41,13 +41,13 @@ public class DeadWheelSubsystem extends BaseSubsystem {
         double distancePerPulse = (Math.PI * wheelDiameterMeters.get()) / pulsesPerRevolution.get();
 
         leftEncoder = encoderFactory.create("LeftDeadwheelEncoder",
-                21,20, distancePerPulse);
+                21,20, distancePerPulse, "LeftDeadWheel");
         rightEncoder = encoderFactory.create("RightDeadwheelEncoder",
-                7,8, distancePerPulse);
+                7,8, distancePerPulse, "RightDeadWheel");
         frontEncoder = encoderFactory.create("FrontDeadwheelEncoder",
-                19,18, distancePerPulse);
+                19,18, distancePerPulse, "FrontDeadWheel");
         rearEncoder = encoderFactory.create("RearDeadwheelEncoder",
-                5,6, distancePerPulse);
+                5,6, distancePerPulse, "RearDeadWheel");
 
     }
 
