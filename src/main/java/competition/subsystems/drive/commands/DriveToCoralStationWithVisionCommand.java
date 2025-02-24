@@ -65,9 +65,6 @@ public class DriveToCoralStationWithVisionCommand extends DriveToBezierCurvesWit
     public void initialize() {
         var radiusOfRobot = Math.sqrt(Math.pow(this.distanceToOuterBumerInMeters, 2.0) * 2.0);
 
-        // TODO: Add additional logic after next test to swithc to deciding based on
-        // DriverStation
-        // and which coral station is clossest.
         var coralStationPose = this.getCoralStationPose();
         var deltaTranslation = new Translation2d(radiusOfRobot, coralStationPose.getRotation());
         var destinationTranslation = coralStationPose.getTranslation().plus(deltaTranslation);
