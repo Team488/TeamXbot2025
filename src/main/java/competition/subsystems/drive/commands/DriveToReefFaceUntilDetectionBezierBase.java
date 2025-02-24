@@ -23,7 +23,6 @@ public class DriveToReefFaceUntilDetectionBezierBase extends SwerveBezierTraject
     AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
     private Cameras camera = Cameras.FRONT_LEFT_CAMERA;
 
-    private double minimumDistanceMeters = 3;
     private final VisionCoprocessorCommander commander;
 
     @Inject
@@ -35,7 +34,7 @@ public class DriveToReefFaceUntilDetectionBezierBase extends SwerveBezierTraject
                                                    CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem) {
         super(drive, pose, pf, headingModuleFactory, robotAssertionManager, coprocessorCommunicationSubsystem);
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
-        this.commander = new VisionCoprocessorCommander(VisionCoprocessor.ORIN3); // Connect to ORIN-3
+        this.commander = new VisionCoprocessorCommander(VisionCoprocessor.LOCALHOST); // Connect to ORIN-3
 
     }
 
@@ -67,7 +66,7 @@ public class DriveToReefFaceUntilDetectionBezierBase extends SwerveBezierTraject
                                 .setFinalRotationTurnSpeedFactor(40) // How fast should it turn back to final rotation (2x)?
                                 .build())
                         .build(), 5, TimeUnit.SECONDS); // When should it give up and return null for any reason?
-        if(curves == null) {
+        if (curves == null) {
             log.info("No curves returned from vision coprocessor within timeout!");
             cancel();
             return;
@@ -79,12 +78,10 @@ public class DriveToReefFaceUntilDetectionBezierBase extends SwerveBezierTraject
 
     @Override
     public boolean isFinished() {
-        return (aprilTagVisionSubsystem.doesCameraBestObservationHaveAprilTagId(camera.getIndex(),
-                aprilTagVisionSubsystem.getTargetAprilTagID(targetReefFacePose)) && pose.getCurrentPose2d()
-                .getTranslation().getDistance(targetReefFacePose.getTranslation()) <= minimumDistanceMeters )
+        return aprilTagVisionSubsystem.doesCameraBestObservationHaveAprilTagId(camera.getIndex(),
+                aprilTagVisionSubsystem.getTargetAprilTagID(targetReefFacePose))
                 || logic.recommendIsFinished(pose.getCurrentPose2d(), drive.getPositionalPid(), headingModule) || super.isFinished();
     }
-
 
 
     public void setAprilTagCamera(Cameras camera) {

@@ -1,10 +1,9 @@
 package competition.auto_programs;
 
 import competition.commandgroups.PathToFaceAndScoreCommandGroupFactory;
-import competition.simulation.MapleSimulator;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
+
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import xbot.common.subsystems.autonomous.AutonomousCommandSelector;
 
@@ -17,11 +16,10 @@ public class FromCurrentPositionScoreFarLeftBranchALevelFour extends SequentialC
     @Inject
     public FromCurrentPositionScoreFarLeftBranchALevelFour(AutonomousCommandSelector autoSelector,
                                                     PoseSubsystem pose,
-                                                           PathToFaceAndScoreCommandGroupFactory driveToFaceAndScoreFact,
-                                                    MapleSimulator mapleSimulator) {
+                                                           PathToFaceAndScoreCommandGroupFactory driveToFaceAndScoreFact) {
         this.autoSelector = autoSelector;
 
-        var resetMapleSimPose = new InstantCommand(() -> mapleSimulator.resetPosition(Landmarks.BlueLeftStartingLine));
+//        var resetMapleSimPose = new InstantCommand(() -> mapleSimulator.resetPosition(Landmarks.BlueLeftStartingLine));
 //        this.addCommands(resetMapleSimPose);
 
         // Force our location to start in front of left cage

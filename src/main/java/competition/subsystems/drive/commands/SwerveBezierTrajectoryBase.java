@@ -37,7 +37,11 @@ public class SwerveBezierTrajectoryBase extends SwerveSimpleBezierCommand {
     private final AprilTagFieldLayout layout;
 
     @Inject
-    public SwerveBezierTrajectoryBase(BaseSwerveDriveSubsystem drive, BasePoseSubsystem pose, PropertyFactory pf, HeadingModule.HeadingModuleFactory headingModuleFactory, RobotAssertionManager assertionManager, CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem) {
+    public SwerveBezierTrajectoryBase(BaseSwerveDriveSubsystem drive, BasePoseSubsystem pose,
+                                      PropertyFactory pf,
+                                      HeadingModule.HeadingModuleFactory headingModuleFactory,
+                                      RobotAssertionManager assertionManager,
+                                      CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem) {
         super(drive, pose, pf, headingModuleFactory, assertionManager);
         this.coprocessor = coprocessorCommunicationSubsystem;
         this.layout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
@@ -235,7 +239,7 @@ public class SwerveBezierTrajectoryBase extends SwerveSimpleBezierCommand {
                     }
                 }
 
-                fullTrajectory.add(new XbotSwervePoint(pointTranslation, targetRotation, 1000));
+                fullTrajectory.add(new XbotSwervePoint(pointTranslation, Rotation2d.fromDegrees(finalRotationDegrees), 1000));
             }
 
             // Update the starting point for the next segment.
