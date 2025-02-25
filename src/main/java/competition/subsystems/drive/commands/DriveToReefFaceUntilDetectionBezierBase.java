@@ -19,7 +19,9 @@ import java.util.concurrent.TimeUnit;
 
 public class DriveToReefFaceUntilDetectionBezierBase extends SwerveBezierTrajectoryBase {
 
-    Pose2d targetReefFacePose;
+    Pose2d targetViewablePose;
+    int aprilTagID;
+
     AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
     private Cameras camera = Cameras.FRONT_LEFT_CAMERA;
 
@@ -34,12 +36,13 @@ public class DriveToReefFaceUntilDetectionBezierBase extends SwerveBezierTraject
                                                    CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem) {
         super(drive, pose, pf, headingModuleFactory, robotAssertionManager, coprocessorCommunicationSubsystem);
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
-        this.commander = new VisionCoprocessorCommander(VisionCoprocessor.LOCALHOST); // Connect to ORIN-3
+        this.commander = new VisionCoprocessorCommander(VisionCoprocessor.ORIN3); // Connect to ORIN-3
 
     }
 
-    public DriveToReefFaceUntilDetectionBezierBase setTargetReefFacePose(Landmarks.ReefFace targetReefFace) {
-        this.targetReefFacePose = Landmarks.getReefFacePose(targetReefFace);
+    public DriveToReefFaceUntilDetectionBezierBase setTargetViewablePose(Landmarks.ReefFace targetReefFace) {
+        this.targetViewablePose = targetReefFace.getViewable();
+        this.aprilTagID = aprilTagVisionSubsystem.getTargetAprilTagID(targetReefFace);
         return this;
     }
 
@@ -54,15 +57,15 @@ public class DriveToReefFaceUntilDetectionBezierBase extends SwerveBezierTraject
                                 .setX(startingPose.getX()) // Set Pose2d X value.
                                 .build())
                         .setEnd(XTableValues.ControlPoint.newBuilder()
-                                .setX(targetReefFacePose.getX()) // Set goal Pose2d X value.
-                                .setY(targetReefFacePose.getY()) // Set goal Pose2d Y value.
-                                .setRotationDegrees(targetReefFacePose.getRotation().getDegrees()) // Set goal rotation.
+                                .setX(targetViewablePose.getX()) // Set goal Pose2d X value.
+                                .setY(targetViewablePose.getY()) // Set goal Pose2d Y value.
+                                .setRotationDegrees(targetViewablePose.getRotation().getDegrees()) // Set goal rotation.
                                 .build())
-                        .setSafeDistanceInches(15) // Will stay an EXTRA 40 inches away (recommended current no DeadWheels)
+                        .setSafeDistanceInches(35) // Will stay an EXTRA 40 inches away (recommended current no DeadWheels)
                         .setOptions(XTableValues.TraversalOptions.newBuilder() // Create a new option builder.
-                                .setMetersPerSecond(1000)
-                                .setAccelerationMetersPerSecond(1000)
-                                .setFinalRotationDegrees(targetReefFacePose.getRotation().getDegrees()) // What should the final rotation be?
+                                .setMetersPerSecond(2)
+                                .setAccelerationMetersPerSecond(1)
+                                .setFinalRotationDegrees(targetViewablePose.getRotation().getDegrees()) // What should the final rotation be?
                                 .setFinalRotationTurnSpeedFactor(40) // How fast should it turn back to final rotation (2x)?
                                 .build())
                         .build(), 5, TimeUnit.SECONDS); // When should it give up and return null for any reason?
@@ -79,7 +82,7 @@ public class DriveToReefFaceUntilDetectionBezierBase extends SwerveBezierTraject
     @Override
     public boolean isFinished() {
         return aprilTagVisionSubsystem.doesCameraBestObservationHaveAprilTagId(camera.getIndex(),
-                aprilTagVisionSubsystem.getTargetAprilTagID(targetReefFacePose))
+                aprilTagID)
                 || logic.recommendIsFinished(pose.getCurrentPose2d(), drive.getPositionalPid(), headingModule) || super.isFinished();
     }
 

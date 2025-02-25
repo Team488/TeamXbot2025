@@ -27,18 +27,18 @@ public class PathToReefFaceThenAlignCommandGroupFactory {
     public void setBranch(Landmarks.ReefFace reefFace, Landmarks.Branch branch) {
         if (branch == Landmarks.Branch.A) {
             alignToReefWithAprilTagCommand.setConfigurations(Cameras.FRONT_RIGHT_CAMERA.getIndex(),
-                    aprilTagVisionSubsystem.getTargetAprilTagID(reefFace), false, 1);
+                    aprilTagVisionSubsystem.getTargetAprilTagID(reefFace), false, -2);
         }
         else {
             alignToReefWithAprilTagCommand.setConfigurations(Cameras.FRONT_LEFT_CAMERA.getIndex(),
-                    aprilTagVisionSubsystem.getTargetAprilTagID(reefFace), false, 1);
+                    aprilTagVisionSubsystem.getTargetAprilTagID(reefFace), false, -2);
         }
     }
 
     public SequentialCommandGroup create(Landmarks.ReefFace targetReefFace, Landmarks.Branch targetBranch) {
         var group = new SequentialCommandGroup();
 
-        driveToReefFaceCommand.setTargetReefFacePose(targetReefFace);
+        driveToReefFaceCommand.setTargetViewablePose(targetReefFace);
         setBranch(targetReefFace, targetBranch);
         group.addCommands(driveToReefFaceCommand, alignToReefWithAprilTagCommand);
 

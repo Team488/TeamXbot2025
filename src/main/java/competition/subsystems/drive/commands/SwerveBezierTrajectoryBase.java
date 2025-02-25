@@ -30,7 +30,7 @@ public class SwerveBezierTrajectoryBase extends SwerveSimpleBezierCommand {
 
     // --- NEW CONSTANTS ---
     private final EnumsToPose enumsToPose = new EnumsToPose(); // not sure why yall made a class that reinits each time, this should be final.
-    private static final int STEPS_PER_SEGMENT = 20;
+    private static final int STEPS_PER_SEGMENT = 5;
     private static final double DEFAULT_ACCELERATION = 1.0;
     private static final double DEFAULT_METERS_PER_SECOND_VELOCITY = 2.0;
     private final List<Pose2d> reefPoses;
@@ -67,6 +67,8 @@ public class SwerveBezierTrajectoryBase extends SwerveSimpleBezierCommand {
     @Override
     public void initialize() {
         this.logic.setVelocityMode(SwerveSimpleTrajectoryMode.ConstantVelocity);
+        this.logic.setPrioritizeRotationIfCloseToGoal(true);
+        this.logic.setDistanceThresholdToPrioritizeRotation(1.5);
 //        XTablesClient client = this.coprocessor.tryGetXTablesClient();
 //        if (client != null) {
 //            XTableValues.BezierCurves curves = client.getBezierCurves("bezier_path");

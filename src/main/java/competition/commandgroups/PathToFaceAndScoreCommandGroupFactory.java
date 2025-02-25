@@ -37,10 +37,10 @@ public class PathToFaceAndScoreCommandGroupFactory {
         var driveToReefWhilePrepping = new ParallelCommandGroup();
 
         var driveToReefFaceThenAlign = driveToReefFaceThenAlignCommandGroupFactory.create(targetReefFace, targetBranch);
-//        var prepCoralSystem = prepCoralSystemFactory.create(() -> targetLevel);
-//        measureDistanceBeforeScoringCommand.setDistanceThreshold(Meters.of(1));
-//        var measureDistanceBeforePreppingSystem = new SequentialCommandGroup(measureDistanceBeforeScoringCommand, prepCoralSystem,
-//                scoreWhenReadyProvider.get());
+        var prepCoralSystem = prepCoralSystemFactory.create(() -> targetLevel);
+        measureDistanceBeforeScoringCommand.setDistanceThreshold(Meters.of(1));
+        var measureDistanceBeforePreppingSystem = new SequentialCommandGroup(measureDistanceBeforeScoringCommand, prepCoralSystem,
+                scoreWhenReadyProvider.get());
 
         driveToReefWhilePrepping.addCommands(driveToReefFaceThenAlign);
 
