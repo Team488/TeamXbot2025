@@ -84,7 +84,7 @@ public class Contract2025 extends ElectricalContract {
     @Override
     public boolean isAlgaeArmPivotMotorReady() {return true;}
 
-    public boolean isAlgaeArmBottomSensorReady(){return true;}
+    public boolean isAlgaeArmBottomSensorReady(){return false;}
 
     public DeviceInfo getAlgaeArmBottomSensor() {return new DeviceInfo("AlgaeArmBottomSensor",9, true); }
 
