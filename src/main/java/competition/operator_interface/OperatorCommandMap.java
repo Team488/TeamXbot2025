@@ -231,6 +231,9 @@ public class OperatorCommandMap {
         var collectGroundAlgae = prepAlgaeSystemCommandGroupFactory.create(AlgaeArmSubsystem.AlgaeArmPositions.GroundCollection);
         oi.operatorGamepad.getPovIfAvailable(270).onTrue(collectGroundAlgae);
 
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(intakeAlgae);
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(ejectAlgae);
+
         var homeAlgaeArm = setAlgaeArmProvider.get();
         homeAlgaeArm.setTargetPosition(AlgaeArmSubsystem.AlgaeArmPositions.FullyRetracted);
         oi.operatorGamepad.getPovIfAvailable(90).onTrue(homeAlgaeArm);
