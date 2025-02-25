@@ -7,7 +7,6 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 
 import javax.inject.Singleton;
-
 import java.util.HashMap;
 
 import static edu.wpi.first.units.Units.Meters;
@@ -23,32 +22,44 @@ public class Landmarks {
     // Reef faces TODO: Find positions again if scoring positions are at different distances from reef for each level
     // Close Left Reef Face
     public static Pose2d BlueCloseLeftBranchA = new Pose2d(4.002, 5.174, Rotation2d.fromDegrees(-60));
-    public static Pose2d BlueCloseLeftAlgae = new Pose2d(3.834 ,5.137, Rotation2d.fromDegrees(-60));
+    public static Pose2d BlueCloseLeftAlgae = new Pose2d(3.834, 5.137, Rotation2d.fromDegrees(-60));
+    public static Pose2d BlueCloseLeftMidViewable = new Pose2d(3.5, 5.8, Rotation2d.fromDegrees(-60));
+
     public static Pose2d BlueCloseLeftBranchB = new Pose2d(3.717, 5.010, Rotation2d.fromDegrees(-60));
 
     // Close Reef Face
     public static Pose2d BlueCloseBranchA = new Pose2d(3.2385, 4.1699, Rotation2d.fromDegrees(0));
     public static Pose2d BlueCloseAlgae = new Pose2d(3.2385, 4.0259, Rotation2d.fromDegrees(0));
+    public static Pose2d BlueCloseMidViewable = new Pose2d(2, 4.025, Rotation2d.fromDegrees(0));
+
     public static Pose2d BlueCloseBranchB = new Pose2d(3.2385, 3.8412, Rotation2d.fromDegrees(0));
 
     // Close Right Reef Face
     public static Pose2d BlueCloseRightBranchA = new Pose2d(3.718, 3.042, Rotation2d.fromDegrees(60));
     public static Pose2d BlueCloseRightAlgae = new Pose2d(3.834, 2.915, Rotation2d.fromDegrees(60));
+    public static Pose2d BlueCloseRightMidViewable = new Pose2d(3.5, 2.35, Rotation2d.fromDegrees(60));
+
     public static Pose2d BlueCloseRightBranchB = new Pose2d(4.002, 2.877, Rotation2d.fromDegrees(60));
 
     // Far Right Reef Face
     public static Pose2d BlueFarRightBranchA = new Pose2d(4.948, 2.878, Rotation2d.fromDegrees(120));
     public static Pose2d BlueFarRightAlgae = new Pose2d(5.116, 2.915, Rotation2d.fromDegrees(120));
+    public static Pose2d BlueFarRightMidViewable = new Pose2d(5.45, 2.4, Rotation2d.fromDegrees(120));
+
     public static Pose2d BlueFarRightBranchB = new Pose2d(5.233, 3.041, Rotation2d.fromDegrees(120));
 
     // Far Reef Face
     public static Pose2d BlueFarBranchA = new Pose2d(5.701, 3.841, Rotation2d.fromDegrees(180));
     public static Pose2d BlueFarAlgae = new Pose2d(5.701, 4.026, Rotation2d.fromDegrees(180));
+    public static Pose2d BlueFarMidViewable = new Pose2d(6.4, 4.025, Rotation2d.fromDegrees(180));
+
     public static Pose2d BlueFarBranchB = new Pose2d(5.701, 4.170, Rotation2d.fromDegrees(180));
 
     // Far Left Reef Face
     public static Pose2d BlueFarLeftBranchA = new Pose2d(5.233, 5.009, Rotation2d.fromDegrees(-120));
     public static Pose2d BlueFarLeftAlgae = new Pose2d(5.116, 5.137, Rotation2d.fromDegrees(-120));
+    public static Pose2d BlueFarLeftMidViewable = new Pose2d(5.45, 5.75, Rotation2d.fromDegrees(-120));
+
     public static Pose2d BlueFarLeftBranchB = new Pose2d(4.949, 5.175, Rotation2d.fromDegrees(-120));
 
     // Coral Stations
@@ -85,12 +96,21 @@ public class Landmarks {
     }
 
     public enum ReefFace {
-        CLOSE,
-        CLOSE_LEFT,
-        CLOSE_RIGHT,
-        FAR,
-        FAR_LEFT,
-        FAR_RIGHT
+        CLOSE(BlueCloseMidViewable),
+        CLOSE_LEFT(BlueCloseLeftMidViewable),
+        CLOSE_RIGHT(BlueCloseRightMidViewable),
+        FAR(BlueFarMidViewable),
+        FAR_LEFT(BlueFarLeftMidViewable),
+        FAR_RIGHT(BlueFarRightMidViewable);
+        final Pose2d viewable;
+
+        ReefFace(Pose2d viewableLocation) {
+            this.viewable = viewableLocation;
+        }
+
+        public Pose2d getViewable() {
+            return viewable;
+        }
     }
 
     public enum ReefAlgae {
@@ -149,7 +169,7 @@ public class Landmarks {
         };
     }
 
-    public enum FieldElementType{
+    public enum FieldElementType {
         REEF_FACE,
         CORAL_STATION,
         ALGAE_PROCESSOR,
