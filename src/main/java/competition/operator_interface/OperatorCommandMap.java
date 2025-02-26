@@ -4,6 +4,7 @@ import competition.auto_programs.FromCageScoreOneCoralAutoFactory;
 import competition.auto_programs.FromLeftCageScoreLeftFacesLevelFours;
 import competition.auto_programs.FromRightCageScoreRightFacesLevelFours;
 import competition.commandgroups.HeadingAssistedDriveAndScoreCommandGroup;
+import competition.commandgroups.PathToReefFaceThenAlignCommandGroupFactory;
 import competition.commandgroups.PrepAlgaeSystemCommandGroupFactory;
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
 import competition.simulation.commands.ResetSimulatedPose;
@@ -31,6 +32,7 @@ import competition.subsystems.drive.commands.DriveToCoralStationWithVisionComman
 import competition.subsystems.drive.commands.DriveToLocationWithPID;
 import competition.subsystems.drive.commands.DriveToNearestReefFaceWithPID;
 import competition.subsystems.drive.commands.RotateToHeadingWithHeadingModule;
+import competition.subsystems.drive.commands.SwerveBezierTrajectoryCommand;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import competition.subsystems.elevator.commands.ForceElevatorCalibratedCommand;
@@ -341,6 +343,16 @@ public class OperatorCommandMap {
 //                        .getSteeringSubsystem()
 //                        .sysIdQuasistatic(SysIdRoutine.Direction.kReverse), Set.of()));
 
+    }
+    @Inject
+    public void setupAutonomousCommands(OperatorInterface oi,
+                                        Provider<SetAutonomousCommand> setAutonomousCommandProvider,
+                                        FromCurrentPositionScoreFarLeftBranchALevelFour fromCurrentPositionScoreFarLeftBranchALevelFour) {
+
+        var setCurrentPathToFarLeftBranchALevelFour = setAutonomousCommandProvider.get();
+        setCurrentPathToFarLeftBranchALevelFour.setAutoCommand(fromCurrentPositionScoreFarLeftBranchALevelFour);
+        oi.neoTrellis.getifAvailable(5).onTrue(fromCurrentPositionScoreFarLeftBranchALevelFour); // temporary button
+        setCurrentPathToFarLeftBranchALevelFour.includeOnSmartDashboard("Path Current Position Score Left Face's Level Fours Auto");
     }
 
     @Inject
