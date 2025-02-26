@@ -90,8 +90,10 @@ public class DriveWithSnapToTagCommand extends BaseCommand {
 
         if (targetInSight) {
             loopsWithTargetCounter++;
+            // TODO: trigger vibration as well
         } else {
             loopsWithTargetCounter--;
+            // TODO: stop any vibration.
         }
 
         if (loopsWithTargetCounter <= 0) {
@@ -109,6 +111,8 @@ public class DriveWithSnapToTagCommand extends BaseCommand {
                 double robotRelativeTagLocationY = vision.getRobotRelativeLocationOfBestDetectedAprilTag(cameraId).getY();
                 var centeringTranslation2d = drive.getPowerForRelativePositionChange(new Translation2d(0, robotRelativeTagLocationY));
                 centeringVector = new XYPair(centeringTranslation2d.getX(), centeringTranslation2d.getY());
+                // All of that was robot-relative. Rotate into field-relative.
+                centeringVector = centeringVector.rotate(pose.getCurrentHeading().getDegrees());
             }
 
             // Whether we have it or have lost it, we still want to drive forward/backward relative to the robot based
