@@ -98,6 +98,16 @@ public class AlgaeArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
         return getHumanInput();
     }
 
+    @Override
+    public void end(boolean interrupted) {
+        if (interrupted) {
+            // Note - this is really important! We need to force the system out of onboard PID because otherwise,
+            // on enable, the PID will have a brief moment of action where it tries to return to the position
+            // it was at before being disabled.
+            algaeArm.setPower(0);
+        }
+    }
+
 }
 
 
