@@ -14,7 +14,6 @@ public class EmergencyAutonomusCommand extends DriveToLocationWithPID {
     Translation2d locationStarting = new Translation2d(0,0);
     Translation2d locationTarget = new Translation2d(0, 1);
 
-    double mininumDriveGoal = 1;
     double currentPostion;
     double oldPostion;
 
