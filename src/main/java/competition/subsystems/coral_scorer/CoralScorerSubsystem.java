@@ -57,8 +57,8 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
             this.motor = null;
         }
 
-        if (electricalContract.isCoralSensorReady()) {
-            this.coralSensor = xDigitalInputFactory.create(electricalContract.getCoralSensor(),
+        if (electricalContract.isCoralScorerSensorReady()) {
+            this.coralSensor = xDigitalInputFactory.create(electricalContract.getCoralScorerSensor(),
                     this.getPrefix());
             this.registerDataFrameRefreshable(coralSensor);
         } else {
@@ -128,7 +128,7 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
     }
 
     public boolean hasCoral() {
-        if (electricalContract.isCoralSensorReady()) {
+        if (electricalContract.isCoralScorerSensorReady()) {
             return this.coralSensor.get();
         }
         return false;
