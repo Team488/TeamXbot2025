@@ -2,7 +2,6 @@ package competition.motion;
 
 import static edu.wpi.first.units.Units.Seconds;
 
-import edu.wpi.first.units.measure.Power;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -11,12 +10,14 @@ import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.MutTime;
+import xbot.common.advantage.AKitLogger;
 import xbot.common.controls.sensors.XTimer;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 
 public class TrapezoidProfileManager {
     protected final Logger log;
+    private final AKitLogger aKitLog;
 
     @AssistedFactory
     public abstract static class Factory {
@@ -38,19 +39,21 @@ public class TrapezoidProfileManager {
     double previousSetpoint = 0;
     MutTime previousSetpointTime = Seconds.mutable(-10000);
 
-    PowerManager powerManager;
+    final GlobalSafeSpeedsManager globalSafeSpeedsManager;
     double multiplier;
 
     @AssistedInject
     public TrapezoidProfileManager(
             @Assisted String name,
             PropertyFactory pf,
-            PowerManager powerManager,
+            GlobalSafeSpeedsManager globalSafeSpeedsManager,
             @Assisted("defaultMaxVelocity") double defaultMaxVelocity,
             @Assisted("defaultMaxAcceleration") double defaultMaxAcceleration,
             @Assisted("initialPosition") double initialPosition) {
         pf.setPrefix(name);
         log = LogManager.getLogger(name + ": TrapezoidProfileManager");
+        aKitLog = new AKitLogger(pf.getPrefix());
+        aKitLog.setLogLevel(AKitLogger.LogLevel.DEBUG);
         maxVelocity = pf.createPersistentProperty("maxVelocity", defaultMaxVelocity);
         maxAcceleration = pf.createPersistentProperty("maxAcceleration", defaultMaxAcceleration);
         constraints = new TrapezoidProfile.Constraints(maxVelocity.get(), maxAcceleration.get());
@@ -58,7 +61,7 @@ public class TrapezoidProfileManager {
         // initialize states to current value
         initialState = new TrapezoidProfile.State(initialPosition, 0);
         goalState = new TrapezoidProfile.State(initialPosition, 0);
-        this.powerManager = powerManager;
+        this.globalSafeSpeedsManager = globalSafeSpeedsManager;
     }
 
     public void resetState(double currentValue, double currentVelocity) {
@@ -69,18 +72,22 @@ public class TrapezoidProfileManager {
     }
 
     private double getMaxVelocity() {
-        return maxVelocity.get() * multiplier;
+        double effectiveVelocity = maxVelocity.get() * multiplier;
+        aKitLog.record("EffectiveVelocity", effectiveVelocity);
+        return effectiveVelocity;
     }
 
     private double getMaxAcceleration() {
-        return maxAcceleration.get() * multiplier;
+        double effectiveAcceleration = maxAcceleration.get() * multiplier;
+        aKitLog.record("EffectiveAcceleration", effectiveAcceleration);
+        return effectiveAcceleration;
     }
 
     public void setTargetPosition(double targetValue, double currentValue, double currentVelocity) {
         // if the profile's constraints properties have changed, recompute the profile
         // there's maybe a better place to do this but this should be fine since setTarget will be called
         // over and over again
-        multiplier = powerManager.getMultiplier();
+        multiplier = globalSafeSpeedsManager.getMultiplier();
         double maxVelocity = getMaxVelocity();
         double maxAcceleration = getMaxAcceleration();
 
