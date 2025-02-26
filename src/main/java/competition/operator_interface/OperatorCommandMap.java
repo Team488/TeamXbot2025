@@ -1,6 +1,8 @@
 package competition.operator_interface;
 
+import competition.auto_programs.FromCurrentPositionScoreFarLeftBranchALevelFour;
 import competition.commandgroups.HeadingAssistedDriveAndScoreCommandGroup;
+import competition.commandgroups.PathToReefFaceThenAlignCommandGroupFactory;
 import competition.commandgroups.PrepAlgaeSystemCommandGroupFactory;
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
 import competition.simulation.commands.ResetSimulatedPose;
@@ -23,6 +25,7 @@ import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
 import competition.subsystems.drive.commands.DriveToCoralStationWithVisionCommand;
 import competition.subsystems.drive.commands.DriveToLocationWithPID;
 import competition.subsystems.drive.commands.RotateToHeadingWithHeadingModule;
+import competition.subsystems.drive.commands.SwerveBezierTrajectoryCommand;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.drive.commands.TeleportToPositionCommand;
 import competition.subsystems.elevator.ElevatorSubsystem;
@@ -37,6 +40,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Commands;
 import xbot.common.controls.sensors.XXboxController;
+import xbot.common.subsystems.autonomous.SetAutonomousCommand;
 import xbot.common.subsystems.drive.SwervePointKinematics;
 import xbot.common.subsystems.drive.SwerveSimpleTrajectoryCommand;
 import xbot.common.subsystems.drive.SwerveSimpleTrajectoryMode;
@@ -83,6 +87,8 @@ public class OperatorCommandMap {
             DebugSwerveModuleCommand debugModule,
             ChangeActiveSwerveModuleCommand changeActiveModule,
             SwerveDriveWithJoysticksCommand typicalSwerveDrive,
+            SwerveBezierTrajectoryCommand sbtc,
+            PathToReefFaceThenAlignCommandGroupFactory pathToReefFaceThenAlignCommandGroupFactory,
             HeadingAssistedDriveAndScoreCommandGroup.Factory headingAssistedDriveAndScoreCommandGroupFactory) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
@@ -333,6 +339,16 @@ public class OperatorCommandMap {
 //                        .getSteeringSubsystem()
 //                        .sysIdQuasistatic(SysIdRoutine.Direction.kReverse), Set.of()));
 
+    }
+    @Inject
+    public void setupAutonomousCommands(OperatorInterface oi,
+                                        Provider<SetAutonomousCommand> setAutonomousCommandProvider,
+                                        FromCurrentPositionScoreFarLeftBranchALevelFour fromCurrentPositionScoreFarLeftBranchALevelFour) {
+
+        var setCurrentPathToFarLeftBranchALevelFour = setAutonomousCommandProvider.get();
+        setCurrentPathToFarLeftBranchALevelFour.setAutoCommand(fromCurrentPositionScoreFarLeftBranchALevelFour);
+        oi.neoTrellis.getifAvailable(5).onTrue(fromCurrentPositionScoreFarLeftBranchALevelFour); // temporary button
+        setCurrentPathToFarLeftBranchALevelFour.includeOnSmartDashboard("Path Current Position Score Left Face's Level Fours Auto");
     }
 
     @Inject
