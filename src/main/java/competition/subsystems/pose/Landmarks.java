@@ -136,4 +136,32 @@ public class Landmarks {
         EnumsToPose enumsToPose = new EnumsToPose();
         return enumsToPose.getCoralStationPose(station, section);
     }
+
+    public static ReefFace getReefFaceFromTagId(int tagId) {
+        return switch (tagId) {
+            case 7, 18 -> ReefFace.CLOSE;
+            case 6, 19 -> ReefFace.CLOSE_LEFT;
+            case 11, 20 -> ReefFace.FAR_LEFT;
+            case 10, 21 -> ReefFace.FAR;
+            case 9, 22 -> ReefFace.FAR_RIGHT;
+            case 8, 17 -> ReefFace.CLOSE_RIGHT;
+            default -> ReefFace.CLOSE; // How did you get here?
+        };
+    }
+
+    public enum FieldElementType{
+        REEF_FACE,
+        CORAL_STATION,
+        ALGAE_PROCESSOR,
+        OVERHEAD_THING
+    }
+
+    public static FieldElementType getFieldElementTypeForAprilTag(int tagId) {
+        return switch (tagId) {
+            case 1, 2, 12, 13 -> FieldElementType.CORAL_STATION;
+            case 3, 16 -> FieldElementType.ALGAE_PROCESSOR;
+            case 4, 5, 14, 15 -> FieldElementType.OVERHEAD_THING;
+            default -> FieldElementType.REEF_FACE;
+        };
+    }
 }
