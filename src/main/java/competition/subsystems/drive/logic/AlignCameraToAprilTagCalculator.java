@@ -23,6 +23,7 @@ import xbot.common.math.XYPair;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
+import xbot.common.subsystems.vision.AprilTagVisionIO;
 
 import java.util.Optional;
 
@@ -71,6 +72,7 @@ public class AlignCameraToAprilTagCalculator {
     final DoubleProperty distanceToStartShoving;
     final DoubleProperty shovePower;
     final DoubleProperty shoveDuration;
+    final DoubleProperty maxTagAmbiguity;
 
 
     double shoveStartTime = 0;
@@ -112,6 +114,7 @@ public class AlignCameraToAprilTagCalculator {
         distanceToStartShoving = pf.createPersistentProperty("DistanceToStartShoving-m", 0.0762); // 3 inches
         shovePower = pf.createPersistentProperty("ShovePower", 0.25);
         shoveDuration = pf.createPersistentProperty("ShoveDuration-s", 0.5);
+        maxTagAmbiguity = pf.createPersistentProperty("MaxTagAmbiguity", 0.5);
 
         reset();
     }
@@ -183,7 +186,8 @@ public class AlignCameraToAprilTagCalculator {
 
         // First, let's get any evergreen information we will need in almost all state machines.
         // Mostly, this is about where we should be pointing - and we generally point at the tag unless we are fairly close.
-        boolean doWeSeeOurTargetTag = aprilTagVisionSubsystem.doesCameraBestObservationHaveAprilTagId(targetCameraID, targetAprilTagID);
+        Optional<AprilTagVisionIO.TargetObservation> targetObservation = aprilTagVisionSubsystem.getTargetObservation(targetCameraID, targetAprilTagID);
+        boolean doWeSeeOurTargetTag = targetObservation.isPresent() && targetObservation.get().ambiguity() < maxTagAmbiguity.get();
         Translation2d currentTranslation = pose.getCurrentPose2d().getTranslation();
         double headingToPointAtAprilTag = Radians.of(
                 currentTranslation.minus(aprilTagPositionInGlobalFieldCoordinates).getAngle().getRadians() + Math.PI
@@ -290,15 +294,20 @@ public class AlignCameraToAprilTagCalculator {
     }
 
     private void updateFinalTargetState(Pose2d currentPose) {
-        Translation2d aprilTagData = aprilTagVisionSubsystem.getRobotRelativeLocationOfBestDetectedAprilTag(targetCameraID);
-        akitLog.record("AprilTagData", aprilTagData);
+        Optional<Translation2d> aprilTagData = aprilTagVisionSubsystem.getRobotRelativeLocationOfAprilTag(targetCameraID, targetAprilTagID);
+        akitLog.record("AprilTagData", aprilTagData.orElse(null));
         // This transform will always be at rotation 0, since in its own frame, the robot is always facing forward.
+
+        if (aprilTagData.isEmpty()) {
+            tagAcquisitionState = TagAcquisitionState.Lost;
+            return;
+        }
 
         // The aprilTagData has the robot-relative location of the AprilTag, but if we tried to drive into it we would crash
         // into the Reef/Coral station, since the robot has some width/depth. We will create a transform that includes an
         // X-offset (since X is the forward/backward direction) to account for this.
         Transform2d relativeGoalTransform = new Transform2d(
-                aprilTagData.minus(alignmentPointOffset),
+                aprilTagData.get().minus(alignmentPointOffset),
                 new Rotation2d()
         );
         // Use WPI libraries to transform the relative goal into a field-oriented goal. That way, if we ever lose the tag,
