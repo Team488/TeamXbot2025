@@ -32,7 +32,7 @@ public class LightSubsystem extends BaseSubsystem {
         RobotEnabled(2),
         CoralPresent(3),
         RequestCoralFromHuman(4),
-        CoralScore(5),
+        ReadyToScore(5),
         CoralReset(6),
         AlgaeDrop(7),
         AlgaeGrab(8),
