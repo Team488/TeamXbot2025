@@ -27,12 +27,27 @@ public class LightSubsystem extends BaseSubsystem {
     public enum LightsStateMessage{
         // we never send NoCode, it's implicit when the robot is off
         // and all of the DIOs float high
-        NoCode(maxValue), 
+        NoCode(0),
         RobotDisabled(1),
         RobotEnabled(2),
-        CoralPresent(3),
-        RequestCoralFromHuman(4),
-        ReadyToScore(5);
+        StartPosition(3),
+        CoralReadyToReceive(4),
+        CoralPresent(5),
+        CoralScore(6),
+        CoralReset(7),
+        AlgaeDrop(8),
+        AlgaeGrab(9),
+        AlgaePush(10),
+        Auto1(11),
+        Auto2(12),
+        Auto3(13),
+        HangDeep(14),
+        HangShallow(15),
+        ElevatorFinish(16),
+        ElevatorRaise2(17),
+        ElevatorRaise3(18),
+        ElevatorRaise4(19),
+        Victory(20);
 
         LightsStateMessage(final int value) {
             if(value > maxValue || value < 0) {
@@ -82,7 +97,7 @@ public class LightSubsystem extends BaseSubsystem {
         } else if (coralScorerSubsystem.confidentlyHasCoral()) {
             currentState = LightsStateMessage.CoralPresent;
         } else if (coralScorerSubsystem.getCoralScorerState() == CoralScorerSubsystem.CoralScorerState.INTAKING) {
-            currentState = LightsStateMessage.RequestCoralFromHuman;
+            currentState = LightsStateMessage.CoralReadyToReceive;
         } else {
             currentState = LightsStateMessage.RobotEnabled;
         }
