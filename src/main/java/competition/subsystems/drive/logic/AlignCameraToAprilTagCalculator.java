@@ -23,6 +23,7 @@ import xbot.common.math.XYPair;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
+import xbot.common.subsystems.vision.AprilTagVisionIO;
 
 import java.util.Optional;
 
@@ -143,6 +144,10 @@ public class AlignCameraToAprilTagCalculator {
                 isCameraBackwards
         );
 
+        // Set the camera to prioritize our target
+        aprilTagVisionSubsystem.setCameraSearchMode(targetCameraID, AprilTagVisionIO.SearchMode.PRIORITIZE_SPECIFIC_TAG);
+        aprilTagVisionSubsystem.setCameraSpecificTagIdToSearchFor(targetCameraID, targetAprilTagID);
+
         // Now for some other one-time calculations about the tag itself
         Optional<Pose3d> aprilTagPose = aprilTagVisionSubsystem.getAprilTagFieldOrientedPose(targetAprilTagID);
         aprilTagPositionInGlobalFieldCoordinates = aprilTagPose.map((p) -> p.getTranslation().toTranslation2d()).orElse(new Translation2d(0, 0));
@@ -183,7 +188,7 @@ public class AlignCameraToAprilTagCalculator {
 
         // First, let's get any evergreen information we will need in almost all state machines.
         // Mostly, this is about where we should be pointing - and we generally point at the tag unless we are fairly close.
-        boolean doWeSeeOurTargetTag = aprilTagVisionSubsystem.doesCameraBestObservationHaveAprilTagId(targetCameraID, targetAprilTagID);
+        boolean doWeSeeOurTargetTag = aprilTagVisionSubsystem.tagVisibleByCamera(targetCameraID, targetAprilTagID);
         Translation2d currentTranslation = pose.getCurrentPose2d().getTranslation();
         double headingToPointAtAprilTag = Radians.of(
                 currentTranslation.minus(aprilTagPositionInGlobalFieldCoordinates).getAngle().getRadians() + Math.PI
