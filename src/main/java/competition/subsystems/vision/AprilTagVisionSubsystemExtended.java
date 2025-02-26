@@ -56,6 +56,17 @@ public class AprilTagVisionSubsystemExtended extends AprilTagVisionSubsystem {
         return new Translation2d(data.getX(), data.getY());
     }
 
+    public Optional<Translation2d> getRobotRelativeLocationOfAprilTag(int cameraToUse, int tagId) {
+        var observation = getTargetObservation(cameraToUse, tagId);
+        return observation.map(obs -> {
+            Translation3d data = obs.cameraToTarget().getTranslation().rotateBy(
+                    getCameraPosition(cameraToUse).getRotation()
+            );
+
+            return new Translation2d(data.getX(), data.getY());
+        });
+    }
+
     /**
      * Returns the Pose3d of an april tag, given that it exists
      * @param targetAprilTagID we are getting the pose for
