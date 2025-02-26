@@ -26,10 +26,11 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 @Singleton
 public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
     public final XCANMotorController armMotor;
-    Angle targetAngle = Degree.of(0);
+    public Angle targetAngle = Degree.of(0);
     final ElectricalContract electricalContract;
     double rotationsAtZero;
     boolean isCalibrated = false;
+    public boolean goingUp;
     public final XDigitalInput bottomSensor;
 
     final DoubleProperty degreesPerRotation;
@@ -41,6 +42,7 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
     final DoubleProperty reefLowTopToBottomSweepEnd;
     final DoubleProperty reefHighSweepStart;
     final DoubleProperty reefHighSweepEnd;
+    final DoubleProperty repositionArmAmount;
 
     final Alert isNotCalibratedAlert = new Alert("AlgaeArm: not calibrated", Alert.AlertType.kWarning);
 
@@ -90,6 +92,7 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
         this.reefLowTopToBottomSweepEnd = propertyFactory.createPersistentProperty("ReefLowTopToBottomSweepEnd", 90.0);
         this.reefHighSweepStart = propertyFactory.createPersistentProperty("ReefHighSweepStart", 110.0);
         this.reefHighSweepEnd = propertyFactory.createPersistentProperty("ReefHighSweepEnd", 150.0);
+        this.repositionArmAmount = propertyFactory.createPersistentProperty("RepositionArmAmount", 5);
     }
 
     @Override
@@ -187,6 +190,10 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
             return this.bottomSensor.get();
         }
         return false;
+    }
+
+    public void repositionToTargetAngle() {
+        if (goingUp)
     }
 
     @Override
