@@ -91,7 +91,9 @@ public class ElevatorSimulator {
 
         // Read out the new elevator position for rendering
         var elevatorCurrentHeight = getCurrentHeight();
-        laserSensor.setDistance(elevatorCurrentHeight.in(Meters) + ((Math.random() - 0.5) * laserNoiseInMeters*2));
+
+        // We'll set our laserSensor distance to our elevator height with some noise (to *mimic reality*)
+        laserSensor.setDistance(elevatorCurrentHeight.in(Meters) + ((Math.random() - 0.5) * laserNoiseInMeters * 2));
 
         // update the motor encoder position based on the elevator height, add in the
         // random from zero offset
