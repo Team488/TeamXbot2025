@@ -1,9 +1,7 @@
 package competition.operator_interface;
 
-import competition.auto_programs.FromLeftCageScoreFarLeftBranchALevelFour;
+import competition.auto_programs.FromCageScoreOneCoralAutoFactory;
 import competition.auto_programs.FromLeftCageScoreLeftFacesLevelFours;
-import competition.auto_programs.FromMidCageScoreFarLeftBranchALevelFour;
-import competition.auto_programs.FromRightCageScoreFarLeftBranchALevelFour;
 import competition.commandgroups.HeadingAssistedDriveAndScoreCommandGroup;
 import competition.commandgroups.PrepAlgaeSystemCommandGroupFactory;
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
@@ -344,22 +342,26 @@ public class OperatorCommandMap {
     @Inject
     public void setupAutonomousCommands(OperatorInterface oi,
                                         Provider<SetAutonomousCommand> setAutonomousCommandProvider,
-                                        FromLeftCageScoreFarLeftBranchALevelFour fromLeftFarLeftBranchALevelFour,
-                                        FromMidCageScoreFarLeftBranchALevelFour fromMidFarLeftBranchALevelFour,
-                                        FromRightCageScoreFarLeftBranchALevelFour fromRightFarLeftBranchALevelFour,
+                                        FromCageScoreOneCoralAutoFactory fromCageScoreOneLevelFourAutoFact,
                                         FromLeftCageScoreLeftFacesLevelFours fromLeftCageScoreLeftFacesLevelFours) {
         var setFromLeftFarLeftBranchALevelFour = setAutonomousCommandProvider.get();
-        setFromLeftFarLeftBranchALevelFour.setAutoCommand(fromLeftFarLeftBranchALevelFour);
+        setFromLeftFarLeftBranchALevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFact.create(
+                Landmarks.BlueLeftStartingLine, Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR
+        ));
         oi.neoTrellis.getifAvailable(1).onTrue(setFromLeftFarLeftBranchALevelFour); // temporary button
         setFromLeftFarLeftBranchALevelFour.includeOnSmartDashboard("From Left Score Far Left Branch A Level 4 Auto");
 
         var setFromMidFarLeftBranchALevelFour = setAutonomousCommandProvider.get();
-        setFromMidFarLeftBranchALevelFour.setAutoCommand(fromMidFarLeftBranchALevelFour);
+        setFromMidFarLeftBranchALevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFact.create(
+                Landmarks.BlueMidStartingLine, Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR
+        ));
         oi.neoTrellis.getifAvailable(2).onTrue(setFromMidFarLeftBranchALevelFour); // temporary button
         setFromMidFarLeftBranchALevelFour.includeOnSmartDashboard("From Mid Score Far Left Branch A Level 4 Auto");
 
         var setFromRightFarLeftBranchALevelFour = setAutonomousCommandProvider.get();
-        setFromRightFarLeftBranchALevelFour.setAutoCommand(fromRightFarLeftBranchALevelFour);
+        setFromRightFarLeftBranchALevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFact.create(
+                Landmarks.BlueRightStartingLine, Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR
+        ));
         oi.neoTrellis.getifAvailable(3).onTrue(setFromRightFarLeftBranchALevelFour); // temporary button
         setFromRightFarLeftBranchALevelFour.includeOnSmartDashboard("From Right Score Far Left Branch A Level 4 Auto");
 
