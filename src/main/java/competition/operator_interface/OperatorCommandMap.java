@@ -22,6 +22,7 @@ import competition.subsystems.drive.commands.CalibrateDriveCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
 import competition.subsystems.drive.commands.DriveToCoralStationWithVisionCommand;
 import competition.subsystems.drive.commands.DriveToLocationWithPID;
+import competition.subsystems.drive.commands.DriveWithSnapToTagCommand;
 import competition.subsystems.drive.commands.RotateToHeadingWithHeadingModule;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.drive.commands.TeleportToPositionCommand;
@@ -83,7 +84,9 @@ public class OperatorCommandMap {
             DebugSwerveModuleCommand debugModule,
             ChangeActiveSwerveModuleCommand changeActiveModule,
             SwerveDriveWithJoysticksCommand typicalSwerveDrive,
-            HeadingAssistedDriveAndScoreCommandGroup.Factory headingAssistedDriveAndScoreCommandGroupFactory) {
+            HeadingAssistedDriveAndScoreCommandGroup.Factory headingAssistedDriveAndScoreCommandGroupFactory,
+            DriveWithSnapToTagCommand driveWithSnapToTagCommand
+            ) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
 
@@ -100,8 +103,8 @@ public class OperatorCommandMap {
         var homed = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(driveToCoralStationWithVisionCommand);
         var branchAHeadingAssistedDriveAndScore = headingAssistedDriveAndScoreCommandGroupFactory.create(Landmarks.Branch.A);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(branchAHeadingAssistedDriveAndScore)
-                        .onFalse(homed);
+        //operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(branchAHeadingAssistedDriveAndScore)
+        //                .onFalse(homed);
         var branchBHeadingAssistedDriveAndScore = headingAssistedDriveAndScoreCommandGroupFactory.create(Landmarks.Branch.B);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(branchBHeadingAssistedDriveAndScore)
                 .onFalse(homed);
@@ -183,6 +186,10 @@ public class OperatorCommandMap {
         rotateTo45Degrees.includeOnSmartDashboard("RotateTo45Degrees");
         rotateTo90Degrees.includeOnSmartDashboard("RotateTo90Degrees");
         rotateTo180Degrees.includeOnSmartDashboard("RotateTo180Degrees");
+
+        driveWithSnapToTagCommand.setChosenTagID(17);
+        driveWithSnapToTagCommand.setCameraId(0);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(driveWithSnapToTagCommand);
     }
 
 
