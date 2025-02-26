@@ -342,24 +342,24 @@ public class OperatorCommandMap {
     @Inject
     public void setupAutonomousCommands(OperatorInterface oi,
                                         Provider<SetAutonomousCommand> setAutonomousCommandProvider,
-                                        FromCageScoreOneCoralAutoFactory fromCageScoreOneLevelFourAutoFact,
+                                        Provider<FromCageScoreOneCoralAutoFactory> fromCageScoreOneLevelFourAutoFactProv,
                                         FromLeftCageScoreLeftFacesLevelFours fromLeftCageScoreLeftFacesLevelFours) {
         var setFromLeftFarLeftBranchALevelFour = setAutonomousCommandProvider.get();
-        setFromLeftFarLeftBranchALevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFact.create(
+        setFromLeftFarLeftBranchALevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFactProv.get().create(
                 Landmarks.BlueLeftStartingLine, Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR
         ));
         oi.neoTrellis.getifAvailable(1).onTrue(setFromLeftFarLeftBranchALevelFour); // temporary button
         setFromLeftFarLeftBranchALevelFour.includeOnSmartDashboard("From Left Score Far Left Branch A Level 4 Auto");
 
         var setFromMidFarLeftBranchALevelFour = setAutonomousCommandProvider.get();
-        setFromMidFarLeftBranchALevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFact.create(
+        setFromMidFarLeftBranchALevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFactProv.get().create(
                 Landmarks.BlueMidStartingLine, Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR
         ));
         oi.neoTrellis.getifAvailable(2).onTrue(setFromMidFarLeftBranchALevelFour); // temporary button
         setFromMidFarLeftBranchALevelFour.includeOnSmartDashboard("From Mid Score Far Left Branch A Level 4 Auto");
 
         var setFromRightFarLeftBranchALevelFour = setAutonomousCommandProvider.get();
-        setFromRightFarLeftBranchALevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFact.create(
+        setFromRightFarLeftBranchALevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFactProv.get().create(
                 Landmarks.BlueRightStartingLine, Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR
         ));
         oi.neoTrellis.getifAvailable(3).onTrue(setFromRightFarLeftBranchALevelFour); // temporary button
