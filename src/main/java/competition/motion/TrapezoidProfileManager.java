@@ -28,6 +28,8 @@ public class TrapezoidProfileManager {
 
     final DoubleProperty maxVelocity;
     final DoubleProperty maxAcceleration;
+    final DoubleProperty maxGap;
+    final DoubleProperty inTargetRange;
     
     TrapezoidProfile profile;
     TrapezoidProfile.Constraints constraints;
@@ -53,6 +55,9 @@ public class TrapezoidProfileManager {
         // initialize states to current value
         initialState = new TrapezoidProfile.State(initialPosition, 0);
         goalState = new TrapezoidProfile.State(initialPosition, 0);
+
+        maxGap = pf.createPersistentProperty("maxGap", 0.1);
+        inTargetRange = pf.createPersistentProperty("acceptableTargetRange", 0.02);
     }
 
     public void resetState(double currentValue, double currentVelocity) {
@@ -71,6 +76,11 @@ public class TrapezoidProfileManager {
             profile = new TrapezoidProfile(constraints);
         }
 
+        if(Math.abs(previousSetpoint - currentValue) > maxGap.get()){
+            goalState = new TrapezoidProfile.State(currentValue + maxGap.get(),0);
+            return;
+        }
+
         // if the target has changed, recompute the goal and current states
         if(goalState.position != targetValue) {
             // if the previousSentpoint we have is very recent, use it as the initial state to
@@ -83,7 +93,6 @@ public class TrapezoidProfileManager {
             goalState = new TrapezoidProfile.State(targetValue, 0);
             profileStartTime.mut_replace(XTimer.getFPGATimestampTime().minus(Seconds.of(0.02)));
         }
-
     }
 
     // currently only doing position, but in theory this goal has a velocity associated with it too we could use
