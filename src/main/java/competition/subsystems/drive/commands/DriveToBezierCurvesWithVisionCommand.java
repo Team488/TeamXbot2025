@@ -59,9 +59,12 @@ public class DriveToBezierCurvesWithVisionCommand extends SwerveSimpleBezierComm
             for (XTableValues.ControlPoint controlPoint : curve.getControlPointsList()) {
                 swervePoints.add(new XbotSwervePoint(controlPoint.getX(), controlPoint.getY(), controlPoint.getRotationDegrees(),
                                                      this.drive.getDriveToWaypointsDurationPerPoint().get()));
-
-                this.log.info("Adding swerve point: {}", controlPoint.getRotationDegrees());
             }
+        }
+
+        if (this.lastTargetPose != null) {
+            var lastSwervePoint = swervePoints.get(swervePoints.size() - 1);
+            lastSwervePoint.setPose(this.lastTargetPose);
         }
 
         this.logic.setKeyPoints(swervePoints);
@@ -126,7 +129,7 @@ public class DriveToBezierCurvesWithVisionCommand extends SwerveSimpleBezierComm
             .setFinalRotationTurnSpeedFactor(2)
             .build();
         
-        try (VisionCoprocessorCommander commander = new VisionCoprocessorCommander(VisionCoprocessor.LOCALHOST)) {
+        try (VisionCoprocessorCommander commander = new VisionCoprocessorCommander(VisionCoprocessor.ORIN2)) {
 
             XTableValues.BezierCurves curves = commander
                     .requestBezierPathWithOptions(XTableValues.RequestVisionCoprocessorMessage.newBuilder()
