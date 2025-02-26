@@ -97,7 +97,7 @@ public class LightSubsystem extends BaseSubsystem {
         } else if (coralScorerSubsystem.confidentlyHasCoral()) {
             currentState = LightsStateMessage.CoralPresent;
         } else if (coralScorerSubsystem.getCoralScorerState() == CoralScorerSubsystem.CoralScorerState.INTAKING) {
-            currentState = LightsStateMessage.CoralReadyToReceive;
+            currentState = LightsStateMessage.RequestCoralFromHuman;
         } else {
             currentState = LightsStateMessage.RobotEnabled;
         }
