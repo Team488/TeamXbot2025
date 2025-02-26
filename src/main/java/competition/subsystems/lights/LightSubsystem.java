@@ -27,12 +27,27 @@ public class LightSubsystem extends BaseSubsystem {
     public enum LightsStateMessage{
         // we never send NoCode, it's implicit when the robot is off
         // and all of the DIOs float high
-        NoCode(maxValue), 
+        NoCode(0),
         RobotDisabled(1),
         RobotEnabled(2),
         CoralPresent(3),
         RequestCoralFromHuman(4),
-        ReadyToScore(5);
+        ReadyToScore(5),
+        CoralReset(6),
+        AlgaeDrop(7),
+        AlgaeGrab(8),
+        AlgaePush(9),
+        Auto1(10),
+        Auto2(11),
+        Auto3(12),
+        HangDeep(13),
+        HangShallow(14),
+        ElevatorFinish(15),
+        ElevatorRaise2(16),
+        ElevatorRaise3(17),
+        ElevatorRaise4(18),
+        Victory(19),
+        StartPosition(20);
 
         LightsStateMessage(final int value) {
             if(value > maxValue || value < 0) {
