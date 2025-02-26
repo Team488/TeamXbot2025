@@ -5,6 +5,7 @@ import competition.operator_interface.OperatorInterface;
 import competition.subsystems.algae_arm.AlgaeArmSubsystem;
 import edu.wpi.first.units.measure.Angle;
 import xbot.common.command.BaseMaintainerCommand;
+import xbot.common.controls.sensors.XXboxController;
 import xbot.common.logic.HumanVsMachineDecider;
 import xbot.common.math.MathUtils;
 import xbot.common.math.PIDManager;
@@ -81,17 +82,30 @@ public class AlgaeArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
 
     @Override
     protected double getHumanInput() {
-        return MathUtils.constrainDouble(
-                MathUtils.deadband(
-                        oi.algaeAndSysIdGamepad.getRightStickY(),
-                        oi.getOperatorGamepadTypicalDeadband(),
-                        (a) -> MathUtils.exponentAndRetainSign(a, 3)),
-                humanMinPower.get(), humanMaxPower.get());
+        if (oi.operatorGamepad.getXboxButton(XXboxController.XboxButton.Back).getAsBoolean()) {
+            return MathUtils.constrainDouble(
+                    MathUtils.deadband(
+                            oi.operatorGamepad.getRightStickY(),
+                            oi.getOperatorGamepadTypicalDeadband(),
+                            (a) -> MathUtils.exponentAndRetainSign(a, 3)),
+                    humanMinPower.get(), humanMaxPower.get());
+        }
+        return 0;
     }
 
     @Override
     protected double getHumanInputMagnitude() {
         return getHumanInput();
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        if (interrupted) {
+            // Note - this is really important! We need to force the system out of onboard PID because otherwise,
+            // on enable, the PID will have a brief moment of action where it tries to return to the position
+            // it was at before being disabled.
+            algaeArm.setPower(0);
+        }
     }
 
 }

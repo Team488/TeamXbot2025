@@ -5,6 +5,8 @@ import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
 import xbot.common.controls.actuators.XCANMotorControllerPIDProperties;
@@ -32,15 +34,18 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     Angle targetAngle = Degrees.of(0);
     ElectricalContract electricalContract;
 
+    double periodicTickCounter;
     double rotationsAtZero = 0;
     boolean isCalibrated = false;
     final Alert isNotCalibratedAlert = new Alert("CoralArm: not calibrated", Alert.AlertType.kWarning);
-    private final DoubleProperty degreesPerRotations;
 
+    private final DoubleProperty degreesPerRotations;
     public final DoubleProperty scoreAngleDegrees;
     public final DoubleProperty humanLoadAngleDegrees;
     public final DoubleProperty rangeOfMotionDegrees;
     public final DoubleProperty powerWhenNotCalibrated;
+
+    public Landmarks.CoralLevel targetCoralLevel;
 
     @Inject
     public CoralArmSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
@@ -75,8 +80,8 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
             this.armAbsoluteEncoder = null;
         }
 
-        if (electricalContract.isCoralArmPivotLowSensorReady()) {
-            this.lowSensor = xDigitalInputFactory.create(electricalContract.getCoralArmPivotLowSensor(),
+        if (electricalContract.isCoralArmLowSensorReady()) {
+            this.lowSensor = xDigitalInputFactory.create(electricalContract.getCoralArmLowSensor(),
                     this.getPrefix());
             this.registerDataFrameRefreshable(this.lowSensor);
         } else {
@@ -166,6 +171,13 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
         }
     }
 
+    public boolean isTouchingBottom() {
+        if (electricalContract.isCoralArmLowSensorReady()) {
+            return this.lowSensor.get();
+        }
+        return false;
+    }
+
     @Override
     public void setPower(double power) {
         if (electricalContract.isCoralArmMotorReady()) {
@@ -173,11 +185,11 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
                 double currentLocationInDegrees = getCurrentValue().in(Degrees);
 
                 if (currentLocationInDegrees > rangeOfMotionDegrees.get()) {
-                    MathUtils.constrainDouble(power, -1, 0);
+                    power = MathUtils.constrainDouble(power, -1, 0);
                 }
 
                 if (currentLocationInDegrees < 0) {
-                    MathUtils.constrainDouble(power, 0, 1);
+                    power = MathUtils.constrainDouble(power, 0, 1);
                 }
             } else {
                 power = MathUtils.constrainDouble(power, -powerWhenNotCalibrated.get(), powerWhenNotCalibrated.get());
@@ -202,7 +214,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     }
 
     public Angle getArmAngle() {
-        if (electricalContract.isCoralArmPivotAbsoluteEncoderReady() && electricalContract.isCoralArmPivotLowSensorReady()) {
+        if (electricalContract.isCoralArmPivotAbsoluteEncoderReady() && electricalContract.isCoralArmLowSensorReady()) {
             return getArmAngle(0, rangeOfMotionDegrees.get() / 360,
                     armAbsoluteEncoder.getAbsolutePosition(), lowSensor.get(), rangeOfMotionDegrees.get());
         }
@@ -277,6 +289,14 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
             armMotor.periodic();
         }
 
+        if (!isCalibrated) {
+            periodicTickCounter++;
+            if (this.isTouchingBottom() && periodicTickCounter >= 20) {
+                forceCalibratedHere();
+                setTargetValue(getCurrentValue());
+            }
+        }
+
         aKitLog.record("Target Angle", this.getTargetValue().in(Degrees));
         aKitLog.record("Current Angle", this.getCurrentValue().in(Degrees));
         aKitLog.record("isCalibrated", this.isCalibrated());
@@ -287,7 +307,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
         if(electricalContract.isAlgaeArmBottomSensorReady()) {
             aKitLog.record("lowSensor Status", lowSensor.get());
         }
-
+        aKitLog.record("Is Sensor Active", this.isTouchingBottom());
     }
   
     public boolean getIsTargetAngleScoring() {
@@ -297,5 +317,16 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     
     public Angle getHumanLoadAngle() {
         return Degrees.of(this.humanLoadAngleDegrees.get());
+    }
+
+    public Command createSetTargetCoralLevelCommand(Landmarks.CoralLevel coralLevel) {
+        return Commands.runOnce(() -> setTargetCoralLevel(coralLevel));
+    }
+    public void setTargetCoralLevel(Landmarks.CoralLevel coralLevel) {
+        this.targetCoralLevel = coralLevel;
+    }
+
+    public Landmarks.CoralLevel getTargetCoralLevel() {
+        return this.targetCoralLevel;
     }
 }

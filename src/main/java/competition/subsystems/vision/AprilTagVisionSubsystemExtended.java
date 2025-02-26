@@ -32,12 +32,12 @@ public class AprilTagVisionSubsystemExtended extends AprilTagVisionSubsystem {
 
         // Note: flipped april tag IDs across the y-midpoint of the field for blue alliance
         // map both blue and red alliance poses
-        aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueCloseLeftAlgae), 8);
+        aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueCloseLeftAlgae), 6);
         aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueCloseAlgae), 7);
-        aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueCloseRightAlgae), 6);
-        aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueFarLeftAlgae), 9);
+        aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueCloseRightAlgae), 8);
+        aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueFarLeftAlgae), 11);
         aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueFarAlgae), 10);
-        aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueFarRightAlgae), 11);
+        aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueFarRightAlgae), 9);
         aprilTagIDHashMap.put(Landmarks.BlueCloseLeftAlgae, 19);
         aprilTagIDHashMap.put(Landmarks.BlueCloseAlgae, 18);
         aprilTagIDHashMap.put(Landmarks.BlueCloseRightAlgae, 17);
@@ -56,6 +56,11 @@ public class AprilTagVisionSubsystemExtended extends AprilTagVisionSubsystem {
         return new Translation2d(data.getX(), data.getY());
     }
 
+    /**
+     * Returns the Pose3d of an april tag, given that it exists
+     * @param targetAprilTagID we are getting the pose for
+     * @return the Pose3d (AKA position) of the tag
+     */
     public Optional<Pose3d> getAprilTagFieldOrientedPose(int targetAprilTagID) {
         return aprilTagFieldLayout.getTagPose(targetAprilTagID);
     }
