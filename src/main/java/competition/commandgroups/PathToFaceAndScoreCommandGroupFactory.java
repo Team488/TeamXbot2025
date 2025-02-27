@@ -42,7 +42,7 @@ public class PathToFaceAndScoreCommandGroupFactory {
         var measureDistanceBeforePreppingSystem = new SequentialCommandGroup(measureDistanceBeforeScoringCommand, prepCoralSystem,
                 scoreWhenReadyProvider.get());
 
-        driveToReefWhilePrepping.addCommands(driveToReefFaceThenAlign);
+        driveToReefWhilePrepping.addCommands(driveToReefFaceThenAlign, measureDistanceBeforePreppingSystem);
 
         driveToFaceAndScoreCommandGroup.addCommands(driveToReefWhilePrepping);
 
