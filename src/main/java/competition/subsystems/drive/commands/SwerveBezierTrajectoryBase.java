@@ -14,6 +14,7 @@ import xbot.common.logging.RobotAssertionManager;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.drive.BaseSwerveDriveSubsystem;
 import xbot.common.subsystems.drive.SwerveSimpleBezierCommand;
+import xbot.common.subsystems.drive.SwerveSimpleTrajectoryCommand;
 import xbot.common.subsystems.drive.SwerveSimpleTrajectoryMode;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
 import xbot.common.subsystems.pose.BasePoseSubsystem;
@@ -66,7 +67,7 @@ public class SwerveBezierTrajectoryBase extends SwerveSimpleBezierCommand {
 
     @Override
     public void initialize() {
-        this.logic.setVelocityMode(SwerveSimpleTrajectoryMode.ConstantVelocity);
+//        this.logic.setVelocityMode(SwerveSimpleTrajectoryMode.ConstantVelocity);
         this.logic.setPrioritizeRotationIfCloseToGoal(true);
         this.logic.setDistanceThresholdToPrioritizeRotation(1.5);
 //        XTablesClient client = this.coprocessor.tryGetXTablesClient();
@@ -117,43 +118,8 @@ public class SwerveBezierTrajectoryBase extends SwerveSimpleBezierCommand {
         int totalSteps = totalSegments * STEPS_PER_SEGMENT;
         int globalStep = 0;
 
-        // Boolean to indicate if we want to use AprilTag facing.
-        boolean faceAprilTag = (options != null && options.hasFaceNearestReefAprilTag() && options.getFaceNearestReefAprilTag());
-        // When to start AprilTag lock (as fraction of total path)
-        double startAprilTagThreshold = (options != null && options.hasStartFaceNearestReefAprilTagPathThresholdPercentage())
-                ? options.getStartFaceNearestReefAprilTagPathThresholdPercentage() / 100.0
-                : 0.0;
-        // When to end AprilTag lock (as fraction of total path)
-        double endAprilTagThreshold = (options != null && options.hasEndFaceNearestReefAprilTagPathThresholdPercentage())
-                ? options.getEndFaceNearestReefAprilTagPathThresholdPercentage() / 100.0
-                : 0.5; // Default to 50% if not provided
-
-        // Final rotation blending speed factor (for after the AprilTag phase)
-        double turnSpeedFactor = (options != null && options.hasFinalRotationTurnSpeedFactor()) ? options.getFinalRotationTurnSpeedFactor() : 1.0;
-
-        // Should we instantly snap to the nearest AprilTag? (If false, we gradually turn.)
-        boolean snapToNearestAprilTag = (options != null && options.hasSnapToNearestAprilTag()) ? options.getSnapToNearestAprilTag() : true;
-
-        // If snapping is false, then use this many degrees per step as the max rotation delta.
-        double aprilTagTurnSpeedPerStepDegrees = (options != null && options.hasAprilTagRotationDegreesTurnSpeedFactorPerStep())
-                ? options.getAprilTagRotationDegreesTurnSpeedFactorPerStep()
-                : 10.0; // default value
-
-        // Which direction to face the tag (default FRONT for 2025 robot).
-        XTableValues.RobotDirection tagDirection = (options != null && options.hasFaceNearestReefAprilTagDirection())
-                ? options.getFaceNearestReefAprilTagDirection()
-                : XTableValues.RobotDirection.FRONT;
-
-        // ---------------------------
-        // State variables for AprilTag mode:
-        // ---------------------------
-        // When not snapping, we maintain the current AprilTag rotation to increment gradually.
-        Rotation2d currentAprilTagRotation = null;
-        // When leaving AprilTag mode we capture the last AprilTag-facing rotation to blend from.
-        Rotation2d aprilTagRotationAtEnd = null;
-
-        // For non-AprilTag behavior, we use a default threshold (50% progress).
-        double originalThreshold = 0.5;
+        // Rotation start threshold (10% of the path)
+        double rotationStartThreshold = 0.2;
 
         // Process each Bézier segment.
         for (XTableValues.BezierCurve segment : bezierCurves.getCurvesList()) {
@@ -189,59 +155,15 @@ public class SwerveBezierTrajectoryBase extends SwerveSimpleBezierCommand {
 
                 Rotation2d targetRotation;
 
-                if (faceAprilTag && (globalProgress >= startAprilTagThreshold) && (globalProgress <= endAprilTagThreshold)) {
-                    // --- APRIL TAG ACTIVE REGION ---
-                    double desiredTagAngle = computeAprilTagAngle(pointTranslation, tagDirection);
-                    Rotation2d desiredTagRotation = new Rotation2d(desiredTagAngle);
-
-                    if (snapToNearestAprilTag) {
-                        // Instantly snap to the computed AprilTag angle.
-                        targetRotation = desiredTagRotation;
-                        currentAprilTagRotation = desiredTagRotation; // store for potential blending later
-                    } else {
-                        // Gradually adjust toward the desired AprilTag rotation.
-                        if (currentAprilTagRotation == null) {
-                            currentAprilTagRotation = overallStartRotation;
-                        }
-                        // Limit the change per step.
-                        double maxDelta = Units.degreesToRadians(aprilTagTurnSpeedPerStepDegrees);
-                        targetRotation = incrementRotationTowards(currentAprilTagRotation, desiredTagRotation, maxDelta);
-                        currentAprilTagRotation = targetRotation;
-                    }
-                } else if (faceAprilTag && (globalProgress > endAprilTagThreshold)) {
-                    // --- BLENDING REGION (after AprilTag active) ---
-                    if (aprilTagRotationAtEnd == null) {
-                        // Capture the last AprilTag rotation (if available)
-                        if (currentAprilTagRotation != null) {
-                            aprilTagRotationAtEnd = currentAprilTagRotation;
-                        } else {
-                            double aprilTagAngle = computeAprilTagAngle(pointTranslation, tagDirection);
-                            aprilTagRotationAtEnd = new Rotation2d(aprilTagAngle);
-                        }
-                    }
-                    // Define an interpolation period that is shortened or lengthened by turnSpeedFactor.
-                    double interpolationEnd = endAprilTagThreshold + (1 - endAprilTagThreshold) / turnSpeedFactor;
-                    if (interpolationEnd > 1.0) {
-                        interpolationEnd = 1.0;
-                    }
-                    if (globalProgress < interpolationEnd) {
-                        double t = (globalProgress - endAprilTagThreshold) / (interpolationEnd - endAprilTagThreshold);
-                        targetRotation = interpolateRotation(aprilTagRotationAtEnd, finalRotation, t);
-                    } else {
-                        targetRotation = finalRotation;
-                    }
+                if (globalProgress < rotationStartThreshold) {
+                    // Before 10% progress, maintain the current heading.
+                    targetRotation = Rotation2d.fromDegrees(pose.getCurrentHeading().getDegrees());
                 } else {
-                    // --- DEFAULT (NON-AprilTag) BEHAVIOR ---
-                    // This applies when faceAprilTag is false or before the start threshold.
-                    if (globalProgress <= originalThreshold) {
-                        double t = globalProgress / originalThreshold;
-                        targetRotation = interpolateRotation(overallStartRotation, finalRotation, t);
-                    } else {
-                        targetRotation = finalRotation;
-                    }
+                    // After 10% progress, switch to the target rotation.
+                    targetRotation = finalRotation;
                 }
 
-                fullTrajectory.add(new XbotSwervePoint(pointTranslation, Rotation2d.fromDegrees(finalRotationDegrees), 1000));
+                fullTrajectory.add(new XbotSwervePoint(pointTranslation, targetRotation, 1000));
             }
 
             // Update the starting point for the next segment.
@@ -249,6 +171,7 @@ public class SwerveBezierTrajectoryBase extends SwerveSimpleBezierCommand {
         }
         return fullTrajectory;
     }
+
 
     @Override
     public void end(boolean interrupted) {
