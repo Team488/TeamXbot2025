@@ -38,8 +38,7 @@ public class DriveToReefFaceUntilDetectionBezierBase extends SwerveBezierTraject
                                                    CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem) {
         super(drive, pose, pf, headingModuleFactory, robotAssertionManager, coprocessorCommunicationSubsystem);
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
-        this.commander = new VisionCoprocessorCommander(VisionCoprocessor.LOCALHOST); // Connect to ORIN-3
-
+        this.commander = coprocessorCommunicationSubsystem.getOrinVisionCoprocessorCommander();
     }
 
     public DriveToReefFaceUntilDetectionBezierBase setTargetViewablePose(Landmarks.ReefFace targetReefFace) {
@@ -82,7 +81,6 @@ public class DriveToReefFaceUntilDetectionBezierBase extends SwerveBezierTraject
             return;
         }
         this.setSegmentedBezierCurve(curves, curves.getOptions());
-
         super.initialize();
     }
 

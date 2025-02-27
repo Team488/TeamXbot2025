@@ -31,6 +31,7 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
 
     // always persisted xtables client manager instance
     private XTablesClientManager xTablesClientManager;
+    private VisionCoprocessorCommander orinVisionCoprocessorCommander;
 
     private VisionCoprocessorCommander visionCoprocessorCommander;
 
@@ -45,6 +46,8 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
         xtablesHeadingLocation = pf.createPersistentProperty("Xtables Heading Location", "target_heading");
 
         xTablesClientManager = XTablesClient.getDefaultClientAsynchronously();
+        this.orinVisionCoprocessorCommander = new VisionCoprocessorCommander(VisionCoprocessor.ORIN3_DHCP); // Connect to ORIN-3
+
         XTablesLogger.setLoggingLevel(Level.OFF);
 
         this.visionCoprocessorCommander = new VisionCoprocessorCommander(VisionCoprocessor.ORIN3);
@@ -52,6 +55,10 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
 
     public XTablesClientManager getXTablesManager(){
         return xTablesClientManager;
+    }
+
+    public VisionCoprocessorCommander getOrinVisionCoprocessorCommander() {
+        return orinVisionCoprocessorCommander;
     }
 
     /** Returns an instance of an xtables client if it can connect, else null**/

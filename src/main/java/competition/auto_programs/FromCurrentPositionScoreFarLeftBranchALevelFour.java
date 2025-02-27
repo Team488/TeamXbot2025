@@ -1,5 +1,6 @@
 package competition.auto_programs;
 
+import competition.commandgroups.DriveToFaceAndScoreCommandGroupFactory;
 import competition.commandgroups.DriveToStationAndIntakeUntilCollectedCommandGroupFactory;
 import competition.commandgroups.PathToFaceAndScoreCommandGroupFactory;
 import competition.subsystems.pose.Landmarks;
@@ -17,6 +18,7 @@ public class FromCurrentPositionScoreFarLeftBranchALevelFour extends SequentialC
     public FromCurrentPositionScoreFarLeftBranchALevelFour(AutonomousCommandSelector autoSelector,
                                                            PoseSubsystem pose,
                                                            PathToFaceAndScoreCommandGroupFactory driveToFaceAndScoreFact,
+                                                           DriveToFaceAndScoreCommandGroupFactory driveToFaceAndScoreCommandGroupFactory,
                                                            DriveToStationAndIntakeUntilCollectedCommandGroupFactory driveToStationAndIntakeUntilCollectedCommandGroupFactory) {
         this.autoSelector = autoSelector;
 
@@ -35,6 +37,9 @@ public class FromCurrentPositionScoreFarLeftBranchALevelFour extends SequentialC
                 Landmarks.Branch.B, Landmarks.CoralLevel.FOUR);
         this.addCommands(pathAndCurveScoreFarLeftBranchALevelFour);
         this.addCommands(driveToStationAndIntakeUntilCollectedCommandGroupFactory.create(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.MID));
+        var driveAndScoreFarLeftBranchALevelFour = driveToFaceAndScoreCommandGroupFactory.create(Landmarks.ReefFace.CLOSE,
+                Landmarks.CoralLevel.FOUR);
+        this.addCommands(driveAndScoreFarLeftBranchALevelFour);
     }
 
     private void queueMessageToAutoSelector(String message) {
