@@ -17,7 +17,8 @@ public class FromCurrentPositionScoreFarLeftBranchALevelFour extends SequentialC
     public FromCurrentPositionScoreFarLeftBranchALevelFour(AutonomousCommandSelector autoSelector,
                                                            PoseSubsystem pose,
                                                            PathToFaceAndScoreCommandGroupFactory driveToFaceAndScoreFact,
-                                                           DriveToStationAndIntakeUntilCollectedCommandGroupFactory driveToStationAndIntakeUntilCollectedCommandGroupFactory) {
+                                                           DriveToStationAndIntakeUntilCollectedCommandGroupFactory 
+                                                           driveToStationAndIntakeUntilCollectedCGFactory) {
         this.autoSelector = autoSelector;
 
 //        var resetMapleSimPose = new InstantCommand(() -> mapleSimulator.resetPosition(Landmarks.BlueLeftStartingLine));
@@ -34,7 +35,7 @@ public class FromCurrentPositionScoreFarLeftBranchALevelFour extends SequentialC
         var pathAndCurveScoreFarLeftBranchALevelFour = driveToFaceAndScoreFact.create(Landmarks.ReefFace.CLOSE,
                 Landmarks.Branch.B, Landmarks.CoralLevel.FOUR);
         this.addCommands(pathAndCurveScoreFarLeftBranchALevelFour);
-        this.addCommands(driveToStationAndIntakeUntilCollectedCommandGroupFactory.create(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.MID));
+        this.addCommands(driveToStationAndIntakeUntilCollectedCGFactory.create(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.MID));
     }
 
     private void queueMessageToAutoSelector(String message) {

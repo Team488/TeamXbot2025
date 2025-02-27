@@ -64,4 +64,18 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
     public String getXtablesTargetPose() {
         return xtablesTargetPose.get();
     }
+
+    public enum CentralTables{
+        BESTREEFAT("BESTOPENREEF_AT"),
+        BESTREEFBRANCH("BESTOPENREEFBRANCH");
+
+        private final String path;
+        private CentralTables(String tablePath){
+            this.path = tablePath;
+        }
+
+        public String getTable(){
+            return this.path;
+        }
+    }
 }
