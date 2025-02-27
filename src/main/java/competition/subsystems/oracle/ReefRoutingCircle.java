@@ -58,7 +58,7 @@ public class ReefRoutingCircle {
         // If there's no intersection between the starting point and the collision circle, just proceed
         // directly to the ending point.
         if (!collisionCircle.doesLineIntersect(start, end)) {
-            swervePoints.add(new XbotSwervePoint(endingPose, 0));
+            swervePoints.add(new XbotSwervePoint(endingPose, 0.001));
             return swervePoints;
         }
 
@@ -71,7 +71,7 @@ public class ReefRoutingCircle {
         } else {
             // otherwise, we're outside the routing circle, and we need to first move to the tangent point.
             tangentPoint = findClosestTangentPoint(start, end);
-            swervePoints.add(new XbotSwervePoint(new Pose2d(tangentPoint, endingPose.getRotation()), 0));
+            swervePoints.add(new XbotSwervePoint(new Pose2d(tangentPoint, endingPose.getRotation()), 0.001));
         }
 
         int escape = 0;

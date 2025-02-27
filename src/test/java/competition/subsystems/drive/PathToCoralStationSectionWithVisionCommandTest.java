@@ -18,7 +18,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 import java.util.Arrays;
 
-public class DriveToCoralStationWithVisionCommandTest extends BaseCompetitionTest {
+public class PathToCoralStationSectionWithVisionCommandTest extends BaseCompetitionTest {
     Distance getDistanceFromCenterToOuterBumperX = Inches.of(18);
 
     @Test

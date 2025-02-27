@@ -2,7 +2,9 @@ package competition.subsystems.vision;
 
 import org.kobe.xbot.JClient.XTablesClient;
 import org.kobe.xbot.JClient.XTablesClientManager;
+import org.kobe.xbot.Utilities.Entities.VisionCoprocessor;
 import org.kobe.xbot.Utilities.Logger.XTablesLogger;
+import org.kobe.xbot.Utilities.VisionCoprocessorCommander;
 import xbot.common.advantage.DataFrameRefreshable;
 import xbot.common.command.BaseSubsystem;
 import xbot.common.logging.RobotAssertionManager;
@@ -29,6 +31,7 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
 
     // always persisted xtables client manager instance
     private XTablesClientManager xTablesClientManager;
+    private VisionCoprocessorCommander orinVisionCoprocessorCommander;
 
 
     @Inject
@@ -41,11 +44,17 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
         xtablesHeadingLocation = pf.createPersistentProperty("Xtables Heading Location", "target_heading");
 
         xTablesClientManager = XTablesClient.getDefaultClientAsynchronously();
+        this.orinVisionCoprocessorCommander = new VisionCoprocessorCommander(VisionCoprocessor.ORIN3_DHCP); // Connect to ORIN-3
+
         XTablesLogger.setLoggingLevel(Level.OFF);
     }
 
     public XTablesClientManager getXTablesManager(){
         return xTablesClientManager;
+    }
+
+    public VisionCoprocessorCommander getOrinVisionCoprocessorCommander() {
+        return orinVisionCoprocessorCommander;
     }
 
     /** Returns an instance of an xtables client if it can connect, else null**/
