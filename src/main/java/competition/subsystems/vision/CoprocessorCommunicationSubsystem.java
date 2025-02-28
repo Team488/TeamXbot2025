@@ -2,7 +2,9 @@ package competition.subsystems.vision;
 
 import org.kobe.xbot.JClient.XTablesClient;
 import org.kobe.xbot.JClient.XTablesClientManager;
+import org.kobe.xbot.Utilities.Entities.VisionCoprocessor;
 import org.kobe.xbot.Utilities.Logger.XTablesLogger;
+import org.kobe.xbot.Utilities.VisionCoprocessorCommander;
 import xbot.common.advantage.DataFrameRefreshable;
 import xbot.common.command.BaseSubsystem;
 import xbot.common.logging.RobotAssertionManager;
@@ -30,6 +32,8 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
     // always persisted xtables client manager instance
     private XTablesClientManager xTablesClientManager;
 
+    private VisionCoprocessorCommander visionCoprocessorCommander;
+
 
     @Inject
     public CoprocessorCommunicationSubsystem(PropertyFactory pf, RobotAssertionManager assertionManager) {
@@ -42,6 +46,8 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
 
         xTablesClientManager = XTablesClient.getDefaultClientAsynchronously();
         XTablesLogger.setLoggingLevel(Level.OFF);
+
+        this.visionCoprocessorCommander = new VisionCoprocessorCommander(VisionCoprocessor.LOCALHOST);
     }
 
     public XTablesClientManager getXTablesManager(){
@@ -64,4 +70,9 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
     public String getXtablesTargetPose() {
         return xtablesTargetPose.get();
     }
+
+    public VisionCoprocessorCommander getVisionCoprocessorCommander() {
+        return this.visionCoprocessorCommander;
+    }
+
 }

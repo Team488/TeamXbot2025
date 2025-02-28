@@ -22,36 +22,43 @@ public class Landmarks {
     public static Pose2d BlueMidStartingLine = new Pose2d(7.56, 6.135, Rotation2d.fromDegrees(180));
     public static Pose2d BlueRightStartingLine = new Pose2d(7.56, 5.044, Rotation2d.fromDegrees(180));
 
-    // Reef faces TODO: Find positions again if scoring positions are at different distances from reef for each level
+    // Reef faces TODO: Find positions again if scoring positions are at different
+    // distances from reef for each level
     // Close Left Reef Face
     public static Pose2d BlueCloseLeftBranchA = new Pose2d(4.002, 5.174, Rotation2d.fromDegrees(-60));
-    public static Pose2d BlueCloseLeftAlgae = new Pose2d(3.834 ,5.137, Rotation2d.fromDegrees(-60));
+    public static Pose2d BlueCloseLeftAlgae = new Pose2d(3.834, 5.137, Rotation2d.fromDegrees(-60));
     public static Pose2d BlueCloseLeftBranchB = new Pose2d(3.717, 5.010, Rotation2d.fromDegrees(-60));
+    public static int BlueDriverStationLeftFiducialId = 19;
 
     // Close Reef Face
     public static Pose2d BlueCloseBranchA = new Pose2d(3.2385, 4.1699, Rotation2d.fromDegrees(0));
     public static Pose2d BlueCloseAlgae = new Pose2d(3.2385, 4.0259, Rotation2d.fromDegrees(0));
     public static Pose2d BlueCloseBranchB = new Pose2d(3.2385, 3.8412, Rotation2d.fromDegrees(0));
+    public static int BlueDriverStationCenterFiducialId = 18;
 
     // Close Right Reef Face
     public static Pose2d BlueCloseRightBranchA = new Pose2d(3.718, 3.042, Rotation2d.fromDegrees(60));
     public static Pose2d BlueCloseRightAlgae = new Pose2d(3.834, 2.915, Rotation2d.fromDegrees(60));
     public static Pose2d BlueCloseRightBranchB = new Pose2d(4.002, 2.877, Rotation2d.fromDegrees(60));
+    public static int BlueDriverStationRigthFiducialId = 17;
 
     // Far Right Reef Face
     public static Pose2d BlueFarRightBranchA = new Pose2d(4.948, 2.878, Rotation2d.fromDegrees(120));
     public static Pose2d BlueFarRightAlgae = new Pose2d(5.116, 2.915, Rotation2d.fromDegrees(120));
     public static Pose2d BlueFarRightBranchB = new Pose2d(5.233, 3.041, Rotation2d.fromDegrees(120));
+    public static int BlueBargeRightFiducialId = 22;
 
     // Far Reef Face
     public static Pose2d BlueFarBranchA = new Pose2d(5.701, 3.841, Rotation2d.fromDegrees(180));
     public static Pose2d BlueFarAlgae = new Pose2d(5.701, 4.026, Rotation2d.fromDegrees(180));
     public static Pose2d BlueFarBranchB = new Pose2d(5.701, 4.170, Rotation2d.fromDegrees(180));
+    public static int BlueBargeCenterFiducialId = 21;
 
     // Far Left Reef Face
     public static Pose2d BlueFarLeftBranchA = new Pose2d(5.233, 5.009, Rotation2d.fromDegrees(-120));
     public static Pose2d BlueFarLeftAlgae = new Pose2d(5.116, 5.137, Rotation2d.fromDegrees(-120));
     public static Pose2d BlueFarLeftBranchB = new Pose2d(4.949, 5.175, Rotation2d.fromDegrees(-120));
+    public static int BlueBargeLeftFiducialId = 20;
 
     // Coral Stations
     // Left Coral Station
@@ -70,6 +77,13 @@ public class Landmarks {
     public static final Distance reefCenterToFace = Meters.of(0.665);
     public static final Distance reefBranchHorizontalOffsetForBranchTypeA = Meters.of(-0.15);
 
+    public static int RedDriverStationLeftFiducialId = 6;
+    public static int RedDriverStationCenterFiducialId = 7;
+    public static int RedDriverStationRightFiducialId = 8;
+    public static int RedBargeLeftFiducialId = 11;
+    public static int RedBargeCenterFiducialId = 10;
+    public static int RedBargeRightFiducialId = 9;
+
     public static int RedLeftTagFiducialId = 1;
     public static int RedRightTagFiducialId = 2;
 
@@ -86,7 +100,8 @@ public class Landmarks {
         addNamedLocation(alliance, face, branch, CoralLevel.FOUR, location);
     }
 
-    private void addNamedLocation(DriverStation.Alliance alliance, ReefFace face, Branch branch, CoralLevel level, Pose2d location) {
+    private void addNamedLocation(DriverStation.Alliance alliance, ReefFace face, Branch branch, CoralLevel level,
+            Pose2d location) {
         String name = alliance.toString() + face.toString() + branch.toString() + level.toString();
         namesToLocations.put(name, location);
     }
@@ -156,7 +171,7 @@ public class Landmarks {
         };
     }
 
-    public enum FieldElementType{
+    public enum FieldElementType {
         REEF_FACE,
         CORAL_STATION,
         ALGAE_PROCESSOR,
@@ -173,13 +188,28 @@ public class Landmarks {
     }
 
     public static List<Integer> getAllianceCoralStationFiducialIds(DriverStation.Alliance alliance) {
-        switch(alliance) {
-        case Red:
-            return List.of(RedLeftTagFiducialId, RedRightTagFiducialId);
-        case Blue:
-            return List.of(BlueLeftTagFiducialId, BlueRightTagFiducialId);
-        default:
-            return new ArrayList<Integer>();
+        switch (alliance) {
+            case Red:
+                return List.of(RedLeftTagFiducialId, RedRightTagFiducialId);
+            case Blue:
+                return List.of(BlueLeftTagFiducialId, BlueRightTagFiducialId);
+            default:
+                return new ArrayList<Integer>();
+        }
+    }
+
+    public static List<Integer> getAllianceReefFiducialIds(DriverStation.Alliance alliance) {
+        switch (alliance) {
+            case Red:
+                return List.of(RedDriverStationLeftFiducialId, RedDriverStationCenterFiducialId,
+                        RedDriverStationRightFiducialId, RedBargeLeftFiducialId, RedBargeCenterFiducialId,
+                        RedBargeRightFiducialId);
+            case Blue:
+                return List.of(BlueDriverStationLeftFiducialId, BlueDriverStationCenterFiducialId,
+                        BlueDriverStationRigthFiducialId, BlueBargeRightFiducialId, BlueBargeCenterFiducialId,
+                        BlueBargeLeftFiducialId);
+            default:
+                return new ArrayList<Integer>();
         }
     }
 }
