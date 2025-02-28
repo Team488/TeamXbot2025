@@ -81,7 +81,7 @@ public class ElevatorSimulator {
         MotorInternalPIDHelper.updateInternalPID(motor, pidManager, gravityFeedForward);
         aKitLog.record("ElevatorMotorControlMode", motor.getControlMode());
 
-        if(DriverStation.isEnabled()) {
+        if (DriverStation.isEnabled()) {
             this.elevatorSim.setInputVoltage(this.motor.getPower() * RobotController.getBatteryVoltage());
         } else {
             this.elevatorSim.setInputVoltage(0);
@@ -107,7 +107,7 @@ public class ElevatorSimulator {
         // this would be used to simulate the bottom position sensor being triggered
         var elevatorIsAtBottom = elevatorCurrentHeight
                 .in(Meters) <= ElevatorSimConstants.elevatorBottomSensorTriggerHeight;
-        if(bottomSensor != null) {
+        if (bottomSensor != null) {
             bottomSensor.setValue(elevatorIsAtBottom);
         }
         aKitLog.record("FieldSimulation/ElevatorHeight-Meters", elevatorCurrentHeight.in(Meters));

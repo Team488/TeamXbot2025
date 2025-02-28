@@ -186,7 +186,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         isCalibrated = true;
         if (this.masterMotor != null) {
             laserCANPositionOffset = getRawLaserDistance();
-            elevatorMotorPositionOffset = Rotations.of(getRawMotorAngle().in(Rotations));
+            elevatorMotorPositionOffset = getRawMotorAngle().copy();
         } else {
             laserCANPositionOffset = Meters.zero();
             elevatorMotorPositionOffset = Rotations.zero();
@@ -198,7 +198,6 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         var motorRotations = getRawMotorAngle();
         var motorRotationsToZero = Rotations.of(laserDistance.in(Meters) / getMetersPerRotation().in(Meters));
         elevatorMotorPositionOffset = motorRotations.minus(motorRotationsToZero);
-        System.out.println("RUNNING");
     }
 
     @Override
@@ -278,13 +277,10 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     }
 
     private Angle getCalibratedMotorAngle() {
-        Angle thingy = getRawMotorAngle().minus(elevatorMotorPositionOffset);
-        aKitLog.record("elevatorMotorPositionOffset", elevatorMotorPositionOffset);
-        return thingy;
+        return getRawMotorAngle().minus(elevatorMotorPositionOffset);
     }
 
     private Distance getCalibratedMotorDistance() {
-        aKitLog.record("MotorAngle", getCalibratedMotorAngle().in(Rotations));
         return Meters.of(getCalibratedMotorAngle().in(Rotations) * getMetersPerRotation().in(Meters));
     }
 

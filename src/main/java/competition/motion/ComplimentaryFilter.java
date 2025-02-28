@@ -82,7 +82,6 @@ public class ComplimentaryFilter {
         aKitLog.record("Bias Estimate", biasEstimate);
         aKitLog.record("Corrected Precise", correctedPrecise);
         aKitLog.setLogLevel(AKitLogger.LogLevel.INFO);
-        aKitLog.record("/preciseSensorReading", preciseSensorReading);
 
         return fused;
     }
