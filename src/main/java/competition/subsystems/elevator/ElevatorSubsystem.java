@@ -186,7 +186,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         isCalibrated = true;
         if (this.masterMotor != null) {
             laserCANPositionOffset = getRawLaserDistance();
-            elevatorMotorPositionOffset = getRawMotorAngle();
+            elevatorMotorPositionOffset = getRawMotorAngle().copy();
         } else {
             laserCANPositionOffset = Meters.zero();
             elevatorMotorPositionOffset = Rotations.zero();
