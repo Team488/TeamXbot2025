@@ -64,7 +64,7 @@ public class TrapezoidProfileManager {
         initialState = new TrapezoidProfile.State(initialPosition, 0);
         goalState = new TrapezoidProfile.State(initialPosition, 0);
 
-        maxGap = pf.createPersistentProperty("maxGap", 0.1);
+        maxGap = pf.createPersistentProperty("maxGap", 0.3);
         inTargetRange = pf.createPersistentProperty("acceptableTargetRange", 0.02);
         this.globalSafeSpeedsManager = globalSafeSpeedsManager;
     }
@@ -102,7 +102,9 @@ public class TrapezoidProfileManager {
         }
 
         if(Math.abs(previousSetpoint - currentValue) > maxGap.get()){
-            goalState = new TrapezoidProfile.State(currentValue + maxGap.get(),0);
+            resetState(previousSetpoint - currentValue <= 0
+                    ? currentValue - maxGap.get()
+                    : currentValue + maxGap.get(), currentVelocity);
             return;
         }
 
