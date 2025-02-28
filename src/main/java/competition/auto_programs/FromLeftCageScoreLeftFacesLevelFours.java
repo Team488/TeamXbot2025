@@ -6,8 +6,6 @@ import competition.simulation.MapleSimulator;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import org.apache.logging.log4j.core.time.Instant;
 import xbot.common.subsystems.autonomous.AutonomousCommandSelector;
 
 import javax.inject.Inject;
@@ -27,11 +25,11 @@ public class FromLeftCageScoreLeftFacesLevelFours extends BaseAutonomousSequenti
 
         // Force our location to start in front of left cage
         var startInFrontOfLeftCage = pose.createSetPositionCommand(
-                () -> PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueLeftStartingLine)
+                () -> PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueCageTwoStartingLine)
         );
         this.addCommands(startInFrontOfLeftCage);
 
-        var resetMapleSim = new InstantCommand(() -> mapleSimulator.resetPosition(PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueLeftStartingLine)));
+        var resetMapleSim = new InstantCommand(() -> mapleSimulator.resetPosition(PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueCageTwoStartingLine)));
         this.addCommands(resetMapleSim);
 
         // Drive to far left, branch A and score level four

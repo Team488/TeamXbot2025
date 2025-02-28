@@ -19,7 +19,7 @@ public class BaseAutonomousSequentialCommandGroup extends SequentialCommandGroup
     public void queueDriveAndScoreMessageToAutoSelector(Landmarks.ReefFace targetReefFace,
                                                         Landmarks.Branch targetBranch,
                                                         Landmarks.CoralLevel targetLevel) {
-        String message = "Drive to " + targetReefFace + ", " + targetBranch + ", and score" + targetLevel;
+        String message = "Drive to " + targetReefFace + ", Branch " + targetBranch + ", and score" + targetLevel;
         queueMessageToAutoSelector(message);
     }
 
