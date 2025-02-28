@@ -2,6 +2,7 @@ package competition.subsystems.pose;
 
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -19,6 +20,7 @@ import edu.wpi.first.units.measure.Distance;
 import static edu.wpi.first.units.Units.Meters;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import org.kobe.xbot.JClient.XTablesClient;
 import org.kobe.xbot.Utilities.Entities.BatchedPushRequests;
@@ -223,6 +225,10 @@ public class PoseSubsystem extends BasePoseSubsystem {
                         this.getCurrentHeadingGyroOnly()));
     }
 
+    public void setCurrentPosition(Pose2d pose) {
+        setCurrentPosition(pose.getTranslation().getX(), pose.getTranslation().getY(), WrappedRotation2d.fromRotation2d(pose.getRotation()));
+    }
+
     public void setCurrentPoseInMeters(Pose2d newPoseInMeters) {
         setCurrentPosition(
                 newPoseInMeters.getTranslation().getX(),
@@ -317,4 +323,17 @@ public class PoseSubsystem extends BasePoseSubsystem {
             return Landmarks.ReefFace.FAR_LEFT;
         }
     }
+
+    public Command createSetPositionCommand(Pose2d pose) {
+        return Commands.runOnce(() -> setCurrentPosition(pose));
+    }
+
+    public Command createSetPositionCommand(Supplier<Pose2d> poseSupplier) {
+        return Commands.runOnce(() -> setCurrentPosition(poseSupplier.get())).ignoringDisable(true);
+    }
+
+    public Command createSetPositionCommandThatMirrorsIfNeeded(Pose2d bluePose) {
+        return Commands.runOnce(() -> setCurrentPosition(PoseSubsystem.convertBlueToRedIfNeeded(bluePose))).ignoringDisable(true);
+    }
+
 }
