@@ -43,6 +43,7 @@ public class AlignCameraToAprilTagCalculator {
         Searching,
         ApproachWhileCentering,
         TerminalApproach,
+        ApproachFailedRetreatToInterstitial,
         Shove,
         Complete
     }
@@ -73,8 +74,9 @@ public class AlignCameraToAprilTagCalculator {
     final DoubleProperty shovePower;
     final DoubleProperty shoveDuration;
     final DoubleProperty maxTagAmbiguity;
+    final DoubleProperty maxHorizontalErrorMeters;
 
-
+    double lastKnownHorizontalErrorMeters = 0;
     double shoveStartTime = 0;
 
     public static Translation2d generateAlignmentPointOffset(Distance robotCenterToOuterBumperX, CameraInfo cameraInfo,
@@ -115,6 +117,7 @@ public class AlignCameraToAprilTagCalculator {
         shovePower = pf.createPersistentProperty("ShovePower", 0.25);
         shoveDuration = pf.createPersistentProperty("ShoveDuration-s", 0.5);
         maxTagAmbiguity = pf.createPersistentProperty("MaxTagAmbiguity", 0.5);
+        maxHorizontalErrorMeters = pf.createPersistentProperty("MaxHorizontalError-m", 0.0508); // 2 inches
 
         reset();
     }
@@ -295,7 +298,13 @@ public class AlignCameraToAprilTagCalculator {
 
     private void updateFinalTargetState(Pose2d currentPose) {
         Optional<Translation2d> aprilTagData = aprilTagVisionSubsystem.getRobotRelativeLocationOfAprilTag(targetCameraID, targetAprilTagID);
+
+        if (aprilTagData.isPresent()) {
+            lastKnownHorizontalErrorMeters = aprilTagData.get().getY();
+        }
+
         akitLog.record("AprilTagData", aprilTagData.orElse(null));
+
         // This transform will always be at rotation 0, since in its own frame, the robot is always facing forward.
 
         if (aprilTagData.isEmpty()) {
