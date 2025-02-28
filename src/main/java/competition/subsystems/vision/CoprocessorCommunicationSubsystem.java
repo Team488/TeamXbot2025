@@ -47,7 +47,7 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
         xTablesClientManager = XTablesClient.getDefaultClientAsynchronously();
         XTablesLogger.setLoggingLevel(Level.OFF);
 
-        this.visionCoprocessorCommander = new VisionCoprocessorCommander(VisionCoprocessor.LOCALHOST);
+        this.visionCoprocessorCommander = new VisionCoprocessorCommander(VisionCoprocessor.ORIN2);
     }
 
     public XTablesClientManager getXTablesManager(){
