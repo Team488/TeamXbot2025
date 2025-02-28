@@ -10,12 +10,14 @@ import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.MutTime;
+import xbot.common.advantage.AKitLogger;
 import xbot.common.controls.sensors.XTimer;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 
 public class TrapezoidProfileManager {
     protected final Logger log;
+    private final AKitLogger aKitLog;
 
     @AssistedFactory
     public abstract static class Factory {
@@ -39,15 +41,21 @@ public class TrapezoidProfileManager {
     double previousSetpoint = 0;
     MutTime previousSetpointTime = Seconds.mutable(-10000);
 
+    final GlobalSafeSpeedsManager globalSafeSpeedsManager;
+    double multiplier;
+
     @AssistedInject
     public TrapezoidProfileManager(
             @Assisted String name,
             PropertyFactory pf,
+            GlobalSafeSpeedsManager globalSafeSpeedsManager,
             @Assisted("defaultMaxVelocity") double defaultMaxVelocity,
             @Assisted("defaultMaxAcceleration") double defaultMaxAcceleration,
             @Assisted("initialPosition") double initialPosition) {
         pf.setPrefix(name);
         log = LogManager.getLogger(name + ": TrapezoidProfileManager");
+        aKitLog = new AKitLogger(pf.getPrefix());
+        aKitLog.setLogLevel(AKitLogger.LogLevel.DEBUG);
         maxVelocity = pf.createPersistentProperty("maxVelocity", defaultMaxVelocity);
         maxAcceleration = pf.createPersistentProperty("maxAcceleration", defaultMaxAcceleration);
         constraints = new TrapezoidProfile.Constraints(maxVelocity.get(), maxAcceleration.get());
@@ -58,6 +66,7 @@ public class TrapezoidProfileManager {
 
         maxGap = pf.createPersistentProperty("maxGap", 0.1);
         inTargetRange = pf.createPersistentProperty("acceptableTargetRange", 0.02);
+        this.globalSafeSpeedsManager = globalSafeSpeedsManager;
     }
 
     public void resetState(double currentValue, double currentVelocity) {
@@ -67,12 +76,28 @@ public class TrapezoidProfileManager {
         profileStartTime.mut_replace(XTimer.getFPGATimestampTime().minus(Seconds.of(0.02)));
     }
 
+    private double getMaxVelocity() {
+        double effectiveVelocity = maxVelocity.get() * multiplier;
+        aKitLog.record("EffectiveVelocity", effectiveVelocity);
+        return effectiveVelocity;
+    }
+
+    private double getMaxAcceleration() {
+        double effectiveAcceleration = maxAcceleration.get() * multiplier;
+        aKitLog.record("EffectiveAcceleration", effectiveAcceleration);
+        return effectiveAcceleration;
+    }
+
     public void setTargetPosition(double targetValue, double currentValue, double currentVelocity) {
         // if the profile's constraints properties have changed, recompute the profile
         // there's maybe a better place to do this but this should be fine since setTarget will be called
         // over and over again
-        if(constraints.maxVelocity != maxVelocity.get() || constraints.maxAcceleration != maxAcceleration.get()) {
-            constraints = new TrapezoidProfile.Constraints(maxVelocity.get(), maxAcceleration.get());
+        multiplier = globalSafeSpeedsManager.getMultiplier();
+        double maxVelocity = getMaxVelocity();
+        double maxAcceleration = getMaxAcceleration();
+
+        if (constraints.maxVelocity != maxVelocity || constraints.maxAcceleration != maxAcceleration) {
+            constraints = new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration);
             profile = new TrapezoidProfile(constraints);
         }
 
@@ -82,10 +107,10 @@ public class TrapezoidProfileManager {
         }
 
         // if the target has changed, recompute the goal and current states
-        if(goalState.position != targetValue) {
+        if (goalState.position != targetValue) {
             // if the previousSentpoint we have is very recent, use it as the initial state to
             // avoid discontinuities in the profile
-            if(XTimer.getFPGATimestampTime().minus(previousSetpointTime).in(Seconds) < 0.1) {
+            if (XTimer.getFPGATimestampTime().minus(previousSetpointTime).in(Seconds) < 0.1) {
                 initialState = new TrapezoidProfile.State(previousSetpoint, currentVelocity);
             } else {
                 initialState = new TrapezoidProfile.State(currentValue, currentVelocity);
