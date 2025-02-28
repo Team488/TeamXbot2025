@@ -51,6 +51,8 @@ public class DriveWithSnapToTagCommand extends BaseCommand {
         this.pose = pose;
         this.swerveLogic = factory.create();
         this.headingModule = headingModuleFactory.create(drive.getRotateToHeadingPid());
+
+        this.addRequirements(drive);
     }
 
     public void setChosenTagID(int chosenTagID) {
@@ -63,6 +65,7 @@ public class DriveWithSnapToTagCommand extends BaseCommand {
 
     @Override
     public void initialize() {
+        log.info("Initializing");
         swerveLogic.initialize();
         vision.setCameraSearchMode(cameraId, AprilTagVisionIO.SearchMode.PRIORITIZE_SPECIFIC_TAG);
         vision.setCameraSpecificTagIdToSearchFor(cameraId, chosenTagID);
@@ -88,24 +91,30 @@ public class DriveWithSnapToTagCommand extends BaseCommand {
         var driveAdvice = new ManualSwerveDriveAdvice();
         boolean targetInSight = vision.doesCameraBestObservationHaveAprilTagId(cameraId, chosenTagID);
 
+        aKitLog.record("targetInSight", targetInSight);
+
         if (targetInSight) {
             loopsWithTargetCounter++;
             // TODO: trigger vibration as well
+            oi.driverGamepad.getRumbleManager().rumbleGamepad(0.5, 1);
         } else {
             loopsWithTargetCounter--;
             // TODO: stop any vibration.
+            oi.driverGamepad.getRumbleManager().stopGamepadRumble();
         }
 
         if (loopsWithTargetCounter <= 0) {
             // We are in regular driving state.
             loopsWithTargetCounter = 0;
             driveAdvice = swerveLogic.getDriveAdvice();
+            state = SnapState.Regular;
         }
 
         if (loopsWithTargetCounter > 0) {
             // We are in either LockedOn or Lost state.
             var centeringVector = new XYPair();
             if (targetInSight) {
+                state = SnapState.LockedOn;
                 // Use PID to center the tag in the camera.
                 // First, where is this tag?
                 double robotRelativeTagLocationY = vision.getRobotRelativeLocationOfBestDetectedAprilTag(cameraId).getY();
@@ -113,19 +122,27 @@ public class DriveWithSnapToTagCommand extends BaseCommand {
                 centeringVector = new XYPair(centeringTranslation2d.getX(), centeringTranslation2d.getY());
                 // All of that was robot-relative. Rotate into field-relative.
                 centeringVector = centeringVector.rotate(pose.getCurrentHeading().getDegrees());
+            } else {
+                state = SnapState.Lost;
             }
 
             // Whether we have it or have lost it, we still want to drive forward/backward relative to the robot based
             // on driver joystick input.
             var fieldVectorTranslation2d = oi.driverGamepad.getLeftFieldOrientedVector();
+            aKitLog.record("Driver Vector Angle", fieldVectorTranslation2d.getAngle().getDegrees());
+            aKitLog.record("Ideal Angle", idealFinalHeadingDegrees);
+
             XYPair fieldVectorXYPair = new XYPair(fieldVectorTranslation2d.getX(), fieldVectorTranslation2d.getY());
             double railsSimilarityToDriver = fieldVectorXYPair.dotProduct(new XYPair(Math.cos(idealFinalHeadingDegrees), Math.sin(idealFinalHeadingDegrees)));
+
+            aKitLog.record("railsSimilarityToDriver", railsSimilarityToDriver);
+
             double rotateIntent = headingModule.calculateHeadingPower(idealFinalHeadingDegrees);
             XYPair onRailsVector = XYPair.fromPolar(idealFinalHeadingDegrees, railsSimilarityToDriver);
 
             aKitLog.record("onRailsVector", onRailsVector);
             aKitLog.record("centeringVector", centeringVector);
-            aKitLog.record("LoopsWithTargetCounter", loopsWithTargetCounter);
+
 
             var combinedVector = onRailsVector.clone().add(centeringVector);
 
@@ -136,6 +153,9 @@ public class DriveWithSnapToTagCommand extends BaseCommand {
                     new XYPair()
             );
         }
+
+        aKitLog.record("LoopsWithTargetCounter", loopsWithTargetCounter);
+        aKitLog.record("state", state);
 
         drive.fieldOrientedDrive(
                 driveAdvice.translation(),
