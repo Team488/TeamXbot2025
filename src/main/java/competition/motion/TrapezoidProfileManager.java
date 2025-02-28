@@ -10,6 +10,7 @@ import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.MutTime;
+import org.checkerframework.checker.units.qual.A;
 import xbot.common.advantage.AKitLogger;
 import xbot.common.controls.sensors.XTimer;
 import xbot.common.properties.DoubleProperty;
@@ -25,13 +26,13 @@ public class TrapezoidProfileManager {
                 @Assisted String name,
                 @Assisted("defaultMaxVelocity") double defaultMaxVelocity,
                 @Assisted("defaultMaxAcceleration") double defaultMaxAcceleration,
+                @Assisted("defaultMaxGap") double defaultMaxGap,
                 @Assisted("initialPosition") double initialPosition);
     }
 
     final DoubleProperty maxVelocity;
     final DoubleProperty maxAcceleration;
     final DoubleProperty maxGap;
-    final DoubleProperty inTargetRange;
     
     TrapezoidProfile profile;
     TrapezoidProfile.Constraints constraints;
@@ -51,6 +52,7 @@ public class TrapezoidProfileManager {
             GlobalSafeSpeedsManager globalSafeSpeedsManager,
             @Assisted("defaultMaxVelocity") double defaultMaxVelocity,
             @Assisted("defaultMaxAcceleration") double defaultMaxAcceleration,
+            @Assisted("defaultMaxGap") double defaultMaxGap,
             @Assisted("initialPosition") double initialPosition) {
         pf.setPrefix(name);
         log = LogManager.getLogger(name + ": TrapezoidProfileManager");
@@ -58,14 +60,13 @@ public class TrapezoidProfileManager {
         aKitLog.setLogLevel(AKitLogger.LogLevel.DEBUG);
         maxVelocity = pf.createPersistentProperty("maxVelocity", defaultMaxVelocity);
         maxAcceleration = pf.createPersistentProperty("maxAcceleration", defaultMaxAcceleration);
+        maxGap = pf.createPersistentProperty("maxGap", defaultMaxGap);
         constraints = new TrapezoidProfile.Constraints(maxVelocity.get(), maxAcceleration.get());
         profile = new TrapezoidProfile(constraints);
         // initialize states to current value
         initialState = new TrapezoidProfile.State(initialPosition, 0);
         goalState = new TrapezoidProfile.State(initialPosition, 0);
 
-        maxGap = pf.createPersistentProperty("maxGap", 0.3);
-        inTargetRange = pf.createPersistentProperty("acceptableTargetRange", 0.02);
         this.globalSafeSpeedsManager = globalSafeSpeedsManager;
     }
 

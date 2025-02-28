@@ -74,6 +74,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
                 getPrefix() + "trapezoidMotion",
                 1, // 5 for competition
                 1, // 3.5 for competition
+                1000, //tune for real robot
                 elevator.getCurrentValue().in(Meters));
     }
 
