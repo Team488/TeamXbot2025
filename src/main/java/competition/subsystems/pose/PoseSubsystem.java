@@ -47,6 +47,8 @@ public class PoseSubsystem extends BasePoseSubsystem {
     public static final Distance fieldXMidpointInMeters = Meters.of(8.7785);
     public static final Distance fieldYMidpointInMeters = Meters.of(4.025);
 
+    private boolean targetAlignTagSeen = false;
+
 
     // only used when simulating the robot
     protected Optional<SwerveModulePosition[]> simulatedModulePositions = Optional.empty();
@@ -106,13 +108,16 @@ public class PoseSubsystem extends BasePoseSubsystem {
                 this.getCurrentHeadingGyroOnly(),
                 getSwerveModulePositions()
         );
-        this.aprilTagVisionSubsystem.getAllPoseObservations().forEach(observation -> {
-            fullSwerveOdometry.addVisionMeasurement(
-                    observation.visionRobotPoseMeters(),
-                    observation.timestampSeconds(),
-                    observation.visionMeasurementStdDevs()
-            );
-        });
+
+        if (!targetAlignTagSeen) {
+            this.aprilTagVisionSubsystem.getAllPoseObservations().forEach(observation -> {
+                fullSwerveOdometry.addVisionMeasurement(
+                        observation.visionRobotPoseMeters(),
+                        observation.timestampSeconds(),
+                        observation.visionMeasurementStdDevs()
+                );
+            });
+        }
 
         // Report poses
         Pose2d estimatedPosition = new Pose2d(
@@ -334,6 +339,10 @@ public class PoseSubsystem extends BasePoseSubsystem {
 
     public Command createSetPositionCommandThatMirrorsIfNeeded(Pose2d bluePose) {
         return Commands.runOnce(() -> setCurrentPosition(PoseSubsystem.convertBlueToRedIfNeeded(bluePose))).ignoringDisable(true);
+    }
+
+    public void setTargetAlignTagSeen(boolean doWeSeeOurTag) {
+        this.targetAlignTagSeen = doWeSeeOurTag;
     }
 
 }
