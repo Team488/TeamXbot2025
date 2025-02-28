@@ -1,6 +1,10 @@
 package competition.operator_interface;
 
+import competition.auto_programs.FromCageScoreOneCoralAutoFactory;
+import competition.auto_programs.FromCurrentPositionScoreFarLeftBranchALevelFour;
+import competition.auto_programs.FromLeftCageScoreLeftFacesLevelFours;
 import competition.commandgroups.HeadingAssistedDriveAndScoreCommandGroup;
+import competition.commandgroups.PathToReefFaceThenAlignCommandGroupFactory;
 import competition.commandgroups.PrepAlgaeSystemCommandGroupFactory;
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
 import competition.simulation.commands.ResetSimulatedPose;
@@ -23,6 +27,7 @@ import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
 import competition.subsystems.drive.commands.DriveToCoralStationWithVisionCommand;
 import competition.subsystems.drive.commands.DriveToLocationWithPID;
 import competition.subsystems.drive.commands.RotateToHeadingWithHeadingModule;
+import competition.subsystems.drive.commands.SwerveBezierTrajectoryCommand;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.drive.commands.TeleportToPositionCommand;
 import competition.subsystems.elevator.ElevatorSubsystem;
@@ -37,6 +42,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Commands;
 import xbot.common.controls.sensors.XXboxController;
+import xbot.common.subsystems.autonomous.SetAutonomousCommand;
 import xbot.common.subsystems.drive.SwervePointKinematics;
 import xbot.common.subsystems.drive.SwerveSimpleTrajectoryCommand;
 import xbot.common.subsystems.drive.SwerveSimpleTrajectoryMode;
@@ -336,22 +342,14 @@ public class OperatorCommandMap {
 //                        .sysIdQuasistatic(SysIdRoutine.Direction.kReverse), Set.of()));
 
     }
-    @Inject
-    public void setupAutonomousCommands(OperatorInterface oi,
-                                        Provider<SetAutonomousCommand> setAutonomousCommandProvider,
-                                        FromCurrentPositionScoreFarLeftBranchALevelFour fromCurrentPositionScoreFarLeftBranchALevelFour) {
 
-        var setCurrentPathToFarLeftBranchALevelFour = setAutonomousCommandProvider.get();
-        setCurrentPathToFarLeftBranchALevelFour.setAutoCommand(fromCurrentPositionScoreFarLeftBranchALevelFour);
-        oi.neoTrellis.getifAvailable(5).onTrue(fromCurrentPositionScoreFarLeftBranchALevelFour); // temporary button
-        setCurrentPathToFarLeftBranchALevelFour.includeOnSmartDashboard("Path Current Position Score Left Face's Level Fours Auto");
-    }
 
     @Inject
     public void setupAutonomousCommands(OperatorInterface oi,
                                         Provider<SetAutonomousCommand> setAutonomousCommandProvider,
                                         Provider<FromCageScoreOneCoralAutoFactory> fromCageScoreOneLevelFourAutoFactProv,
-                                        FromLeftCageScoreLeftFacesLevelFours fromLeftCageScoreLeftFacesLevelFours) {
+                                        FromLeftCageScoreLeftFacesLevelFours fromLeftCageScoreLeftFacesLevelFours,
+                                        FromCurrentPositionScoreFarLeftBranchALevelFour fromCurrentPositionScoreFarLeftBranchALevelFour) {
         var setFromLeftFarLeftBranchALevelFour = setAutonomousCommandProvider.get();
         setFromLeftFarLeftBranchALevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFactProv.get().create(
                 Landmarks.BlueLeftStartingLine, Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR
@@ -377,6 +375,11 @@ public class OperatorCommandMap {
         setFromLeftCageScoreLeftFacesLevelFours.setAutoCommand(fromLeftCageScoreLeftFacesLevelFours);
         oi.neoTrellis.getifAvailable(4).onTrue(setFromLeftCageScoreLeftFacesLevelFours); // temporary button
         setFromLeftCageScoreLeftFacesLevelFours.includeOnSmartDashboard("From Left Score Left Face's Level Fours Auto");
+
+        var setCurrentPathToFarLeftBranchALevelFour = setAutonomousCommandProvider.get();
+        setCurrentPathToFarLeftBranchALevelFour.setAutoCommand(fromCurrentPositionScoreFarLeftBranchALevelFour);
+        oi.neoTrellis.getifAvailable(5).onTrue(fromCurrentPositionScoreFarLeftBranchALevelFour); // temporary button
+        setCurrentPathToFarLeftBranchALevelFour.includeOnSmartDashboard("Path Current Position Score Left Face's Level Fours Auto");
     }
 
     @Inject

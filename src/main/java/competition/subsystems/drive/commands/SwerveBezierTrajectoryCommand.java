@@ -59,7 +59,7 @@ public class SwerveBezierTrajectoryCommand extends SwerveBezierTrajectoryBase {
     public void execute() {
         if (subscriber != null && curves != null && subscriber.getAsBezierCurves(curves).equals(curves)) {
             super.execute();
-        } else if(subscriber != null) {
+        } else if (subscriber != null) {
             curves = subscriber.getAsBezierCurves(null);
             if (curves != null && !curves.getCurvesList().isEmpty()) {
                 log.info("There was a new drive trajectory, updating to drive.");
@@ -70,13 +70,13 @@ public class SwerveBezierTrajectoryCommand extends SwerveBezierTrajectoryBase {
             }
         } else {
             log.warn("No drive trajectory found from XTABLES, cancelling.");
-            cancel();
+            end(true);
         }
     }
 
     @Override
     public boolean isFinished() {
-       return getAlternativeIsFinishedSupplier().get();
+        return getAlternativeIsFinishedSupplier().get();
     }
 
     @Override
@@ -85,7 +85,9 @@ public class SwerveBezierTrajectoryCommand extends SwerveBezierTrajectoryBase {
         if (interrupted) {
             log.warn("Command interrupted");
         }
-        this.subscriber.unsubscribe();
+        if (this.subscriber != null) {
+            this.subscriber.unsubscribe();
+        }
     }
 
 }

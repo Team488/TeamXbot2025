@@ -30,8 +30,8 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
     final StringProperty xtablesHeadingLocation;
 
     // always persisted xtables client manager instance
-    private XTablesClientManager xTablesClientManager;
-    private VisionCoprocessorCommander orinVisionCoprocessorCommander;
+    private final XTablesClientManager xTablesClientManager;
+    private final VisionCoprocessorCommander orinVisionCoprocessorCommander;
 
 
     @Inject
