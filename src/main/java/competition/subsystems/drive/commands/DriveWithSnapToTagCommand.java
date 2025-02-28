@@ -67,8 +67,6 @@ public class DriveWithSnapToTagCommand extends BaseCommand {
     public void initialize() {
         log.info("Initializing");
         swerveLogic.initialize();
-        vision.setCameraSearchMode(cameraId, AprilTagVisionIO.SearchMode.PRIORITIZE_SPECIFIC_TAG);
-        vision.setCameraSpecificTagIdToSearchFor(cameraId, chosenTagID);
 
         Optional<Pose3d> aprilTagPose = vision.getAprilTagFieldOrientedPose(chosenTagID);
         var aprilTagZRotationRadians = aprilTagPose.map((p) -> p.getRotation().getZ()).orElse(0.0);
@@ -133,7 +131,12 @@ public class DriveWithSnapToTagCommand extends BaseCommand {
             aKitLog.record("Ideal Angle", idealFinalHeadingDegrees);
 
             XYPair fieldVectorXYPair = new XYPair(fieldVectorTranslation2d.getX(), fieldVectorTranslation2d.getY());
-            double railsSimilarityToDriver = fieldVectorXYPair.dotProduct(new XYPair(Math.cos(idealFinalHeadingDegrees), Math.sin(idealFinalHeadingDegrees)));
+            double railsSimilarityToDriver = fieldVectorXYPair.dotProduct(
+                    new XYPair(
+                            Math.cos(Math.toRadians(idealFinalHeadingDegrees) + Math.PI),
+                            Math.sin(Math.toRadians(idealFinalHeadingDegrees) + Math.PI)
+                    )
+            );
 
             aKitLog.record("railsSimilarityToDriver", railsSimilarityToDriver);
 
@@ -163,10 +166,5 @@ public class DriveWithSnapToTagCommand extends BaseCommand {
                 driveAdvice.currentHeading(),
                 driveAdvice.centerOfRotationInches()
         );
-    }
-
-    @Override
-    public void end(boolean interrupted) {
-        vision.setAllCamerasToRegularSearchMode();
     }
 }
