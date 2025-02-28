@@ -8,6 +8,7 @@ import javax.inject.Inject;
 
 public class DriveToNearestReefThenAlignCommandGroup extends SequentialCommandGroup {
 
+    // TODO: update to new AlignToReefWithAprilTagCommand
     @Inject
     public DriveToNearestReefThenAlignCommandGroup(DriveToNearestReefFaceUntilDetectionCommand driveToNearestReefFaceUntilDetectionCommand,
                                                    AlignToReefWithAprilTagCommand alignToReefWithAprilTagCommand) {

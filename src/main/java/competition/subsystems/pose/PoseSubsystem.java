@@ -1,7 +1,9 @@
 package competition.subsystems.pose;
 
-import java.util.HashMap;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -19,6 +21,7 @@ import edu.wpi.first.units.measure.Distance;
 import static edu.wpi.first.units.Units.Meters;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import org.kobe.xbot.JClient.XTablesClient;
 import org.kobe.xbot.Utilities.Entities.BatchedPushRequests;
@@ -223,6 +226,10 @@ public class PoseSubsystem extends BasePoseSubsystem {
                         this.getCurrentHeadingGyroOnly()));
     }
 
+    public void setCurrentPosition(Pose2d pose) {
+        setCurrentPosition(pose.getTranslation().getX(), pose.getTranslation().getY(), WrappedRotation2d.fromRotation2d(pose.getRotation()));
+    }
+
     public void setCurrentPoseInMeters(Pose2d newPoseInMeters) {
         setCurrentPosition(
                 newPoseInMeters.getTranslation().getX(),
@@ -259,35 +266,15 @@ public class PoseSubsystem extends BasePoseSubsystem {
     public Pose2d getClosestReefFacePose() {
         Pose2d currentPose = getCurrentPose2d();
 
-        double closeDistance = convertBlueToRedIfNeeded(
-                Landmarks.BlueCloseAlgae).getTranslation().getDistance(currentPose.getTranslation());
-        double closeLeftDistance = PoseSubsystem.convertBlueToRedIfNeeded(
-                Landmarks.BlueCloseLeftAlgae).getTranslation().getDistance(currentPose.getTranslation());
-        double closeRightDistance = PoseSubsystem.convertBlueToRedIfNeeded(
-                Landmarks.BlueCloseRightAlgae).getTranslation().getDistance(currentPose.getTranslation());
-        double farLeftDistance = PoseSubsystem.convertBlueToRedIfNeeded(
-                Landmarks.BlueFarLeftAlgae).getTranslation().getDistance(currentPose.getTranslation());
-        double farDistance = PoseSubsystem.convertBlueToRedIfNeeded(
-                Landmarks.BlueFarAlgae).getTranslation().getDistance(currentPose.getTranslation());
-        double farRightDistance = PoseSubsystem.convertBlueToRedIfNeeded(
-                Landmarks.BlueFarRightAlgae).getTranslation().getDistance(currentPose.getTranslation());
+        List<Pose2d> reefFacePoses = Arrays.asList(
+                convertBlueToRedIfNeeded(Landmarks.BlueCloseAlgae),
+                convertBlueToRedIfNeeded(Landmarks.BlueCloseLeftAlgae),
+                convertBlueToRedIfNeeded(Landmarks.BlueCloseRightAlgae),
+                convertBlueToRedIfNeeded(Landmarks.BlueFarLeftAlgae),
+                convertBlueToRedIfNeeded(Landmarks.BlueFarAlgae),
+                convertBlueToRedIfNeeded(Landmarks.BlueFarRightAlgae));
 
-        HashMap<Double, Pose2d> hashMap = new HashMap<>();
-        hashMap.put(closeLeftDistance, PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueCloseLeftAlgae));
-        hashMap.put(closeDistance, PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueCloseAlgae));
-        hashMap.put(closeRightDistance, PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueCloseRightAlgae));
-        hashMap.put(farLeftDistance, PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueFarLeftAlgae));
-        hashMap.put(farDistance, PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueFarAlgae));
-        hashMap.put(farRightDistance, PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueFarRightAlgae));
-
-        double leastDistance = closeLeftDistance;
-
-        for (Double distance : hashMap.keySet()) {
-            if (distance < leastDistance) {
-                leastDistance = distance;
-            }
-        }
-        return hashMap.get(leastDistance);
+        return currentPose.nearest(reefFacePoses);
     }
 
     public Landmarks.ReefFace getReefFaceFromAngle() {
@@ -317,4 +304,17 @@ public class PoseSubsystem extends BasePoseSubsystem {
             return Landmarks.ReefFace.FAR_LEFT;
         }
     }
+
+    public Command createSetPositionCommand(Pose2d pose) {
+        return Commands.runOnce(() -> setCurrentPosition(pose));
+    }
+
+    public Command createSetPositionCommand(Supplier<Pose2d> poseSupplier) {
+        return Commands.runOnce(() -> setCurrentPosition(poseSupplier.get())).ignoringDisable(true);
+    }
+
+    public Command createSetPositionCommandThatMirrorsIfNeeded(Pose2d bluePose) {
+        return Commands.runOnce(() -> setCurrentPosition(PoseSubsystem.convertBlueToRedIfNeeded(bluePose))).ignoringDisable(true);
+    }
+
 }
