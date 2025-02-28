@@ -74,6 +74,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
                 getPrefix() + "trapezoidMotion",
                 1, // 5 for competition
                 1, // 3.5 for competition
+                1000, //tune for real robot
                 elevator.getCurrentValue().in(Meters));
     }
 
@@ -138,7 +139,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     private void attemptCalibration(){
         elevator.setPower(elevator.calibrationNegativePower.get());
 
-        if (elevator.isTouchingBottom()){
+        if (elevator.isTouchingBottom()) {
             elevator.markElevatorAsCalibratedAgainstLowerLimit();
             elevator.setTargetValue(elevator.getCurrentValue());
         }
