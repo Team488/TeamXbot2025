@@ -29,7 +29,7 @@ public class FromCageScoreOneCoralAutoFactory {
                                          Landmarks.CoralLevel targetLevel) {
         var auto = new BaseAutonomousSequentialCommandGroup(autoSelector);
 
-        var startInFrontOfCage = pose.createSetPositionCommand(startingLocation);
+        var startInFrontOfCage = pose.createSetPositionCommand(PoseSubsystem.convertBlueToRedIfNeeded(startingLocation));
         auto.addCommands(startInFrontOfCage);
 
         auto.queueDriveAndScoreMessageToAutoSelector(targetReefFace, targetBranch, targetLevel);

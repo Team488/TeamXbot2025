@@ -16,9 +16,16 @@ import static edu.wpi.first.units.Units.Meters;
 public class Landmarks {
 
     // Auto starting positions
-    public static Pose2d BlueLeftStartingLine = new Pose2d(7.56, 7.262, Rotation2d.fromDegrees(180));
-    public static Pose2d BlueMidStartingLine = new Pose2d(7.56, 6.135, Rotation2d.fromDegrees(180));
-    public static Pose2d BlueRightStartingLine = new Pose2d(7.56, 5.044, Rotation2d.fromDegrees(180));
+    // Blue cages - cages are labeled 1-6 from north to south, the x value has the robot's back bumper lined up with the auto line
+    public static Pose2d BlueCageOneStartingLine = new Pose2d(7.14, 7.262, Rotation2d.fromDegrees(180));
+    public static Pose2d BlueCageTwoStartingLine = new Pose2d(7.14, 6.135, Rotation2d.fromDegrees(180));
+    public static Pose2d BlueCageThreeStartingLine = new Pose2d(7.14, 5.044, Rotation2d.fromDegrees(180));
+    public static Pose2d BlueCageFourStartingLine = new Pose2d(7.14, 2.974, Rotation2d.fromDegrees(180));
+    public static Pose2d BlueCageFiveStartingLine = new Pose2d(7.14, 1.883, Rotation2d.fromDegrees(180));
+    public static Pose2d BlueCageSixStartingLine = new Pose2d(7.14, 0.792, Rotation2d.fromDegrees(180));
+
+    // Middle of line
+    public static Pose2d BlueMidOfLine = new Pose2d(7.14, 4.26, Rotation2d.fromDegrees(180));
 
     // Reef faces TODO: Find positions again if scoring positions are at different distances from reef for each level
     // Close Left Reef Face
