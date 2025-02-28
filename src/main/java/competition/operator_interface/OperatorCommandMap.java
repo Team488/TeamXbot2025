@@ -24,6 +24,7 @@ import competition.subsystems.drive.commands.CalibrateDriveCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
 import competition.subsystems.drive.commands.DriveToCoralStationWithVisionCommand;
 import competition.subsystems.drive.commands.DriveToLocationWithPID;
+import competition.subsystems.drive.commands.DriveWithSnapToTagCommand;
 import competition.subsystems.drive.commands.RotateToHeadingWithHeadingModule;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.drive.commands.TeleportToPositionCommand;
@@ -86,24 +87,26 @@ public class OperatorCommandMap {
             DebugSwerveModuleCommand debugModule,
             ChangeActiveSwerveModuleCommand changeActiveModule,
             SwerveDriveWithJoysticksCommand typicalSwerveDrive,
-            HeadingAssistedDriveAndScoreCommandGroup.Factory headingAssistedDriveAndScoreCommandGroupFactory) {
+            HeadingAssistedDriveAndScoreCommandGroup.Factory headingAssistedDriveAndScoreCommandGroupFactory,
+            Provider<DriveWithSnapToTagCommand> driveWithSnapToTagCommand
+            ) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
 
         var alignToReefWithAprilTagWithLeftCamera = alignToReefWithAprilTagProvider.get();
         alignToReefWithAprilTagWithLeftCamera.setConfigurations(Cameras.FRONT_LEFT_CAMERA.getIndex(), false, -2);
         alignToReefWithAprilTagWithLeftCamera.setDriverRelative(true);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(alignToReefWithAprilTagWithLeftCamera);
+        //operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(alignToReefWithAprilTagWithLeftCamera);
 
         var alignToReefWithAprilTagWithRightCamera = alignToReefWithAprilTagProvider.get();
         alignToReefWithAprilTagWithRightCamera.setConfigurations(Cameras.FRONT_RIGHT_CAMERA.getIndex(), false, -2);
         alignToReefWithAprilTagWithRightCamera.setDriverRelative(true);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(alignToReefWithAprilTagWithRightCamera);
+        //operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(alignToReefWithAprilTagWithRightCamera);
 
         var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
 
         var homed = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(driveToCoralStationWithVisionCommand);
+        //operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(driveToCoralStationWithVisionCommand);
         var branchAHeadingAssistedDriveAndScore = headingAssistedDriveAndScoreCommandGroupFactory.create(Landmarks.Branch.A);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(branchAHeadingAssistedDriveAndScore)
                         .onFalse(homed);
@@ -188,6 +191,16 @@ public class OperatorCommandMap {
         rotateTo45Degrees.includeOnSmartDashboard("RotateTo45Degrees");
         rotateTo90Degrees.includeOnSmartDashboard("RotateTo90Degrees");
         rotateTo180Degrees.includeOnSmartDashboard("RotateTo180Degrees");
+
+        var command1 = driveWithSnapToTagCommand.get();
+        command1.setCameraToUse(Cameras.FRONT_RIGHT_CAMERA.getIndex());
+        command1.setDriverRelative(true);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(command1);
+
+        var command2 = driveWithSnapToTagCommand.get();
+        command2.setCameraToUse(Cameras.FRONT_LEFT_CAMERA.getIndex());
+        command2.setDriverRelative(true);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(command2);
     }
 
 
