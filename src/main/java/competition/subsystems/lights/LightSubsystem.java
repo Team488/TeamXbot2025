@@ -28,26 +28,28 @@ public class LightSubsystem extends BaseSubsystem {
         // we never send NoCode, it's implicit when the robot is off
         // and all of the DIOs float high
         NoCode(0),
-        RobotDisabled(1),
-        RobotEnabled(2),
-        CoralPresent(3),
-        RequestCoralFromHuman(4),
-        ReadyToScore(5),
-        CoralReset(6),
-        AlgaeDrop(7),
-        AlgaeGrab(8),
-        AlgaePush(9),
-        Auto1(10),
-        Auto2(11),
-        Auto3(12),
-        HangDeep(13),
-        HangShallow(14),
-        ElevatorFinish(15),
-        ElevatorRaise2(16),
-        ElevatorRaise3(17),
-        ElevatorRaise4(18),
-        Victory(19),
-        StartPosition(20);
+        RobotDisabledDefault(1),
+        RobotDisabledAuto(2),
+        RobotEnabled(3),
+        CoralPresent(4),
+        RequestCoralFromHuman(5),
+        // ReadyToScore(5),
+        // CoralReset(6),
+        // AlgaeDrop(7),
+        // AlgaeGrab(8),
+        // AlgaePush(9),
+        // Auto1(10),
+        // Auto2(11),
+        // Auto3(12),
+        // HangDeep(13),
+        // HangShallow(14),
+        // ElevatorFinish(15),
+        // ElevatorRaise2(16),
+        // ElevatorRaise3(17),
+        // ElevatorRaise4(18),
+        Victory(6);
+
+        // StartPosition(20);
 
         LightsStateMessage(final int value) {
             if(value > maxValue || value < 0) {
@@ -93,7 +95,7 @@ public class LightSubsystem extends BaseSubsystem {
         // Needs to implement vision as well
         // Not sure about if the way we are checking the shooter is correct (and collector)
         if (!dsEnabled) {
-            currentState = LightsStateMessage.RobotDisabled;
+            currentState = LightsStateMessage.RobotDisabledDefault;
         } else if (coralScorerSubsystem.confidentlyHasCoral()) {
             currentState = LightsStateMessage.CoralPresent;
         } else if (coralScorerSubsystem.getCoralScorerState() == CoralScorerSubsystem.CoralScorerState.INTAKING) {
