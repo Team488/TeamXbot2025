@@ -1,11 +1,13 @@
 package competition.subsystems.drive.commands;
 
+import competition.electrical_contract.ElectricalContract;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.units.Units;
 import org.kobe.xbot.JClient.XTablesClient;
 import org.kobe.xbot.JClient.XTablesClientManager;
 import org.kobe.xbot.Utilities.VisionCoprocessorCommander;
@@ -28,20 +30,24 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class DriveToBezierCurvesWithVisionCommand extends SwerveSimpleBezierCommand {
-    DriveSubsystem drive;
-    PoseSubsystem pose;
-    CoprocessorCommunicationSubsystem coprocessorComms;
+    final DriveSubsystem drive;
+    final PoseSubsystem pose;
+    final CoprocessorCommunicationSubsystem coprocessorComms;
+    final double radiusOfRobot;
     XTableValues.BezierCurves lastBezierCurves;
     Pose2d lastTargetPose;
 
     @Inject
     DriveToBezierCurvesWithVisionCommand(PoseSubsystem pose, DriveSubsystem drive, CoprocessorCommunicationSubsystem coprocessorComms,
                                          PropertyFactory pf, HeadingModule.HeadingModuleFactory headingModuleFactory,
-                                         RobotAssertionManager assertionManager) {
+                                         RobotAssertionManager assertionManager, ElectricalContract electricalContract) {
         super(drive, pose, pf, headingModuleFactory, assertionManager);
         this.pose = pose;
         this.drive = drive;
         this.coprocessorComms = coprocessorComms;
+
+        var distanceToOuterBumerInMeters = electricalContract.getDistanceFromCenterToOuterBumperX().in(Units.Meters);
+        this.radiusOfRobot = Math.sqrt(Math.pow(distanceToOuterBumerInMeters, 2.0) * 2.0);
     }
 
     @Override
@@ -52,7 +58,7 @@ public class DriveToBezierCurvesWithVisionCommand extends SwerveSimpleBezierComm
     }
 
     //allows for driving not in a straight line
-    public void prepareToDriveWithCurves(XTableValues.BezierCurves curves) {
+    protected void prepareToDriveWithCurves(XTableValues.BezierCurves curves) {
         List<XbotSwervePoint> swervePoints = new ArrayList<>();
         
         for (XTableValues.BezierCurve curve : curves.getCurvesList()) {
@@ -71,7 +77,7 @@ public class DriveToBezierCurvesWithVisionCommand extends SwerveSimpleBezierComm
         this.logic.setConstantVelocity(this.drive.getDriveToWaypointsSpeed().get());
     }
 
-    protected boolean setTargetPoseForVision(Pose2d targetPose) {
+    private boolean setTargetPoseForVision(Pose2d targetPose) {
         this.lastTargetPose = targetPose;
         this.log.info("Setting vision target pose: {}", targetPose);
         this.aKitLog.record("Set vision target pose", targetPose);
@@ -102,7 +108,7 @@ public class DriveToBezierCurvesWithVisionCommand extends SwerveSimpleBezierComm
     }
 
     //allows for driving not in a straight line
-    public boolean retrieveCurvesFromVision() {
+    protected boolean retrieveCurvesFromVision() {
         var currentPose = this.pose.getCurrentPose2d();
         var start = XTableValues.ControlPoint.newBuilder()
             .setY(currentPose.getY())
@@ -128,21 +134,29 @@ public class DriveToBezierCurvesWithVisionCommand extends SwerveSimpleBezierComm
             .setAprilTagRotationDegreesTurnSpeedFactorPerStep(50)
             .setFinalRotationTurnSpeedFactor(2)
             .build();
-        
-        try (VisionCoprocessorCommander commander = new VisionCoprocessorCommander(VisionCoprocessor.ORIN2)) {
 
-            XTableValues.BezierCurves curves = commander
-                    .requestBezierPathWithOptions(XTableValues.RequestVisionCoprocessorMessage.newBuilder()
-                            .setStart(start)
-                            .setEnd(end)
-                            .setSafeDistanceInches(3) // Will stay an EXTRA 3 inches away (recommended)
-                            .setOptions(options)
-                            .build(), 5, TimeUnit.SECONDS);
-            this.lastBezierCurves = curves;
-            this.prepareToDriveWithCurves(this.lastBezierCurves);
-        }
+        var commander = this.coprocessorComms.getVisionCoprocessorCommander();
+
+        XTableValues.BezierCurves curves = commander
+                .requestBezierPathWithOptions(XTableValues.RequestVisionCoprocessorMessage.newBuilder()
+                        .setStart(start)
+                        .setEnd(end)
+                        .setSafeDistanceInches(2) // Will stay an EXTRA 3 inches away (recommended)
+                        .setOptions(options)
+                        .build(), 5, TimeUnit.SECONDS);
+        this.lastBezierCurves = curves;
+        this.prepareToDriveWithCurves(this.lastBezierCurves);
 
         return true;
+    }
+
+    protected boolean setDestinationPoseForVision(Pose2d destinationPose, boolean isRearFacing) {
+        var offsetRotation = Rotation2d.fromDegrees(isRearFacing ? 0 : 180);
+        var deltaTranslation = new Translation2d(this.radiusOfRobot, destinationPose.getRotation());
+        var destinationTranslation = destinationPose.getTranslation().plus(deltaTranslation);
+        var targetPose = new Pose2d(destinationTranslation, destinationPose.getRotation().rotateBy(offsetRotation));
+
+        return this.setTargetPoseForVision(targetPose);
     }
 
     @Override
