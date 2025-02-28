@@ -13,7 +13,6 @@ import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.units.measure.Distance;
@@ -47,6 +46,8 @@ public class PoseSubsystem extends BasePoseSubsystem {
 
     public static final Distance fieldXMidpointInMeters = Meters.of(8.7785);
     public static final Distance fieldYMidpointInMeters = Meters.of(4.025);
+
+    private boolean isVisionUpdatesDisabled = false;
 
 
     // only used when simulating the robot
@@ -107,13 +108,16 @@ public class PoseSubsystem extends BasePoseSubsystem {
                 this.getCurrentHeadingGyroOnly(),
                 getSwerveModulePositions()
         );
-        this.aprilTagVisionSubsystem.getAllPoseObservations().forEach(observation -> {
-            fullSwerveOdometry.addVisionMeasurement(
-                    observation.visionRobotPoseMeters(),
-                    observation.timestampSeconds(),
-                    observation.visionMeasurementStdDevs()
-            );
-        });
+
+        if (!isVisionUpdatesDisabled) {
+            this.aprilTagVisionSubsystem.getAllPoseObservations().forEach(observation -> {
+                fullSwerveOdometry.addVisionMeasurement(
+                        observation.visionRobotPoseMeters(),
+                        observation.timestampSeconds(),
+                        observation.visionMeasurementStdDevs()
+                );
+            });
+        }
 
         // Report poses
         Pose2d estimatedPosition = new Pose2d(
@@ -315,6 +319,10 @@ public class PoseSubsystem extends BasePoseSubsystem {
 
     public Command createSetPositionCommandThatMirrorsIfNeeded(Pose2d bluePose) {
         return Commands.runOnce(() -> setCurrentPosition(PoseSubsystem.convertBlueToRedIfNeeded(bluePose))).ignoringDisable(true);
+    }
+
+    public void setVisionUpdatesDisabled(boolean disableVisionUpdates) {
+        this.isVisionUpdatesDisabled = disableVisionUpdates;
     }
 
 }
