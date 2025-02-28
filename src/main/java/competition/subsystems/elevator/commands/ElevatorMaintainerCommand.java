@@ -138,7 +138,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     private void attemptCalibration(){
         elevator.setPower(elevator.calibrationNegativePower.get());
 
-        if (elevator.isTouchingBottom()){
+        if (elevator.isTouchingBottom()) {
             elevator.markElevatorAsCalibratedAgainstLowerLimit();
             elevator.setTargetValue(elevator.getCurrentValue());
         }
