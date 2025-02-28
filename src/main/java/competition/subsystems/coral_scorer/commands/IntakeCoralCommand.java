@@ -35,8 +35,8 @@ public class IntakeCoralCommand extends BaseCommand {
         System.out.println("Trigger is pressed");
         if (coral.confidentlyHasCoral()) {
             System.out.println("Execute happened - Rumble On");
-            oi.operatorGamepad.getRumbleManager().rumbleGamepad(operatorGamePadRumblePrefrence.get(), 1);
-            oi.driverGamepad.getRumbleManager().rumbleGamepad(driverGamePadRumblePrefrence.get(), 1);
+            oi.operatorGamepad.getRumbleManager().rumbleGamepad(operatorGamePadRumblePrefrence.get(), .5);
+            oi.driverGamepad.getRumbleManager().rumbleGamepad(driverGamePadRumblePrefrence.get(), .5);
         } else {
             System.out.println("IT DOESNT HAVE CORAL STILL");
         }
