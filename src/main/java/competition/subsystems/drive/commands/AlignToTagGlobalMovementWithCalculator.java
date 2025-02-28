@@ -69,4 +69,9 @@ public class AlignToTagGlobalMovementWithCalculator extends BaseCommand {
     public boolean isFinished() {
         return calculator.recommendIsFinished();
     }
+
+    @Override
+    public void end(boolean interrupted) {
+        pose.setVisionUpdatesDisabled(false);
+    }
 }
