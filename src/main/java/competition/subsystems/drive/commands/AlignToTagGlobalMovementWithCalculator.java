@@ -66,6 +66,11 @@ public class AlignToTagGlobalMovementWithCalculator extends BaseCommand {
     }
 
     @Override
+    public void end(boolean interrupted) {
+        aprilTagVisionSubsystem.setAllCamerasToRegularSearchMode();
+    }
+
+    @Override
     public boolean isFinished() {
         return calculator.recommendIsFinished();
     }

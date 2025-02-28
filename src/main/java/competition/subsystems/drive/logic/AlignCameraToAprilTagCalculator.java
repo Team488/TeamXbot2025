@@ -188,6 +188,7 @@ public class AlignCameraToAprilTagCalculator {
         // Mostly, this is about where we should be pointing - and we generally point at the tag unless we are fairly close.
         Optional<AprilTagVisionIO.TargetObservation> targetObservation = aprilTagVisionSubsystem.getTargetObservation(targetCameraID, targetAprilTagID);
         boolean doWeSeeOurTargetTag = targetObservation.isPresent() && targetObservation.get().ambiguity() < maxTagAmbiguity.get();
+
         Translation2d currentTranslation = pose.getCurrentPose2d().getTranslation();
         double headingToPointAtAprilTag = Radians.of(
                 currentTranslation.minus(aprilTagPositionInGlobalFieldCoordinates).getAngle().getRadians() + Math.PI
