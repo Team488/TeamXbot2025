@@ -108,11 +108,11 @@ public class OperatorCommandMap {
         var homed = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
         //operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(driveToCoralStationWithVisionCommand);
         var branchAHeadingAssistedDriveAndScore = headingAssistedDriveAndScoreCommandGroupFactory.create(Landmarks.Branch.A);
-        //operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(branchAHeadingAssistedDriveAndScore)
-        //                .onFalse(homed);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(branchAHeadingAssistedDriveAndScore)
+                        .onFalse(homed);
         var branchBHeadingAssistedDriveAndScore = headingAssistedDriveAndScoreCommandGroupFactory.create(Landmarks.Branch.B);
-        //operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(branchBHeadingAssistedDriveAndScore)
-        //        .onFalse(homed);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(branchBHeadingAssistedDriveAndScore)
+                .onFalse(homed);
 
         operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
         operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(changeActiveModule);
@@ -193,34 +193,14 @@ public class OperatorCommandMap {
         rotateTo180Degrees.includeOnSmartDashboard("RotateTo180Degrees");
 
         var command1 = driveWithSnapToTagCommand.get();
-        command1.setChosenTagID(6);
-        command1.setCameraId(0);
+        command1.setCameraToUse(Cameras.FRONT_RIGHT_CAMERA.getIndex());
+        command1.setDriverRelative(true);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(command1);
 
         var command2 = driveWithSnapToTagCommand.get();
-        command2.setChosenTagID(7);
-        command2.setCameraId(0);
+        command2.setCameraToUse(Cameras.FRONT_LEFT_CAMERA.getIndex());
+        command2.setDriverRelative(true);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(command2);
-
-        var command3 = driveWithSnapToTagCommand.get();
-        command3.setChosenTagID(8);
-        command3.setCameraId(0);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(command3);
-
-        var command4 = driveWithSnapToTagCommand.get();
-        command4.setChosenTagID(9);
-        command4.setCameraId(0);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(command4);
-
-        var command5 = driveWithSnapToTagCommand.get();
-        command5.setChosenTagID(10);
-        command5.setCameraId(0);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(command5);
-
-        var command6 = driveWithSnapToTagCommand.get();
-        command6.setChosenTagID(11);
-        command6.setCameraId(0);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(command6);
     }
 
 

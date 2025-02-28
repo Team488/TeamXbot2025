@@ -11,9 +11,10 @@ import edu.wpi.first.math.geometry.Translation2d;
 import xbot.common.command.BaseCommand;
 import xbot.common.math.XYPair;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
-import xbot.common.subsystems.vision.AprilTagVisionIO;
 
 import javax.inject.Inject;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static edu.wpi.first.units.Units.Degrees;
@@ -28,9 +29,11 @@ public class DriveWithSnapToTagCommand extends BaseCommand {
     final ManualSwerveDriveLogic swerveLogic;
     final HeadingModule headingModule;
     int chosenTagID;
-    int cameraId;
+    int cameraToUse;
     double idealFinalHeadingDegrees;
     int loopsWithTargetCounter = 0;
+    boolean isDriverRelative = false;
+    boolean hasCameraFlippedDriverRelative = false;
 
     enum SnapState {
         Regular,
@@ -55,18 +58,24 @@ public class DriveWithSnapToTagCommand extends BaseCommand {
         this.addRequirements(drive);
     }
 
-    public void setChosenTagID(int chosenTagID) {
-        this.chosenTagID = chosenTagID;
+    public void setDriverRelative(boolean isEnabled) {
+        this.isDriverRelative = isEnabled;
     }
 
-    public void setCameraId(int cameraId) {
-        this.cameraId = cameraId;
+    public void setCameraToUse(int cameraToUse) {
+        this.cameraToUse = cameraToUse;
     }
 
     @Override
     public void initialize() {
         log.info("Initializing");
         swerveLogic.initialize();
+
+        // For now, we'll set our aprilTag and camera upon initialization
+        if (isDriverRelative) {
+            setDriverRelativeCameraToUse();
+        }
+        this.chosenTagID = vision.getTargetAprilTagID(pose.getClosestReefFacePose());
 
         Optional<Pose3d> aprilTagPose = vision.getAprilTagFieldOrientedPose(chosenTagID);
         var aprilTagZRotationRadians = aprilTagPose.map((p) -> p.getRotation().getZ()).orElse(0.0);
@@ -87,7 +96,7 @@ public class DriveWithSnapToTagCommand extends BaseCommand {
         //      the driver translation joystick to only allow robot-relative forward/backward motion.
 
         var driveAdvice = new ManualSwerveDriveAdvice();
-        boolean targetInSight = vision.doesCameraBestObservationHaveAprilTagId(cameraId, chosenTagID);
+        boolean targetInSight = vision.doesCameraBestObservationHaveAprilTagId(cameraToUse, chosenTagID);
 
         aKitLog.record("targetInSight", targetInSight);
 
@@ -115,7 +124,7 @@ public class DriveWithSnapToTagCommand extends BaseCommand {
                 state = SnapState.LockedOn;
                 // Use PID to center the tag in the camera.
                 // First, where is this tag?
-                double robotRelativeTagLocationY = vision.getRobotRelativeLocationOfBestDetectedAprilTag(cameraId).getY();
+                double robotRelativeTagLocationY = vision.getRobotRelativeLocationOfBestDetectedAprilTag(cameraToUse).getY();
                 var centeringTranslation2d = drive.getPowerForRelativePositionChange(new Translation2d(0, robotRelativeTagLocationY));
                 centeringVector = new XYPair(centeringTranslation2d.getX(), centeringTranslation2d.getY());
                 // All of that was robot-relative. Rotate into field-relative.
@@ -166,5 +175,26 @@ public class DriveWithSnapToTagCommand extends BaseCommand {
                 driveAdvice.currentHeading(),
                 driveAdvice.centerOfRotationInches()
         );
+    }
+
+    // Stolen from AlignToReefWithAprilTagCommand for convenience sakes
+    private void setDriverRelativeCameraToUse() {
+        List<Integer> farReefFacePoseIDList = Arrays.asList(20, 21, 22, 9, 10 , 11);
+        List<Integer> closeReefFacePoseIDList = Arrays.asList(19, 18, 17, 6, 7, 8);
+
+        // if our target april tag is a far april tag and cameras haven't been flipped,
+        // flip and use the other front camera to align with tag
+        if (farReefFacePoseIDList.contains(vision.getTargetAprilTagID(pose.getClosestReefFacePose()))
+                && !hasCameraFlippedDriverRelative) {
+            cameraToUse = (cameraToUse + 1) % 2;
+            hasCameraFlippedDriverRelative = true;
+        }
+        // if our target april tag is a close april tag and cameras have been flipped,
+        // flip and use the other front camera to align with tag
+        else if (closeReefFacePoseIDList.contains(vision.getTargetAprilTagID(pose.getClosestReefFacePose()))
+                && hasCameraFlippedDriverRelative) {
+            cameraToUse = (cameraToUse + 1) % 2;
+            hasCameraFlippedDriverRelative = false;
+        }
     }
 }
