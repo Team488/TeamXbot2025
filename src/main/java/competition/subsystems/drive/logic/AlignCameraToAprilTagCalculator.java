@@ -43,7 +43,6 @@ public class AlignCameraToAprilTagCalculator {
         Searching,
         ApproachWhileCentering,
         TerminalApproach,
-        ApproachFailedRetreatToInterstitial,
         Shove,
         Complete
     }
@@ -264,8 +263,14 @@ public class AlignCameraToAprilTagCalculator {
 
                 // If we're quite close to the final point, advance to shoving into the reef or coral station.
                 if (currentPose.getTranslation().getDistance(targetLocationOnField) < distanceToStartShoving.get()) {
-                    activity = Activity.Shove;
-                    shoveStartTime = XTimer.getFPGATimestamp();
+                    // We need to make a decision. If our error is small enough, we should advance to shove.
+                    // However, if our error is large, we should retreat and try again.
+                    if (isLastKnownErrorWithinBounds()) {
+                        activity = Activity.Shove;
+                        shoveStartTime = XTimer.getFPGATimestamp();
+                    } else {
+                        activity = Activity.ApproachWhileCentering;
+                    }
                 }
                 break;
             case Shove:
@@ -292,8 +297,19 @@ public class AlignCameraToAprilTagCalculator {
 
         akitLog.record("Activity", activity);
         akitLog.record("TagAcquisitionState", tagAcquisitionState);
+        akitLog.record("ErrorIsWithinBounds", isLastKnownErrorWithinBounds());
 
         return new AlignCameraToAprilTagAdvice(driveIntent, rotationIntent, tagAcquisitionState, activity);
+    }
+
+    private boolean isLastKnownErrorWithinBounds() {
+        // We have to at least be in an Approach/Shove phase for this to be possibly true.
+        // If we're in the searching phase, error isn't relevant, so we return false.
+        return switch (activity) {
+            case ApproachWhileCentering, TerminalApproach, Shove ->
+                Math.abs(lastKnownHorizontalErrorMeters) < maxHorizontalErrorMeters.get();
+            default -> false;
+        };
     }
 
     private void updateFinalTargetState(Pose2d currentPose) {
@@ -302,7 +318,6 @@ public class AlignCameraToAprilTagCalculator {
         if (aprilTagData.isPresent()) {
             lastKnownHorizontalErrorMeters = aprilTagData.get().getY();
         }
-
         akitLog.record("AprilTagData", aprilTagData.orElse(null));
 
         // This transform will always be at rotation 0, since in its own frame, the robot is always facing forward.
