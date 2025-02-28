@@ -3,8 +3,10 @@ package competition.auto_programs;
 import competition.commandgroups.DriveToFaceAndScoreCommandGroupFactory;
 import competition.commandgroups.DriveToStationAndIntakeUntilCollectedCommandGroupFactory;
 import competition.commandgroups.PathToFaceAndScoreCommandGroupFactory;
+import competition.simulation.MapleSimulator;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import xbot.common.subsystems.autonomous.AutonomousCommandSelector;
 
@@ -17,6 +19,7 @@ public class FromCurrentPositionScoreFarLeftBranchALevelFour extends SequentialC
     @Inject
     public FromCurrentPositionScoreFarLeftBranchALevelFour(AutonomousCommandSelector autoSelector,
                                                            PoseSubsystem pose,
+                                                           MapleSimulator mapleSimulator,
                                                            PathToFaceAndScoreCommandGroupFactory driveToFaceAndScoreFact,
                                                            DriveToFaceAndScoreCommandGroupFactory driveToFaceAndScoreCommandGroupFactory,
                                                            DriveToStationAndIntakeUntilCollectedCommandGroupFactory driveToStationAndIntakeUntilCollectedCommandGroupFactory) {
@@ -24,8 +27,7 @@ public class FromCurrentPositionScoreFarLeftBranchALevelFour extends SequentialC
 
 //        var resetMapleSimPose = new InstantCommand(() -> mapleSimulator.resetPosition(Landmarks.BlueLeftStartingLine));
 //        this.addCommands(resetMapleSimPose);
-
-        // Force our location to start in front of left cage
+//
 //        var startInFrontOfLeftCage = pose.createSetPositionCommand(
 //                () -> Landmarks.BlueLeftStartingLine
 //        );
@@ -33,13 +35,13 @@ public class FromCurrentPositionScoreFarLeftBranchALevelFour extends SequentialC
 
         // Drive to far left, branch A and score level four
         queueMessageToAutoSelector("Path curve to far left, branch A and score level four");
-        var pathAndCurveScoreFarLeftBranchALevelFour = driveToFaceAndScoreFact.create(Landmarks.ReefFace.CLOSE,
+        var pathAndCurveScoreFarLeftBranchALevelFour = driveToFaceAndScoreFact.create(Landmarks.ReefFace.FAR_LEFT,
                 Landmarks.Branch.B, Landmarks.CoralLevel.FOUR);
         this.addCommands(pathAndCurveScoreFarLeftBranchALevelFour);
         this.addCommands(driveToStationAndIntakeUntilCollectedCommandGroupFactory.create(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.MID));
-        var driveAndScoreFarLeftBranchALevelFour = driveToFaceAndScoreCommandGroupFactory.create(Landmarks.ReefFace.CLOSE,
-                Landmarks.CoralLevel.FOUR);
-        this.addCommands(driveAndScoreFarLeftBranchALevelFour);
+        var driveAndScoreCloseLeftBranchALevelFour = driveToFaceAndScoreCommandGroupFactory.create(Landmarks.ReefFace.CLOSE_LEFT,
+               Landmarks.Branch.A, Landmarks.CoralLevel.FOUR);
+        this.addCommands(driveAndScoreCloseLeftBranchALevelFour);
     }
 
     private void queueMessageToAutoSelector(String message) {

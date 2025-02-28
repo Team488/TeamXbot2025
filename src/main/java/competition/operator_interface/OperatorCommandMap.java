@@ -344,16 +344,7 @@ public class OperatorCommandMap {
 //                        .sysIdQuasistatic(SysIdRoutine.Direction.kReverse), Set.of()));
 
     }
-    @Inject
-    public void setupAutonomousCommands(OperatorInterface oi,
-                                        Provider<SetAutonomousCommand> setAutonomousCommandProvider,
-                                        FromCurrentPositionScoreFarLeftBranchALevelFour fromCurrentPositionScoreFarLeftBranchALevelFour) {
 
-        var setCurrentPathToFarLeftBranchALevelFour = setAutonomousCommandProvider.get();
-        setCurrentPathToFarLeftBranchALevelFour.setAutoCommand(fromCurrentPositionScoreFarLeftBranchALevelFour);
-        oi.neoTrellis.getifAvailable(5).onTrue(fromCurrentPositionScoreFarLeftBranchALevelFour); // temporary button
-        setCurrentPathToFarLeftBranchALevelFour.includeOnSmartDashboard("Path Current Position Score Left Face's Level Fours Auto");
-    }
 
     @Inject
     public void setupAutonomousCommands(OperatorInterface oi,
