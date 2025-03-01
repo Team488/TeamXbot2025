@@ -25,9 +25,7 @@ public class ManualControlPawlMotorCommand extends BaseCommand {
 
     @Override
     public void execute() {
-        if (oi.superstructureGamepad.getXboxButton(XXboxController.XboxButton.Y).getAsBoolean()) {
             double power = oi.operatorGamepad.getRightStickY();
-            climber.setPower(power);
-        }
+            climber.setPawlMotorPower(power);
     }
 }
