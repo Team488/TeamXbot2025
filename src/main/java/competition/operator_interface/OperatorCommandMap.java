@@ -24,7 +24,7 @@ import competition.subsystems.drive.commands.CalibrateDriveCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
 import competition.subsystems.drive.commands.DriveToCoralStationWithVisionCommand;
 import competition.subsystems.drive.commands.DriveToLocationWithPID;
-import competition.subsystems.drive.commands.EmergencyAutonomusCommand;
+import competition.subsystems.drive.commands.EmergencyAutonomousCommand;
 import competition.subsystems.drive.commands.RotateToHeadingWithHeadingModule;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.drive.commands.TeleportToPositionCommand;
@@ -304,12 +304,12 @@ public class OperatorCommandMap {
     public void setupAutonomousCommandsSelection(OperatorInterface oi,
                                                  Provider<SetAutonomousCommand> setAutonomousCommandProvider,
                                                  DriveToLocationWithPID driveToLocationWithPID,
-                                                 EmergencyAutonomusCommand emergencyAutonomusCommand
+                                                 EmergencyAutonomousCommand emergencyAutonomousCommand
                                                  ){
 
         var setEmergencyAutonomousCommand = setAutonomousCommandProvider.get();
-        setEmergencyAutonomousCommand.setAutoCommand(emergencyAutonomusCommand);
-        oi.neoTrellis.getifAvailable(31).onTrue(emergencyAutonomusCommand);
+        setEmergencyAutonomousCommand.setAutoCommand(emergencyAutonomousCommand);
+        oi.neoTrellis.getifAvailable(31).onTrue(emergencyAutonomousCommand);
         setEmergencyAutonomousCommand.includeOnSmartDashboard("EMERGENCYAUTO");
 
 
