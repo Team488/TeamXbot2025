@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
 
 @Singleton
 public class ClimberSubsystem extends BaseSubsystem {
@@ -22,8 +23,6 @@ public class ClimberSubsystem extends BaseSubsystem {
     public final ElectricalContract contract;
 
     public final XCANMotorController pawlMotor;
-
-    public Time pawlTimestamp;
 
     @Inject
     public ClimberSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
@@ -56,12 +55,9 @@ public class ClimberSubsystem extends BaseSubsystem {
         }
     }
 
-    public void releaseClimberSolenoid(){
-        //timestamp in seconds
-        pawlTimestamp = XTimer.getFPGATimestampTime();
-
-        while (pawlTimestamp.in(Seconds) <= 1.5){
-            return;
+    public void setPawlMotorPower(double power){
+        if(contract.isPawlMotorReady()){
+            this.pawlMotor.setVoltage(Volts.of(power * 12));
         }
     }
 
@@ -69,10 +65,5 @@ public class ClimberSubsystem extends BaseSubsystem {
         if (contract.isClimberMotorReady()) {
             this.climberMotor.setPower(0);
         }
-    }
-
-    @Override
-    public void periodic() {
-
     }
 }
