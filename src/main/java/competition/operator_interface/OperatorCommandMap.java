@@ -218,7 +218,7 @@ public class OperatorCommandMap {
         var homed = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeUntilCoralCollectedCommand);
-        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(intakeCoralCommand);
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreWhenReadyCommand);
 
         // combine all three claibration commands into one parallal command group
         var calibrateAll = Commands.parallel(
