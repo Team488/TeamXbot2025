@@ -45,9 +45,7 @@ public class DriveToBezierCurvesWithVisionCommand extends SwerveSimpleBezierComm
         this.pose = pose;
         this.drive = drive;
         this.coprocessorComms = coprocessorComms;
-
-        var distanceToOuterBumerInMeters = electricalContract.getDistanceFromCenterToOuterBumperX().in(Units.Meters);
-        this.radiusOfRobot = Math.sqrt(Math.pow(distanceToOuterBumerInMeters, 2.0) * 2.0);
+        this.radiusOfRobot = electricalContract.getRadiusOfRobot().in(Units.Meters);
     }
 
     @Override
