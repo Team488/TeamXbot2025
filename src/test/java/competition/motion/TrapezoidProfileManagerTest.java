@@ -13,7 +13,7 @@ public class TrapezoidProfileManagerTest extends BaseCompetitionTest {
     public void setUp() {
         super.setUp();
         manager = getInjectorComponent().trapezoidProfileManagerFactory()
-                .create("test", 1, 1, 0);
+                .create("test", 1, 1, 1000, 0);
     }
 
     @Test
