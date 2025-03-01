@@ -9,6 +9,7 @@ import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import competition.subsystems.drive.commands.DriveToBezierCurvesWithVisionCommand;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
+import static edu.wpi.first.units.Units.Meters;
 import edu.wpi.first.wpilibj.DriverStation;
 import xbot.common.logging.RobotAssertionManager;
 import xbot.common.properties.PropertyFactory;
@@ -57,7 +58,7 @@ public class DriveToClosestReefSectionWithVisionCommand extends DriveToBezierCur
 
     @Override
     public void initialize() {
-        if (this.setDestinationPoseForVision(this.getClosestReefPose(), false)) {
+        if (this.setDestinationPoseForVision(this.getClosestReefPose(), false, Meters.of(1))) {
             super.initialize();
         } else {
             this.log.error("Drive to closest reef failed to initialize!");

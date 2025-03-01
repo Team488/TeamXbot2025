@@ -16,6 +16,12 @@ public class BaseAutonomousSequentialCommandGroup extends SequentialCommandGroup
         this.addCommands(autoSelector.createAutonomousStateMessageCommand(message));
     }
 
+    public void queueDriveClosestAndScoreMessageToAutoSelector(Landmarks.Branch targetBranch,
+                                                               Landmarks.CoralLevel targetLevel) {
+        String message = "Drive to closest reef, " + targetBranch + ", and score" + targetLevel;
+        queueMessageToAutoSelector(message);
+    }
+
     public void queueDriveAndScoreMessageToAutoSelector(Landmarks.ReefFace targetReefFace,
                                                         Landmarks.Branch targetBranch,
                                                         Landmarks.CoralLevel targetLevel) {

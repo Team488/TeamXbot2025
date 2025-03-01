@@ -38,6 +38,4 @@ public class FromCageScoreOneCoralAutoFactory {
 
         return auto;
     }
-
-
 }
