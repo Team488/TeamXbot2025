@@ -15,9 +15,9 @@ public class ReleaseClimberSolenoidCommand extends BaseCommand {
     ClimberSubsystem climber;
 
     //timestamp in seconds
-    final Time pawlTimestampStart = XTimer.getFPGATimestampTime();
-    final Time pawlTimestampEnd = pawlTimestampStart.plus(Seconds.of(1.5));
-    final Time pawlTimestampCooldown = pawlTimestampEnd.plus(Seconds.of(6));
+    Time pawlTimestampStart;
+    Time pawlTimestampEnd;
+    Time pawlTimestampCooldown;
 
     @Inject
     public ReleaseClimberSolenoidCommand(ClimberSubsystem climberSubsystem) {
@@ -28,6 +28,10 @@ public class ReleaseClimberSolenoidCommand extends BaseCommand {
     @Override
     public void initialize() {
         System.out.println("Initializing");
+
+        pawlTimestampStart = XTimer.getFPGATimestampTime();
+        pawlTimestampEnd = pawlTimestampStart.plus(Seconds.of(1.5));
+        pawlTimestampCooldown = pawlTimestampEnd.plus(Seconds.of(6));
     }
 
     @Override
