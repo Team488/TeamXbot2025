@@ -10,11 +10,10 @@ import javax.inject.Inject;
 public class ManualControlPawlMotorCommand extends BaseCommand {
 
     ClimberSubsystem climber;
-    OperatorInterface oi;
+
     @Inject
-    public ManualControlPawlMotorCommand(ClimberSubsystem climber, OperatorInterface oi){
+    public ManualControlPawlMotorCommand(ClimberSubsystem climber){
         this.climber = climber;
-        this.oi = oi;
     }
 
     @Override
