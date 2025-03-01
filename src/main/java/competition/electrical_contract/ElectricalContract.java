@@ -8,6 +8,8 @@ import xbot.common.injection.electrical_contract.XSwerveDriveElectricalContract;
 import xbot.common.injection.swerve.SwerveInstance;
 import xbot.common.math.XYPair;
 
+import static edu.wpi.first.units.Units.Meters;
+
 public abstract class ElectricalContract implements XSwerveDriveElectricalContract, XCameraElectricalContract {
 
     public abstract boolean isDriveReady();
@@ -73,4 +75,9 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
     public abstract CANMotorControllerInfo getClimberMotor();
 
     public abstract  boolean isClimberMotorReady();
+
+    public Distance getRadiusOfRobot() {
+        return Meters.of(Math.sqrt(Math.pow(this.getDistanceFromCenterToOuterBumperX().in(Meters), 2.0) * 2.0));
+    }
+
 }

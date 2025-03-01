@@ -40,7 +40,7 @@ public class PathDriveToNearestCoralStationSectionCommand
     /**
      * Distance from the center of the robot to the outer bumper, in meters.
      */
-    double distanceToOuterBumperInMeters;
+    double radiusOfRobot;
 
     /**
      * Field layout containing AprilTag positions.
@@ -76,9 +76,7 @@ public class PathDriveToNearestCoralStationSectionCommand
                                                         CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem) {
         super(drive, pose, pf, headingModuleFactory, aprilTagVisionSubsystem,
                 robotAssertionManager, coprocessorCommunicationSubsystem);
-        this.distanceToOuterBumperInMeters =
-                electricalContract.getDistanceFromCenterToOuterBumperX().in(
-                        Units.Meters);
+        this.radiusOfRobot = electricalContract.getRadiusOfRobot().in(Units.Meters);
         this.aprilTagFieldLayout = aprilTagFieldLayout;
     }
 
@@ -121,7 +119,7 @@ public class PathDriveToNearestCoralStationSectionCommand
         log.info("Initializing");
         var coralStationPose = this.getCoralStationPose();
         var deltaTranslation = new Translation2d(
-                this.distanceToOuterBumperInMeters, coralStationPose.getRotation());
+                this.radiusOfRobot, coralStationPose.getRotation());
         var destinationTranslation =
                 coralStationPose.getTranslation().plus(deltaTranslation);
         var destinationPose =
