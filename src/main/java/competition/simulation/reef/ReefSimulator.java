@@ -41,7 +41,7 @@ public class ReefSimulator {
         A, B
     }
 
-    record ReefCoralKey(ReefFace face, ReefLevel level, ReefPost post) {}
+    record ReefCoralKey(Alliance alliance, ReefFace face, ReefLevel level, ReefPost post) {}
 
     record ReefAlgaeKey(Alliance alliance, ReefFace face, ReefLevel level) {}
 
@@ -68,10 +68,12 @@ public class ReefSimulator {
     public void fillReefWithCoral() {
         // for debugging positions
         // enumerate faces, levels and posts
-        for (ReefFace face : ReefFace.values()) {
-            for (ReefLevel level : ReefLevel.values()) {
-                for (ReefPost post : ReefPost.values()) {
-                    reefCoralLocations.add(new ReefCoralKey(face, level, post));
+        for (Alliance alliance : Alliance.values()) {
+            for (ReefFace face : ReefFace.values()) {
+                for (ReefLevel level : ReefLevel.values()) {
+                    for (ReefPost post : ReefPost.values()) {
+                        reefCoralLocations.add(new ReefCoralKey(alliance, face, level, post));
+                    }
                 }
             }
         }
@@ -79,15 +81,17 @@ public class ReefSimulator {
 
     public ReefCoralKey findNearestCoral(Translation3d scorerPose) {
         var coralDistanceMap = new HashMap<ReefCoralKey, Distance>();
-        for (ReefFace face : ReefFace.values()) {
-            for (ReefLevel level : ReefLevel.values()) {
-                for (ReefPost post : ReefPost.values()) {
-                    var key = new ReefCoralKey(face, level, post);
-                    // TODO: consider some logic to ignore locations that already have coral on them
-                    // or otherwise cause the coral to drop to the floor if that happens?
-                    var pose = getCoralPose(key.face, key.level, key.post);
-                    var distance = Meters.of(scorerPose.getDistance(pose.getTranslation()));
-                    coralDistanceMap.put(key, distance);
+        for (Alliance alliance : Alliance.values()) {
+            for (ReefFace face : ReefFace.values()) {
+                for (ReefLevel level : ReefLevel.values()) {
+                    for (ReefPost post : ReefPost.values()) {
+                        var key = new ReefCoralKey(alliance, face, level, post);
+                        // TODO: consider some logic to ignore locations that already have coral on them
+                        // or otherwise cause the coral to drop to the floor if that happens?
+                        var pose = getCoralPose(key.face, key.level, key.post);
+                        var distance = Meters.of(scorerPose.getDistance(pose.getTranslation()));
+                        coralDistanceMap.put(key, distance);
+                    }
                 }
             }
         }
@@ -134,7 +138,23 @@ public class ReefSimulator {
 
     public Pose3d[] getCoralPoses() {
         return reefCoralLocations.stream()
-                .map(coralLocation -> getCoralPose(coralLocation.face(), coralLocation.level(), coralLocation.post()))
+                .map(coralLocation -> {
+                    Pose3d originalPose = getCoralPose(coralLocation.face(), coralLocation.level(), coralLocation.post());
+                    Pose2d pose  = originalPose.toPose2d();
+                    Rotation3d desiredRotation = originalPose.getRotation();
+
+                    // Flip stuff if red
+                    if (coralLocation.alliance() == Alliance.RED) {
+                        pose = PoseSubsystem.convertBluetoRed(pose);
+                        desiredRotation = new Rotation3d(
+                                desiredRotation.getX(),
+                                2 * Math.PI - desiredRotation.getY(),
+                                desiredRotation.getZ()
+                        );
+                    }
+
+                    return new Pose3d(pose.getX(), pose.getY(), originalPose.getZ(), desiredRotation);
+                })
                 .toArray(Pose3d[]::new);
     }
 
