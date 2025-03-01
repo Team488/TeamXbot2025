@@ -2,6 +2,7 @@ package competition.auto_programs;
 
 import competition.commandgroups.DriveToFaceAndScoreCommandGroupFactory;
 import competition.commandgroups.DriveToStationAndIntakeUntilCollectedCommandGroupFactory;
+import competition.simulation.BaseSimulator;
 import competition.simulation.MapleSimulator;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
@@ -20,7 +21,7 @@ public class FromLeftCageScoreLeftFacesLevelFours extends BaseAutonomousSequenti
                                                 DriveToStationAndIntakeUntilCollectedCommandGroupFactory driveToStationAndIntakeFact,
                                                 Provider<DriveToFaceAndScoreCommandGroupFactory> driveToFaceAndScoreFactProv,
                                                 Provider<DriveToStationAndIntakeUntilCollectedCommandGroupFactory> driveToStationAndIntakeFactProv,
-                                                MapleSimulator mapleSimulator) {
+                                                BaseSimulator simulator) {
         super(autoSelector);
 
         // Force our location to start in front of left cage
@@ -29,8 +30,8 @@ public class FromLeftCageScoreLeftFacesLevelFours extends BaseAutonomousSequenti
         );
         this.addCommands(startInFrontOfLeftCage);
 
-        var resetMapleSim = new InstantCommand(() -> mapleSimulator.resetPosition(PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueCageTwoStartingLine)));
-        this.addCommands(resetMapleSim);
+        var resetSim = new InstantCommand(() -> simulator.resetPosition(PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueCageTwoStartingLine)));
+        this.addCommands(resetSim);
 
         // Drive to far left, branch A and score level four
         queueDriveAndScoreMessageToAutoSelector(Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR);
