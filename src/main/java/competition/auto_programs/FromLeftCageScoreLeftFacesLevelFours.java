@@ -2,12 +2,11 @@ package competition.auto_programs;
 
 import competition.commandgroups.DriveToFaceAndScoreCommandGroupFactory;
 import competition.commandgroups.DriveToStationAndIntakeUntilCollectedCommandGroupFactory;
+import competition.simulation.BaseSimulator;
 import competition.simulation.MapleSimulator;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import org.apache.logging.log4j.core.time.Instant;
 import xbot.common.subsystems.autonomous.AutonomousCommandSelector;
 
 import javax.inject.Inject;
@@ -22,17 +21,17 @@ public class FromLeftCageScoreLeftFacesLevelFours extends BaseAutonomousSequenti
                                                 DriveToStationAndIntakeUntilCollectedCommandGroupFactory driveToStationAndIntakeFact,
                                                 Provider<DriveToFaceAndScoreCommandGroupFactory> driveToFaceAndScoreFactProv,
                                                 Provider<DriveToStationAndIntakeUntilCollectedCommandGroupFactory> driveToStationAndIntakeFactProv,
-                                                MapleSimulator mapleSimulator) {
+                                                BaseSimulator simulator) {
         super(autoSelector);
 
         // Force our location to start in front of left cage
         var startInFrontOfLeftCage = pose.createSetPositionCommand(
-                () -> PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueLeftStartingLine)
+                () -> PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueCageTwoStartingLine)
         );
         this.addCommands(startInFrontOfLeftCage);
 
-        var resetMapleSim = new InstantCommand(() -> mapleSimulator.resetPosition(PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueLeftStartingLine)));
-        this.addCommands(resetMapleSim);
+        var resetSim = new InstantCommand(() -> simulator.resetPosition(PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueCageTwoStartingLine)));
+        this.addCommands(resetSim);
 
         // Drive to far left, branch A and score level four
         queueDriveAndScoreMessageToAutoSelector(Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR);

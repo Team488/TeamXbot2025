@@ -37,7 +37,7 @@ public class LightsSimulator {
             return new Color8Bit(Color.kGray);
         }
         switch (state) {
-            case RobotDisabled:
+            case RobotDisabledDefault:
                 return new Color8Bit(Color.kRed);
             case RobotEnabled:
                 return new Color8Bit(Color.kGreen);
