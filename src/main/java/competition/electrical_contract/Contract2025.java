@@ -361,7 +361,7 @@ public class Contract2025 extends ElectricalContract {
         return new CANMotorControllerInfo("PawlMotor",
                 MotorControllerType.VictorSPX,
                 CANBusId.RIO,
-                , 50//need to find the real id
+                50,
                 new CANMotorControllerOutputConfig()
                         .withStatorCurrentLimit(Amps.of(60)));
     }
