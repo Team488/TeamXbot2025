@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import xbot.common.advantage.AKitLogger;
 import xbot.common.controls.actuators.mock_adapters.MockCANMotorController;
 import xbot.common.controls.sensors.mock_adapters.MockAbsoluteEncoder;
+import xbot.common.controls.sensors.mock_adapters.MockDutyCycleEncoder;
 import xbot.common.math.PIDManager;
 import xbot.common.properties.PropertyFactory;
 
@@ -32,7 +33,7 @@ public class CoralArmSimulator {
 
     final CoralArmSubsystem armPivotSubsystem;
     final MockCANMotorController armMotor;
-    final MockAbsoluteEncoder absoluteEncoder;
+    final MockDutyCycleEncoder absoluteEncoder;
     final MockDigitalInput lowSensor;
 
     @Inject
@@ -42,7 +43,7 @@ public class CoralArmSimulator {
         this.pidManager = pidManagerFactory.create(pf.getPrefix() + "/CANMotorPositionalPID", 0.2, 0.001, 0.0, 0.0, 1.0, -1.0);
         this.armPivotSubsystem = armPivotSubsystem;
         this.armMotor = (MockCANMotorController) armPivotSubsystem.armMotor;
-        this.absoluteEncoder = (MockAbsoluteEncoder) armPivotSubsystem.armAbsoluteEncoder;
+        this.absoluteEncoder = (MockDutyCycleEncoder) armPivotSubsystem.armAbsoluteEncoder;
         this.lowSensor = (MockDigitalInput) armPivotSubsystem.lowSensor;
 
         this.armSim = new SingleJointedArmSim(
@@ -76,8 +77,8 @@ public class CoralArmSimulator {
         var armMotorRotations = armRelativeAngle.in(Radians) / CoralArmSimConstants.armEncoderAnglePerRotation.in(Radians);
         armMotor.setPosition(Rotations.of(armMotorRotations));
 
-        absoluteEncoder.setPosition_internal(getAbsoluteEncoderPosition(getArmAngle(), 0.0,
-                armPivotSubsystem.rangeOfMotionDegrees.get() / 360));
+        absoluteEncoder.setRawPosition(getAbsoluteEncoderPosition(getArmAngle(), 0.0,
+                armPivotSubsystem.rangeOfMotionDegrees.get() / 360).in(Rotations) + 0.5);
 
         // if the arm angle is lower than 10.8 degrees it will return true, otherwise return false
         lowSensor.setValue(getArmAngle().in(Degrees) < 10.8);

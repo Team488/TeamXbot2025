@@ -4,7 +4,7 @@ import competition.BaseCompetitionTest;
 import org.junit.Test;
 
 import competition.subsystems.pose.Landmarks;
-import competition.subsystems.drive.commands.DriveToWaypointsWithVisionCommand;
+import competition.subsystems.drive.commands.DriveToBezierCurvesWithVisionCommand;
 import edu.wpi.first.units.measure.Distance;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
@@ -43,10 +43,10 @@ public class DriveToCoralStationWithVisionCommandTest extends BaseCompetitionTes
         var firstList = Arrays.asList(1, 3, 5, 7);
         var secondList = Arrays.asList(1, 3, 5);
 
-        assertFalse(DriveToWaypointsWithVisionCommand.areListsEqual(firstList, secondList));
+        assertFalse(DriveToBezierCurvesWithVisionCommand.areListsEqual(firstList, secondList));
         secondList = Arrays.asList(1, 3, 5, 7);
-        assertTrue(DriveToWaypointsWithVisionCommand.areListsEqual(firstList, secondList));
+        assertTrue(DriveToBezierCurvesWithVisionCommand.areListsEqual(firstList, secondList));
         secondList = Arrays.asList(1, 5, 3, 7);
-        assertFalse(DriveToWaypointsWithVisionCommand.areListsEqual(firstList, secondList));
+        assertFalse(DriveToBezierCurvesWithVisionCommand.areListsEqual(firstList, secondList));
     }
 }

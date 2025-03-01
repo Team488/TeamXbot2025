@@ -35,7 +35,7 @@ public class DriveToCoralStationSectionCommand extends SwerveSimpleTrajectoryCom
     public void initialize() {
         log.info("Initializing");
         ArrayList<XbotSwervePoint> swervePoints = new ArrayList<>();
-        swervePoints.add(new XbotSwervePoint(targetCoralStationSection, 10));
+        swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(targetCoralStationSection), 10));
         this.logic.setKeyPoints(swervePoints);
         if (kinematics) {
             this.logic.setGlobalKinematicValues(new SwervePointKinematics(.5, 0, 0, 2));

@@ -52,6 +52,7 @@ public class AlignToTagGlobalMovementWithCalculator extends BaseCommand {
     public void initialize() {
         log.info("Initializing");
         calculator.configureAndReset(targetAprilTagID, targetCameraID, offset, isCameraBackwards);
+        pose.setAreVisionUpdatesDisabled(true);
     }
 
     @Override
@@ -68,5 +69,10 @@ public class AlignToTagGlobalMovementWithCalculator extends BaseCommand {
     @Override
     public boolean isFinished() {
         return calculator.recommendIsFinished();
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        pose.setAreVisionUpdatesDisabled(false);
     }
 }
