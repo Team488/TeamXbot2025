@@ -4,10 +4,12 @@ import competition.operator_interface.OperatorInterface;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.logic.ManualSwerveDriveAdvice;
 import competition.subsystems.drive.logic.ManualSwerveDriveLogic;
+import competition.subsystems.pose.DriverRelativeCameraValues;
 import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.units.measure.Angle;
 import xbot.common.command.BaseCommand;
 import xbot.common.math.XYPair;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
@@ -30,7 +32,7 @@ public class DriveWithSnapToTagCommand extends BaseCommand {
     final HeadingModule headingModule;
     int chosenTagID;
     int cameraToUse;
-    double idealFinalHeadingDegrees;
+    Angle idealFinalHeading;
     int loopsWithTargetCounter = 0;
     boolean isDriverRelative = false;
     boolean hasCameraFlippedDriverRelative = false;
@@ -71,17 +73,21 @@ public class DriveWithSnapToTagCommand extends BaseCommand {
         log.info("Initializing");
         swerveLogic.initialize();
 
-        // For now, we'll set our aprilTag and camera upon initialization
+        // For now, we'll set our aprilTag target upon initialization
+        // This may need to be changed later if target needs to update in real time.
         if (isDriverRelative) {
             setDriverRelativeCameraToUse();
         }
         this.chosenTagID = vision.getTargetAprilTagID(pose.getClosestReefFacePose());
 
         Optional<Pose3d> aprilTagPose = vision.getAprilTagFieldOrientedPose(chosenTagID);
-        var aprilTagZRotationRadians = aprilTagPose.map((p) -> p.getRotation().getZ()).orElse(0.0);
-        idealFinalHeadingDegrees = Radians.of(Math.PI + aprilTagZRotationRadians).in(Degrees);
+        Angle aprilTagZRotation = Radians.of(aprilTagPose.map((p) -> p.getRotation().getZ()).orElse(0.0));
+        aKitLog.record("TargetAprilTag", chosenTagID);
+        aKitLog.record("DoesAprilTagExist", aprilTagPose.isPresent());
 
-        state = SnapState.Regular;
+        idealFinalHeading = aprilTagZRotation.plus(Radians.of(Math.PI));
+
+        state = searchForTarget() ? SnapState.LockedOn : SnapState.Regular;
         loopsWithTargetCounter = 0;
     }
 
@@ -96,19 +102,7 @@ public class DriveWithSnapToTagCommand extends BaseCommand {
         //      the driver translation joystick to only allow robot-relative forward/backward motion.
 
         var driveAdvice = new ManualSwerveDriveAdvice();
-        boolean targetInSight = vision.doesCameraBestObservationHaveAprilTagId(cameraToUse, chosenTagID);
-
-        aKitLog.record("targetInSight", targetInSight);
-
-        if (targetInSight) {
-            loopsWithTargetCounter++;
-            // TODO: trigger vibration as well
-            oi.driverGamepad.getRumbleManager().rumbleGamepad(0.5, 1);
-        } else {
-            loopsWithTargetCounter--;
-            // TODO: stop any vibration.
-            oi.driverGamepad.getRumbleManager().stopGamepadRumble();
-        }
+        boolean targetInSight = searchForTarget();
 
         if (loopsWithTargetCounter <= 0) {
             // We are in regular driving state.
@@ -136,21 +130,21 @@ public class DriveWithSnapToTagCommand extends BaseCommand {
             // Whether we have it or have lost it, we still want to drive forward/backward relative to the robot based
             // on driver joystick input.
             var fieldVectorTranslation2d = oi.driverGamepad.getLeftFieldOrientedVector();
-            aKitLog.record("Driver Vector Angle", fieldVectorTranslation2d.getAngle().getDegrees());
-            aKitLog.record("Ideal Angle", idealFinalHeadingDegrees);
+            aKitLog.record("DriverVectorAngle-deg", fieldVectorTranslation2d.getAngle().getDegrees());
+            aKitLog.record("IdealAngle-deg", idealFinalHeading.in(Degrees));
 
             XYPair fieldVectorXYPair = new XYPair(fieldVectorTranslation2d.getX(), fieldVectorTranslation2d.getY());
             double railsSimilarityToDriver = fieldVectorXYPair.dotProduct(
                     new XYPair(
-                            Math.cos(Math.toRadians(idealFinalHeadingDegrees) + Math.PI),
-                            Math.sin(Math.toRadians(idealFinalHeadingDegrees) + Math.PI)
+                            Math.cos(idealFinalHeading.in(Radians) + Math.PI),
+                            Math.sin(idealFinalHeading.in(Radians) + Math.PI)
                     )
             );
 
             aKitLog.record("railsSimilarityToDriver", railsSimilarityToDriver);
 
-            double rotateIntent = headingModule.calculateHeadingPower(idealFinalHeadingDegrees);
-            XYPair onRailsVector = XYPair.fromPolar(idealFinalHeadingDegrees, railsSimilarityToDriver);
+            double rotateIntent = headingModule.calculateHeadingPower(idealFinalHeading.in(Degrees));
+            XYPair onRailsVector = XYPair.fromPolar(idealFinalHeading.in(Degrees), railsSimilarityToDriver);
 
             aKitLog.record("onRailsVector", onRailsVector);
             aKitLog.record("centeringVector", centeringVector);
@@ -177,24 +171,28 @@ public class DriveWithSnapToTagCommand extends BaseCommand {
         );
     }
 
-    // Stolen from AlignToReefWithAprilTagCommand for convenience sakes
-    private void setDriverRelativeCameraToUse() {
-        List<Integer> farReefFacePoseIDList = Arrays.asList(20, 21, 22, 9, 10 , 11);
-        List<Integer> closeReefFacePoseIDList = Arrays.asList(19, 18, 17, 6, 7, 8);
+    /**
+     * @return target found
+     */
+    private boolean searchForTarget() {
+        boolean targetInSight = vision.doesCameraBestObservationHaveAprilTagId(cameraToUse, chosenTagID);
 
-        // if our target april tag is a far april tag and cameras haven't been flipped,
-        // flip and use the other front camera to align with tag
-        if (farReefFacePoseIDList.contains(vision.getTargetAprilTagID(pose.getClosestReefFacePose()))
-                && !hasCameraFlippedDriverRelative) {
-            cameraToUse = (cameraToUse + 1) % 2;
-            hasCameraFlippedDriverRelative = true;
+        aKitLog.record("targetInSight", targetInSight);
+
+        if (targetInSight) {
+            loopsWithTargetCounter++;
+            oi.driverGamepad.getRumbleManager().rumbleGamepad(0.5, 0.05);
+        } else {
+            loopsWithTargetCounter--;
+            oi.driverGamepad.getRumbleManager().stopGamepadRumble();
         }
-        // if our target april tag is a close april tag and cameras have been flipped,
-        // flip and use the other front camera to align with tag
-        else if (closeReefFacePoseIDList.contains(vision.getTargetAprilTagID(pose.getClosestReefFacePose()))
-                && hasCameraFlippedDriverRelative) {
-            cameraToUse = (cameraToUse + 1) % 2;
-            hasCameraFlippedDriverRelative = false;
-        }
+
+        return targetInSight;
+    }
+
+    private void setDriverRelativeCameraToUse() {
+        DriverRelativeCameraValues values = pose.getDriverRelativeCameraToUse(hasCameraFlippedDriverRelative, cameraToUse);
+        hasCameraFlippedDriverRelative = values.hasCameraFlippedDriverRelative();
+        cameraToUse = values.cameraToUse();
     }
 }

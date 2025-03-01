@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import competition.subsystems.drive.DriveSubsystem;
+import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -39,7 +40,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
     final SwerveDrivePoseEstimator fullSwerveOdometry;
 
     private final DriveSubsystem drive;
-    private final AprilTagVisionSubsystem aprilTagVisionSubsystem;
+    private final AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
     private final BooleanProperty useVisionAssistedPose;
     private final BooleanProperty reportCameraPoses;
     private final CoprocessorCommunicationSubsystem coprocessorComms;
@@ -55,7 +56,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
 
     @Inject
     public PoseSubsystem(XGyroFactory gyroFactory, PropertyFactory propManager, DriveSubsystem drive,
-                         AprilTagVisionSubsystem aprilTagVisionSubsystem, CoprocessorCommunicationSubsystem coprocessorComms) {
+                         AprilTagVisionSubsystemExtended aprilTagVisionSubsystem, CoprocessorCommunicationSubsystem coprocessorComms) {
         super(gyroFactory, propManager);
         this.drive = drive;
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
@@ -325,4 +326,24 @@ public class PoseSubsystem extends BasePoseSubsystem {
         this.areVisionUpdatesDisabled = disableVisionUpdates;
     }
 
+    public DriverRelativeCameraValues getDriverRelativeCameraToUse(boolean hasCameraFlippedDriverRelative, int cameraToUse) {
+        List<Integer> farReefFacePoseIDList = Arrays.asList(20, 21, 22, 9, 10 , 11);
+        List<Integer> closeReefFacePoseIDList = Arrays.asList(19, 18, 17, 6, 7, 8);
+
+        // if our target april tag is a far april tag and cameras haven't been flipped,
+        // flip and use the other front camera to align with tag
+        if (farReefFacePoseIDList.contains(aprilTagVisionSubsystem.getTargetAprilTagID(getClosestReefFacePose()))
+                && !hasCameraFlippedDriverRelative) {
+            cameraToUse = (cameraToUse + 1) % 2;
+            hasCameraFlippedDriverRelative = true;
+        }
+        // if our target april tag is a close april tag and cameras have been flipped,
+        // flip and use the other front camera to align with tag
+        else if (closeReefFacePoseIDList.contains(aprilTagVisionSubsystem.getTargetAprilTagID(getClosestReefFacePose()))
+                && hasCameraFlippedDriverRelative) {
+            cameraToUse = (cameraToUse + 1) % 2;
+            hasCameraFlippedDriverRelative = false;
+        }
+        return new DriverRelativeCameraValues(hasCameraFlippedDriverRelative, cameraToUse);
+    }
 }
