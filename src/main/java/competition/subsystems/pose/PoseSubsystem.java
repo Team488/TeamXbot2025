@@ -147,7 +147,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
             var robotPose3d = new Pose3d(
                     robotPose.getTranslation().getX(),
                     robotPose.getTranslation().getY(),
-                    0,
+                    -0.5, // Reverse offset in Advantage Scope
                     new Rotation3d(robotPose.getRotation()));
             for (int i = 0; i < aprilTagVisionSubsystem.getCameraCount(); i++) {
                 var cameraPosition = aprilTagVisionSubsystem.getCameraPosition(i);
