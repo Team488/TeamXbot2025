@@ -15,7 +15,6 @@ public class ManualControlPawlMotorCommand extends BaseCommand {
     public ManualControlPawlMotorCommand(ClimberSubsystem climber, OperatorInterface oi){
         this.climber = climber;
         this.oi = oi;
-        this.addRequirements(climber);
     }
 
     @Override
@@ -25,9 +24,11 @@ public class ManualControlPawlMotorCommand extends BaseCommand {
 
     @Override
     public void execute() {
-        if (oi.operatorGamepad.getXboxButton(XXboxController.XboxButton.Back).getAsBoolean()) {
-            double power = oi.operatorGamepad.getRightStickY();
-            climber.setPawlMotorPower(power);
-        }
+            climber.setPawlMotorPower(1);
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        climber.setPawlMotorPower(0);
     }
 }

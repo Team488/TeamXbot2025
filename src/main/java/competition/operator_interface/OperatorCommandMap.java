@@ -11,6 +11,7 @@ import competition.subsystems.algae_arm.commands.ForceAlgaeArmCalibrated;
 import competition.subsystems.algae_arm.commands.SetAlgaeArmSetpointToTargetPosition;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionIntakeCommand;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionOutputCommand;
+import competition.subsystems.climber.commands.ManualControlPawlMotorCommand;
 import competition.subsystems.climber.commands.ReleaseClimberSolenoidCommand;
 import competition.subsystems.coral_arm.CoralArmSubsystem;
 import competition.subsystems.coral_arm.commands.ForceCoralArmCalibratedCommand;
@@ -258,7 +259,8 @@ public class OperatorCommandMap {
             Provider<SetElevatorTargetHeightCommand> setElevatorTargetHeightCommandProvider,
             ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
             ForceCoralArmCalibratedCommand forceCoralArmCalibratedCommand,
-            ReleaseClimberSolenoidCommand releaseClimberSolenoidCommand) {
+            ReleaseClimberSolenoidCommand releaseClimberSolenoidCommand,
+            ManualControlPawlMotorCommand manualControlPawlMotorCommand) {
 
         var returnToBase = setElevatorTargetHeightCommandProvider.get();
         returnToBase.setHeight(Landmarks.CoralLevel.COLLECTING);
@@ -287,7 +289,7 @@ public class OperatorCommandMap {
 
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.Back).onTrue(forceCoralArmCalibratedCommand);
 
-        //oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(releaseClimberSolenoidCommand);
+        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(manualControlPawlMotorCommand);
 
 
 
