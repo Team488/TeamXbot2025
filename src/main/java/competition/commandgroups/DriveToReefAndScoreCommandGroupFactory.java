@@ -13,4 +13,31 @@ public class DriveToReefAndScoreCommandGroupFactory {
     DriveToReefThenAlignCommandGroupFactory driveToReefThenAlignCommandGroupFactory;
     PrepCoralSystemCommandGroupFactory prepCoralSystemFactory;
     Provider<ScoreWhenReadyCommand> scoreWhenReadyProvider;
+
+    @Inject
+    public DriveToReefAndScoreCommandGroupFactory(DriveToReefThenAlignCommandGroupFactory driveToReefThenAlignCommandGroupFactory,
+                                                  PrepCoralSystemCommandGroupFactory prepCoralSystemFactory,
+                                                  Provider<ScoreWhenReadyCommand> scoreWhenReadyProvider) {
+        this.driveToReefThenAlignCommandGroupFactory = driveToReefThenAlignCommandGroupFactory;
+        this.prepCoralSystemFactory = prepCoralSystemFactory;
+        this.scoreWhenReadyProvider = scoreWhenReadyProvider;
+    }
+
+    public SequentialCommandGroup create(Landmarks.Branch targetBranch,
+                                         Landmarks.CoralLevel targetLevel) {
+        var driveToFaceAndScoreCommandGroup = new SequentialCommandGroup();
+
+        var driveToReefWhilePrepping = new ParallelCommandGroup();
+
+        var driveToReefFaceThenAlign = driveToReefThenAlignCommandGroupFactory.create(targetBranch);
+        var prepCoralSystem = prepCoralSystemFactory.create(() -> targetLevel);
+
+        driveToReefWhilePrepping.addCommands(driveToReefFaceThenAlign, prepCoralSystem);
+
+        var scoreWhenReady = scoreWhenReadyProvider.get();
+
+        driveToFaceAndScoreCommandGroup.addCommands(driveToReefWhilePrepping, scoreWhenReady);
+
+        return driveToFaceAndScoreCommandGroup;
+    }
 }

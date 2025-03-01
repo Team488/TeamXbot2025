@@ -1,6 +1,6 @@
 package competition.auto_programs;
 
-import competition.commandgroups.DriveToFaceAndScoreCommandGroupFactory;
+import competition.commandgroups.DriveToReefAndScoreCommandGroupFactory;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.Landmarks.ReefFace;
 import competition.subsystems.pose.PoseSubsystem;
@@ -20,15 +20,15 @@ public class ClosestReefScoreLevelFours {
     private final AprilTagFieldLayout aprilTagFieldLayout;
     final AutonomousCommandSelector autoSelector;
     PoseSubsystem pose;
-    DriveToFaceAndScoreCommandGroupFactory driveToFaceAndScoreCommandGroupFact;
+    DriveToReefAndScoreCommandGroupFactory driveToReefAndScoreCommandGroupFactory;
 
     @Inject
     public ClosestReefScoreLevelFours(AutonomousCommandSelector autoSelector,
-                                      DriveToFaceAndScoreCommandGroupFactory driveToFaceAndScoreCommandGroupFact,
+                                      DriveToReefAndScoreCommandGroupFactory driveToReefAndScoreCommandGroupFactory,
                                       PoseSubsystem pose, AprilTagFieldLayout aprilTagFieldLayout){
         this.autoSelector = autoSelector;
         this.pose = pose;
-        this.driveToFaceAndScoreCommandGroupFact = driveToFaceAndScoreCommandGroupFact;
+        this.driveToReefAndScoreCommandGroupFactory = driveToReefAndScoreCommandGroupFactory;
         this.aprilTagFieldLayout = aprilTagFieldLayout;
     }
 
@@ -59,7 +59,7 @@ public class ClosestReefScoreLevelFours {
         var targetReefFace = robotPose.nearest(reefPoses);
 
         auto.queueDriveClosestAndScoreMessageToAutoSelector(targetBranch, targetLevel);
-        var driveAndScore = driveToFaceAndScoreCommandGroupFact.create(targetReefFace, targetBranch, targetLevel);
+        var driveAndScore = this.driveToReefAndScoreCommandGroupFactory.create(targetBranch, targetLevel);
         auto.addCommands(driveAndScore);
 
         return auto;
