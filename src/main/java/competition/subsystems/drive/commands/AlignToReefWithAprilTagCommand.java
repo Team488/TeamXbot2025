@@ -20,6 +20,7 @@ public class AlignToReefWithAprilTagCommand extends AlignToTagGlobalMovementWith
     private double offsetInInches;
     private boolean isDriverRelative = false;
     private boolean hasCameraFlippedDriverRelative = false;
+    private boolean hasSetConfiguration = false;
 
     @Inject
     public AlignToReefWithAprilTagCommand(AprilTagVisionSubsystemExtended aprilTagVisionSubsystem, DriveSubsystem drive,
@@ -31,14 +32,22 @@ public class AlignToReefWithAprilTagCommand extends AlignToTagGlobalMovementWith
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
     }
 
-    public void setConfigurations(int cameraToUse, boolean isCameraBackwards, double offsetInInches) {
+    public void setConfigurations(int cameraToUse, boolean isCameraBackwards, double offsetInInches, boolean isDriverRelative) {
         this.cameraToUse = cameraToUse;
         this.isCameraBackwards = isCameraBackwards;
         this.offsetInInches = offsetInInches;
+        this.isDriverRelative = isDriverRelative;
+        this.hasSetConfiguration = true;
     }
 
     @Override
     public void initialize() {
+        log.info("Initializing");
+        if (!hasSetConfiguration) {
+            cancel();
+            return;
+        }
+
         if (isDriverRelative) {
             setDriverRelativeCameraToUse();
         }
@@ -48,12 +57,8 @@ public class AlignToReefWithAprilTagCommand extends AlignToTagGlobalMovementWith
                 aprilTagVisionSubsystem.getTargetAprilTagID(pose.getClosestReefFacePose()),
                 isCameraBackwards,
                 offsetInInches
-            );
+        );
         super.initialize();
-    }
-
-    public void setDriverRelative(boolean isEnabled) {
-        this.isDriverRelative = isEnabled;
     }
 
     private void setDriverRelativeCameraToUse() {

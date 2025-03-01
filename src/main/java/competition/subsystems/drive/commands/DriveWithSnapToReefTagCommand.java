@@ -15,14 +15,12 @@ import xbot.common.math.XYPair;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
 
 import javax.inject.Inject;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
 
-public class DriveWithSnapToTagCommand extends BaseCommand {
+public class DriveWithSnapToReefTagCommand extends BaseCommand {
 
     final DriveSubsystem drive;
     final AprilTagVisionSubsystemExtended vision;
@@ -36,6 +34,7 @@ public class DriveWithSnapToTagCommand extends BaseCommand {
     int loopsWithTargetCounter = 0;
     boolean isDriverRelative = false;
     boolean hasCameraFlippedDriverRelative = false;
+    boolean hasSetConfiguration = false;
 
     enum SnapState {
         Regular,
@@ -46,10 +45,10 @@ public class DriveWithSnapToTagCommand extends BaseCommand {
     SnapState state = SnapState.Regular;
 
     @Inject
-    public DriveWithSnapToTagCommand(DriveSubsystem drive, AprilTagVisionSubsystemExtended vision,
-                                     ManualSwerveDriveLogic.ManualSwerveDriveLogicFactory factory,
-                                     OperatorInterface oi, HeadingModule.HeadingModuleFactory headingModuleFactory,
-                                     PoseSubsystem pose) {
+    public DriveWithSnapToReefTagCommand(DriveSubsystem drive, AprilTagVisionSubsystemExtended vision,
+                                         ManualSwerveDriveLogic.ManualSwerveDriveLogicFactory factory,
+                                         OperatorInterface oi, HeadingModule.HeadingModuleFactory headingModuleFactory,
+                                         PoseSubsystem pose) {
         this.drive = drive;
         this.vision = vision;
         this.oi = oi;
@@ -60,17 +59,19 @@ public class DriveWithSnapToTagCommand extends BaseCommand {
         this.addRequirements(drive);
     }
 
-    public void setDriverRelative(boolean isEnabled) {
-        this.isDriverRelative = isEnabled;
-    }
-
-    public void setCameraToUse(int cameraToUse) {
+    public void setConfigurations(int cameraToUse, boolean isDriverRelative) {
         this.cameraToUse = cameraToUse;
+        this.isDriverRelative = isDriverRelative;
+        this.hasSetConfiguration = true;
     }
 
     @Override
     public void initialize() {
         log.info("Initializing");
+        if (!hasSetConfiguration) {
+            cancel();
+            return;
+        }
         swerveLogic.initialize();
 
         // For now, we'll set our aprilTag target upon initialization

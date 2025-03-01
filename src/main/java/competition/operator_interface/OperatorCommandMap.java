@@ -24,7 +24,6 @@ import competition.subsystems.drive.commands.CalibrateDriveCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
 import competition.subsystems.drive.commands.DriveToCoralStationWithVisionCommand;
 import competition.subsystems.drive.commands.DriveToLocationWithPID;
-import competition.subsystems.drive.commands.DriveWithSnapToTagCommand;
 import competition.subsystems.drive.commands.RotateToHeadingWithHeadingModule;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.drive.commands.TeleportToPositionCommand;
@@ -92,13 +91,11 @@ public class OperatorCommandMap {
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
 
         var alignToReefWithAprilTagWithLeftCamera = alignToReefWithAprilTagProvider.get();
-        alignToReefWithAprilTagWithLeftCamera.setConfigurations(Cameras.FRONT_LEFT_CAMERA.getIndex(), false, -2);
-        alignToReefWithAprilTagWithLeftCamera.setDriverRelative(true);
+        alignToReefWithAprilTagWithLeftCamera.setConfigurations(Cameras.FRONT_LEFT_CAMERA.getIndex(), false, -2, true);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(alignToReefWithAprilTagWithLeftCamera);
 
         var alignToReefWithAprilTagWithRightCamera = alignToReefWithAprilTagProvider.get();
-        alignToReefWithAprilTagWithRightCamera.setConfigurations(Cameras.FRONT_RIGHT_CAMERA.getIndex(), false, -2);
-        alignToReefWithAprilTagWithRightCamera.setDriverRelative(true);
+        alignToReefWithAprilTagWithRightCamera.setConfigurations(Cameras.FRONT_RIGHT_CAMERA.getIndex(), false, -2, true);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(alignToReefWithAprilTagWithRightCamera);
 
         var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
@@ -285,9 +282,6 @@ public class OperatorCommandMap {
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(riseToL4);
 
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.Back).onTrue(forceCoralArmCalibratedCommand);
-
-
-
     }
 
     @Inject
