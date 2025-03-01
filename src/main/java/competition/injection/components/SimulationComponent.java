@@ -5,11 +5,13 @@ import javax.inject.Singleton;
 import competition.electrical_contract.ElectricalContract;
 import competition.injection.modules.CommonModule;
 import competition.injection.modules.SimulatedRobotModule;
+import competition.subsystems.drive.commands.AlignToTagGlobalMovementWithCalculator;
 import dagger.BindsInstance;
 import dagger.Component;
 import xbot.common.injection.modules.MockDevicesModule;
 import xbot.common.injection.modules.RealControlsModule;
 import xbot.common.injection.modules.SimulationModule;
+import xbot.common.subsystems.autonomous.SetAutonomousCommand;
 
 @Singleton
 @Component(modules = { SimulationModule.class, MockDevicesModule.class, RealControlsModule.class,
@@ -22,4 +24,6 @@ public abstract class SimulationComponent extends BaseRobotComponent {
 
         public abstract BaseRobotComponent build();
     }
+
+    public abstract AlignToTagGlobalMovementWithCalculator alignToTagGlobalMovementCommand();
 }

@@ -137,6 +137,8 @@ dependencies {
     testAnnotationProcessor 'com.google.dagger:dagger-compiler:2.44.2'
 
     testImplementation "org.mockito:mockito-core:3.+"
+    testImplementation 'org.hamcrest:hamcrest:3.+'
+    testImplementation 'org.apache.commons:commons-lang3:3.6'
 
     // xtables
     implementation "org.kobe.xbot:xtables:5.3.0"

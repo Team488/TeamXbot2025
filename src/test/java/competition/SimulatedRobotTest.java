@@ -3,6 +3,7 @@ package competition;
 import competition.electrical_contract.UnitTestContract2025;
 import edu.wpi.first.wpilibj.RobotBase;
 import org.junit.Test;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.concurrent.TimeUnit;
 

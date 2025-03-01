@@ -1,4 +1,4 @@
-package competition.subsystems.drive.commands;
+package competition.subsystems.drive;
 
 import competition.BaseCompetitionTest;
 import org.junit.Test;
