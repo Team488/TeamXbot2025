@@ -28,7 +28,7 @@ public class ClimbWithJoySticksCommand extends BaseCommand {
     @Override
     public void execute() {
         if (oi.superstructureGamepad.getXboxButton(XXboxController.XboxButton.Y).getAsBoolean()) {
-            double power = MathUtils.deadband(oi.superstructureGamepad.getRightStickY(), 0.15);
+            double power = MathUtils.deadband(oi.superstructureGamepad.getRightStickY(), 0.15, (x) -> x);
             climber.setPower(power);
         }
     }
