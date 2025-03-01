@@ -4,6 +4,7 @@ import java.util.EnumSet;
 
 import javax.inject.Inject;
 
+import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -352,7 +353,7 @@ public class Contract2025 extends ElectricalContract {
 
     @Override
     public boolean isPawlMotorReady(){
-        return false;
+        return true;
     }
 
     @Override
