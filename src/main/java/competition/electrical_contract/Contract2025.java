@@ -349,4 +349,19 @@ public class Contract2025 extends ElectricalContract {
                 new CANMotorControllerOutputConfig()
                         .withStatorCurrentLimit(Amps.of(60)));
     }
+
+    @Override
+    public boolean isPawlMotorReady(){
+        return false;
+    }
+
+    @Override
+    public CANMotorControllerInfo getPawlMotor(){
+        return new CANMotorControllerInfo("PawlMotor",
+                MotorControllerType.TalonFx,
+                CANBusId.RIO,
+                99,
+                new CANMotorControllerOutputConfig()
+                        .withStatorCurrentLimit(Amps.of(60)));
+    }
 }

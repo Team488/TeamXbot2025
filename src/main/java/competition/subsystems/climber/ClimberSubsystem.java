@@ -1,13 +1,18 @@
 package competition.subsystems.climber;
 
 import competition.electrical_contract.ElectricalContract;
+import edu.wpi.first.units.measure.Time;
 import xbot.common.command.BaseSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
+import xbot.common.controls.actuators.XSolenoid;
+import xbot.common.controls.sensors.XTimer;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import static edu.wpi.first.units.Units.Seconds;
 
 @Singleton
 public class ClimberSubsystem extends BaseSubsystem {
@@ -15,6 +20,10 @@ public class ClimberSubsystem extends BaseSubsystem {
     public final XCANMotorController climberMotor;
     public final DoubleProperty climberPower;
     public final ElectricalContract contract;
+
+    public final XCANMotorController pawlMotor;
+
+    public Time pawlTimestamp;
 
     @Inject
     public ClimberSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
@@ -28,6 +37,14 @@ public class ClimberSubsystem extends BaseSubsystem {
             this.climberMotor = null;
         }
 
+        if (contract.isPawlMotorReady()){
+            this.pawlMotor = xcanMotorControllerFactory.create(contract.getPawlMotor(),
+                    getPrefix(), "PawlMotor");
+            this.registerDataFrameRefreshable(pawlMotor);
+        } else{
+            this.pawlMotor = null;
+        }
+
         this.contract = contract;
 
         this.climberPower = pf.createPersistentProperty("climberPower", 0.1);
@@ -39,9 +56,23 @@ public class ClimberSubsystem extends BaseSubsystem {
         }
     }
 
+    public void releaseClimberSolenoid(){
+        //timestamp in seconds
+        pawlTimestamp = XTimer.getFPGATimestampTime();
+
+        while (pawlTimestamp.in(Seconds) <= 1.5){
+            return;
+        }
+    }
+
     public void stop() {
         if (contract.isClimberMotorReady()) {
             this.climberMotor.setPower(0);
         }
+    }
+
+    @Override
+    public void periodic() {
+
     }
 }
