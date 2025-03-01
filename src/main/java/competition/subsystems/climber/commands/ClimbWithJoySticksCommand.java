@@ -4,6 +4,7 @@ import competition.operator_interface.OperatorInterface;
 import competition.subsystems.climber.ClimberSubsystem;
 import xbot.common.command.BaseCommand;
 import xbot.common.controls.sensors.XXboxController;
+import xbot.common.math.MathUtils;
 
 import javax.inject.Inject;
 
@@ -26,10 +27,9 @@ public class ClimbWithJoySticksCommand extends BaseCommand {
 
     @Override
     public void execute() {
-        if (oi.operatorGamepad.getXboxButton(XXboxController.XboxButton.Back).getAsBoolean()) {
-            double power = oi.operatorGamepad.getRightStickY();
+        if (oi.superstructureGamepad.getXboxButton(XXboxController.XboxButton.Y).getAsBoolean()) {
+            double power = MathUtils.deadband(oi.superstructureGamepad.getRightStickY(), 0.15);
             climber.setPower(power);
         }
-
     }
 }
