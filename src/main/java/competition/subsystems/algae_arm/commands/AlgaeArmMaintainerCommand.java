@@ -41,7 +41,10 @@ public class AlgaeArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
         humanMinPower = pf.createPersistentProperty("HumanMinPowerProperty", -.1);
 
         profileManager = trapzoidProfileManagerFactory.create(getPrefix() + "trapezoidMotion",
-                60, 100, algaeArm.getCurrentValue().in(Degrees));
+                60,
+                100,
+                1000, //tune on real robot
+                algaeArm.getCurrentValue().in(Degrees));
 
         decider.setDeadband(0.02);
     }

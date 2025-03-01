@@ -8,7 +8,9 @@ import edu.wpi.first.wpilibj.DriverStation;
 
 import javax.inject.Singleton;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import static edu.wpi.first.units.Units.Meters;
 
@@ -16,9 +18,16 @@ import static edu.wpi.first.units.Units.Meters;
 public class Landmarks {
 
     // Auto starting positions
-    public static Pose2d BlueLeftStartingLine = new Pose2d(7.56, 7.262, Rotation2d.fromDegrees(180));
-    public static Pose2d BlueMidStartingLine = new Pose2d(7.56, 6.135, Rotation2d.fromDegrees(180));
-    public static Pose2d BlueRightStartingLine = new Pose2d(7.56, 5.044, Rotation2d.fromDegrees(180));
+    // Blue cages - cages are labeled 1-6 from north to south, the x value has the robot's back bumper lined up with the auto line
+    public static Pose2d BlueCageOneStartingLine = new Pose2d(7.14, 7.262, Rotation2d.fromDegrees(180));
+    public static Pose2d BlueCageTwoStartingLine = new Pose2d(7.14, 6.135, Rotation2d.fromDegrees(180));
+    public static Pose2d BlueCageThreeStartingLine = new Pose2d(7.14, 5.044, Rotation2d.fromDegrees(180));
+    public static Pose2d BlueCageFourStartingLine = new Pose2d(7.14, 2.974, Rotation2d.fromDegrees(180));
+    public static Pose2d BlueCageFiveStartingLine = new Pose2d(7.14, 1.883, Rotation2d.fromDegrees(180));
+    public static Pose2d BlueCageSixStartingLine = new Pose2d(7.14, 0.792, Rotation2d.fromDegrees(180));
+
+    // Middle of line
+    public static Pose2d BlueMidOfLine = new Pose2d(7.14, 4.26, Rotation2d.fromDegrees(180));
 
     // Reef faces TODO: Find positions again if scoring positions are at different distances from reef for each level
     // Close Left Reef Face
@@ -56,15 +65,20 @@ public class Landmarks {
     public static Pose2d BlueLeftCoralStationClose = new Pose2d(0.754, 6.804, Rotation2d.fromDegrees(-54.012));
     public static Pose2d BlueLeftCoralStationMid = new Pose2d(1.093, 7.043, Rotation2d.fromDegrees(-54.012));
     public static Pose2d BlueLeftCoralStationFar = new Pose2d(1.422, 7.282, Rotation2d.fromDegrees(-54.012));
+    public static int BlueLeftTagFiducialId = 13;
 
     // Right Coral Station
     public static Pose2d BlueRightCoralStationClose = new Pose2d(0.764, 1.247, Rotation2d.fromDegrees(54.012));
     public static Pose2d BlueRightCoralStationMid = new Pose2d(1.093, 1.009, Rotation2d.fromDegrees(54.012));
     public static Pose2d BlueRightCoralStationFar = new Pose2d(1.422, 0.770, Rotation2d.fromDegrees(54.012));
+    public static int BlueRightTagFiducialId = 12;
 
     public static Pose2d BlueCenterOfReef = new Pose2d(new Translation2d(4.4785, 4.0132), new Rotation2d());
     public static final Distance reefCenterToFace = Meters.of(0.665);
     public static final Distance reefBranchHorizontalOffsetForBranchTypeA = Meters.of(-0.15);
+
+    public static int RedLeftTagFiducialId = 1;
+    public static int RedRightTagFiducialId = 2;
 
     public HashMap<String, Pose2d> namesToLocations;
 
@@ -163,5 +177,16 @@ public class Landmarks {
             case 4, 5, 14, 15 -> FieldElementType.OVERHEAD_THING;
             default -> FieldElementType.REEF_FACE;
         };
+    }
+
+    public static List<Integer> getAllianceCoralStationFiducialIds(DriverStation.Alliance alliance) {
+        switch(alliance) {
+        case Red:
+            return List.of(RedLeftTagFiducialId, RedRightTagFiducialId);
+        case Blue:
+            return List.of(BlueLeftTagFiducialId, BlueRightTagFiducialId);
+        default:
+            return new ArrayList<Integer>();
+        }
     }
 }

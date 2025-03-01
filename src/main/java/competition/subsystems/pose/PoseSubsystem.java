@@ -1,6 +1,7 @@
 package competition.subsystems.pose;
 
-import java.util.HashMap;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -12,7 +13,6 @@ import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.units.measure.Distance;
@@ -46,6 +46,8 @@ public class PoseSubsystem extends BasePoseSubsystem {
 
     public static final Distance fieldXMidpointInMeters = Meters.of(8.7785);
     public static final Distance fieldYMidpointInMeters = Meters.of(4.025);
+
+    private boolean areVisionUpdatesDisabled = false;
 
 
     // only used when simulating the robot
@@ -106,13 +108,16 @@ public class PoseSubsystem extends BasePoseSubsystem {
                 this.getCurrentHeadingGyroOnly(),
                 getSwerveModulePositions()
         );
-        this.aprilTagVisionSubsystem.getAllPoseObservations().forEach(observation -> {
-            fullSwerveOdometry.addVisionMeasurement(
-                    observation.visionRobotPoseMeters(),
-                    observation.timestampSeconds(),
-                    observation.visionMeasurementStdDevs()
-            );
-        });
+
+        if (!areVisionUpdatesDisabled) {
+            this.aprilTagVisionSubsystem.getAllPoseObservations().forEach(observation -> {
+                fullSwerveOdometry.addVisionMeasurement(
+                        observation.visionRobotPoseMeters(),
+                        observation.timestampSeconds(),
+                        observation.visionMeasurementStdDevs()
+                );
+            });
+        }
 
         // Report poses
         Pose2d estimatedPosition = new Pose2d(
@@ -265,35 +270,15 @@ public class PoseSubsystem extends BasePoseSubsystem {
     public Pose2d getClosestReefFacePose() {
         Pose2d currentPose = getCurrentPose2d();
 
-        double closeDistance = convertBlueToRedIfNeeded(
-                Landmarks.BlueCloseAlgae).getTranslation().getDistance(currentPose.getTranslation());
-        double closeLeftDistance = PoseSubsystem.convertBlueToRedIfNeeded(
-                Landmarks.BlueCloseLeftAlgae).getTranslation().getDistance(currentPose.getTranslation());
-        double closeRightDistance = PoseSubsystem.convertBlueToRedIfNeeded(
-                Landmarks.BlueCloseRightAlgae).getTranslation().getDistance(currentPose.getTranslation());
-        double farLeftDistance = PoseSubsystem.convertBlueToRedIfNeeded(
-                Landmarks.BlueFarLeftAlgae).getTranslation().getDistance(currentPose.getTranslation());
-        double farDistance = PoseSubsystem.convertBlueToRedIfNeeded(
-                Landmarks.BlueFarAlgae).getTranslation().getDistance(currentPose.getTranslation());
-        double farRightDistance = PoseSubsystem.convertBlueToRedIfNeeded(
-                Landmarks.BlueFarRightAlgae).getTranslation().getDistance(currentPose.getTranslation());
+        List<Pose2d> reefFacePoses = Arrays.asList(
+                convertBlueToRedIfNeeded(Landmarks.BlueCloseAlgae),
+                convertBlueToRedIfNeeded(Landmarks.BlueCloseLeftAlgae),
+                convertBlueToRedIfNeeded(Landmarks.BlueCloseRightAlgae),
+                convertBlueToRedIfNeeded(Landmarks.BlueFarLeftAlgae),
+                convertBlueToRedIfNeeded(Landmarks.BlueFarAlgae),
+                convertBlueToRedIfNeeded(Landmarks.BlueFarRightAlgae));
 
-        HashMap<Double, Pose2d> hashMap = new HashMap<>();
-        hashMap.put(closeLeftDistance, PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueCloseLeftAlgae));
-        hashMap.put(closeDistance, PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueCloseAlgae));
-        hashMap.put(closeRightDistance, PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueCloseRightAlgae));
-        hashMap.put(farLeftDistance, PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueFarLeftAlgae));
-        hashMap.put(farDistance, PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueFarAlgae));
-        hashMap.put(farRightDistance, PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueFarRightAlgae));
-
-        double leastDistance = closeLeftDistance;
-
-        for (Double distance : hashMap.keySet()) {
-            if (distance < leastDistance) {
-                leastDistance = distance;
-            }
-        }
-        return hashMap.get(leastDistance);
+        return currentPose.nearest(reefFacePoses);
     }
 
     public Landmarks.ReefFace getReefFaceFromAngle() {
@@ -334,6 +319,10 @@ public class PoseSubsystem extends BasePoseSubsystem {
 
     public Command createSetPositionCommandThatMirrorsIfNeeded(Pose2d bluePose) {
         return Commands.runOnce(() -> setCurrentPosition(PoseSubsystem.convertBlueToRedIfNeeded(bluePose))).ignoringDisable(true);
+    }
+
+    public void setAreVisionUpdatesDisabled(boolean disableVisionUpdates) {
+        this.areVisionUpdatesDisabled = disableVisionUpdates;
     }
 
 }
