@@ -32,16 +32,12 @@ public class ReleaseClimberSolenoidCommand extends BaseCommand {
 
     @Override
     public void execute() {
-        releaseClimberSolenoid();
-    }
-
-    public void releaseClimberSolenoid(){
-        while (XTimer.getFPGATimestampTime().lt(pawlTimestampEnd)){
+        if (XTimer.getFPGATimestampTime().lt(pawlTimestampEnd)){
             climber.setPawlMotorPower(1);
         }
 
         //prevents motor from spinning while on cooldown
-        while (XTimer.getFPGATimestampTime().lt(pawlTimestampCooldown) && XTimer.getFPGATimestampTime().gt(pawlTimestampEnd)){
+        if (XTimer.getFPGATimestampTime().lt(pawlTimestampCooldown) && XTimer.getFPGATimestampTime().gt(pawlTimestampEnd)){
             climber.setPawlMotorPower(0);
         }
     }
