@@ -47,7 +47,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
     public static final Distance fieldXMidpointInMeters = Meters.of(8.7785);
     public static final Distance fieldYMidpointInMeters = Meters.of(4.025);
 
-    private boolean isVisionUpdatesDisabled = false;
+    private boolean areVisionUpdatesDisabled = false;
 
 
     // only used when simulating the robot
@@ -109,7 +109,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
                 getSwerveModulePositions()
         );
 
-        if (!isVisionUpdatesDisabled) {
+        if (!areVisionUpdatesDisabled) {
             this.aprilTagVisionSubsystem.getAllPoseObservations().forEach(observation -> {
                 fullSwerveOdometry.addVisionMeasurement(
                         observation.visionRobotPoseMeters(),
@@ -321,8 +321,8 @@ public class PoseSubsystem extends BasePoseSubsystem {
         return Commands.runOnce(() -> setCurrentPosition(PoseSubsystem.convertBlueToRedIfNeeded(bluePose))).ignoringDisable(true);
     }
 
-    public void setVisionUpdatesDisabled(boolean disableVisionUpdates) {
-        this.isVisionUpdatesDisabled = disableVisionUpdates;
+    public void setAreVisionUpdatesDisabled(boolean disableVisionUpdates) {
+        this.areVisionUpdatesDisabled = disableVisionUpdates;
     }
 
 }
