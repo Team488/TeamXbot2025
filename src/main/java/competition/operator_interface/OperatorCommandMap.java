@@ -5,6 +5,7 @@ import competition.auto_programs.FromCurrentPositionScoreFarLeftBranchALevelFour
 import competition.auto_programs.FromLeftCageScoreLeftFacesLevelFours;
 import competition.commandgroups.HeadingAssistedDriveAndScoreCommandGroup;
 import competition.commandgroups.vision_path.PathDriveToCoralStationAndIntakeUntilCollected;
+import competition.commandgroups.vision_path.PathToFaceAndScoreCommandGroupFactory;
 import competition.commandgroups.vision_path.PathToReefFaceThenAlignCommandGroupFactory;
 import competition.commandgroups.PrepAlgaeSystemCommandGroupFactory;
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
@@ -29,6 +30,7 @@ import competition.subsystems.drive.commands.DriveToLocationWithPID;
 import competition.subsystems.drive.commands.RotateToHeadingWithHeadingModule;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.drive.commands.TeleportToPositionCommand;
+import competition.subsystems.drive.commands.vision_path.DriveToNearestOpenReef;
 import competition.subsystems.drive.commands.vision_path.PathDriveToNearestCoralStationSectionCommand;
 import competition.subsystems.drive.commands.vision_path.SwerveBezierTrajectoryCommand;
 import competition.subsystems.elevator.ElevatorSubsystem;
@@ -39,6 +41,7 @@ import competition.subsystems.oracle.commands.SuperstructureAccordingToOracleCom
 import competition.subsystems.pose.Cameras;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.commands.ResetPoseCommand;
+import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -93,7 +96,9 @@ public class OperatorCommandMap {
             SwerveBezierTrajectoryCommand sbtc,
             PathToReefFaceThenAlignCommandGroupFactory pathToReefFaceThenAlignCommandGroupFactory,
             PathDriveToCoralStationAndIntakeUntilCollected pathDriveToCoralStationAndIntakeUntilCollected,
-            HeadingAssistedDriveAndScoreCommandGroup.Factory headingAssistedDriveAndScoreCommandGroupFactory) {
+            HeadingAssistedDriveAndScoreCommandGroup.Factory headingAssistedDriveAndScoreCommandGroupFactory,
+            CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem,
+            PathToFaceAndScoreCommandGroupFactory pathToFaceAndScoreCommandGroupFactory) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
 
@@ -108,7 +113,7 @@ public class OperatorCommandMap {
         var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
 
         var homed = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(pathDriveToCoralStationAndIntakeUntilCollected.create());
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(new DriveToNearestOpenReef(coprocessorCommunicationSubsystem,pathToFaceAndScoreCommandGroupFactory));
         var branchAHeadingAssistedDriveAndScore = headingAssistedDriveAndScoreCommandGroupFactory.create(Landmarks.Branch.A);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(branchAHeadingAssistedDriveAndScore)
                         .onFalse(homed);
