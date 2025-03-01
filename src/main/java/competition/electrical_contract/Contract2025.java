@@ -359,7 +359,7 @@ public class Contract2025 extends ElectricalContract {
     @Override
     public CANMotorControllerInfo getPawlMotor(){
         return new CANMotorControllerInfo("PawlMotor",
-                MotorControllerType.TalonFx,
+                MotorControllerType.VictorSPX,
                 CANBusId.RIO,
                 99, //need to find the real id
                 new CANMotorControllerOutputConfig()
