@@ -3,7 +3,6 @@ package competition.auto_programs;
 import competition.commandgroups.DriveToFaceAndScoreCommandGroupFactory;
 import competition.commandgroups.DriveToStationAndIntakeUntilCollectedCommandGroupFactory;
 import competition.commandgroups.vision_path.PathToFaceAndScoreCommandGroupFactory;
-import competition.simulation.MapleSimulator;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -17,22 +16,12 @@ public class FromCurrentPositionScoreFarLeftBranchALevelFour
     @Inject
     public FromCurrentPositionScoreFarLeftBranchALevelFour(
             AutonomousCommandSelector autoSelector, PoseSubsystem pose,
-            MapleSimulator mapleSimulator,
             PathToFaceAndScoreCommandGroupFactory driveToFaceAndScoreFact,
             DriveToFaceAndScoreCommandGroupFactory
                     driveToFaceAndScoreCommandGroupFactory,
             DriveToStationAndIntakeUntilCollectedCommandGroupFactory
                     driveToStationAndIntakeUntilCollectedCommandGroupFactory) {
         this.autoSelector = autoSelector;
-
-        //        var resetMapleSimPose = new InstantCommand(() ->
-        //        mapleSimulator.resetPosition(Landmarks.BlueLeftStartingLine));
-        //        this.addCommands(resetMapleSimPose);
-        //
-        //        var startInFrontOfLeftCage = pose.createSetPositionCommand(
-        //                () -> Landmarks.BlueLeftStartingLine
-        //        );
-        //        this.addCommands(startInFrontOfLeftCage);
 
         // Drive to far left, branch A and score level four
         queueMessageToAutoSelector(
