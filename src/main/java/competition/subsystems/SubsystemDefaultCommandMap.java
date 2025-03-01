@@ -38,11 +38,6 @@ public class SubsystemDefaultCommandMap {
     }
 
     @Inject
-    public void setupCoralScorerSubsystem(CoralScorerSubsystem subsystem, StopCoralCommand command) {
-        subsystem.setDefaultCommand(command);
-    }
-
-    @Inject
     public void setupElevatorSubsystem(ElevatorSubsystem elevatorSubsystem, ElevatorMaintainerCommand command){
         elevatorSubsystem.setDefaultCommand(command);
     }
