@@ -20,7 +20,7 @@ public class DriveToReefFaceUntilDetectionCommand extends SwerveSimpleTrajectory
 
     Pose2d targetReefFacePose;
     AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
-    boolean kinematics = false;
+    boolean kinematics = true;
 
     @Inject
     public DriveToReefFaceUntilDetectionCommand(DriveSubsystem drive, PoseSubsystem pose,
@@ -40,7 +40,7 @@ public class DriveToReefFaceUntilDetectionCommand extends SwerveSimpleTrajectory
     public void initialize() {
         log.info("Initializing");
         ArrayList<XbotSwervePoint> swervePoints = new ArrayList<>();
-        swervePoints.add(new XbotSwervePoint(targetReefFacePose, 10));
+        swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(targetReefFacePose), 10));
         this.logic.setKeyPoints(swervePoints);
         if (kinematics) {
             this.logic.setGlobalKinematicValues(new SwervePointKinematics(.5, 0, 0, 2));

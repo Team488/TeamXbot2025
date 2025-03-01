@@ -53,7 +53,10 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
         this.oi = oi;
         pf.setPrefix(this);
         profileManager = trapzoidProfileManagerFactory.create(getPrefix() + "trapezoidMotion",
-                1500, 1200, armPivotSubsystem.getCurrentValue().in(Degrees));
+                1500,
+                1200,
+                1000, //tune defaultMaxGap on real robot
+                armPivotSubsystem.getCurrentValue().in(Degrees));
         pf.setDefaultLevel(Property.PropertyLevel.Important);
 
         humanMaxPower = pf.createPersistentProperty("HumanMaxPower", .20);
