@@ -26,8 +26,8 @@ public class OperatorInterface {
     final DoubleProperty driverDeadband;
     final DoubleProperty operatorDeadband;
     final DoubleProperty algaeArmDeadband;
-    final public DoubleProperty driverGamePadRumblePrefrence;
-    final public DoubleProperty operatorGamePadRumblePrefrence;
+    final DoubleProperty driverGamePadRumblePrefrence;
+    final DoubleProperty operatorGamePadRumblePrefrence;
 
 
 
