@@ -194,13 +194,10 @@ public class Landmarks {
     }
 
     public static List<Integer> getAllianceCoralStationFiducialIds(DriverStation.Alliance alliance) {
-        switch(alliance) {
-        case Red:
-            return List.of(RedLeftTagFiducialId, RedRightTagFiducialId);
-        case Blue:
-            return List.of(BlueLeftTagFiducialId, BlueRightTagFiducialId);
-        default:
-            return new ArrayList<Integer>();
-        }
+        return switch (alliance) {
+            case Red -> List.of(RedLeftTagFiducialId, RedRightTagFiducialId);
+            case Blue -> List.of(BlueLeftTagFiducialId, BlueRightTagFiducialId);
+            default -> new ArrayList<>();
+        };
     }
 }

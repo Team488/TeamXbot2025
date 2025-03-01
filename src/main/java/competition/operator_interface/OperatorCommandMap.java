@@ -4,7 +4,8 @@ import competition.auto_programs.FromCageScoreOneCoralAutoFactory;
 import competition.auto_programs.FromCurrentPositionScoreFarLeftBranchALevelFour;
 import competition.auto_programs.FromLeftCageScoreLeftFacesLevelFours;
 import competition.commandgroups.HeadingAssistedDriveAndScoreCommandGroup;
-import competition.commandgroups.PathToReefFaceThenAlignCommandGroupFactory;
+import competition.commandgroups.vision_path.PathDriveToCoralStationAndIntakeUntilCollected;
+import competition.commandgroups.vision_path.PathToReefFaceThenAlignCommandGroupFactory;
 import competition.commandgroups.PrepAlgaeSystemCommandGroupFactory;
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
 import competition.simulation.commands.ResetSimulatedPose;
@@ -24,12 +25,12 @@ import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.CalibrateDriveCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
-import competition.subsystems.drive.commands.DriveToCoralStationWithVisionCommand;
 import competition.subsystems.drive.commands.DriveToLocationWithPID;
 import competition.subsystems.drive.commands.RotateToHeadingWithHeadingModule;
-import competition.subsystems.drive.commands.SwerveBezierTrajectoryCommand;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.drive.commands.TeleportToPositionCommand;
+import competition.subsystems.drive.commands.vision_path.PathDriveToNearestCoralStationSectionCommand;
+import competition.subsystems.drive.commands.vision_path.SwerveBezierTrajectoryCommand;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import competition.subsystems.elevator.commands.ForceElevatorCalibratedCommand;
 import competition.subsystems.elevator.commands.SetElevatorTargetHeightCommand;
@@ -78,7 +79,7 @@ public class OperatorCommandMap {
             ResetPoseCommand resetPoseCommand,
             DriveAccordingToOracleCommand driveAccordingToOracle,
             SuperstructureAccordingToOracleCommand superstructureAccordingToOracle,
-            DriveToCoralStationWithVisionCommand driveToCoralStationWithVisionCommand,
+            PathDriveToNearestCoralStationSectionCommand pathToCoralStationWithVisionCommand,
             IntakeCoralCommand intakeCoralCommand,
             SetCoralArmTargetAngleCommand setCoralArmTargetAngleCommand,
             ScoreCoralCommand scoreCoralCommand,
@@ -91,6 +92,7 @@ public class OperatorCommandMap {
             SwerveDriveWithJoysticksCommand typicalSwerveDrive,
             SwerveBezierTrajectoryCommand sbtc,
             PathToReefFaceThenAlignCommandGroupFactory pathToReefFaceThenAlignCommandGroupFactory,
+            PathDriveToCoralStationAndIntakeUntilCollected pathDriveToCoralStationAndIntakeUntilCollected,
             HeadingAssistedDriveAndScoreCommandGroup.Factory headingAssistedDriveAndScoreCommandGroupFactory) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
@@ -106,7 +108,7 @@ public class OperatorCommandMap {
         var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
 
         var homed = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(sbtc);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(pathDriveToCoralStationAndIntakeUntilCollected.create());
         var branchAHeadingAssistedDriveAndScore = headingAssistedDriveAndScoreCommandGroupFactory.create(Landmarks.Branch.A);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(branchAHeadingAssistedDriveAndScore)
                         .onFalse(homed);
