@@ -68,6 +68,14 @@ public class OperatorInterface {
         algaeArmDeadband= pf.createPersistentProperty("Algae Arm Deadband", .18);
     }
 
+    public double getDriverGamepadRumbleIntensitity(){
+        return driverGamePadRumblePrefrence.get();
+    }
+    
+    public double getOperatorGamepadRumbleIntensitiy(){
+        return operatorGamePadRumblePrefrence.get();
+    }
+
     public double getDriverGamepadTypicalDeadband() {
         return driverDeadband.get();
     }

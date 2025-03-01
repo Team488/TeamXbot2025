@@ -11,21 +11,19 @@ import javax.inject.Inject;
 public class IntakeCoralCommand extends BaseCommand {
     final CoralScorerSubsystem coral;
     final OperatorInterface oi;
-    final DoubleProperty driverGamePadRumblePrefrence;
-    final DoubleProperty operatorGamePadRumblePrefrence;
+
 
     @Inject
     public IntakeCoralCommand(CoralScorerSubsystem coralScorerSubsystem, OperatorInterface oi, PropertyFactory pf){
         coral = coralScorerSubsystem;
         this.oi = oi;
         this.addRequirements(coral);
-        pf.setPrefix(this);
-        driverGamePadRumblePrefrence = pf.createPersistentProperty("John/Driver Gamepad rumble level prefrence", .25);
-        operatorGamePadRumblePrefrence = pf.createPersistentProperty("Anthony/Operator Gamepad rumble level prefrence", .5);
+
     }
 
     @Override
     public void initialize() {
+        this.log.info("Intialize");
         coral.setCoralScorerState(CoralScorerSubsystem.CoralScorerState.INTAKING);
     }
 
@@ -33,8 +31,8 @@ public class IntakeCoralCommand extends BaseCommand {
     @Override
     public void execute(){
         if (coral.confidentlyHasCoral()) {
-            oi.operatorGamepad.getRumbleManager().rumbleGamepad(operatorGamePadRumblePrefrence.get(), .1);
-            oi.driverGamepad.getRumbleManager().rumbleGamepad(driverGamePadRumblePrefrence.get(), .1);
+            oi.getOperatorGamepadRumbleIntensitiy();
+            oi.getDriverGamepadRumbleIntensitity();
         }
     }
 
