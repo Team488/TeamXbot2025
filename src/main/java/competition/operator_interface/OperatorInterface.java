@@ -26,6 +26,8 @@ public class OperatorInterface {
     final DoubleProperty driverDeadband;
     final DoubleProperty operatorDeadband;
     final DoubleProperty algaeArmDeadband;
+    final public DoubleProperty driverGamePadRumblePrefrence;
+    final public DoubleProperty operatorGamePadRumblePrefrence;
 
 
 
@@ -42,6 +44,9 @@ public class OperatorInterface {
         operatorGamepad = controllerFactory.create(1);
         operatorGamepad.setLeftInversion(false, true);
         operatorGamepad.setRightInversion(false, true);
+        pf.setPrefix("OperatorInterface");
+        driverGamePadRumblePrefrence = pf.createPersistentProperty("John/Driver Gamepad rumble level prefrence", .25);
+        operatorGamePadRumblePrefrence = pf.createPersistentProperty("Anthony/Operator Gamepad rumble level prefrence", .5);
 
         neoTrellis = joystickFactory.create(2, 32);
         // No axes to invert on the NeoTrellis
