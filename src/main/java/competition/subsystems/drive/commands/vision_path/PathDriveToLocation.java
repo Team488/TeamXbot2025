@@ -28,6 +28,7 @@ public class PathDriveToLocation extends SwerveBezierTrajectoryBase {
     private XTableValues.TraversalOptions traversalOptions;
     private int safeInches = 10;
     private final ReefRoutingCircle routingCircle;
+    private XTableValues.AdditionalArguments additionalArguments;
 
     public XTableValues.BezierCurves curves = null;
 
@@ -63,6 +64,11 @@ public class PathDriveToLocation extends SwerveBezierTrajectoryBase {
         return this;
     }
 
+    public PathDriveToLocation setAdditionalArguments(XTableValues.AdditionalArguments additionalArguments) {
+        this.additionalArguments = additionalArguments;
+        return this;
+    }
+
     public static void setUseBackupPointToPoint(boolean useBackupPointToPoint) {
         PathDriveToLocation.useBackupPointToPoint = useBackupPointToPoint;
     }
@@ -85,6 +91,7 @@ public class PathDriveToLocation extends SwerveBezierTrajectoryBase {
                                     .build())
                             .setSafeDistanceInches(safeInches)
                             .setOptions(traversalOptions)
+                            .setArguments(additionalArguments)
                             .build(),
                     3000, TimeUnit.MILLISECONDS); // When should it give up and return
             // null for any reason?

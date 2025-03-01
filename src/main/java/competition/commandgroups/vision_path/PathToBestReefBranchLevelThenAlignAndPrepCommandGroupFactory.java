@@ -9,6 +9,7 @@ import competition.subsystems.pose.Cameras;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -46,13 +47,17 @@ public class PathToBestReefBranchLevelThenAlignAndPrepCommandGroupFactory {
 
     public SequentialCommandGroup create() {
         return new SequentialCommandGroup(
-                // Step 1: Configure and Run `driveToReefFaceCommand`
+                // Step 1: Configure and Run Path Drive
                 new InstantCommand(() -> {
                     driveToReefFaceCommandUntilAprilTagDetection.setTarget(new Pose2d());
+                    driveToReefFaceCommandUntilAprilTagDetection.setAdditionalArguments(XTableValues.AdditionalArguments.newBuilder()
+                                    .setAlliance(fromAlliance(DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue)))
+                                    .setGoalToBestReefBranch(true)
+                            .build());
                 }),
                 driveToReefFaceCommandUntilAprilTagDetection,
 
-                // Step 2: Extract data after `driveToReefFaceCommand` completes
+                // Step 2: Extract data after driving is done
                 new InstantCommand(() -> {
                     if (driveToReefFaceCommandUntilAprilTagDetection.curves.hasAlignToReefAprilTagOptions()) {
                         int cameraIndex = driveToReefFaceCommandUntilAprilTagDetection.curves.getAlignToReefAprilTagOptions().getCamera()
@@ -86,5 +91,9 @@ public class PathToBestReefBranchLevelThenAlignAndPrepCommandGroupFactory {
             case LEVEL_3 -> Landmarks.CoralLevel.THREE;
             case LEVEL_4 -> Landmarks.CoralLevel.FOUR;
         };
+    }
+
+    private XTableValues.Alliance fromAlliance(DriverStation.Alliance alliance) {
+        return alliance.equals(DriverStation.Alliance.Blue) ? XTableValues.Alliance.BLUE : XTableValues.Alliance.RED;
     }
 }
