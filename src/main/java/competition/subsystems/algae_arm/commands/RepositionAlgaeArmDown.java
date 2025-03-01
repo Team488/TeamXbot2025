@@ -18,7 +18,11 @@ public class RepositionAlgaeArmDown extends BaseCommand {
     @Override
     public void initialize() {
         log.info("Initializing");
-        algaeArm.goingUp = false;
-        algaeArm.repositionToTargetAngle();
+        algaeArm.repositionToTargetAngle(false);
+    }
+
+    @Override
+    public boolean isFinished() {
+        return true;
     }
 }

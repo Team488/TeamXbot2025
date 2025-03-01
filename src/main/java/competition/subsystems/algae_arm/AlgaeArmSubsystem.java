@@ -30,7 +30,6 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
     final ElectricalContract electricalContract;
     double rotationsAtZero;
     boolean isCalibrated = false;
-    public boolean goingUp;
     public final XDigitalInput bottomSensor;
 
     final DoubleProperty degreesPerRotation;
@@ -192,8 +191,8 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
         return false;
     }
 
-    public void repositionToTargetAngle() {
-        if (goingUp) {
+    public void repositionToTargetAngle(boolean goingUpHere) {
+        if (goingUpHere) {
             targetAngle = getTargetValue().plus(Degrees.of(repositionArmAmount.get()));
         } else {
             targetAngle = getTargetValue().minus(Degrees.of(repositionArmAmount.get()));
