@@ -310,7 +310,7 @@ public class OperatorCommandMap {
         var setEmergencyAutonomousCommand = setAutonomousCommandProvider.get();
         setEmergencyAutonomousCommand.setAutoCommand(emergencyAutonomousCommand);
         oi.neoTrellis.getifAvailable(31).onTrue(emergencyAutonomousCommand);
-        setEmergencyAutonomousCommand.includeOnSmartDashboard("EMERGENCYAUTO");
+        setEmergencyAutonomousCommand.includeOnSmartDashboard("EMERGENCYAUTO, move robot forward");
 
 
 
