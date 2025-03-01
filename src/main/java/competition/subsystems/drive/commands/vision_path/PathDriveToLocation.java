@@ -106,6 +106,6 @@ public class PathDriveToLocation extends SwerveBezierTrajectoryBase {
     private void pointToPoint() {
         List<XbotSwervePoint> swervePoints =
                 routingCircle.generateSwervePoints(pose.getCurrentPose2d(), target);
-        logic.setKeyPoints(swervePoints);
+        super.logic.setKeyPoints(swervePoints);
     }
 }
