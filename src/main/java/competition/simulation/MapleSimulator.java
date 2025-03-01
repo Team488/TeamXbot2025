@@ -65,6 +65,7 @@ public class MapleSimulator implements BaseSimulator {
         this.coralArmSimulator = armSimulator;
         this.reefSimulator = reefSimulator;
         this.coralScorerSimulator = coralScorerSimulator;
+        this.coralScorerSimulator.simulateCoralLoad();
         this.algaeArmSimulator = algaeArmSimulator;
         this.lightsSimulator = lightsSimulator;
         this.superstructureMechanism = new SuperstructureMechanism();

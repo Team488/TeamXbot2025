@@ -4,6 +4,8 @@ import competition.subsystems.algae_arm.AlgaeArmSubsystem;
 import competition.subsystems.algae_arm.commands.AlgaeArmMaintainerCommand;
 import competition.subsystems.algae_collection.AlgaeCollectionSubsystem;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionStopCommand;
+import competition.subsystems.climber.ClimberSubsystem;
+import competition.subsystems.climber.commands.ClimbWithJoySticksCommand;
 import competition.subsystems.coral_arm.CoralArmSubsystem;
 import competition.subsystems.coral_arm.commands.CoralArmMaintainerCommand;
 import competition.subsystems.coral_scorer.CoralScorerSubsystem;
@@ -53,5 +55,10 @@ public class SubsystemDefaultCommandMap {
     @Inject
     public void setupAlgaeArmSubsystem(AlgaeArmSubsystem algaeArmSubsystem, AlgaeArmMaintainerCommand commands){
         algaeArmSubsystem.setDefaultCommand(commands);
+    }
+
+    @Inject
+    public void setupClimberSubsystem(ClimberSubsystem climberSubsystem, ClimbWithJoySticksCommand command) {
+        climberSubsystem.setDefaultCommand(command);
     }
 }

@@ -148,6 +148,16 @@ public class Contract2024 extends Contract2025 {
         };
     }
 
+    @Override
+    public double getSteeringGearRatio() {
+        return 12.8; // Documented for Swerve Specialties MK4
+    }
+
+    @Override
+    public double getDriveGearRatio() {
+        return 6.12; // Documented value for Swerve Specialties MK4 with L3 ratio.
+    }
+
     public DeviceInfo getLightsDio0() {
         return new DeviceInfo("Lights0", 0);
     }

@@ -2,6 +2,7 @@ package competition.subsystems.drive.commands;
 
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.oracle.ReefRoutingCircle;
+import competition.subsystems.pose.Cameras;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
@@ -26,6 +27,7 @@ public class DriveToReefFaceFromAngleUntilDetectionCommand extends SwerveSimpleT
     Pose2d targetReefFacePose;
     ReefRoutingCircle routingCircle;
     boolean kinematics = true;
+    private Cameras camera = Cameras.FRONT_LEFT_CAMERA;
 
     @Inject
     public DriveToReefFaceFromAngleUntilDetectionCommand(DriveSubsystem drive, PoseSubsystem pose,
@@ -62,8 +64,12 @@ public class DriveToReefFaceFromAngleUntilDetectionCommand extends SwerveSimpleT
 
     @Override
     public boolean isFinished() {
-        return aprilTagVisionSubsystem.reefAprilTagCameraHasCorrectTarget(
+        return aprilTagVisionSubsystem.doesCameraBestObservationHaveAprilTagId(camera.getIndex(),
                 aprilTagVisionSubsystem.getTargetAprilTagID(targetReefFacePose))
                 || logic.recommendIsFinished(pose.getCurrentPose2d(), drive.getPositionalPid(), headingModule);
+    }
+
+    public void setAprilTagCamera(Cameras camera) {
+        this.camera = camera;
     }
 }

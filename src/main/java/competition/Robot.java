@@ -13,6 +13,9 @@ import competition.injection.components.DaggerSimulationComponent;
 import competition.operator_interface.OperatorInterface;
 import competition.simulation.BaseSimulator;
 import competition.subsystems.pose.PoseSubsystem;
+import edu.wpi.first.hal.AllianceStationID;
+import edu.wpi.first.wpilibj.simulation.DriverStationSim;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Preferences;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -131,6 +134,8 @@ public class Robot extends BaseRobot {
         // hassle of navigating to the DS window and re-enabling the simulated robot.
 
         //webots.setFieldPoseOffset(getFieldOrigin());
+        // Line below isn't working, still sets to the red alliance... need to investigate further.
+        // DriverStationSim.setAllianceStationId(AllianceStationID.Blue2);
     }
 
     private FieldPose getFieldOrigin() {

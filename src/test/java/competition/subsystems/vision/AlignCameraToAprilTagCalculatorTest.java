@@ -3,10 +3,9 @@ package competition.subsystems.vision;
 import competition.BaseCompetitionTest;
 
 import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Meters;
 import static org.junit.Assert.assertEquals;
 
-import competition.electrical_contract.ElectricalContract;
+import competition.subsystems.drive.logic.AlignCameraToAprilTagCalculator;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;

@@ -13,7 +13,7 @@ public class HumanLoadUntillCoralCollectedCommandGroup extends ParallelCommandGr
     public HumanLoadUntillCoralCollectedCommandGroup(PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
                                                      IntakeUntilCoralCollectedCommand intakeUntilCoralCollectedCommand){
 
-        var prepCoralSystemCommandGroup = prepCoralSystemCommandGroupFactory.create(Landmarks.CoralLevel.COLLECTING);
+        var prepCoralSystemCommandGroup = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
         this.addCommands(intakeUntilCoralCollectedCommand, prepCoralSystemCommandGroup);
     }
 }

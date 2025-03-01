@@ -182,8 +182,7 @@ import static edu.wpi.first.units.Units.Volts;
             return driveToWaypointsDurationPerPoint;
         }
 
-        public Translation2d getPowerToAchieveFieldPosition(
-                Translation2d current, Translation2d target) {
+        public Translation2d getPowerToAchieveFieldPosition(Translation2d current, Translation2d target) {
             var goalVector = target.minus(current);
             // This essentially says "our goal is X distance away from where we are now.
             // Assume we are at zero. How much power should we use to go X distance?"

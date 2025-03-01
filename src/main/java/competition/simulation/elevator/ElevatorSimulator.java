@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import xbot.common.advantage.AKitLogger;
 import xbot.common.controls.actuators.mock_adapters.MockCANMotorController;
+import xbot.common.controls.sensors.mock_adapters.MockLaserCAN;
 import xbot.common.math.PIDManager;
 import xbot.common.math.PIDManager.PIDManagerFactory;
 import xbot.common.properties.PropertyFactory;
@@ -36,10 +37,12 @@ public class ElevatorSimulator {
     final PIDManager pidManager;
     final ElectricalContract electricalContract;
     final double gravityFeedForward = 0.02;
+    final double laserNoiseInMeters = 0.01;
 
     final ElevatorSubsystem elevatorSubsystem;
     final MockCANMotorController motor;
     final MockDigitalInput bottomSensor;
+    final MockLaserCAN laserSensor;
 
     @Inject
     public ElevatorSimulator(ElevatorSubsystem elevatorSubsystem, PIDManagerFactory pidManagerFactory,
@@ -51,9 +54,11 @@ public class ElevatorSimulator {
         this.pidManager = pidManagerFactory.create("ElevatorSimulationPositionalPID", 0.05, 0.0, 0.0, 0.0, 1.0, -1.0);
         this.motor = (MockCANMotorController) elevatorSubsystem.masterMotor;
         this.bottomSensor = (MockDigitalInput) elevatorSubsystem.bottomSensor;
+        this.laserSensor = (MockLaserCAN) elevatorSubsystem.distanceSensor;
 
         // init motor position to our random home value
         motor.setPosition(ElevatorSimConstants.rotationsAtZero);
+        laserSensor.setDistance(ElevatorSimConstants.startingHeightMeters);
 
         this.elevatorSim = new ElevatorSim(
                 elevatorGearBox,
@@ -76,7 +81,7 @@ public class ElevatorSimulator {
         MotorInternalPIDHelper.updateInternalPID(motor, pidManager, gravityFeedForward);
         aKitLog.record("ElevatorMotorControlMode", motor.getControlMode());
 
-        if(DriverStation.isEnabled()) {
+        if (DriverStation.isEnabled()) {
             this.elevatorSim.setInputVoltage(this.motor.getPower() * RobotController.getBatteryVoltage());
         } else {
             this.elevatorSim.setInputVoltage(0);
@@ -86,6 +91,9 @@ public class ElevatorSimulator {
 
         // Read out the new elevator position for rendering
         var elevatorCurrentHeight = getCurrentHeight();
+
+        // We'll set our laserSensor distance to our elevator height with some noise (to *mimic reality*)
+        laserSensor.setDistance(elevatorCurrentHeight.in(Meters) + ((Math.random() - 0.5) * laserNoiseInMeters * 2));
 
         // update the motor encoder position based on the elevator height, add in the
         // random from zero offset
@@ -99,7 +107,7 @@ public class ElevatorSimulator {
         // this would be used to simulate the bottom position sensor being triggered
         var elevatorIsAtBottom = elevatorCurrentHeight
                 .in(Meters) <= ElevatorSimConstants.elevatorBottomSensorTriggerHeight;
-        if(bottomSensor != null) {
+        if (bottomSensor != null) {
             bottomSensor.setValue(elevatorIsAtBottom);
         }
         aKitLog.record("FieldSimulation/ElevatorHeight-Meters", elevatorCurrentHeight.in(Meters));
