@@ -76,7 +76,7 @@ public class PathDriveToNearestCoralStationSectionCommand
                                                         CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem) {
         super(drive, pose, pf, headingModuleFactory, aprilTagVisionSubsystem,
                 robotAssertionManager, coprocessorCommunicationSubsystem);
-        this.radiusOfRobot = electricalContract.getRadiusOfRobot().in(Units.Meters);
+        this.radiusOfRobot = electricalContract.getDistanceFromCenterToOuterBumperX().in(Units.Meters);
         this.aprilTagFieldLayout = aprilTagFieldLayout;
     }
 

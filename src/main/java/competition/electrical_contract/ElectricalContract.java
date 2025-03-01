@@ -76,8 +76,4 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
 
     public abstract  boolean isClimberMotorReady();
 
-    public Distance getRadiusOfRobot() {
-        return Meters.of(Math.sqrt(Math.pow(this.getDistanceFromCenterToOuterBumperX().in(Meters), 2.0) * 2.0));
-    }
-
 }
