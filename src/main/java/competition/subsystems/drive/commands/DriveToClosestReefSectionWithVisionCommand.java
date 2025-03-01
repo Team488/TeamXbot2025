@@ -59,6 +59,8 @@ public class DriveToClosestReefSectionWithVisionCommand extends DriveToBezierCur
     public void initialize() {
         if (this.setDestinationPoseForVision(this.getClosestReefPose(), false)) {
             super.initialize();
+        } else {
+            this.log.error("Drive to closest reef failed to initialize!");
         }
     }
 }

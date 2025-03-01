@@ -62,6 +62,8 @@ public class DriveToCoralStationWithVisionCommand extends DriveToBezierCurvesWit
     public void initialize() {
         if (this.setDestinationPoseForVision(this.getCoralStationPose(), true)) {
             super.initialize();
+        } else {
+            this.log.error("Drive to closest coral station failed to initialize!");
         }
     }
 }
