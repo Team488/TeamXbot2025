@@ -118,6 +118,7 @@ public class PathDriveToNearestCoralStationSectionCommand
      */
     @Override
     public void initialize() {
+        log.info("Initializing");
         var coralStationPose = this.getCoralStationPose();
         var deltaTranslation = new Translation2d(
                 this.distanceToOuterBumperInMeters, coralStationPose.getRotation());
