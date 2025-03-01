@@ -11,17 +11,12 @@ import javax.inject.Inject;
 public class IntakeCoralCommand extends BaseCommand {
     final CoralScorerSubsystem coral;
     final OperatorInterface oi;
-    final DoubleProperty driverGamePadRumblePrefrence;
-    final DoubleProperty operatorGamePadRumblePrefrence;
 
     @Inject
-    public IntakeCoralCommand(CoralScorerSubsystem coralScorerSubsystem, OperatorInterface oi, PropertyFactory pf){
+    public IntakeCoralCommand(CoralScorerSubsystem coralScorerSubsystem, OperatorInterface oi) {
         coral = coralScorerSubsystem;
         this.oi = oi;
         this.addRequirements(coral);
-        pf.setPrefix(this);
-        driverGamePadRumblePrefrence = pf.createPersistentProperty("John/Driver Gamepad rumble level prefrence", .25);
-        operatorGamePadRumblePrefrence = pf.createPersistentProperty("Anthony/Operator Gamepad rumble level prefrence", .5);
     }
 
     @Override
