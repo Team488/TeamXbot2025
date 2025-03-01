@@ -33,6 +33,7 @@ public class LightSubsystem extends BaseSubsystem {
         RobotEnabled(3),
         CoralPresent(4),
         RequestCoralFromHuman(5),
+        Victory(6);
         // ReadyToScore(5),
         // CoralReset(6),
         // AlgaeDrop(7),
@@ -47,7 +48,7 @@ public class LightSubsystem extends BaseSubsystem {
         // ElevatorRaise2(16),
         // ElevatorRaise3(17),
         // ElevatorRaise4(18),
-        Victory(6);
+    
 
         // StartPosition(20);
 
