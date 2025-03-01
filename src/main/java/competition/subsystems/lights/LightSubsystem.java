@@ -89,11 +89,11 @@ public class LightSubsystem extends BaseSubsystem {
                           CoralScorerSubsystem coralScorerSubsystem) {
         this.autonomousCommandSelector = autonomousCommandSelector;
         this.coralScorerSubsystem = coralScorerSubsystem;
-        // this.dioInt = new DIOInt(
-        //     digitalOutputFactory.create(contract.getLightsDio0().channel), 
-        //     digitalOutputFactory.create(contract.getLightsDio1().channel), 
-        //     digitalOutputFactory.create(contract.getLightsDio2().channel), 
-        //     digitalOutputFactory.create(contract.getLightsDio3().channel));
+        this.dioInt = new DIOInt(
+            digitalOutputFactory.create(contract.getLightsDio0().channel), 
+            digitalOutputFactory.create(contract.getLightsDio1().channel), 
+            digitalOutputFactory.create(contract.getLightsDio2().channel), 
+            digitalOutputFactory.create(contract.getLightsDio3().channel));
     }
 
     public LightsStateMessage getCurrentState() {
@@ -115,7 +115,7 @@ public class LightSubsystem extends BaseSubsystem {
     }
 
     public void sendState(LightsStateMessage state) {
-        // dioInt.setDIOInt(state.getValue());
+        dioInt.setDIOInt(state.getValue());
     }
 
     public LightsStateMessage getState() {
