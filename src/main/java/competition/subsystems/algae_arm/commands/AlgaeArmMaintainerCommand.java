@@ -41,7 +41,10 @@ public class AlgaeArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
         humanMinPower = pf.createPersistentProperty("HumanMinPowerProperty", -.1);
 
         profileManager = trapzoidProfileManagerFactory.create(getPrefix() + "trapezoidMotion",
-                60, 100, algaeArm.getCurrentValue().in(Degrees));
+                60,
+                100,
+                1000, //tune on real robot
+                algaeArm.getCurrentValue().in(Degrees));
 
         decider.setDeadband(0.02);
     }
@@ -96,6 +99,16 @@ public class AlgaeArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
     @Override
     protected double getHumanInputMagnitude() {
         return getHumanInput();
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        if (interrupted) {
+            // Note - this is really important! We need to force the system out of onboard PID because otherwise,
+            // on enable, the PID will have a brief moment of action where it tries to return to the position
+            // it was at before being disabled.
+            algaeArm.setPower(0);
+        }
     }
 
 }

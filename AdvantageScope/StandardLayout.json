@@ -11,13 +11,10 @@
           "expanded": [
             "/SwerveDriveSubsystem/DrivePID",
             "/SwerveSteeringSubsystem/SteeringPID",
-            "/Preferences/SwerveSteeringSubsystem/SteeringPID",
             "/AdvantageKit/RealOutputs/Simulator/FieldSimulation",
             "/Preferences/CoralArmPivotMaintainerCommand/PositionalPID",
-            "/AdvantageKit/RealOutputs/Simulator",
             "/AdvantageKit/RealOutputs/AprilTagVisionSubsystemExtended/Cameras",
             "/AdvantageKit/RealOutputs/AprilTagVisionSubsystemExtended/Cameras/AprilTagFrontLeft",
-            "/AdvantageKit/RealOutputs/AlignToReefWithAprilTagCommand",
             "/AdvantageKit/RealOutputs/AlignToReefWithAprilTagCommand/TargetReefFace",
             "/AdvantageKit/RealOutputs/AlignToReefWithAprilTagCommand/ChosenTag/translation",
             "/AdvantageKit/RealOutputs/PoseSubsystem/CameraPose",
@@ -28,7 +25,6 @@
             "/AdvantageKit/AprilTagVisionSubsystemExtended/Cameras",
             "/AdvantageKit/AprilTagVisionSubsystemExtended/Cameras/AprilTagRearLeft",
             "/AdvantageKit/AprilTagVisionSubsystemExtended/Cameras/AprilTagRearRight",
-            "/photonvision/Apriltag_RearRight_Camera",
             "/photonvision/Apriltag_RearLeft_Camera",
             "/AdvantageKit/AprilTagVisionSubsystemExtended/Cameras/AprilTagRearLeft/LatestTargetObservation",
             "/AdvantageKit/AprilTagVisionSubsystemExtended/Cameras/AprilTagRearLeft/LatestTargetObservation/cameraToTarget/translation",
@@ -42,16 +38,70 @@
             "/Preferences/ElevatorMaintainerCommand/trapezoidMotion",
             "/AdvantageKit/RealOutputs",
             "/Preferences/CoralArmMaintainerCommand/trapezoidMotion",
-            "/AdvantageKit/DriverStation",
-            "/AdvantageKit/RealOutputs/CoralScorerSubsystem",
-            "/AdvantageKit",
             "/AdvantageKit/ElevatorMotorCANMotorController",
+            "/Preferences/SwerveDriveSubsystem/DrivePID",
+            "/AdvantageKit/ArmPivotMotorCANMotorController",
+            "/AdvantageKit/AlgaeArmSubsystem/Dio9DigitalInput",
+            "/AdvantageKit/AlgaeArmSubsystem/Dio8DigitalInput",
+            "/AdvantageKit/AlgaeArmSubsystem/Dio7DigitalInput",
+            "/AdvantageKit/AlgaeArmSubsystem/Dio6DigitalInput",
+            "/AdvantageKit/AlgaeArmSubsystem/Dio5DigitalInput",
+            "/AdvantageKit/AlgaeArmSubsystem/Dio3DigitalInput",
+            "/AdvantageKit/AlgaeArmSubsystem/Dio4DigitalInput",
+            "/AdvantageKit/AlgaeArmSubsystem/Dio2DigitalInput",
+            "/AdvantageKit/AlgaeArmSubsystem/Dio1DigitalInput",
+            "/AdvantageKit/AlgaeArmSubsystem/Dio0DigitalInput",
+            "/AdvantageKit/AlgaeArmPivotMotor/CANMotorController",
+            "/Preferences/AlgaeArmMaintainerCommand/trapezoidMotion",
+            "/Preferences/SwerveSteeringSubsystem/SteeringPID",
+            "/AdvantageKit/ElevatorMotor/CANMotorController",
+            "/AdvantageKit/DriveSubsystem/RearRightDrive/Steering",
+            "/AdvantageKit/DriveSubsystem/RearRightDrive/SteeringEncoder",
+            "/AdvantageKit/DriveSubsystem/RearRightDrive/SteeringEncoder/CANCoder",
+            "/AdvantageKit/DriveSubsystem/RearRightDrive/SteeringEncoder/AbsoluteEncoder",
+            "/AdvantageKit/RealOutputs/SwerveSteeringSubsystem/RearRightDrive",
+            "/AdvantageKit/DriveSubsystem/RearRightDrive/Steering/CANMotorController",
+            "/AdvantageKit/ArmPivotMotor/CANMotorController",
+            "/AdvantageKit/RealOutputs/SwerveDriveWithJoysticksCommand/RawTranslationIntent",
+            "/AdvantageKit/RealOutputs/SwerveDriveWithJoysticksCommand/ScaledTranslationIntent",
+            "/AdvantageKit/AlgaeArmSubsystem/AlgaeArmBottomSensorDigitalInput",
+            "/AdvantageKit/RealOutputs/ElevatorSubsystem",
+            "/AdvantageKit/RealOutputs/FilterSubsystem",
+            "/Preferences/FilterSubsystem",
+            "/Preferences/FilterSubsystem/ComplimentaryFilter",
+            "/Preferences/ElevatorSubsystem",
+            "/RealOutputs",
+            "/RealOutputs/ElevatorSubsystem",
+            "/RealOutputs/ElevatorMaintainerCommand",
+            "/ElevatorMotorPID",
+            "/ElevatorMotor",
+            "/ElevatorMotor/CANMotorController",
+            "/AdvantageKit/RealOutputs/CalibrateDriveCommand",
+            "/AdvantageKit/RealOutputs/ElevatorMaintainerCommand",
+            "/Preferences/SwerveDriveSubsystem",
+            "/AdvantageKit/RealOutputs/PoseSubsystem",
+            "/Preferences/DriveSubsystem/PositionPID",
+            "/Preferences/DriveSubsystem/HeadingPID",
+            "/AdvantageKit/DriveSubsystem",
+            "/AdvantageKit/RealOutputs/PoseSubsystem/RobotPose",
+            "/AdvantageKit/RealOutputs/PoseSubsystem/RobotPose/translation",
+            "/AdvantageKit/RealOutputs/AlignCameraToAprilTagCalculator/AprilTagData",
+            "/AdvantageKit/RealOutputs/AlignCameraToAprilTagCalculator/TargetLocationOnField",
+            "/AdvantageKit/RealOutputs/AlignCameraToAprilTagCalculator/TargetLocationOnField/translation",
+            "/AdvantageKit",
+            "/AdvantageKit/RealOutputs/AprilTagVisionSubsystemExtended",
+            "/AdvantageKit/RealOutputs/AprilTagVisionSubsystemExtended/Cameras/AprilTagFrontLeft/TagPoses/0/translation",
+            "/AdvantageKit/RealOutputs/AprilTagVisionSubsystemExtended/Cameras/AprilTagFrontLeft/TagPoses/0/rotation",
+            "/AdvantageKit/AprilTagVisionSubsystemExtended",
+            "/AdvantageKit/AprilTagVisionSubsystemExtended/Cameras/AprilTagFrontLeft",
+            "/AdvantageKit/AprilTagVisionSubsystemExtended/Cameras/AprilTagFrontLeft/TagIds",
+            "/AdvantageKit/AprilTagVisionSubsystemExtended/Cameras/AprilTagFrontLeft/LatestTargetObservation",
             "/Preferences",
-            "/Preferences/ElevatorMotorPID"
+            "/Preferences/DriveSubsystem"
           ]
         },
         "tabs": {
-          "selected": 1,
+          "selected": 19,
           "tabs": [
             {
               "type": 0,
@@ -76,9 +126,9 @@
               "title": "Joysticks",
               "controller": [
                 "Xbox Controller (White)",
-                "Xbox Controller (White)",
                 "None",
-                "Xbox Controller (Blue)",
+                "None",
+                "None",
                 "None",
                 "None"
               ],
@@ -112,12 +162,113 @@
                     }
                   }
                 ],
-                "maxSpeed": 5,
+                "maxSpeed": 3.4,
                 "sizeX": 0.65,
                 "sizeY": 0.65,
                 "orientation": 1
               },
               "controllerUUID": "8tvgr5720hvoti5us5umldp8v3hirq1e",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 1,
+              "title": "Line Graph",
+              "controller": {
+                "leftSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/Preferences/DriveSubsystem/MaxAccelerationMps2",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/DriveSubsystem//MaxAccelerationMps2",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#af2437",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "rightSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/PoseSubsystem/RobotPose/translation/x",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "discreteSources": [],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "rightUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "gmsq3xperby5txi3vo8c1wutctd1mvln",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 1,
+              "title": "Line Graph",
+              "controller": {
+                "leftSources": [],
+                "rightSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/SwerveSteeringSubsystem/RearRightDrive/BestEncoderPositionDegrees",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/SwerveSteeringSubsystem/RearRightDrive/TargetDegrees",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "discreteSources": [],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "rightUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "6uq0s14av5fgbg9ejjgjbqgnb3ktd8i5",
               "renderer": null,
               "controlsHeight": 200
             },
@@ -132,9 +283,18 @@
                     "logType": "Pose2d",
                     "visible": true,
                     "options": {}
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/AlignCameraToAprilTagCalculator/TargetLocationOnField",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00"
+                    }
                   }
                 ],
-                "game": "2025 Field",
+                "game": "2025 Field (Welded)",
                 "bumpers": "auto",
                 "origin": "blue",
                 "orientation": 0,
@@ -212,7 +372,7 @@
                     }
                   }
                 ],
-                "game": "2025 Field",
+                "game": "2025 Field (Welded)",
                 "origin": "blue"
               },
               "controllerUUID": "ox2te7k1ktj76khhhqyowcgkihnqvl8g",
@@ -220,14 +380,14 @@
                 "cameraIndex": -1,
                 "orbitFov": 50,
                 "cameraPosition": [
-                  6.191877126030862,
-                  2.51686703497216,
-                  -1.0640283643925335
+                  4.032681057205682,
+                  2.2232290953564426,
+                  -2.8605141020583122
                 ],
                 "cameraTarget": [
-                  5.705480812781844,
-                  1.8074211279113803,
-                  -0.554023333620806
+                  3.641759510079777,
+                  1.7722253231713216,
+                  -2.0581576093024547
                 ]
               },
               "controlsHeight": 239
@@ -293,7 +453,7 @@
                     }
                   }
                 ],
-                "game": "2025 Field",
+                "game": "2025 Field (Welded)",
                 "origin": "blue"
               },
               "controllerUUID": "zzauzu00k05es4ph6rmnpywc2uk1s4qv",
@@ -301,9 +461,9 @@
                 "cameraIndex": -1,
                 "orbitFov": 50,
                 "cameraPosition": [
-                  -1.241553413348315,
-                  17.43639147375957,
-                  1.7827113325778914
+                  -4.870963192225852,
+                  13.486866531603551,
+                  9.760309998383542
                 ],
                 "cameraTarget": [
                   0.7257252695797833,
@@ -363,14 +523,12 @@
                       "color": "#3b875a",
                       "size": "normal"
                     }
-                  }
-                ],
-                "rightSources": [
+                  },
                   {
                     "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/ElevatorMotorCANMotorController/Voltage",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/ElevatorSubsystem/CalibratedElevatorDistanceSensor-m",
                     "logType": "Number",
-                    "visible": true,
+                    "visible": false,
                     "options": {
                       "color": "#af2437",
                       "size": "normal"
@@ -378,11 +536,43 @@
                   },
                   {
                     "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/ElevatorMotorCANMotorController/Current",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/ElevatorSubsystem/CalibratedElevatorMotorSensor-m",
+                    "logType": "Number",
+                    "visible": false,
+                    "options": {
+                      "color": "#c0b487",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "rightSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/ElevatorMaintainerCommand/PM-CurrentValue",
                     "logType": "Number",
                     "visible": true,
                     "options": {
-                      "color": "#80588e",
+                      "color": "#858584",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/ElevatorMaintainerCommand/PM-CurrentVelocity",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#d993aa",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/ElevatorMaintainerCommand/PM-TargetValue",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#5f4528",
                       "size": "normal"
                     }
                   }
@@ -398,21 +588,19 @@
                     }
                   },
                   {
-                    "type": "stripes",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/CoralArmPivotMaintainerCommand/ErrorIsTimeStable",
-                    "logType": "Boolean",
+                    "type": "alerts",
+                    "logKey": "NT:/SmartDashboard/Alerts",
+                    "logType": "Alerts",
                     "visible": true,
-                    "options": {
-                      "color": "#c0b487"
-                    }
+                    "options": {}
                   },
                   {
                     "type": "stripes",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/CoralScorerSubsystem/coralPresent",
-                    "logType": "Boolean",
-                    "visible": false,
+                    "logKey": "NT:/AdvantageKit/RealOutputs/ElevatorMaintainerCommand/CurrentMode",
+                    "logType": "String",
+                    "visible": true,
                     "options": {
-                      "color": "#858584"
+                      "color": "#80588e"
                     }
                   }
                 ],
@@ -435,7 +623,103 @@
             },
             {
               "type": 1,
-              "title": "Arm Debug",
+              "title": "Line Graph",
+              "controller": {
+                "leftSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "/RealOutputs/ElevatorSubsystem/ElevatorTargetHeight-m",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "/RealOutputs/ElevatorSubsystem/ElevatorCurrentHeight-m",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "/RealOutputs/ElevatorSubsystem/CalibratedElevatorDistanceSensor-m",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#af2437",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "/RealOutputs/ElevatorSubsystem/CalibratedElevatorMotorSensor-m",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#80588e",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "/RealOutputs/ElevatorMaintainerCommand/elevatorProfileTarget",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#858584",
+                      "size": "bold"
+                    }
+                  }
+                ],
+                "rightSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "/ElevatorMotor/CANMotorController/Voltage",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#c0b487",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "discreteSources": [
+                  {
+                    "type": "stripes",
+                    "logKey": "/RealOutputs/ElevatorMaintainerCommand/CurrentMode",
+                    "logType": "String",
+                    "visible": true,
+                    "options": {
+                      "color": "#e48b32"
+                    }
+                  }
+                ],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "rightUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "tiktb5d0mdcrt7z6f4qd2q6nbl41duz6",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 1,
+              "title": "CoralArm",
               "controller": {
                 "leftSources": [
                   {
@@ -460,7 +744,7 @@
                   },
                   {
                     "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/CoralArmMaintainerCommand/coralArmProfileTarget",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/CoralArmMaintainerCommand/ProfileTarget",
                     "logType": "Number",
                     "visible": true,
                     "options": {
@@ -469,7 +753,18 @@
                     }
                   }
                 ],
-                "rightSources": [],
+                "rightSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/ArmPivotMotor/CANMotorController/Current",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#c0b487",
+                      "size": "normal"
+                    }
+                  }
+                ],
                 "discreteSources": [
                   {
                     "type": "stripes",
@@ -478,6 +773,15 @@
                     "visible": true,
                     "options": {
                       "color": "#80588e"
+                    }
+                  },
+                  {
+                    "type": "stripes",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/CoralArmSubsystem/isCalibrated",
+                    "logType": "Boolean",
+                    "visible": true,
+                    "options": {
+                      "color": "#e48b32"
                     }
                   }
                 ],
@@ -495,6 +799,92 @@
                 "rightFilter": 0
               },
               "controllerUUID": "e2roa1c1s4n0nghyz872b97wh93oxjmy",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 1,
+              "title": "AlgaeArm",
+              "controller": {
+                "leftSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/AlgaeArmSubsystem/Current Angle",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/AlgaeArmSubsystem/Target Angle",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#af2437",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/AlgaeArmMaintainerCommand/ProfileTarget",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#80588e",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "rightSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/AlgaeArmPivotMotor/CANMotorController/Angle",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/AlgaeArmPivotMotor/CANMotorController/AngularVelocity",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e48b32",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/AlgaeArmSubsystem/Current Velocity",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#c0b487",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "discreteSources": [],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "rightUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "1fslfkqxcyb0hpah7dolnvxzx89gf5c2",
               "renderer": null,
               "controlsHeight": 200
             },
@@ -597,6 +987,140 @@
                       "color": "#af2437",
                       "size": "normal"
                     }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/LoggedRobot/FullCycleMS",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#80588e",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/LoggedRobot/GCTimeMS",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e48b32",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/LoggedRobot/LogPeriodicMS",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#c0b487",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/LoggedRobot/UserCodeMS",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#858584",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/OutsidePeriodicMs",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#3b875a",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "rightSources": [],
+                "discreteSources": [
+                  {
+                    "type": "stripes",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/LoggedRobot/GCCounts",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#5f4528"
+                    }
+                  },
+                  {
+                    "type": "stripes",
+                    "logKey": "NT:/AdvantageKit/DriverStation/Enabled",
+                    "logType": "Boolean",
+                    "visible": true,
+                    "options": {
+                      "color": "#d993aa"
+                    }
+                  }
+                ],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "rightUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "n6wr3uv99ns63zc88ok300fe2ruzod97",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 1,
+              "title": "DriveCalib",
+              "controller": {
+                "leftSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/CalibrateDriveCommand/frontLeftModuleDeltaPosition",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/CalibrateDriveCommand/frontRightModuleDeltaPosition",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/CalibrateDriveCommand/rearLeftModuleDeltaPosition",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#af2437",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/CalibrateDriveCommand/rearRightModuleDeltaPosition",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#80588e",
+                      "size": "normal"
+                    }
                   }
                 ],
                 "rightSources": [],
@@ -614,7 +1138,118 @@
                 "leftFilter": 0,
                 "rightFilter": 0
               },
-              "controllerUUID": "n6wr3uv99ns63zc88ok300fe2ruzod97",
+              "controllerUUID": "p4ihanma1pq8k1r8esilpny6747lsozx",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 1,
+              "title": "Line Graph",
+              "controller": {
+                "leftSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/AlignCameraToAprilTagCalculator/AprilTagData/x",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/AlignCameraToAprilTagCalculator/AprilTagData/y",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "rightSources": [],
+                "discreteSources": [],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "rightUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "kbjvzhdrcnjs1kqra8p5jwbcj69vzl6g",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 1,
+              "title": "Line Graph",
+              "controller": {
+                "leftSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/AlignCameraToAprilTagCalculator/TargetLocationOnField/translation/x",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/PoseSubsystem/RobotPose/translation/x",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#af2437",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "rightSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/AlignCameraToAprilTagCalculator/TargetLocationOnField/translation/y",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/PoseSubsystem/RobotPose/translation/y",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#80588e",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "discreteSources": [],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "rightUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "0pnea6slzhxgxz8khaxkotz491e2aghk",
               "renderer": null,
               "controlsHeight": 200
             }

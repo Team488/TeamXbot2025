@@ -5,12 +5,12 @@ import xbot.common.command.BaseCommand;
 
 import javax.inject.Inject;
 
-public class ForceCoralPivotCalibrated extends BaseCommand {
+public class ForceCoralArmCalibratedCommand extends BaseCommand {
 
     CoralArmSubsystem coralArmPivotSubsystem;
 
     @Inject
-    public ForceCoralPivotCalibrated(CoralArmSubsystem coralArmPivotSubsystem) {
+    public ForceCoralArmCalibratedCommand(CoralArmSubsystem coralArmPivotSubsystem) {
         this.coralArmPivotSubsystem = coralArmPivotSubsystem;
     }
 

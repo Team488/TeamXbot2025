@@ -20,6 +20,7 @@ public class DriveToLocationWithPID extends BaseCommand {
     public DriveToLocationWithPID(DriveSubsystem drive, PoseSubsystem pose) {
         this.drive = drive;
         this.pose = pose;
+        this.addRequirements(drive);
     }
 
     public void setLocationTarget(Translation2d location) {
