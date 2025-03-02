@@ -28,7 +28,7 @@ public class FromCurrentPositionScoreFarLeftBranchALevelFour
                 "Path curve to far left, branch A and score level four");
         var pathAndCurveScoreFarLeftBranchALevelFour =
                 driveToFaceAndScoreFact.create(Landmarks.ReefFace.FAR_LEFT,
-                        Landmarks.Branch.B, Landmarks.CoralLevel.FOUR);
+                        Landmarks.Branch.B, Landmarks.CoralLevel.THREE);
         this.addCommands(pathAndCurveScoreFarLeftBranchALevelFour);
         this.addCommands(
                 driveToStationAndIntakeUntilCollectedCommandGroupFactory.create(
@@ -36,7 +36,7 @@ public class FromCurrentPositionScoreFarLeftBranchALevelFour
         var driveAndScoreCloseLeftBranchALevelFour =
                 driveToFaceAndScoreCommandGroupFactory.create(
                         Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.A,
-                        Landmarks.CoralLevel.FOUR);
+                        Landmarks.CoralLevel.THREE);
         this.addCommands(driveAndScoreCloseLeftBranchALevelFour);
     }
 
