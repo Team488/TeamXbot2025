@@ -29,7 +29,7 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
     public final XCANMotorController armMotor;
     public final MutAngle targetAngle = Degrees.mutable(0);
     final ElectricalContract electricalContract;
-    Angle rotationsAtZero;
+    Angle rotationsAtZero = Rotations.of(0);
     boolean isCalibrated = false;
     public final XDigitalInput bottomSensor;
 
