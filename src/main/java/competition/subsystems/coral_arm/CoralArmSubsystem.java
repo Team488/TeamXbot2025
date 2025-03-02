@@ -41,8 +41,8 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     final Alert isNotCalibratedAlert = new Alert("CoralArm: not calibrated", Alert.AlertType.kWarning);
 
     private final DoubleProperty degreesPerRotations;
-    public final DoubleProperty L123ScoringAngle;
-    public final DoubleProperty L4ScoringAngle;
+    public final DoubleProperty level123ScoringAngle;
+    public final DoubleProperty level4ScoringAngle;
     public final DoubleProperty humanLoadAngleDegrees;
     public final DoubleProperty rangeOfMotionDegrees;
     public final DoubleProperty powerWhenNotCalibrated;
@@ -91,8 +91,8 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
         this.degreesPerRotations = propertyFactory.createPersistentProperty("Degrees Per Rotations", 5.790);
         this.rangeOfMotionDegrees = propertyFactory.createPersistentProperty("Range of Motion in Degrees", 140);
-        this.L123ScoringAngle = propertyFactory.createPersistentProperty("Level 1/2/3 Scoring Angle", 125);
-        this.L4ScoringAngle = propertyFactory.createPersistentProperty("Level 4 Scoring Angle", 140);
+        this.level123ScoringAngle = propertyFactory.createPersistentProperty("Level 1/2/3 Scoring Angle", 125);
+        this.level4ScoringAngle = propertyFactory.createPersistentProperty("Level 4 Scoring Angle", 150);
         this.humanLoadAngleDegrees = propertyFactory.createPersistentProperty("Human Loading Angle in Degrees", 0);
         this.powerWhenNotCalibrated = propertyFactory.createPersistentProperty("Power When Not Calibrated", 0.25);
     }
@@ -163,10 +163,10 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
             case ONE:
             case TWO:
             case THREE:
-                setTargetValue(Degrees.of(L123ScoringAngle.get()));
+                setTargetValue(Degrees.of(level123ScoringAngle.get()));
                 break;
             case FOUR:
-                setTargetValue(Degrees.of(L4ScoringAngle.get()));
+                setTargetValue(Degrees.of(level4ScoringAngle.get()));
                 break;
             case COLLECTING:
             default:
@@ -315,8 +315,8 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     }
   
     public boolean getIsTargetAngleScoring() {
-        return Degrees.of(L123ScoringAngle.get()).isNear(targetAngle, Degrees.of(0.25)) ||
-               Degrees.of(L4ScoringAngle.get()).isNear(targetAngle, Degrees.of(0.25));
+        return Degrees.of(level123ScoringAngle.get()).isNear(targetAngle, Degrees.of(0.25)) ||
+               Degrees.of(level4ScoringAngle.get()).isNear(targetAngle, Degrees.of(0.25));
     }
 
     
