@@ -24,11 +24,13 @@ public class EmergencyAutonomousCommand extends BaseCommand {
 
     @Inject
     public EmergencyAutonomousCommand(DriveSubsystem drive, PropertyFactory pf) {
+        pf.setPrefix(this);
         this.drive = drive;
         this.addRequirements(drive);
         this.moveRobotX = pf.createPersistentProperty("Move robot X", 1);
         this.moveRobotY = pf.createPersistentProperty("Move robot Y", 0);
         this.timeAmountToMove= pf.createPersistentProperty("Seconds it moves",1);
+
     }
 
     @Override
