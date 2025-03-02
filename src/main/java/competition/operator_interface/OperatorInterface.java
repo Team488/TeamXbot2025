@@ -9,6 +9,7 @@ import xbot.common.controls.sensors.XXboxController.XXboxControllerFactory;
 import xbot.common.logging.RobotAssertionManager;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
+import xbot.common.properties.Property.PropertyLevel;
 
 /**
  * This class is the glue that binds the controls on the physical operator interface to the commands and command groups
@@ -44,10 +45,7 @@ public class OperatorInterface {
         operatorGamepad = controllerFactory.create(1);
         operatorGamepad.setLeftInversion(false, true);
         operatorGamepad.setRightInversion(false, true);
-        pf.setPrefix("OperatorInterface");
-        driverGamePadRumblePrefrence = pf.createPersistentProperty("John/Driver Gamepad rumble level prefrence", .1);
-        operatorGamePadRumblePrefrence = pf.createPersistentProperty("Anthony/Operator Gamepad rumble level prefrence", .1);
-
+        
         neoTrellis = joystickFactory.create(2, 32);
         // No axes to invert on the NeoTrellis
 
@@ -63,6 +61,10 @@ public class OperatorInterface {
         algaeAndSysIdGamepad.setRightInversion(false, true);
 
         pf.setPrefix("OperatorInterface");
+        pf.setDefaultLevel(PropertyLevel.Debug);
+        driverGamePadRumblePrefrence = pf.createPersistentProperty("John/Driver Gamepad rumble level prefrence", .1);
+        operatorGamePadRumblePrefrence = pf.createPersistentProperty("Anthony/Operator Gamepad rumble level prefrence", .1);
+
         driverDeadband = pf.createPersistentProperty("Driver Deadband", 0.12);
         operatorDeadband = pf.createPersistentProperty("Operator Deadband", 0.15);
         algaeArmDeadband= pf.createPersistentProperty("Algae Arm Deadband", .18);

@@ -13,7 +13,6 @@ import javax.inject.Singleton;
 public class ClimberSubsystem extends BaseSubsystem {
 
     public final XCANMotorController climberMotor;
-    public final DoubleProperty climberPower;
     public final ElectricalContract contract;
 
     @Inject
@@ -29,8 +28,6 @@ public class ClimberSubsystem extends BaseSubsystem {
         }
 
         this.contract = contract;
-
-        this.climberPower = pf.createPersistentProperty("climberPower", 0.1);
     }
 
     public void setPower(double power) {
