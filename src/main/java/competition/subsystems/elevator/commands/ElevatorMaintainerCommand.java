@@ -145,8 +145,8 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     private boolean wouldHitBranch(Distance targetValue) {
         var coralArmAngleDangerous = coralArm.getCurrentValue().gt(coralArmCollisionAngleDegrees.get());
-        var elevatorIsMoving = Math.abs(targetValue.minus(elevator.getCurrentValue()).in(Inches)) >
-                elevatorTargetChangingThreshold.get().in(Inches);
+        var elevatorIsMoving = Math.abs(targetValue.minus(elevator.getCurrentValue()).in(Inches))
+                > elevatorTargetChangingThreshold.get().in(Inches);
         return coralArmAngleDangerous && elevatorIsMoving;
     }
 
