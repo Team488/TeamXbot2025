@@ -27,7 +27,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 @Singleton
 public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
     public final XCANMotorController armMotor;
-    MutAngle targetAngle = Degrees.mutable(0);
+    public final MutAngle targetAngle = Degrees.mutable(0);
     final ElectricalContract electricalContract;
     double rotationsAtZero;
     boolean isCalibrated = false;
