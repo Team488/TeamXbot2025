@@ -13,6 +13,7 @@ import xbot.common.injection.electrical_contract.DeviceInfo;
 import xbot.common.math.MathUtils;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
+import xbot.common.properties.Property.PropertyLevel;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -42,6 +43,7 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
     final DoubleProperty reefLowTopToBottomSweepEnd;
     final DoubleProperty reefHighSweepStart;
     final DoubleProperty reefHighSweepEnd;
+    final DoubleProperty repositionArmAmount;
 
     final Alert isNotCalibratedAlert = new Alert("AlgaeArm: not calibrated", Alert.AlertType.kWarning);
 
@@ -82,7 +84,11 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
             this.bottomSensor = null;
         }
 
+        this.repositionArmAmount = propertyFactory.createPersistentProperty("RepositionArmAmount", 5);
+        
+        propertyFactory.setDefaultLevel(PropertyLevel.Debug);
         this.degreesPerRotation = propertyFactory.createPersistentProperty("DegreesPerRotation", 13.523);
+
         this.rangeOfMotionInDegrees = propertyFactory.createPersistentProperty("RangeOfMotionInDegrees", 160.0);
         this.groundCollectionDegrees = propertyFactory.createPersistentProperty("GroundCollectionDegrees", 45.0);
         this.reefLowBottomToTopSweepStart = propertyFactory.createPersistentProperty("ReefLowBottomToTopSweepStart", 90.0);
@@ -91,6 +97,7 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
         this.reefLowTopToBottomSweepEnd = propertyFactory.createPersistentProperty("ReefLowTopToBottomSweepEnd", 90.0);
         this.reefHighSweepStart = propertyFactory.createPersistentProperty("ReefHighSweepStart", 110.0);
         this.reefHighSweepEnd = propertyFactory.createPersistentProperty("ReefHighSweepEnd", 150.0);
+        propertyFactory.setDefaultLevel(PropertyLevel.Important);
     }
 
     @Override
@@ -188,6 +195,14 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
             return this.bottomSensor.get();
         }
         return false;
+    }
+
+    public void repositionToTargetAngle(boolean goingUpHere) {
+        if (goingUpHere) {
+            targetAngle = getTargetValue().plus(Degrees.of(repositionArmAmount.get()));
+        } else {
+            targetAngle = getTargetValue().minus(Degrees.of(repositionArmAmount.get()));
+        }
     }
 
     @Override

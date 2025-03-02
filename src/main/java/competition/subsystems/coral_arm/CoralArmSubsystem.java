@@ -17,6 +17,7 @@ import xbot.common.controls.sensors.XDutyCycleEncoder;
 import xbot.common.math.MathUtils;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
+import xbot.common.properties.Property.PropertyLevel;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -42,7 +43,8 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     final Alert isNotCalibratedAlert = new Alert("CoralArm: not calibrated", Alert.AlertType.kWarning);
 
     private final DoubleProperty degreesPerRotations;
-    public final DoubleProperty scoreAngleDegrees;
+    public final DoubleProperty level123ScoringAngle;
+    public final DoubleProperty level4ScoringAngle;
     public final DoubleProperty humanLoadAngleDegrees;
     public final DoubleProperty rangeOfMotionDegrees;
     public final DoubleProperty powerWhenNotCalibrated;
@@ -89,11 +91,14 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
             this.lowSensor = null;
         }
 
-        this.degreesPerRotations = propertyFactory.createPersistentProperty("Degrees Per Rotations", 5.790);
-        this.rangeOfMotionDegrees = propertyFactory.createPersistentProperty("Range of Motion in Degrees", 125);
-        this.scoreAngleDegrees = propertyFactory.createPersistentProperty("Scoring Angle in Degrees", 125);
+        this.level123ScoringAngle = propertyFactory.createPersistentProperty("Level 1/2/3 Scoring Angle", 125);
+        this.level4ScoringAngle = propertyFactory.createPersistentProperty("Level 4 Scoring Angle", 150);
+        propertyFactory.setDefaultLevel(PropertyLevel.Debug);
         this.humanLoadAngleDegrees = propertyFactory.createPersistentProperty("Human Loading Angle in Degrees", 0);
+        this.degreesPerRotations = propertyFactory.createPersistentProperty("Degrees Per Rotations", 5.790);
+        this.rangeOfMotionDegrees = propertyFactory.createPersistentProperty("Range of Motion in Degrees", 150);
         this.powerWhenNotCalibrated = propertyFactory.createPersistentProperty("Power When Not Calibrated", 0.25);
+        propertyFactory.setDefaultLevel(PropertyLevel.Important);
     }
 
     @Override
@@ -162,8 +167,10 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
             case ONE:
             case TWO:
             case THREE:
+                setTargetValue(Degrees.of(level123ScoringAngle.get()));
+                break;
             case FOUR:
-                setTargetValue(Degrees.of(scoreAngleDegrees.get()));
+                setTargetValue(Degrees.of(level4ScoringAngle.get()));
                 break;
             case COLLECTING:
             default:
@@ -312,7 +319,8 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     }
   
     public boolean getIsTargetAngleScoring() {
-        return Degrees.of(scoreAngleDegrees.get()).isNear(targetAngle, Degrees.of(0.25));
+        return Degrees.of(level123ScoringAngle.get()).isNear(targetAngle, Degrees.of(0.25))
+                || Degrees.of(level4ScoringAngle.get()).isNear(targetAngle, Degrees.of(0.25));
     }
 
     

@@ -21,6 +21,7 @@ import xbot.common.math.MathUtils;
 import xbot.common.properties.DistanceProperty;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
+import xbot.common.properties.Property.PropertyLevel;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -90,10 +91,11 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
         pf.setPrefix(this);
 
-        l2Height = pf.createPersistentProperty("l2Height", Inches.of(2.0));
+        l2Height = pf.createPersistentProperty("l2Height", Inches.of(0.5));
         l3Height = pf.createPersistentProperty("l3Height", Inches.of(16.0));
-        l4Height = pf.createPersistentProperty("l4Height", Inches.of(42.0));
+        l4Height = pf.createPersistentProperty("l4Height", Inches.of(46.0));
         humanLoadHeight = pf.createPersistentProperty("humanLoadHeight", Inches.of(1));
+        pf.setDefaultLevel(PropertyLevel.Debug);
         baseHeight = pf.createPersistentProperty("baseHeight", Inches.of(0));
 
 
@@ -113,7 +115,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         this.powerNearUpperLimitThreshold = pf.createPersistentProperty("powerNearUpperLimit", 0.0);
         this.powerNearLowerLimitThreshold = pf.createPersistentProperty("powerNearLowerLimit", 0.0);
         this.powerWhenBottomSensorHit = pf.createPersistentProperty("powerWhenBottomSensorHit", 0);
-
+        pf.setDefaultLevel(PropertyLevel.Important);
+                                
         this.sysId = new SysIdRoutine(
                 new SysIdRoutine.Config(
                         Volts.of(0.2).per(Second),
