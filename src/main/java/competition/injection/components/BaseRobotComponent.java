@@ -15,6 +15,7 @@ import competition.subsystems.elevator.ElevatorSubsystem;
 import competition.subsystems.oracle.OracleSubsystem;
 import competition.subsystems.oracle.ReefCoordinateGenerator;
 import competition.subsystems.oracle.ScoringQueue;
+import competition.subsystems.orchestra.OrchestraSubsystem;
 import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import competition.subsystems.elevator_mechanism.SuperstructureMechanismSubsystem;
@@ -73,4 +74,6 @@ public abstract class BaseRobotComponent extends BaseComponent {
     public abstract AlgaeArmSubsystem algaeArmSubsystem();
 
     public abstract AlgaeCollectionSubsystem algaeCollectionSubsystem();
+
+    public abstract OrchestraSubsystem orchestraSubsystem();
 }

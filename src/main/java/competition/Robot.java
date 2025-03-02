@@ -50,6 +50,7 @@ public class Robot extends BaseRobot {
         getInjectorComponent().superstructureMechanismSubsystem();
         getInjectorComponent().oracleSubsystem();
         getInjectorComponent().lightSubsystem();
+        getInjectorComponent().orchestraSubsystem();
         oi = getInjectorComponent().operatorInterface();
 
         if (BaseRobot.isSimulation()) {
