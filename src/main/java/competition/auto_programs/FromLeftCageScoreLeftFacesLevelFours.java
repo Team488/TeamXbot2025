@@ -38,7 +38,7 @@ public class FromLeftCageScoreLeftFacesLevelFours extends BaseAutonomousSequenti
         // Drive to far left, branch B and score level four
         queueDriveAndScoreMessageToAutoSelector(Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR);
         var driveAndScoreFarLeftBranchBLevelFour = driveToFaceAndScoreFactProv.get().create(
-                Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.THREE);
+                Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR);
         this.addCommands(driveAndScoreFarLeftBranchBLevelFour);
 
         // Drive to left coral station, far section and intake coral until collected
@@ -50,7 +50,7 @@ public class FromLeftCageScoreLeftFacesLevelFours extends BaseAutonomousSequenti
         // Drive to close left, branch B and score level four
         queueDriveAndScoreMessageToAutoSelector(Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR);
         var driveAndScoreCloseLeftBranchBLevelFour = driveToFaceAndScoreFactProv.get().create(
-                Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.THREE);
+                Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR);
         this.addCommands(driveAndScoreCloseLeftBranchBLevelFour);
 
         // Drive to left coral station, close section and intake coral until collected
@@ -62,7 +62,7 @@ public class FromLeftCageScoreLeftFacesLevelFours extends BaseAutonomousSequenti
         // Drive to close left, branch A and score level four
         queueDriveAndScoreMessageToAutoSelector(Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR);
         var driveAndScoreCloseLeftBranchALevelFour = driveToFaceAndScoreFactProv.get().create(
-                Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.THREE);
+                Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR);
         this.addCommands(driveAndScoreCloseLeftBranchALevelFour);
 
         // Drive to left coral station, far section and intake coral until collected again
@@ -74,7 +74,7 @@ public class FromLeftCageScoreLeftFacesLevelFours extends BaseAutonomousSequenti
         // Drive to close, branch A and score level four
         queueDriveAndScoreMessageToAutoSelector(Landmarks.ReefFace.CLOSE, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR);
         var driveAndScoreCloseBranchALevelFour = driveToFaceAndScoreFactProv.get().create(
-                Landmarks.ReefFace.CLOSE, Landmarks.Branch.A, Landmarks.CoralLevel.THREE);
+                Landmarks.ReefFace.CLOSE, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR);
         this.addCommands(driveAndScoreCloseBranchALevelFour);
 
         var homeCoralSystem = prepCoralSystemCommandGroupFact.create(() -> Landmarks.CoralLevel.COLLECTING);
