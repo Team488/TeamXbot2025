@@ -1,5 +1,6 @@
 package competition.electrical_contract;
 
+import static edu.wpi.first.units.Units.Meters;
 import edu.wpi.first.units.measure.Distance;
 import xbot.common.injection.electrical_contract.CANMotorControllerInfo;
 import xbot.common.injection.electrical_contract.DeviceInfo;
@@ -69,6 +70,11 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
     public abstract DeviceInfo getAlgaeArmBottomSensor();
 
     public abstract Distance getDistanceFromCenterToOuterBumperX();
+
+    public Distance getRadiusOfRobot() {
+        var distanceToOuterBumerInMeters = this.getDistanceFromCenterToOuterBumperX().in(Meters);
+        return Meters.of(Math.sqrt(Math.pow(distanceToOuterBumerInMeters, 2.0) * 2.0));
+    }
 
     public abstract CANMotorControllerInfo getClimberMotor();
 
