@@ -48,7 +48,9 @@ import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.commands.ResetPoseCommand;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import xbot.common.controls.sensors.XXboxController;
 import xbot.common.subsystems.autonomous.SetAutonomousCommand;
 import xbot.common.subsystems.drive.SwervePointKinematics;
@@ -100,6 +102,9 @@ public class OperatorCommandMap {
             PathToReefFaceThenAlignCommandGroupFactory pathToReefFaceThenAlignCommandGroupFactory,
             PathDriveToCoralStationAndIntakeUntilCollected pathDriveToCoralStationAndIntakeUntilCollected,
             HeadingAssistedDriveAndScoreCommandGroup.Factory headingAssistedDriveAndScoreCommandGroupFactory) {
+        setNeotrellisButtons(operatorInterface,pathToReefFaceThenAlignCommandGroupFactory);
+
+
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
 
@@ -201,6 +206,26 @@ public class OperatorCommandMap {
         // rotateTo90Degrees.includeOnSmartDashboard("RotateTo90Degrees");
         // rotateTo180Degrees.includeOnSmartDashboard("RotateTo180Degrees");
     }
+
+    private final Landmarks.ReefFace[] faces = new Landmarks.ReefFace[]{Landmarks.ReefFace.FAR_LEFT, Landmarks.ReefFace.FAR,Landmarks.ReefFace.FAR_RIGHT,
+                                                                        Landmarks.ReefFace.CLOSE_LEFT, Landmarks.ReefFace.CLOSE,Landmarks.ReefFace.CLOSE_RIGHT};
+
+    private final Landmarks.Branch[] branches = new Landmarks.Branch[]{Landmarks.Branch.A, Landmarks.Branch.B};
+    private final Landmarks.CoralLevel[] levels = new Landmarks.CoralLevel[]{Landmarks.CoralLevel.ONE,Landmarks.CoralLevel.TWO,Landmarks.CoralLevel.THREE, Landmarks.CoralLevel.FOUR};
+    private void setNeotrellisButtons(OperatorInterface oi, PathToReefFaceThenAlignCommandGroupFactory pathToReefFaceThenAlignCommandGroupFactory){
+        int start = 17;
+        int step = 1;
+        int idx = 0;
+        for(Landmarks.ReefFace face : faces){
+            oi.neoTrellis.getifAvailable(start+idx).whileTrue(pathToReefFaceThenAlignCommandGroupFactory.create(face, branches[0]));
+            idx += step;
+            if(idx % 3 == 0){
+                idx = 0;
+                start += 8;
+            }
+        }
+    }
+
 
 
     @Inject

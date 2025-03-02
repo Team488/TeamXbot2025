@@ -7,23 +7,25 @@ import competition.subsystems.pose.Landmarks;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 public class PathToReefFaceThenAlignCommandGroupFactory {
-    PathDriveToLocationUntilAprilTagDetection driveToReefFaceCommand;
-    AlignToTagGlobalMovementWithCalculator alignToReefWithAprilTagCommand;
+    Provider<PathDriveToLocationUntilAprilTagDetection> driveToReefFaceCommandProvider;
+    Provider<AlignToTagGlobalMovementWithCalculator> alignToReefWithAprilTagCommandProvider;
     AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
 
     @Inject
     public PathToReefFaceThenAlignCommandGroupFactory(
-            PathDriveToLocationUntilAprilTagDetection driveToReefFaceCommand,
-            AlignToTagGlobalMovementWithCalculator alignToReefWithAprilTagCommand,
+            Provider<PathDriveToLocationUntilAprilTagDetection> driveToReefFaceCommandProvider,
+            Provider<AlignToTagGlobalMovementWithCalculator> alignToReefWithAprilTagCommandProvider,
             AprilTagVisionSubsystemExtended aprilTagVisionSubsystem) {
-        this.driveToReefFaceCommand = driveToReefFaceCommand;
-        this.alignToReefWithAprilTagCommand = alignToReefWithAprilTagCommand;
+        this.driveToReefFaceCommandProvider = driveToReefFaceCommandProvider;
+        this.alignToReefWithAprilTagCommandProvider = alignToReefWithAprilTagCommandProvider;
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
     }
 
-    public void setBranch(Landmarks.ReefFace reefFace, Landmarks.Branch branch) {
+    public void setBranch(Landmarks.ReefFace reefFace, Landmarks.Branch branch,
+                          AlignToTagGlobalMovementWithCalculator alignToReefWithAprilTagCommand) {
         if (branch == Landmarks.Branch.A) {
             alignToReefWithAprilTagCommand.setConfigurations(
                     Cameras.FRONT_RIGHT_CAMERA.getIndex(),
@@ -38,10 +40,11 @@ public class PathToReefFaceThenAlignCommandGroupFactory {
     public SequentialCommandGroup create(
             Landmarks.ReefFace targetReefFace, Landmarks.Branch targetBranch) {
         var group = new SequentialCommandGroup();
-
+        PathDriveToLocationUntilAprilTagDetection driveToReefFaceCommand = driveToReefFaceCommandProvider.get();
+        AlignToTagGlobalMovementWithCalculator alignToReefWithAprilTagCommand = alignToReefWithAprilTagCommandProvider.get();
         driveToReefFaceCommand.setTarget(targetReefFace.getViewable(),
                 aprilTagVisionSubsystem.getTargetAprilTagID(targetReefFace));
-        setBranch(targetReefFace, targetBranch);
+        setBranch(targetReefFace, targetBranch, alignToReefWithAprilTagCommand);
         group.addCommands(driveToReefFaceCommand, alignToReefWithAprilTagCommand);
 
         return group;
