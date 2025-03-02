@@ -25,7 +25,7 @@ public class LightSubsystemTest extends BaseCompetitionTest {
         var subsystem = getInjectorComponent().lightSubsystem();
         assertNotNull(subsystem);
 
-        for(int i = 0; i < (Math.pow(2, LightSubsystem.numBits)); i++) {
+        for(int i = 0; i < (Math.pow(2, 4)); i++) {
             subsystem.dioInt.setDIOInt(i);
             subsystem.refreshDataFrame();
             assertEquals(subsystem.dioInt.getDIOInt(), i);
