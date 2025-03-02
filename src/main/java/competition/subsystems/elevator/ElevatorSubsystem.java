@@ -25,6 +25,7 @@ import xbot.common.properties.PropertyFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Hertz;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meter;
@@ -46,8 +47,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     // elevator starts uncalibrated because it could be in the middle of it's range and we have no idea where that is
     private boolean isCalibrated;
     final Alert isNotCalibratedAlert = new Alert("Elevator: not calibrated", Alert.AlertType.kWarning);
-    private MutDistance laserCANPositionOffset;
-    private MutAngle elevatorMotorPositionOffset;
+    private final MutDistance laserCANPositionOffset = Meters.mutable(0);
+    private final MutAngle elevatorMotorPositionOffset = Degrees.mutable(0);
 
     public MutDistance elevatorTargetHeight;
 

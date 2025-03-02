@@ -33,7 +33,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     public final XCANMotorController armMotor;
     public final XDutyCycleEncoder armAbsoluteEncoder;
     public final XDigitalInput lowSensor;
-    MutAngle targetAngle;
+    public final MutAngle targetAngle = Degrees.mutable(0);
     ElectricalContract electricalContract;
 
     double periodicTickCounter;
@@ -156,7 +156,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
     @Override
     public void setTargetValue(Angle value) {
-        targetAngle = value;
+        targetAngle.mut_replace(value);
     }
 
     public void setTargetAngle(Landmarks.CoralLevel value) {
