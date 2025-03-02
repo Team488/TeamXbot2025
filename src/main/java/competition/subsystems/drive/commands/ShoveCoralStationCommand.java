@@ -44,12 +44,14 @@ public class ShoveCoralStationCommand extends BaseCommand {
     @Override
     public void initialize() {
         log.info("Initializing");
+        pose.setAreVisionUpdatesDisabled(true);
         startTime = XTimer.getFPGATimestamp();
     }
 
     @Override
     public void execute() {
         drive.fieldOrientedDrive(XYPair.fromPolar(shoveAngleDegrees, shovePower.get()), 0, pose.getCurrentHeading().getDegrees(), true);
+        aKitLog.record("ShoveAngleDegrees", shoveAngleDegrees);
     }
 
     @Override
@@ -59,6 +61,7 @@ public class ShoveCoralStationCommand extends BaseCommand {
 
     @Override
     public void end(boolean interrupted) {
+        pose.setAreVisionUpdatesDisabled(false);
         drive.stop();
     }
 }
