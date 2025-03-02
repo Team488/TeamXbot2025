@@ -29,7 +29,7 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
     public final XCANMotorController armMotor;
     public final MutAngle targetAngle = Degrees.mutable(0);
     final ElectricalContract electricalContract;
-    double rotationsAtZero;
+    Angle rotationsAtZero;
     boolean isCalibrated = false;
     public final XDigitalInput bottomSensor;
 
@@ -106,7 +106,7 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
     }
 
     private Angle getCalibratedPosition() {
-        return getMotorPosition().minus(Rotations.of(rotationsAtZero));
+        return getMotorPosition().minus(rotationsAtZero);
     }
 
     private Angle getMotorPosition() {
@@ -149,7 +149,7 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
     public void setPositionalGoalIncludingOffset(Angle setpoint) {
         var denominator = degreesPerRotation.get() == 0 ? 0.0001 : degreesPerRotation.get();
         armMotor.setPositionTarget(
-                Rotations.of(setpoint.div(denominator).in(Rotations) + rotationsAtZero),
+                setpoint.div(denominator).plus(rotationsAtZero),
                 XCANMotorController.MotorPidMode.Voltage);
     }
 
@@ -159,7 +159,7 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
     public void setCalibrated() {
         isCalibrated = true;
-        rotationsAtZero = getMotorPosition().in(Rotations);
+        rotationsAtZero = getMotorPosition();
     }
 
     @Override
