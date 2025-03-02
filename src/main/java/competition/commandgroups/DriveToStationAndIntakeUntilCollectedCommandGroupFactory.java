@@ -25,10 +25,11 @@ public class DriveToStationAndIntakeUntilCollectedCommandGroupFactory {
     }
 
     public ParallelDeadlineGroup create(Landmarks.CoralStation station,
-                                        Landmarks.CoralStationSection section) {
+                                        Landmarks.CoralStationSection section,
+                                        boolean addPoint) {
         var driveToCoralStationSectionWhilePrepping = new ParallelCommandGroup();
         var prepCoralSystem = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
-        driveToCoralStationSectionCommand.setTargetCoralStationSection(station, section);
+        driveToCoralStationSectionCommand.setTargetCoralStationSection(station, section, addPoint);
         driveToCoralStationSectionWhilePrepping.addCommands(driveToCoralStationSectionCommand, prepCoralSystem);
 
         return new ParallelDeadlineGroup(intakeUntilCoralCollectedCommand, driveToCoralStationSectionWhilePrepping);

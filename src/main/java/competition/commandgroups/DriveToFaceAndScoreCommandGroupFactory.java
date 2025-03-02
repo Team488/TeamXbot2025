@@ -29,16 +29,13 @@ public class DriveToFaceAndScoreCommandGroupFactory {
                                          Landmarks.CoralLevel targetLevel) {
         var driveToFaceAndScoreCommandGroup = new SequentialCommandGroup();
 
-        var driveToReefWhilePrepping = new ParallelCommandGroup();
-
         var driveToReefFaceThenAlign = driveToReefFaceThenAlignCommandGroupFactory.create(targetReefFace, targetBranch);
-        var prepCoralSystem = prepCoralSystemFactory.create(() -> targetLevel);
 
-        driveToReefWhilePrepping.addCommands(driveToReefFaceThenAlign, prepCoralSystem);
+        var prepCoralSystem = prepCoralSystemFactory.create(() -> targetLevel);
 
         var scoreWhenReady = scoreWhenReadyProvider.get();
 
-        driveToFaceAndScoreCommandGroup.addCommands(driveToReefWhilePrepping, scoreWhenReady);
+        driveToFaceAndScoreCommandGroup.addCommands(driveToReefFaceThenAlign, prepCoralSystem, scoreWhenReady);
 
         return driveToFaceAndScoreCommandGroup;
     }
