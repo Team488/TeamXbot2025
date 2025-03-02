@@ -34,6 +34,8 @@ import competition.subsystems.elevator.commands.ForceElevatorCalibratedCommand;
 import competition.subsystems.elevator.commands.SetElevatorTargetHeightCommand;
 import competition.subsystems.oracle.commands.DriveAccordingToOracleCommand;
 import competition.subsystems.oracle.commands.SuperstructureAccordingToOracleCommand;
+import competition.subsystems.orchestra.OrchestraSubsystem;
+import competition.subsystems.orchestra.commands.PlayMusicCommand;
 import competition.subsystems.pose.Cameras;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.commands.ResetPoseCommand;
@@ -205,7 +207,8 @@ public class OperatorCommandMap {
                                       AlgaeCollectionOutputCommand ejectAlgae,
                                       CoralArmSubsystem coralArmSubsystem,
                                       IntakeCoralCommand intakeCoralCommand,
-                                      PrepAlgaeSystemCommandGroupFactory prepAlgaeSystemCommandGroupFactory) {
+                                      PrepAlgaeSystemCommandGroupFactory prepAlgaeSystemCommandGroupFactory,
+                                      PlayMusicCommand.Factory playMusicCommandFactory) {
         // Coral system buttons
         var prepL4 = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.FOUR);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
@@ -240,6 +243,8 @@ public class OperatorCommandMap {
 
         var homeAlgaeArm = prepAlgaeSystemCommandGroupFactory.create(AlgaeArmSubsystem.AlgaeArmPositions.FullyRetracted);
         oi.operatorGamepad.getPovIfAvailable(90).onTrue(homeAlgaeArm);
+
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Back).whileTrue(playMusicCommandFactory.create(OrchestraSubsystem.Songs.NOKIA_TUNE));
     }
 
     @Inject
