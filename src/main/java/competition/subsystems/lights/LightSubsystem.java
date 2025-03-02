@@ -89,11 +89,12 @@ public class LightSubsystem extends BaseSubsystem {
                           CoralScorerSubsystem coralScorerSubsystem) {
         this.autonomousCommandSelector = autonomousCommandSelector;
         this.coralScorerSubsystem = coralScorerSubsystem;
-        this.dioInt = new DIOInt(
+        XDigitalOutput[] dios = {
             digitalOutputFactory.create(contract.getLightsDio0().channel), 
             digitalOutputFactory.create(contract.getLightsDio1().channel), 
             digitalOutputFactory.create(contract.getLightsDio2().channel), 
-            digitalOutputFactory.create(contract.getLightsDio3().channel));
+            digitalOutputFactory.create(contract.getLightsDio3().channel)};
+        this.dioInt = new DIOInt(dios);
     }
 
     public LightsStateMessage getCurrentState() {
@@ -132,15 +133,12 @@ public class LightSubsystem extends BaseSubsystem {
     }
     
     protected class DIOInt {
-        private XDigitalOutput[] bits;
+        private XDigitalOutput[] dios;
+        private static int numDios;
 
-        public DIOInt(XDigitalOutput bit0, XDigitalOutput bit1, XDigitalOutput bit2, XDigitalOutput bit3) {
-            bits = new XDigitalOutput[numBits];
-
-            this.bits[0] = bit0;
-            this.bits[1] = bit1;
-            this.bits[2] = bit2;
-            this.bits[3] = bit3;
+        public DIOInt(XDigitalOutput[] dios) {
+            this.dios = dios;
+            numDios = dios.length;
         }
 
         /**
@@ -155,8 +153,8 @@ public class LightSubsystem extends BaseSubsystem {
          * 15 -> [true, true, true, true]
          */
         private static boolean[] convertIntToBits(int value) {
-            boolean[] bits = new boolean[numBits];
-            for(int i = 0; i < numBits; i++) {
+            boolean[] bits = new boolean[numDios];
+            for(int i = 0; i < numDios; i++) {
                 bits[i] = (value & (1 << i)) != 0;
             }
             return bits;
@@ -165,16 +163,16 @@ public class LightSubsystem extends BaseSubsystem {
         public void setDIOInt(int num) {
             boolean[] bitsToSet = convertIntToBits(num);
 
-            for(int i = 0; i < numBits; i++) {
-                bits[i].set(bitsToSet[i]);
+            for(int i = 0; i < numDios; i++) {
+                dios[i].set(bitsToSet[i]);
             }
         }
 
         public int getDIOInt() {
             int value = 0;
             
-            for (int i = 0; i < numBits; i++) {
-                value += bits[i].get() ? (1L << i) : 0L;
+            for (int i = 0; i < numDios; i++) {
+                value += dios[i].get() ? (1L << i) : 0L;
             }
 
             return value;
