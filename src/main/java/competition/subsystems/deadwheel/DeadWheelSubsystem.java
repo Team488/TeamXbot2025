@@ -4,6 +4,8 @@ import xbot.common.command.BaseSubsystem;
 import xbot.common.controls.sensors.XEncoder.XEncoderFactory;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Distance;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.Property;
 import xbot.common.properties.PropertyFactory;
@@ -59,6 +61,21 @@ public class DeadWheelSubsystem extends BaseSubsystem {
         rearEncoder.setDistancePerPulse(distancePerPulse);
     }
 
+    public Distance getLeftAdjustedDistance() {
+        return Units.Meters.of(leftEncoder.getAdjustedDistance());
+    }
+
+    public Distance getRightAdjustedDistance() {
+        return Units.Meters.of(rightEncoder.getAdjustedDistance());
+    }
+
+    public Distance getFrontAdjustedDistance() {
+        return Units.Meters.of(frontEncoder.getAdjustedDistance());
+    }
+
+    public Distance getRearAdjustedDistance() {
+        return Units.Meters.of(rearEncoder.getAdjustedDistance());
+    }
 
     public void resetPose(Pose2d pose) {
         currentPose = pose;
