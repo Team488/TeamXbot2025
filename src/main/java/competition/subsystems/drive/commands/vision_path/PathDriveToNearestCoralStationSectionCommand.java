@@ -130,7 +130,7 @@ public class PathDriveToNearestCoralStationSectionCommand
                 .build());
         this.setOptions(
                 XTableValues.TraversalOptions.newBuilder()
-                        .setMetersPerSecond(5)
+                        .setMetersPerSecond(3)
                         .setAccelerationMetersPerSecond(2)
                         .setFinalRotationDegrees(destinationPose.getRotation().getDegrees())
                         .build());

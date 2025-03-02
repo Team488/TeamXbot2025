@@ -7,6 +7,7 @@ import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import org.kobe.xbot.JClient.XTablesClient;
 import org.kobe.xbot.Utilities.Entities.XTableValues;
 import org.kobe.xbot.Utilities.VisionCoprocessorCommander;
 import xbot.common.logging.RobotAssertionManager;
@@ -32,6 +33,7 @@ public class PathDriveToLocation extends SwerveBezierTrajectoryBase {
     private XTableValues.AdditionalArguments additionalArguments;
 
     public XTableValues.BezierCurves curves = null;
+    private CoprocessorCommunicationSubsystem coprocessor;
 
     @Inject
     public PathDriveToLocation(BaseSwerveDriveSubsystem drive, PoseSubsystem pose,
@@ -44,6 +46,7 @@ public class PathDriveToLocation extends SwerveBezierTrajectoryBase {
                 coprocessorCommunicationSubsystem);
         this.commander =
                 coprocessorCommunicationSubsystem.getOrinVisionCoprocessorCommander();
+        this.coprocessor = coprocessorCommunicationSubsystem;
         this.traversalOptions = XTableValues.TraversalOptions.newBuilder().build();
         Translation2d center = Landmarks.BlueCenterOfReef.getTranslation();
         routingCircle = new ReefRoutingCircle(center, 2);
@@ -79,37 +82,40 @@ public class PathDriveToLocation extends SwerveBezierTrajectoryBase {
         log.info("Initializing");
         Pose2d startingPose = pose.getCurrentPose2d();
         curves = null;
-        if (!useBackupPointToPoint) {
-            XTableValues.RequestVisionCoprocessorMessage.Builder message = XTableValues.RequestVisionCoprocessorMessage.newBuilder()
-                    .setStart(XTableValues.ControlPoint.newBuilder()
-                            .setY(startingPose.getY()) // Set Pose2d Y value.
-                            .setX(startingPose.getX()) // Set Pose2d X value.
-                            .build())
-                    .setEnd(XTableValues.ControlPoint.newBuilder()
-                            .setX(target.getX()) // Set goal Pose2d X value.
-                            .setY(target.getY()) // Set goal Pose2d Y value.
-                            .build())
-                    .setSafeDistanceInches(safeInches);
-            if (traversalOptions != null) {
-                message.setOptions(traversalOptions);
-            }
-            if (additionalArguments != null) {
-                message.setArguments(additionalArguments);
-            }
-            curves = commander.requestBezierPathWithOptions(
 
-                    message
-                            .build(),
-                    3000, TimeUnit.MILLISECONDS); // When should it give up and return
-            // null for any reason?
+        XTableValues.RequestVisionCoprocessorMessage.Builder message = XTableValues.RequestVisionCoprocessorMessage.newBuilder()
+                .setStart(XTableValues.ControlPoint.newBuilder()
+                        .setY(startingPose.getY()) // Set Pose2d Y value.
+                        .setX(startingPose.getX()) // Set Pose2d X value.
+                        .build())
+                .setEnd(XTableValues.ControlPoint.newBuilder()
+                        .setX(target.getX()) // Set goal Pose2d X value.
+                        .setY(target.getY()) // Set goal Pose2d Y value.
+                        .build())
+                .setSafeDistanceInches(safeInches);
+        if (traversalOptions != null) {
+            message.setOptions(traversalOptions);
         }
+        if (additionalArguments != null) {
+            message.setArguments(additionalArguments);
+        }
+        curves = commander.requestBezierPathWithOptions(
+                message
+                        .build(),
+                3000, TimeUnit.MILLISECONDS); // When should it give up and return
+        // null for any reason?
+
         if (curves == null) {
             useBackupPointToPoint = true;
             log.warn("No curves returned from vision coprocessor within timeout! "
                     + "Using P2P from now on.");
-            pointToPoint();
         } else {
+
             this.setSegmentedBezierCurve(curves, curves.getOptions());
+            XTablesClient client = this.coprocessor.getXTablesManager().getOrNull();
+            if (client != null) {
+                client.putBezierCurves("bezier_path", curves);
+            }
         }
         super.initialize();
     }
