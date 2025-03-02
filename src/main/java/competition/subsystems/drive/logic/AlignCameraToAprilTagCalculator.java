@@ -124,7 +124,7 @@ public class AlignCameraToAprilTagCalculator {
     private void reset() {
         drive.getPositionalPid().reset();
         tagAcquisitionState = TagAcquisitionState.NeverSeen;
-        activity = Activity.Searching;
+        activity = Activity.ApproachWhileCentering;
     }
 
     public void configureAndReset(int targetAprilTagID, int targetCameraID, Distance offset,

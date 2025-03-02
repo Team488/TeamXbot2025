@@ -24,6 +24,7 @@ import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.CalibrateDriveCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
+import competition.subsystems.drive.commands.DriveToCoralStationSectionCommand;
 import competition.subsystems.drive.commands.DriveToCoralStationWithVisionCommand;
 import competition.subsystems.drive.commands.DriveToLocationWithPID;
 import competition.subsystems.drive.commands.RotateToHeadingWithHeadingModule;
@@ -352,21 +353,21 @@ public class OperatorCommandMap {
                                         FromLeftCageScoreLeftFacesLevelFours fromLeftCageScoreLeftFacesLevelFours) {
         var setFromLeftFarLeftBranchALevelFour = setAutonomousCommandProvider.get();
         setFromLeftFarLeftBranchALevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFactProv.get().create(
-                Landmarks.BlueCageTwoStartingLine, Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR
+                Landmarks.BlueCageTwoStartingLine, Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.THREE
         ));
         oi.neoTrellis.getifAvailable(1).onTrue(setFromLeftFarLeftBranchALevelFour); // temporary button
         setFromLeftFarLeftBranchALevelFour.includeOnSmartDashboard("From Left Score Far Left Branch A Level 4 Auto");
 
-        var setFromMidFarBranchALevelFour = setAutonomousCommandProvider.get();
-        setFromMidFarBranchALevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFactProv.get().create(
-                Landmarks.BlueMidOfLine, Landmarks.ReefFace.FAR, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR
+        var setFromMidFarBranchBLevelFour = setAutonomousCommandProvider.get();
+        setFromMidFarBranchBLevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFactProv.get().create(
+                Landmarks.BlueMidOfLine, Landmarks.ReefFace.FAR, Landmarks.Branch.B, Landmarks.CoralLevel.THREE
         ));
-        oi.neoTrellis.getifAvailable(2).onTrue(setFromMidFarBranchALevelFour); // temporary button
-        setFromMidFarBranchALevelFour.includeOnSmartDashboard("From Mid Score Far Branch A Level 4 Auto");
+        oi.neoTrellis.getifAvailable(2).onTrue(setFromMidFarBranchBLevelFour); // temporary button
+        setFromMidFarBranchBLevelFour.includeOnSmartDashboard("From Mid Score Far Branch B Level 4 Auto");
 
         var setFromRightFarRightBranchBLevelFour = setAutonomousCommandProvider.get();
         setFromRightFarRightBranchBLevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFactProv.get().create(
-                Landmarks.BlueCageFiveStartingLine, Landmarks.ReefFace.FAR_RIGHT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR
+                Landmarks.BlueCageFiveStartingLine, Landmarks.ReefFace.FAR_RIGHT, Landmarks.Branch.B, Landmarks.CoralLevel.THREE
         ));
         oi.neoTrellis.getifAvailable(3).onTrue(setFromRightFarRightBranchBLevelFour); // temporary button
         setFromRightFarRightBranchBLevelFour.includeOnSmartDashboard("From Right Score Far Right Branch A Level 4 Auto");
@@ -382,5 +383,13 @@ public class OperatorCommandMap {
             ResetSimulatedPose resetPose
     ) {
         resetPose.includeOnSmartDashboard();
+    }
+
+    @Inject
+    public void test(OperatorInterface oi,
+                     DriveToCoralStationSectionCommand driveToCoralStationSectionCommand) {
+
+        driveToCoralStationSectionCommand.setTargetCoralStationSection(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.FAR, false);
+        oi.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(driveToCoralStationSectionCommand);
     }
 }
