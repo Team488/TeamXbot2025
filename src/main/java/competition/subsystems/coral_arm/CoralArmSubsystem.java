@@ -89,8 +89,6 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
             this.lowSensor = null;
         }
 
-        targetAngle.mut_replace(Degrees.of(0));
-
         this.degreesPerRotations = propertyFactory.createPersistentProperty("Degrees Per Rotations", 5.790);
         this.rangeOfMotionDegrees = propertyFactory.createPersistentProperty("Range of Motion in Degrees", 125);
         this.scoreAngleDegrees = propertyFactory.createPersistentProperty("Scoring Angle in Degrees", 125);

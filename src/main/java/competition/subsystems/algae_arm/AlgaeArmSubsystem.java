@@ -82,8 +82,6 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
             this.bottomSensor = null;
         }
 
-        targetAngle.mut_replace(Degree.of(0));
-
         this.degreesPerRotation = propertyFactory.createPersistentProperty("DegreesPerRotation", 13.523);
         this.rangeOfMotionInDegrees = propertyFactory.createPersistentProperty("RangeOfMotionInDegrees", 160.0);
         this.groundCollectionDegrees = propertyFactory.createPersistentProperty("GroundCollectionDegrees", 45.0);
