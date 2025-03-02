@@ -86,9 +86,8 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
         this.repositionArmAmount = propertyFactory.createPersistentProperty("RepositionArmAmount", 5);
         
-        propertyFactory.setDefaultLevel(PropertyLevel.Debug);
-        this.degreesPerRotation = propertyFactory.createPersistentProperty("DegreesPerRotation", 13.523);
-
+        this.degreesPerRotation = propertyFactory.createPersistentProperty("DegreesPerRotation", 4.559);
+        
         this.rangeOfMotionInDegrees = propertyFactory.createPersistentProperty("RangeOfMotionInDegrees", 160.0);
         this.groundCollectionDegrees = propertyFactory.createPersistentProperty("GroundCollectionDegrees", 45.0);
         this.reefLowBottomToTopSweepStart = propertyFactory.createPersistentProperty("ReefLowBottomToTopSweepStart", 90.0);
@@ -97,7 +96,6 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
         this.reefLowTopToBottomSweepEnd = propertyFactory.createPersistentProperty("ReefLowTopToBottomSweepEnd", 90.0);
         this.reefHighSweepStart = propertyFactory.createPersistentProperty("ReefHighSweepStart", 110.0);
         this.reefHighSweepEnd = propertyFactory.createPersistentProperty("ReefHighSweepEnd", 150.0);
-        propertyFactory.setDefaultLevel(PropertyLevel.Important);
     }
 
     @Override
