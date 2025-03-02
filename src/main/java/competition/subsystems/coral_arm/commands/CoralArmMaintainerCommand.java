@@ -64,7 +64,7 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
         humanMinPower = pf.createPersistentProperty("HumanMinPower", -.20);
         algaeArmCollisionAngleDegrees = pf.createPersistentProperty("AlgaeArmCollisionAngleDegrees", 90);
         level123SafeArmAngleDegrees = pf.createPersistentProperty("L123SafeArmAngleDegrees", 60);
-        level4SafeArmAngleDegrees = pf.createPersistentProperty("L4SafeArmAngleDegrees", 120);
+        level4SafeArmAngleDegrees = pf.createPersistentProperty("L4SafeArmAngleDegrees", 126);
 
         decider.setDeadband(0.02);
     }

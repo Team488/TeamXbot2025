@@ -25,6 +25,7 @@ import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.AlignToSpecificHumanLoadingStationCommand;
 import competition.subsystems.drive.commands.CalibrateDriveCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
+import competition.subsystems.drive.commands.DriveToClosestReefSectionWithVisionCommand;
 import competition.subsystems.drive.commands.DriveToCoralStationWithVisionCommand;
 import competition.subsystems.drive.commands.DriveToLocationWithPID;
 import competition.subsystems.drive.commands.RotateToHeadingWithHeadingModule;
@@ -78,6 +79,7 @@ public class OperatorCommandMap {
             ResetPoseCommand resetPoseCommand,
             DriveAccordingToOracleCommand driveAccordingToOracle,
             SuperstructureAccordingToOracleCommand superstructureAccordingToOracle,
+            DriveToClosestReefSectionWithVisionCommand driveToClosestReefSectionWithVisionCommand,
             DriveToCoralStationWithVisionCommand driveToCoralStationWithVisionCommand,
             PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
             DebugSwerveModuleCommand debugModule,
@@ -99,7 +101,8 @@ public class OperatorCommandMap {
         var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
 
         var homed = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(driveToCoralStationWithVisionCommand);
+//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(driveToClosestReefSectionWithVisionCommand);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(driveToCoralStationWithVisionCommand);
         var branchAHeadingAssistedDriveAndScore = headingAssistedDriveAndScoreCommandGroupFactory.create(Landmarks.Branch.A);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(branchAHeadingAssistedDriveAndScore)
                         .onFalse(homed);
@@ -151,13 +154,10 @@ public class OperatorCommandMap {
         oneLength.logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
         oneLength.logic.setKeyPoints(points3);
 
-        oneLength.includeOnSmartDashboard("OneLengthTest");
+        // oneLength.includeOnSmartDashboard("OneLengthTest");
 
-        aroundBlueReef.includeOnSmartDashboard("AroundReefTest");
-        backAndFourth.includeOnSmartDashboard("BackAndForthTest");
-
-        // Don't think this is needed anymore, I'll keep it just in case
-        resetPoseCommand.includeOnSmartDashboard("ResetPoseToOriginCommand");
+        // aroundBlueReef.includeOnSmartDashboard("AroundReefTest");
+        // backAndFourth.includeOnSmartDashboard("BackAndForthTest");
 
         var driveWithPidNear = driveToLocationWithPIDProvider.get();
         driveWithPidNear.setLocationTarget(new Translation2d(1, 0));
@@ -180,13 +180,13 @@ public class OperatorCommandMap {
         var rotateTo180Degrees = rotationToHeadingWithHeadingModuleProvider.get();
         rotateTo180Degrees.setTargetHeading(Degree.of(180));
 
-        driveWithPidNear.includeOnSmartDashboard("DriveToLocationWithPIDNear");
-        driveWithPidFar.includeOnSmartDashboard("DriveToLocationWithPIDFar");
-        rotateTo5Degrees.includeOnSmartDashboard("RotateTo5Degrees");
-        rotateTo10Degrees.includeOnSmartDashboard("RotateTo10Degrees");
-        rotateTo45Degrees.includeOnSmartDashboard("RotateTo45Degrees");
-        rotateTo90Degrees.includeOnSmartDashboard("RotateTo90Degrees");
-        rotateTo180Degrees.includeOnSmartDashboard("RotateTo180Degrees");
+        // driveWithPidNear.includeOnSmartDashboard("DriveToLocationWithPIDNear");
+        // driveWithPidFar.includeOnSmartDashboard("DriveToLocationWithPIDFar");
+        // rotateTo5Degrees.includeOnSmartDashboard("RotateTo5Degrees");
+        // rotateTo10Degrees.includeOnSmartDashboard("RotateTo10Degrees");
+        // rotateTo45Degrees.includeOnSmartDashboard("RotateTo45Degrees");
+        // rotateTo90Degrees.includeOnSmartDashboard("RotateTo90Degrees");
+        // rotateTo180Degrees.includeOnSmartDashboard("RotateTo180Degrees");
     }
 
 
@@ -374,12 +374,5 @@ public class OperatorCommandMap {
         setFromLeftCageScoreLeftFacesLevelFours.setAutoCommand(fromLeftCageScoreLeftFacesLevelFours);
         oi.neoTrellis.getifAvailable(4).onTrue(setFromLeftCageScoreLeftFacesLevelFours); // temporary button
         setFromLeftCageScoreLeftFacesLevelFours.includeOnSmartDashboard("From Left Score Left Face's Level Fours Auto");
-    }
-
-    @Inject
-    public void setupSimulatorCommands(
-            ResetSimulatedPose resetPose
-    ) {
-        resetPose.includeOnSmartDashboard();
     }
 }

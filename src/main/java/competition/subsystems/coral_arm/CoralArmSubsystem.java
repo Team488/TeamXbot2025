@@ -16,6 +16,7 @@ import xbot.common.controls.sensors.XDutyCycleEncoder;
 import xbot.common.math.MathUtils;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
+import xbot.common.properties.Property.PropertyLevel;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -89,12 +90,14 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
             this.lowSensor = null;
         }
 
-        this.degreesPerRotations = propertyFactory.createPersistentProperty("Degrees Per Rotations", 5.790);
-        this.rangeOfMotionDegrees = propertyFactory.createPersistentProperty("Range of Motion in Degrees", 150);
         this.level123ScoringAngle = propertyFactory.createPersistentProperty("Level 1/2/3 Scoring Angle", 125);
         this.level4ScoringAngle = propertyFactory.createPersistentProperty("Level 4 Scoring Angle", 150);
+        propertyFactory.setDefaultLevel(PropertyLevel.Debug);
         this.humanLoadAngleDegrees = propertyFactory.createPersistentProperty("Human Loading Angle in Degrees", 0);
+        this.degreesPerRotations = propertyFactory.createPersistentProperty("Degrees Per Rotations", 5.790);
+        this.rangeOfMotionDegrees = propertyFactory.createPersistentProperty("Range of Motion in Degrees", 150);
         this.powerWhenNotCalibrated = propertyFactory.createPersistentProperty("Power When Not Calibrated", 0.25);
+        propertyFactory.setDefaultLevel(PropertyLevel.Important);
     }
 
     @Override
