@@ -77,4 +77,11 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
     public abstract boolean isPawlMotorReady();
 
     public abstract CANMotorControllerInfo getPawlMotor();
+    public abstract DeviceInfo getLightsDio0();
+
+    public abstract DeviceInfo getLightsDio1();
+
+    public abstract DeviceInfo getLightsDio2();
+
+    public abstract DeviceInfo getLightsDio3();
 }

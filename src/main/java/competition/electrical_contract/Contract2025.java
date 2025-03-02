@@ -364,5 +364,22 @@ public class Contract2025 extends ElectricalContract {
                 50,
                 new CANMotorControllerOutputConfig()
                         .withStatorCurrentLimit(Amps.of(60)));
+    public DeviceInfo getLightsDio0() {
+        return new DeviceInfo("Lights0", 2);
+    }
+
+    @Override
+    public DeviceInfo getLightsDio1() {
+        return new DeviceInfo("Lights1", 4);
+    }
+
+    @Override
+    public DeviceInfo getLightsDio2() {
+        return new DeviceInfo("Lights2", 7);
+    }
+
+    @Override
+    public DeviceInfo getLightsDio3() {
+        return new DeviceInfo("Lights3", 8);
     }
 }
