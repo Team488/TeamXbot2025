@@ -26,6 +26,9 @@ public class DeadWheelSubsystem extends BaseSubsystem {
     private final int pulsesPerRevolution;
     private final double distancePerPulse;
 
+    private final DoubleProperty wheelDiameterMeters;
+    private final DoubleProperty pulsesPerRevolution;
+
 
     private Pose2d currentPose = new Pose2d();
     private double prevLeftDistance = 0;
@@ -39,8 +42,8 @@ public class DeadWheelSubsystem extends BaseSubsystem {
         super();
         propManager.setPrefix(this);
         propManager.setDefaultLevel(Property.PropertyLevel.Important);
-        DoubleProperty wheelDiameterMeters = propManager.createPersistentProperty("wheelDiameterMeters", 0.032);
-        DoubleProperty pulsesPerRevolution = propManager.createPersistentProperty("pulsesPerRevolution", 2000.0);
+        this.wheelDiameterMeters = propManager.createPersistentProperty("wheelDiameterMeters", 0.032);
+        this.pulsesPerRevolution = propManager.createPersistentProperty("pulsesPerRevolution", 2000.0);
 
         this.trackWidth = propManager.createPersistentProperty("TrackWidth", 0.5);
 
@@ -55,10 +58,15 @@ public class DeadWheelSubsystem extends BaseSubsystem {
         rearEncoder = encoderFactory.create("RearDeadwheelEncoder",
                 5,6, distancePerPulse);
 
-        leftEncoder.setDistancePerPulse(distancePerPulse);
-        rightEncoder.setDistancePerPulse(distancePerPulse);
-        frontEncoder.setDistancePerPulse(distancePerPulse);
-        rearEncoder.setDistancePerPulse(distancePerPulse);
+        leftEncoder.setInverted(true);
+        rightEncoder.setInverted(false);
+        frontEncoder.setInverted(true);
+        rearEncoder.setInverted(false);
+
+        dataFrameRefreshables.add(leftEncoder);
+        dataFrameRefreshables.add(rightEncoder);
+        dataFrameRefreshables.add(frontEncoder);
+        dataFrameRefreshables.add(rearEncoder);
     }
 
     public Distance getLeftAdjustedDistance() {
@@ -87,6 +95,13 @@ public class DeadWheelSubsystem extends BaseSubsystem {
 
     public void update() {
         EncoderValues result = calculateValues();
+
+        double distancePerPulse = (Math.PI * wheelDiameterMeters.get()) / pulsesPerRevolution.get();
+
+        leftEncoder.setDistancePerPulseSupplier(() -> distancePerPulse);
+        rightEncoder.setDistancePerPulseSupplier(() -> distancePerPulse);
+        frontEncoder.setDistancePerPulseSupplier(() -> distancePerPulse);
+        rearEncoder.setDistancePerPulseSupplier(() -> distancePerPulse);
 
         this.aKitLog.record("DeadWheelLeftAdjusted", leftEncoder.getAdjustedDistance());        
         this.aKitLog.record("DeadWheelRgithAdjusted", rightEncoder.getAdjustedDistance());
