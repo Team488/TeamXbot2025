@@ -56,7 +56,7 @@ public class DriveToReefFaceUntilDetectionCommand extends SwerveSimpleTrajectory
     @Override
     public boolean isFinished() {
         return aprilTagVisionSubsystem.reefAprilTagCameraHasCorrectTarget(
-                aprilTagVisionSubsystem.getTargetAprilTagID(targetReefFacePose))
+                aprilTagVisionSubsystem.getTargetAprilTagID(PoseSubsystem.convertBlueToRedIfNeeded(targetReefFacePose)))
                 || logic.recommendIsFinished(pose.getCurrentPose2d(), drive.getPositionalPid(), headingModule);
     }
 }
