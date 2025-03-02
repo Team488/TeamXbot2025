@@ -3,6 +3,7 @@ package competition.subsystems.algae_arm;
 import competition.electrical_contract.ElectricalContract;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.wpilibj.Alert;
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
@@ -27,7 +28,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 @Singleton
 public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
     public final XCANMotorController armMotor;
-    Angle targetAngle = Degree.of(0);
+    public final MutAngle targetAngle = Degrees.mutable(0);
     final ElectricalContract electricalContract;
     double rotationsAtZero;
     boolean isCalibrated = false;
@@ -85,9 +86,8 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
         this.repositionArmAmount = propertyFactory.createPersistentProperty("RepositionArmAmount", 5);
         
-        propertyFactory.setDefaultLevel(PropertyLevel.Debug);
-        this.degreesPerRotation = propertyFactory.createPersistentProperty("DegreesPerRotation", 13.523);
-
+        this.degreesPerRotation = propertyFactory.createPersistentProperty("DegreesPerRotation", 4.559);
+        
         this.rangeOfMotionInDegrees = propertyFactory.createPersistentProperty("RangeOfMotionInDegrees", 160.0);
         this.groundCollectionDegrees = propertyFactory.createPersistentProperty("GroundCollectionDegrees", 45.0);
         this.reefLowBottomToTopSweepStart = propertyFactory.createPersistentProperty("ReefLowBottomToTopSweepStart", 90.0);
@@ -96,7 +96,6 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
         this.reefLowTopToBottomSweepEnd = propertyFactory.createPersistentProperty("ReefLowTopToBottomSweepEnd", 90.0);
         this.reefHighSweepStart = propertyFactory.createPersistentProperty("ReefHighSweepStart", 110.0);
         this.reefHighSweepEnd = propertyFactory.createPersistentProperty("ReefHighSweepEnd", 150.0);
-        propertyFactory.setDefaultLevel(PropertyLevel.Important);
     }
 
     @Override
@@ -139,7 +138,7 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
     @Override
     public void setTargetValue(Angle value) {
-        targetAngle = value;
+        targetAngle.mut_replace(value);
     }
 
     public void setTargetValue(AlgaeArmPositions position) {
@@ -198,9 +197,9 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
     public void repositionToTargetAngle(boolean goingUpHere) {
         if (goingUpHere) {
-            targetAngle = getTargetValue().plus(Degrees.of(repositionArmAmount.get()));
+            targetAngle.mut_replace(getTargetValue().plus(Degrees.of(repositionArmAmount.get())));
         } else {
-            targetAngle = getTargetValue().minus(Degrees.of(repositionArmAmount.get()));
+            targetAngle.mut_replace(getTargetValue().minus(Degrees.of(repositionArmAmount.get())));
         }
     }
 
