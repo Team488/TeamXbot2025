@@ -3,6 +3,7 @@ package competition.subsystems.drive.commands;
 import competition.electrical_contract.ElectricalContract;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.logic.AlignCameraToAprilTagCalculator;
+import competition.subsystems.pose.DriverRelativeCameraValues;
 import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
@@ -19,6 +20,7 @@ public class AlignToReefWithAprilTagCommand extends AlignToTagGlobalMovementWith
     private double offsetInInches;
     private boolean isDriverRelative = false;
     private boolean hasCameraFlippedDriverRelative = false;
+    private boolean hasSetConfiguration = false;
 
     @Inject
     public AlignToReefWithAprilTagCommand(AprilTagVisionSubsystemExtended aprilTagVisionSubsystem, DriveSubsystem drive,
@@ -30,14 +32,22 @@ public class AlignToReefWithAprilTagCommand extends AlignToTagGlobalMovementWith
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
     }
 
-    public void setConfigurations(int cameraToUse, boolean isCameraBackwards, double offsetInInches) {
+    public void setConfigurations(int cameraToUse, boolean isCameraBackwards, double offsetInInches, boolean isDriverRelative) {
         this.cameraToUse = cameraToUse;
         this.isCameraBackwards = isCameraBackwards;
         this.offsetInInches = offsetInInches;
+        this.isDriverRelative = isDriverRelative;
+        this.hasSetConfiguration = true;
     }
 
     @Override
     public void initialize() {
+        log.info("Initializing");
+        if (!hasSetConfiguration) {
+            cancel();
+            return;
+        }
+
         if (isDriverRelative) {
             setDriverRelativeCameraToUse();
         }
@@ -47,31 +57,13 @@ public class AlignToReefWithAprilTagCommand extends AlignToTagGlobalMovementWith
                 aprilTagVisionSubsystem.getTargetAprilTagID(pose.getClosestReefFacePose()),
                 isCameraBackwards,
                 offsetInInches
-            );
+        );
         super.initialize();
     }
 
-    public void setDriverRelative(boolean isEnabled) {
-        this.isDriverRelative = isEnabled;
-    }
-
     private void setDriverRelativeCameraToUse() {
-        List<Integer> farReefFacePoseIDList = Arrays.asList(20, 21, 22, 9, 10 , 11);
-        List<Integer> closeReefFacePoseIDList = Arrays.asList(19, 18, 17, 6, 7, 8);
-
-        // if our target april tag is a far april tag and cameras haven't been flipped,
-        // flip and use the other front camera to align with tag
-        if (farReefFacePoseIDList.contains(aprilTagVisionSubsystem.getTargetAprilTagID(pose.getClosestReefFacePose()))
-                && !hasCameraFlippedDriverRelative) {
-            cameraToUse = (cameraToUse + 1) % 2;
-            hasCameraFlippedDriverRelative = true;
-        }
-        // if our target april tag is a close april tag and cameras have been flipped,
-        // flip and use the other front camera to align with tag
-        else if (closeReefFacePoseIDList.contains(aprilTagVisionSubsystem.getTargetAprilTagID(pose.getClosestReefFacePose()))
-                && hasCameraFlippedDriverRelative) {
-            cameraToUse = (cameraToUse + 1) % 2;
-            hasCameraFlippedDriverRelative = false;
-        }
+        DriverRelativeCameraValues values = pose.getDriverRelativeCameraToUse(hasCameraFlippedDriverRelative, cameraToUse);
+        hasCameraFlippedDriverRelative = values.hasCameraFlippedDriverRelative();
+        cameraToUse = values.cameraToUse();
     }
 }
