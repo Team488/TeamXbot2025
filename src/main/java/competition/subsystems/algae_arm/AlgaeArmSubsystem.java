@@ -199,9 +199,9 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
     public void repositionToTargetAngle(boolean goingUpHere) {
         if (goingUpHere) {
-            targetAngle = getTargetValue().plus(Degrees.of(repositionArmAmount.get()));
+            targetAngle.mut_replace(getTargetValue().plus(Degrees.of(repositionArmAmount.get())));
         } else {
-            targetAngle = getTargetValue().minus(Degrees.of(repositionArmAmount.get()));
+            targetAngle.mut_replace(getTargetValue().minus(Degrees.of(repositionArmAmount.get())));
         }
     }
 
