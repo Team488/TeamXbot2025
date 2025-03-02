@@ -6,6 +6,8 @@ import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.MutAngle;
+import edu.wpi.first.units.measure.MutDistance;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -24,6 +26,7 @@ import xbot.common.properties.Property.PropertyLevel;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Hertz;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meter;
@@ -45,10 +48,10 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     // elevator starts uncalibrated because it could be in the middle of it's range and we have no idea where that is
     private boolean isCalibrated;
     final Alert isNotCalibratedAlert = new Alert("Elevator: not calibrated", Alert.AlertType.kWarning);
-    private Distance laserCANPositionOffset;
-    private Angle elevatorMotorPositionOffset;
+    private final MutDistance laserCANPositionOffset = Meters.mutable(0);
+    private final MutAngle elevatorMotorPositionOffset = Degrees.mutable(0);
 
-    public Distance elevatorTargetHeight;
+    public final MutDistance elevatorTargetHeight = Inches.mutable(0);
 
     public final DoubleProperty rotationsPerMeter;
 
@@ -84,9 +87,6 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
         this.contract = contract;
 
-        this.laserCANPositionOffset = Meters.zero();
-        this.elevatorMotorPositionOffset = Rotations.zero();
-        this.elevatorTargetHeight = Inches.of(0);
         sensorFusionFilter = new ComplimentaryFilter(pf, this.getPrefix(), true, 0.5);
 
         pf.setPrefix(this);
@@ -188,11 +188,11 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     public void markElevatorAsCalibratedAgainstLowerLimit() {
         isCalibrated = true;
         if (this.masterMotor != null) {
-            laserCANPositionOffset = getRawLaserDistance();
-            elevatorMotorPositionOffset = getRawMotorAngle().copy();
+            laserCANPositionOffset.mut_replace(getRawLaserDistance());
+            elevatorMotorPositionOffset.mut_replace(getRawMotorAngle().copy());
         } else {
-            laserCANPositionOffset = Meters.zero();
-            elevatorMotorPositionOffset = Rotations.zero();
+            laserCANPositionOffset.mut_replace(Meters.zero());
+            elevatorMotorPositionOffset.mut_replace(Rotations.zero());
         }
     }
 
@@ -200,7 +200,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         var laserDistance = getCalibratedLaserDistance();
         var motorRotations = getRawMotorAngle();
         var motorRotationsToZero = Rotations.of(laserDistance.in(Meters) / getMetersPerRotation().in(Meters));
-        elevatorMotorPositionOffset = motorRotations.minus(motorRotationsToZero);
+        elevatorMotorPositionOffset.mut_replace(motorRotations.minus(motorRotationsToZero));
     }
 
     @Override
@@ -225,7 +225,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     @Override
     public void setTargetValue(Distance value) {
-        elevatorTargetHeight = value;
+        elevatorTargetHeight.mut_replace(value);
     }
 
     public void setTargetHeight(Landmarks.CoralLevel value) {

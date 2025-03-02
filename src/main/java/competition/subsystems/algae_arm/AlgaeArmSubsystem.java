@@ -3,6 +3,7 @@ package competition.subsystems.algae_arm;
 import competition.electrical_contract.ElectricalContract;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.wpilibj.Alert;
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
@@ -27,7 +28,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 @Singleton
 public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
     public final XCANMotorController armMotor;
-    Angle targetAngle = Degree.of(0);
+    public final MutAngle targetAngle = Degrees.mutable(0);
     final ElectricalContract electricalContract;
     double rotationsAtZero;
     boolean isCalibrated = false;
@@ -139,7 +140,7 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
     @Override
     public void setTargetValue(Angle value) {
-        targetAngle = value;
+        targetAngle.mut_replace(value);
     }
 
     public void setTargetValue(AlgaeArmPositions position) {
@@ -198,9 +199,9 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
     public void repositionToTargetAngle(boolean goingUpHere) {
         if (goingUpHere) {
-            targetAngle = getTargetValue().plus(Degrees.of(repositionArmAmount.get()));
+            targetAngle.mut_replace(getTargetValue().plus(Degrees.of(repositionArmAmount.get())));
         } else {
-            targetAngle = getTargetValue().minus(Degrees.of(repositionArmAmount.get()));
+            targetAngle.mut_replace(getTargetValue().minus(Degrees.of(repositionArmAmount.get())));
         }
     }
 
