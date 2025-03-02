@@ -33,8 +33,8 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
     final DoubleProperty humanMinPower;
 
     final DoubleProperty algaeArmCollisionAngleDegrees;
-    final DoubleProperty L123SafeArmAngleDegrees;
-    final DoubleProperty L4SafeArmAngleDegrees;
+    final DoubleProperty level123SafeArmAngleDegrees;
+    final DoubleProperty level4SafeArmAngleDegrees;
 
     final TrapezoidProfileManager profileManager;
 
@@ -63,8 +63,8 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
         humanMaxPower = pf.createPersistentProperty("HumanMaxPower", .20);
         humanMinPower = pf.createPersistentProperty("HumanMinPower", -.20);
         algaeArmCollisionAngleDegrees = pf.createPersistentProperty("AlgaeArmCollisionAngleDegrees", 90);
-        L123SafeArmAngleDegrees = pf.createPersistentProperty("L123SafeArmAngleDegrees", 60);
-        L4SafeArmAngleDegrees = pf.createPersistentProperty("L4SafeArmAngleDegrees", 110);
+        level123SafeArmAngleDegrees = pf.createPersistentProperty("L123SafeArmAngleDegrees", 60);
+        level4SafeArmAngleDegrees = pf.createPersistentProperty("L4SafeArmAngleDegrees", 110);
 
         decider.setDeadband(0.02);
     }
@@ -91,11 +91,11 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
         
         var currentTarget = coralArm.getTargetValue();
         if(imminentReefCollision) {
-            currentTarget = Degrees.of(this.L4SafeArmAngleDegrees.get());
+            currentTarget = Degrees.of(this.level4SafeArmAngleDegrees.get());
         }
         // this angle is even more conservative
         if(imminentAlgaeArmCollision) {
-            currentTarget = Degrees.of(this.L123SafeArmAngleDegrees.get());
+            currentTarget = Degrees.of(this.level123SafeArmAngleDegrees.get());
         }
 
         profileManager.setTargetPosition(
@@ -110,7 +110,7 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
     }
 
     private boolean wouldCollideWithAlgaeArm(Angle targetGoal) {
-        var coralArmGoalAboveSafeLevel = targetGoal.gt(Degrees.of(this.L123SafeArmAngleDegrees.get()));
+        var coralArmGoalAboveSafeLevel = targetGoal.gt(Degrees.of(this.level123SafeArmAngleDegrees.get()));
         var algaeArmRaised = algaeArm.getCurrentValue().in(Degrees) >= algaeArmCollisionAngleDegrees.get();
         var elevatorBelowLevel2Height = elevator.getCurrentValue().lt(elevator.l2Height.get().minus(Inches.of(0.25)));
 
@@ -118,7 +118,7 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
     }
 
     private boolean wouldCollideWithReef(Angle targetGoal) {
-        var coralArmGoalAboveSafeLevel = targetGoal.gt(Degrees.of(this.L4SafeArmAngleDegrees.get()));
+        var coralArmGoalAboveSafeLevel = targetGoal.gt(Degrees.of(this.level4SafeArmAngleDegrees.get()));
         var elevatorBelowLevel2Height = elevator.getCurrentValue().lt(elevator.l4Height.get().minus(Inches.of(5)));
         return coralArmGoalAboveSafeLevel && elevatorBelowLevel2Height;
     }
