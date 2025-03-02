@@ -93,13 +93,11 @@ public class OperatorCommandMap {
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
 
         var alignToReefWithAprilTagWithLeftCamera = alignToReefWithAprilTagProvider.get();
-        alignToReefWithAprilTagWithLeftCamera.setConfigurations(Cameras.FRONT_LEFT_CAMERA.getIndex(), false, -2);
-        alignToReefWithAprilTagWithLeftCamera.setDriverRelative(true);
+        alignToReefWithAprilTagWithLeftCamera.setConfigurations(Cameras.FRONT_LEFT_CAMERA.getIndex(), false, -2, true);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(alignToReefWithAprilTagWithLeftCamera);
 
         var alignToReefWithAprilTagWithRightCamera = alignToReefWithAprilTagProvider.get();
-        alignToReefWithAprilTagWithRightCamera.setConfigurations(Cameras.FRONT_RIGHT_CAMERA.getIndex(), false, -2);
-        alignToReefWithAprilTagWithRightCamera.setDriverRelative(true);
+        alignToReefWithAprilTagWithRightCamera.setConfigurations(Cameras.FRONT_RIGHT_CAMERA.getIndex(), false, -2, true);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(alignToReefWithAprilTagWithRightCamera);
 
         var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
@@ -197,14 +195,16 @@ public class OperatorCommandMap {
     @Inject
     public void setUpOperatorCommands(OperatorInterface oi,
                                       PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
-                                      ScoreCoralCommand scoreCoralCommand, IntakeUntilCoralCollectedCommand intakeUntilCoralCollectedCommand,
-                                      ScoreWhenReadyCommand scoreWhenReadyCommand, ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
+                                      ScoreCoralCommand scoreCoralCommand,
+                                      ScoreWhenReadyCommand scoreWhenReadyCommand, 
+                                      ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
                                       ForceCoralArmCalibratedCommand forceCoralPivotCalibratedCommand,
                                       ForceAlgaeArmCalibrated forceAlgaeArmCalibrated,
                                       Provider<SetAlgaeArmSetpointToTargetPosition> setAlgaeArmProvider,
                                       AlgaeCollectionIntakeCommand intakeAlgae,
                                       AlgaeCollectionOutputCommand ejectAlgae,
                                       CoralArmSubsystem coralArmSubsystem,
+                                      IntakeCoralCommand intakeCoralCommand,
                                       PrepAlgaeSystemCommandGroupFactory prepAlgaeSystemCommandGroupFactory) {
         // Coral system buttons
         var prepL4 = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.FOUR);
@@ -218,7 +218,7 @@ public class OperatorCommandMap {
 
         var homed = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
-        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeUntilCoralCollectedCommand);
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeCoralCommand);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreCoralCommand);
 
         // combine all three claibration commands into one parallal command group
@@ -291,7 +291,7 @@ public class OperatorCommandMap {
 
 //        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(repositionAlgaeArmUp);
 //        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(repositionAlgaeArmDown);
-
+      
     }
 
     @Inject

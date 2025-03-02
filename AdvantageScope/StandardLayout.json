@@ -1,10 +1,10 @@
 {
   "hubs": [
     {
-      "x": -8,
-      "y": -8,
-      "width": 1552,
-      "height": 832,
+      "x": 14,
+      "y": 51,
+      "width": 1100,
+      "height": 650,
       "state": {
         "sidebar": {
           "width": 447,
@@ -36,7 +36,6 @@
             "/AdvantageKit/AprilTagVisionSubsystemExtended/Cameras/AprilTagRearRight/LatestTargetObservation/cameraToTarget/translation",
             "/SmartDashboard/Scheduler",
             "/Preferences/ElevatorMaintainerCommand/trapezoidMotion",
-            "/AdvantageKit/RealOutputs",
             "/Preferences/CoralArmMaintainerCommand/trapezoidMotion",
             "/AdvantageKit/ElevatorMotorCANMotorController",
             "/Preferences/SwerveDriveSubsystem/DrivePID",
@@ -65,11 +64,9 @@
             "/AdvantageKit/RealOutputs/SwerveDriveWithJoysticksCommand/RawTranslationIntent",
             "/AdvantageKit/RealOutputs/SwerveDriveWithJoysticksCommand/ScaledTranslationIntent",
             "/AdvantageKit/AlgaeArmSubsystem/AlgaeArmBottomSensorDigitalInput",
-            "/AdvantageKit/RealOutputs/ElevatorSubsystem",
             "/AdvantageKit/RealOutputs/FilterSubsystem",
             "/Preferences/FilterSubsystem",
             "/Preferences/FilterSubsystem/ComplimentaryFilter",
-            "/Preferences/ElevatorSubsystem",
             "/RealOutputs",
             "/RealOutputs/ElevatorSubsystem",
             "/RealOutputs/ElevatorMaintainerCommand",
@@ -79,29 +76,30 @@
             "/AdvantageKit/RealOutputs/CalibrateDriveCommand",
             "/AdvantageKit/RealOutputs/ElevatorMaintainerCommand",
             "/Preferences/SwerveDriveSubsystem",
-            "/AdvantageKit/RealOutputs/PoseSubsystem",
             "/Preferences/DriveSubsystem/PositionPID",
             "/Preferences/DriveSubsystem/HeadingPID",
-            "/AdvantageKit/DriveSubsystem",
-            "/AdvantageKit/RealOutputs/PoseSubsystem/RobotPose",
             "/AdvantageKit/RealOutputs/PoseSubsystem/RobotPose/translation",
             "/AdvantageKit/RealOutputs/AlignCameraToAprilTagCalculator/AprilTagData",
             "/AdvantageKit/RealOutputs/AlignCameraToAprilTagCalculator/TargetLocationOnField",
             "/AdvantageKit/RealOutputs/AlignCameraToAprilTagCalculator/TargetLocationOnField/translation",
             "/AdvantageKit",
-            "/AdvantageKit/RealOutputs/AprilTagVisionSubsystemExtended",
             "/AdvantageKit/RealOutputs/AprilTagVisionSubsystemExtended/Cameras/AprilTagFrontLeft/TagPoses/0/translation",
             "/AdvantageKit/RealOutputs/AprilTagVisionSubsystemExtended/Cameras/AprilTagFrontLeft/TagPoses/0/rotation",
-            "/AdvantageKit/AprilTagVisionSubsystemExtended",
             "/AdvantageKit/AprilTagVisionSubsystemExtended/Cameras/AprilTagFrontLeft",
             "/AdvantageKit/AprilTagVisionSubsystemExtended/Cameras/AprilTagFrontLeft/TagIds",
             "/AdvantageKit/AprilTagVisionSubsystemExtended/Cameras/AprilTagFrontLeft/LatestTargetObservation",
-            "/Preferences",
-            "/Preferences/DriveSubsystem"
+            "/AdvantageKit/PoseSubsystem",
+            "/Preferences/PoseSubsystem",
+            "/AdvantageKit/RealOutputs",
+            "/AdvantageKit/RealOutputs/PoseSubsystem/CameraPose/0",
+            "/AdvantageKit/RealOutputs/PoseSubsystem/CameraPose/1",
+            "/AdvantageKit/RealOutputs/AprilTagVisionSubsystemExtended",
+            "/AdvantageKit/RealOutputs/AprilTagVisionSubsystemExtended/Cameras/AprilTagFrontLeft/TagPoses",
+            "/AdvantageKit/RealOutputs/AprilTagVisionSubsystemExtended/Cameras/AprilTagFrontRight"
           ]
         },
         "tabs": {
-          "selected": 19,
+          "selected": 10,
           "tabs": [
             {
               "type": 0,
@@ -461,14 +459,87 @@
                 "cameraIndex": -1,
                 "orbitFov": 50,
                 "cameraPosition": [
-                  -4.870963192225852,
-                  13.486866531603551,
-                  9.760309998383542
+                  0.3303731489841745,
+                  4.4942838016697,
+                  2.2917329078242337
                 ],
                 "cameraTarget": [
-                  0.7257252695797833,
-                  3.8107601033957064,
-                  1.7240484519681272
+                  0.7369011664850061,
+                  3.791438111717305,
+                  1.708001028360566
+                ]
+              },
+              "controlsHeight": 200
+            },
+            {
+              "type": 3,
+              "title": "3D Field - Real Robot",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "robot",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/PoseSubsystem/RobotPose",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {
+                      "model": "Xbot 2025"
+                    }
+                  },
+                  {
+                    "type": "robot",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/PoseSubsystem/CameraPose/0",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {
+                      "model": "Camera"
+                    }
+                  },
+                  {
+                    "type": "vision",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/AprilTagVisionSubsystemExtended/Cameras/AprilTagFrontLeft/TagPoses",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#0000ff",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "robot",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/PoseSubsystem/CameraPose/1",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {
+                      "model": "Camera"
+                    }
+                  },
+                  {
+                    "type": "vision",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/AprilTagVisionSubsystemExtended/Cameras/AprilTagFrontRight/TagPoses",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff0000",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "game": "2025 Field (Welded)",
+                "origin": "blue"
+              },
+              "controllerUUID": "lx6ovlmxtyz4lqytjd3vsca0sum7vs7x",
+              "renderer": {
+                "cameraIndex": -1,
+                "orbitFov": 50,
+                "cameraPosition": [
+                  3.310905086787144,
+                  1.849038767580131,
+                  -3.998074912438454
+                ],
+                "cameraTarget": [
+                  1.3397250736112536,
+                  -0.014045626424849487,
+                  0.49039466622869315
                 ]
               },
               "controlsHeight": 200
@@ -1259,5 +1330,5 @@
     }
   ],
   "satellites": [],
-  "version": "4.1.2"
+  "version": "4.1.0"
 }

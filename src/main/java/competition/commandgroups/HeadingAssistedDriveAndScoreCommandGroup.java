@@ -41,8 +41,7 @@ public class HeadingAssistedDriveAndScoreCommandGroup extends SequentialCommandG
 
         Cameras camera = branch == Landmarks.Branch.A ? Cameras.FRONT_RIGHT_CAMERA : Cameras.FRONT_LEFT_CAMERA;
 
-        alignToReefWithAprilTagWithCameraCommand.setConfigurations(camera.getIndex(),
-                false, 0.5);
+        alignToReefWithAprilTagWithCameraCommand.setConfigurations(camera.getIndex(), false, 0.5, false);
         driveToReefFaceFromAngleCommand.setAprilTagCamera(camera);
         measureDistanceBeforeScoringCommand.setBranch(branch);
 
