@@ -163,17 +163,27 @@ public class AlignCameraToAprilTagCalculator {
         interstitialPoint = new Pose2d();
         Landmarks.FieldElementType elementType = Landmarks.getFieldElementTypeForAprilTag(targetAprilTagID);
 
+        var alliance = DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
+
         if (elementType == Landmarks.FieldElementType.REEF_FACE) {
             interstitialPoint = reefCoordinateGenerator.getPoseRelativeToReefFaceAndBranch(
-                            DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue),
+                            alliance,
                             Landmarks.getReefFaceFromTagId(targetAprilTagID),
                             isLeft ? Landmarks.Branch.B : Landmarks.Branch.A,
                             Meters.of(interstitialDistance.get()),
                             Meters.zero()
                     );
         } else if (elementType == Landmarks.FieldElementType.CORAL_STATION) {
-            // TODO - figure this out once we have a rear-facing camera
-            int foo = 0;
+            // From the Tag ID, figure out which coral station this is
+            var station = Landmarks.getCoralStationFromTagId(targetAprilTagID);
+            // From the station, get its pose
+            var coralStationPose = Landmarks.getCoralStationSectionPose(station, Landmarks.CoralStationSection.MID);
+            // From the pose, project a point in front of it
+            var vectorToInterstitialPoint = new Translation2d(interstitialDistance.get(), coralStationPose.getRotation());
+            interstitialPoint = new Pose2d(
+                    coralStationPose.getTranslation().plus(vectorToInterstitialPoint),
+                    coralStationPose.getRotation()
+            );
         }
 
         akitLog.record("InterstitialPoint", interstitialPoint);
