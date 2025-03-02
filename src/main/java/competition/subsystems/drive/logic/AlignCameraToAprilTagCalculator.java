@@ -370,6 +370,7 @@ public class AlignCameraToAprilTagCalculator {
         // Use WPI libraries to transform the relative goal into a field-oriented goal. That way, if we ever lose the tag,
         // we can still attempt to move to this target location
         targetLocationOnField = currentPose.transformBy(relativeGoalTransform).getTranslation();
+        akitLog.record("TargetLocationOnField", targetLocationOnField);
     }
 
     public boolean recommendIsFinished() {
