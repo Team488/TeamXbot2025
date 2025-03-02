@@ -357,13 +357,16 @@ public class Contract2025 extends ElectricalContract {
     }
 
     @Override
-    public CANMotorControllerInfo getPawlMotor(){
+    public CANMotorControllerInfo getPawlMotor() {
         return new CANMotorControllerInfo("PawlMotor",
                 MotorControllerType.VictorSPX,
                 CANBusId.RIO,
                 50,
                 new CANMotorControllerOutputConfig()
                         .withStatorCurrentLimit(Amps.of(60)));
+    }
+
+    @Override
     public DeviceInfo getLightsDio0() {
         return new DeviceInfo("Lights0", 2);
     }
