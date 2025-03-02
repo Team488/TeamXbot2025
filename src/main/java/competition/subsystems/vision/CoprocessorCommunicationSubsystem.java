@@ -50,7 +50,6 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
 
         XTablesLogger.setLoggingLevel(Level.OFF);
 
-        this.visionCoprocessorCommander = new VisionCoprocessorCommander(VisionCoprocessor.ORIN3);
     }
 
     public XTablesClientManager getXTablesManager(){

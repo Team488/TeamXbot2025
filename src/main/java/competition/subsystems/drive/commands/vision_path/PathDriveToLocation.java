@@ -114,6 +114,7 @@ public class PathDriveToLocation extends SwerveBezierTrajectoryBase {
             this.setSegmentedBezierCurve(curves, curves.getOptions());
             XTablesClient client = this.coprocessor.getXTablesManager().getOrNull();
             if (client != null) {
+                log.info("Logged bezier curves onto XTABLES.");
                 client.putBezierCurves("bezier_path", curves);
             }
         }

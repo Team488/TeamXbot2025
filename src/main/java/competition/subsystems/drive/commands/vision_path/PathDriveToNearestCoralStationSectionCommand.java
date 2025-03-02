@@ -47,6 +47,10 @@ public class PathDriveToNearestCoralStationSectionCommand
      */
     private final AprilTagFieldLayout aprilTagFieldLayout;
 
+    private final DriveSubsystem driveSubsystem;
+
+    private Pose2d coralStationTarget;
+
     /**
      * Constructs the PathDriveToNearestCoralStationSectionCommand.
      *
@@ -78,6 +82,7 @@ public class PathDriveToNearestCoralStationSectionCommand
                 robotAssertionManager, coprocessorCommunicationSubsystem);
         this.radiusOfRobot = electricalContract.getDistanceFromCenterToOuterBumperX().in(Units.Meters);
         this.aprilTagFieldLayout = aprilTagFieldLayout;
+        this.driveSubsystem = drive;
     }
 
     /**
@@ -117,26 +122,31 @@ public class PathDriveToNearestCoralStationSectionCommand
     @Override
     public void initialize() {
         log.info("Initializing");
-        var coralStationPose = this.getCoralStationPose();
+        targetCoralStationSection = this.getCoralStationPose();
         var deltaTranslation = new Translation2d(
-                this.radiusOfRobot, coralStationPose.getRotation());
+                this.radiusOfRobot, targetCoralStationSection.getRotation());
         var destinationTranslation =
-                coralStationPose.getTranslation().plus(deltaTranslation);
+                targetCoralStationSection.getTranslation().plus(deltaTranslation);
         var destinationPose =
-                new Pose2d(destinationTranslation, coralStationPose.getRotation());
+                new Pose2d(destinationTranslation, targetCoralStationSection.getRotation());
         this.setTarget(destinationPose);
         this.setAdditionalArguments(XTableValues.AdditionalArguments.newBuilder()
                         .setAlliance(fromAlliance(DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue)))
                 .build());
+        this.setSafeInches(25);
         this.setOptions(
                 XTableValues.TraversalOptions.newBuilder()
-                        .setMetersPerSecond(3)
-                        .setAccelerationMetersPerSecond(2)
+                        .setMetersPerSecond(driveSubsystem.getDriveToWaypointsSpeed().get())
+                        .setAccelerationMetersPerSecond(driveSubsystem.getMaxAccelerationMetersPerSecondSquared())
                         .setFinalRotationDegrees(destinationPose.getRotation().getDegrees())
                         .build());
         super.initialize();
     }
     private XTableValues.Alliance fromAlliance(DriverStation.Alliance alliance) {
         return alliance.equals(DriverStation.Alliance.Blue) ? XTableValues.Alliance.BLUE : XTableValues.Alliance.RED;
+    }
+
+    public Pose2d getTargetCoralStationSection() {
+        return targetCoralStationSection;
     }
 }
