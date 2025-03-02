@@ -5,15 +5,25 @@ import competition.commandgroups.DriveToStationAndIntakeUntilCollectedCommandGro
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
 import competition.simulation.BaseSimulator;
 import competition.simulation.MapleSimulator;
+import competition.subsystems.coral_scorer.CoralScorerSubsystem;
+import competition.subsystems.drive.commands.AlignToHLSAndIntakeUntilCollectedCommandGroupFactory;
+import competition.subsystems.drive.commands.AlignToSpecificHumanLoadingStationCommand;
+import competition.subsystems.drive.commands.DriveToCoralStationSectionCommand;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import xbot.common.subsystems.autonomous.AutonomousCommandSelector;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 
 public class FromLeftCageScoreLeftFacesLevelFours extends BaseAutonomousSequentialCommandGroup {
+    double timeOutSeconds = 8;
+    CoralScorerSubsystem coralScorerSubsystem;
 
     @Inject
     public FromLeftCageScoreLeftFacesLevelFours(AutonomousCommandSelector autoSelector,
@@ -23,8 +33,12 @@ public class FromLeftCageScoreLeftFacesLevelFours extends BaseAutonomousSequenti
                                                 Provider<DriveToFaceAndScoreCommandGroupFactory> driveToFaceAndScoreFactProv,
                                                 Provider<DriveToStationAndIntakeUntilCollectedCommandGroupFactory> driveToStationAndIntakeFactProv,
                                                 PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFact,
-                                                BaseSimulator simulator) {
+                                                Provider<AlignToHLSAndIntakeUntilCollectedCommandGroupFactory> alignToHLSAndIntakeUntilCollectedCommandGroupFactoryProvider,
+                                                CoralScorerSubsystem coralScorerSubsystem,
+                                                BaseSimulator simulator,
+                                                DriveToCoralStationSectionCommand driveToCoralStationSectionCommand) {
         super(autoSelector);
+        this.coralScorerSubsystem = coralScorerSubsystem;
 
         // Force our location to start in front of left cage
         var startInFrontOfLeftCage = pose.createSetPositionCommand(
@@ -45,7 +59,14 @@ public class FromLeftCageScoreLeftFacesLevelFours extends BaseAutonomousSequenti
         queueDriveAndIntakeMessageToAutoSelector(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.FAR);
         var driveToLeftStationFarSectionAndIntake = driveToStationAndIntakeFactProv.get().create(
                 Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.FAR, true);
-        this.addCommands(driveToLeftStationFarSectionAndIntake);
+        this.addCommands(driveToLeftStationFarSectionAndIntake.withTimeout(timeOutSeconds));
+
+        var firstAlignToCoralStation = alignToHLSAndIntakeUntilCollectedCommandGroupFactoryProvider
+                .get().create(Landmarks.CoralStation.LEFT);
+        var goToCoralStationIntakeUntilCollected = new ParallelDeadlineGroup(firstAlignToCoralStation);
+        var firstTryLoadingAgain = new ConditionalCommand(new WaitCommand(0), goToCoralStationIntakeUntilCollected,
+                () -> coralScorerSubsystem.confidentlyHasCoral());
+        this.addCommands(firstTryLoadingAgain);
 
         // Drive to close left, branch B and score level four
         queueDriveAndScoreMessageToAutoSelector(Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR);
