@@ -4,6 +4,7 @@ import competition.electrical_contract.ElectricalContract;
 import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -32,7 +33,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     public final XCANMotorController armMotor;
     public final XDutyCycleEncoder armAbsoluteEncoder;
     public final XDigitalInput lowSensor;
-    Angle targetAngle = Degrees.of(0);
+    MutAngle targetAngle;
     ElectricalContract electricalContract;
 
     double periodicTickCounter;
@@ -87,6 +88,8 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
         } else {
             this.lowSensor = null;
         }
+
+        targetAngle.mut_replace(Degrees.of(0));
 
         this.degreesPerRotations = propertyFactory.createPersistentProperty("Degrees Per Rotations", 5.790);
         this.rangeOfMotionDegrees = propertyFactory.createPersistentProperty("Range of Motion in Degrees", 125);
