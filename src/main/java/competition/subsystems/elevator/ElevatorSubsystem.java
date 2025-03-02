@@ -50,7 +50,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     private final MutDistance laserCANPositionOffset = Meters.mutable(0);
     private final MutAngle elevatorMotorPositionOffset = Degrees.mutable(0);
 
-    public MutDistance elevatorTargetHeight;
+    public final MutDistance elevatorTargetHeight = Inches.mutable(0);
 
     public final DoubleProperty rotationsPerMeter;
 
@@ -86,9 +86,6 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
         this.contract = contract;
 
-        this.laserCANPositionOffset.mut_replace(Meters.zero());
-        this.elevatorMotorPositionOffset.mut_replace(Rotations.zero());
-        this.elevatorTargetHeight.mut_replace(Inches.of(0));
         sensorFusionFilter = new ComplimentaryFilter(pf, this.getPrefix(), true, 0.5);
 
         pf.setPrefix(this);
