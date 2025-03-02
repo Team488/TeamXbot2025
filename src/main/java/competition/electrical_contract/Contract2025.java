@@ -317,9 +317,7 @@ public class Contract2025 extends ElectricalContract {
                                 -frontAprilCameraYDisplacement,
                                 frontAprilCameraZDisplacement),
                                 new Rotation3d(0, frontAprilCameraPitch, frontAprilCameraYaw)),
-                        EnumSet.of(CameraCapabilities.APRIL_TAG))
-
-                /* Camera below does not exist yet:
+                        EnumSet.of(CameraCapabilities.APRIL_TAG)),
                 new CameraInfo("Apriltag_Back_Camera",
                         "AprilTagBack",
                         new Transform3d(new Translation3d(
@@ -327,9 +325,8 @@ public class Contract2025 extends ElectricalContract {
                                 0,
                                 frontAprilCameraZDisplacement),
                                 new Rotation3d(0, Math.toRadians(-60), Math.PI)),
-                        EnumSet.of(CameraCapabilities.APRIL_TAG))*/
+                        EnumSet.of(CameraCapabilities.APRIL_TAG))
         };
-
     }
 
     @Override

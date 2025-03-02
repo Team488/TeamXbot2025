@@ -77,6 +77,8 @@ public class AlignCameraToAprilTagCalculator {
 
     double lastKnownHorizontalErrorMeters = 0;
     double shoveStartTime = 0;
+    private Activity startingActivity = Activity.Searching;
+    private boolean requireExcellentAlignment = true;
 
     public static Translation2d generateAlignmentPointOffset(Distance robotCenterToOuterBumperX, CameraInfo cameraInfo,
                                                              Distance offset, boolean isCameraBackwards) {
@@ -124,19 +126,26 @@ public class AlignCameraToAprilTagCalculator {
     private void reset() {
         drive.getPositionalPid().reset();
         tagAcquisitionState = TagAcquisitionState.NeverSeen;
-        activity = Activity.Searching;
+        activity = startingActivity;
     }
 
     public void configureAndReset(int targetAprilTagID, int targetCameraID, Distance offset,
                                   boolean isCameraBackwards) {
-        reset();
+        configureAndReset(targetAprilTagID, targetCameraID, offset, isCameraBackwards, Activity.Searching, true);
+    }
 
+    public void configureAndReset(int targetAprilTagID, int targetCameraID, Distance offset,
+                                  boolean isCameraBackwards, Activity startingActivity,
+                                    boolean requireExcellentAlignment) {
+        this.startingActivity = startingActivity;
+        this.requireExcellentAlignment = requireExcellentAlignment;
         this.targetAprilTagID = targetAprilTagID;
         this.targetCameraID = targetCameraID;
         this.isCameraBackwards = isCameraBackwards;
 
+        reset();
+
         this.initialHeading = pose.getCurrentPose2d().getRotation().getDegrees();
-        this.isCameraBackwards = isCameraBackwards;
 
         CameraInfo cameraInfo = electricalContract.getCameraInfo()[targetCameraID];
         this.cameraRotation = cameraInfo.position().getRotation();
@@ -282,7 +291,7 @@ public class AlignCameraToAprilTagCalculator {
                 if (currentPose.getTranslation().getDistance(targetLocationOnField) < distanceToStartShoving.get()) {
                     // We need to make a decision. If our error is small enough, we should advance to shove.
                     // However, if our error is large, we should retreat and try again.
-                    if (isLastKnownErrorWithinBounds()) {
+                    if (isLastKnownErrorWithinBounds() || !requireExcellentAlignment) {
                         activity = Activity.Shove;
                         shoveStartTime = XTimer.getFPGATimestamp();
                     } else {
@@ -298,7 +307,13 @@ public class AlignCameraToAprilTagCalculator {
 
                 // We know the ideal angle the robot will be pointing at, so we can quickly construct a shove vector
                 // in that direction.
-                driveIntent = XYPair.fromPolar(idealFinalHeadingDegrees, shovePower.get());
+
+                double shoveDirection = idealFinalHeadingDegrees;
+                if (isCameraBackwards) {
+                    shoveDirection += 180;
+                }
+
+                driveIntent = XYPair.fromPolar(shoveDirection, shovePower.get());
                 rotationIntent = headingModule.calculateHeadingPower(idealFinalHeadingDegrees);
 
                 // If we've been shoving for a while, we're done.

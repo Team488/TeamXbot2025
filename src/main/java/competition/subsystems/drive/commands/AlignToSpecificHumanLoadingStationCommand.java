@@ -37,7 +37,9 @@ public class AlignToSpecificHumanLoadingStationCommand extends AlignToTagGlobalM
                 2,
                 Landmarks.getTagIdFromCoralStation(alliance, station),
                 true,
-                1.0
+                1.0,
+                AlignCameraToAprilTagCalculator.Activity.ApproachWhileCentering,
+                false
         );
         super.initialize();
     }
