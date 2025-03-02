@@ -1,6 +1,7 @@
 package competition.auto_programs;
 
 import competition.commandgroups.DriveToFaceAndScoreCommandGroupFactory;
+import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
 import competition.simulation.BaseSimulator;
 import competition.simulation.MapleSimulator;
 import competition.subsystems.pose.Landmarks;
@@ -11,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import xbot.common.subsystems.autonomous.AutonomousCommandSelector;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 public class FromCageScoreOneCoralAutoFactory {
 
@@ -18,16 +20,19 @@ public class FromCageScoreOneCoralAutoFactory {
     BaseSimulator simulator;
     PoseSubsystem pose;
     DriveToFaceAndScoreCommandGroupFactory driveToFaceAndScoreCommandGroupFact;
+    PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFact;
 
     @Inject
     public FromCageScoreOneCoralAutoFactory(AutonomousCommandSelector autoSelector,
                                             BaseSimulator simulator,
                                             PoseSubsystem pose,
-                                            DriveToFaceAndScoreCommandGroupFactory driveToFaceAndScoreCommandGroupFact){
+                                            DriveToFaceAndScoreCommandGroupFactory driveToFaceAndScoreCommandGroupFact,
+                                            PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFact){
         this.autoSelector = autoSelector;
         this.simulator = simulator;
         this.pose = pose;
         this.driveToFaceAndScoreCommandGroupFact = driveToFaceAndScoreCommandGroupFact;
+        this.prepCoralSystemCommandGroupFact = prepCoralSystemCommandGroupFact;
     }
 
     public BaseAutonomousSequentialCommandGroup create(Pose2d startingLocation,
@@ -44,6 +49,9 @@ public class FromCageScoreOneCoralAutoFactory {
         auto.queueDriveAndScoreMessageToAutoSelector(targetReefFace, targetBranch, targetLevel);
         var driveAndScore = driveToFaceAndScoreCommandGroupFact.create(targetReefFace, targetBranch, targetLevel);
         auto.addCommands(driveAndScore);
+
+        var homeCoralSystem = prepCoralSystemCommandGroupFact.create(() -> Landmarks.CoralLevel.COLLECTING);
+        auto.addCommands(homeCoralSystem);
 
         return auto;
     }
