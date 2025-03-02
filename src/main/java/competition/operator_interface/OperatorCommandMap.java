@@ -244,7 +244,7 @@ public class OperatorCommandMap {
         var homeAlgaeArm = prepAlgaeSystemCommandGroupFactory.create(AlgaeArmSubsystem.AlgaeArmPositions.FullyRetracted);
         oi.operatorGamepad.getPovIfAvailable(90).onTrue(homeAlgaeArm);
 
-        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Back).whileTrue(playMusicCommandFactory.create(OrchestraSubsystem.Songs.NOKIA_TUNE));
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Back).whileTrue(playMusicCommandFactory.create(OrchestraSubsystem.Songs.RICKROLL));
     }
 
     @Inject

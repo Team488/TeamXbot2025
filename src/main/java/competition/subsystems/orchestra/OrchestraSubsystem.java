@@ -22,6 +22,7 @@ public class OrchestraSubsystem extends BaseSubsystem {
 
     public static class Songs {
         public static final String NOKIA_TUNE = "nokia_tune.chrp";
+        public static final String RICKROLL = "rickroll.chrp";
     }
 
     @Inject
