@@ -54,6 +54,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
     private final AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
     private final BooleanProperty useVisionAssistedPose;
     private final BooleanProperty useDeadwheelAssistedPose;
+    private final BooleanProperty addSwerveTelemetry;
     private final BooleanProperty reportCameraPoses;
     private final CoprocessorCommunicationSubsystem coprocessorComms;
 
@@ -86,7 +87,8 @@ public class PoseSubsystem extends BasePoseSubsystem {
         propManager.setPrefix(this);
         propManager.setDefaultLevel(Property.PropertyLevel.Important);
         useVisionAssistedPose = propManager.createPersistentProperty("UseVisionAssistedPose", true);
-        useDeadwheelAssistedPose = propManager.createPersistentProperty("UseVisionAssistedPose", true);
+        useDeadwheelAssistedPose = propManager.createPersistentProperty("useDeadwheelAssistedPose", true);
+        addSwerveTelemetry = propManager.createPersistentProperty("addSwerveTelemetry", true);
         reportCameraPoses = propManager.createPersistentProperty("ReportCameraPoses", false);
     }
 
@@ -158,11 +160,14 @@ public class PoseSubsystem extends BasePoseSubsystem {
                     this.deadWheelSubsystem.getFrontAdjustedDistance().in(Meters),
                     this.deadWheelSubsystem.getRearAdjustedDistance().in(Meters));
 
-        } else {
+        }
+
+        if (!this.useDeadwheelAssistedPose.get() || this.addSwerveTelemetry.get()) {
             fullSwerveOdometry.update(
                     this.getCurrentHeadingGyroOnly(),
                     getSwerveModulePositions());
         }
+
         var fullOdometry = this.useDeadwheelAssistedPose.get() ? this.fullDeadwheelOdometry : fullSwerveOdometry;
         if (!areVisionUpdatesDisabled) {
             this.aprilTagVisionSubsystem.getAllPoseObservations().forEach(observation -> {
@@ -171,6 +176,15 @@ public class PoseSubsystem extends BasePoseSubsystem {
                         observation.timestampSeconds(),
                         observation.visionMeasurementStdDevs());
             });
+
+            if (!this.useDeadwheelAssistedPose.get() || this.addSwerveTelemetry.get()) {
+                this.aprilTagVisionSubsystem.getAllPoseObservations().forEach(observation -> {
+                    fullSwerveOdometry.addVisionMeasurement(
+                            observation.visionRobotPoseMeters(),
+                            observation.timestampSeconds(),
+                            observation.visionMeasurementStdDevs());
+                });
+            }
         }
 
         onlyDeadwheelOdometry.update(
@@ -211,13 +225,18 @@ public class PoseSubsystem extends BasePoseSubsystem {
         aKitLog.record("OdometryOnlyRobotPose", estimatedPosition);
         batchedPushRequests.putPose2d(xtablesPrefix + ".OdometryOnlyRobotPose", estimatedPosition);
 
+        Pose2d fullSwervePosiiton = new Pose2d(
+                fullSwerveOdometry.getEstimatedPosition().getTranslation(),
+                fullSwerveOdometry.getEstimatedPosition().getRotation());
+        aKitLog.record("SwerveVisionEnhancedPose", fullSwervePosiiton);
+
         Pose2d visionEnhancedPosition = new Pose2d(
                 fullOdometry.getEstimatedPosition().getTranslation(),
                 fullOdometry.getEstimatedPosition().getRotation());
         aKitLog.record("VisionEnhancedPose", visionEnhancedPosition);
         batchedPushRequests.putPose2d(xtablesPrefix + ".VisionEnhancedPose", visionEnhancedPosition);
 
-        Pose2d deadWheelPosition = deadWheelSubsystem.getEstimatedPosition();
+        Pose2d deadWheelPosition = fullDeadwheelOdometry.getEstimatedPosition();
         aKitLog.record("DeadWheelPosition", deadWheelPosition);
         batchedPushRequests.putPose2d(xtablesPrefix + ".DeadWheelPose", deadWheelPosition);
 
