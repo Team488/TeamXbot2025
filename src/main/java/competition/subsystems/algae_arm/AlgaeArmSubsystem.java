@@ -12,6 +12,7 @@ import xbot.common.injection.electrical_contract.DeviceInfo;
 import xbot.common.math.MathUtils;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
+import xbot.common.properties.Property.PropertyLevel;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -81,6 +82,10 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
         } else {
             this.bottomSensor = null;
         }
+
+        this.repositionArmAmount = propertyFactory.createPersistentProperty("RepositionArmAmount", 5);
+        
+        propertyFactory.setDefaultLevel(PropertyLevel.Debug);
         this.degreesPerRotation = propertyFactory.createPersistentProperty("DegreesPerRotation", 13.523);
 
         this.rangeOfMotionInDegrees = propertyFactory.createPersistentProperty("RangeOfMotionInDegrees", 160.0);
@@ -91,7 +96,7 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
         this.reefLowTopToBottomSweepEnd = propertyFactory.createPersistentProperty("ReefLowTopToBottomSweepEnd", 90.0);
         this.reefHighSweepStart = propertyFactory.createPersistentProperty("ReefHighSweepStart", 110.0);
         this.reefHighSweepEnd = propertyFactory.createPersistentProperty("ReefHighSweepEnd", 150.0);
-        this.repositionArmAmount = propertyFactory.createPersistentProperty("RepositionArmAmount", 5);
+        propertyFactory.setDefaultLevel(PropertyLevel.Important);
     }
 
     @Override
