@@ -7,9 +7,6 @@ import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import javax.inject.Inject;
 import org.kobe.xbot.Utilities.Entities.XTableValues;
 import org.kobe.xbot.Utilities.VisionCoprocessorCommander;
 import xbot.common.logging.RobotAssertionManager;
@@ -17,6 +14,10 @@ import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.drive.BaseSwerveDriveSubsystem;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
 import xbot.common.trajectory.XbotSwervePoint;
+
+import javax.inject.Inject;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class PathDriveToLocation extends SwerveBezierTrajectoryBase {
     Pose2d target;
@@ -79,19 +80,25 @@ public class PathDriveToLocation extends SwerveBezierTrajectoryBase {
         Pose2d startingPose = pose.getCurrentPose2d();
         curves = null;
         if (!useBackupPointToPoint) {
+            XTableValues.RequestVisionCoprocessorMessage.Builder message = XTableValues.RequestVisionCoprocessorMessage.newBuilder()
+                    .setStart(XTableValues.ControlPoint.newBuilder()
+                            .setY(startingPose.getY()) // Set Pose2d Y value.
+                            .setX(startingPose.getX()) // Set Pose2d X value.
+                            .build())
+                    .setEnd(XTableValues.ControlPoint.newBuilder()
+                            .setX(target.getX()) // Set goal Pose2d X value.
+                            .setY(target.getY()) // Set goal Pose2d Y value.
+                            .build())
+                    .setSafeDistanceInches(safeInches);
+            if (traversalOptions != null) {
+                message.setOptions(traversalOptions);
+            }
+            if (additionalArguments != null) {
+                message.setArguments(additionalArguments);
+            }
             curves = commander.requestBezierPathWithOptions(
-                    XTableValues.RequestVisionCoprocessorMessage.newBuilder()
-                            .setStart(XTableValues.ControlPoint.newBuilder()
-                                    .setY(startingPose.getY()) // Set Pose2d Y value.
-                                    .setX(startingPose.getX()) // Set Pose2d X value.
-                                    .build())
-                            .setEnd(XTableValues.ControlPoint.newBuilder()
-                                    .setX(target.getX()) // Set goal Pose2d X value.
-                                    .setY(target.getY()) // Set goal Pose2d Y value.
-                                    .build())
-                            .setSafeDistanceInches(safeInches)
-                            .setOptions(traversalOptions)
-                            .setArguments(additionalArguments)
+
+                    message
                             .build(),
                     3000, TimeUnit.MILLISECONDS); // When should it give up and return
             // null for any reason?
@@ -110,6 +117,7 @@ public class PathDriveToLocation extends SwerveBezierTrajectoryBase {
     public XTableValues.BezierCurves getCurves() {
         return curves;
     }
+
     private void pointToPoint() {
         List<XbotSwervePoint> swervePoints =
                 routingCircle.generateSwervePoints(pose.getCurrentPose2d(), target);

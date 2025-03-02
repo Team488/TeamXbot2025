@@ -7,7 +7,6 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 
 import javax.inject.Singleton;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,24 +17,24 @@ import static edu.wpi.first.units.Units.Meters;
 public class Landmarks {
 
     // Auto starting positions
+    // Auto starting positions
     // Blue cages - cages are labeled 1-6 from north to south, the x value has the robot's back bumper lined up with the auto line
     public static Pose2d BlueCageOneStartingLine = new Pose2d(7.14, 7.262, Rotation2d.fromDegrees(-135));
     public static Pose2d BlueCageTwoStartingLine = new Pose2d(7.14, 6.135, Rotation2d.fromDegrees(-135));
     public static Pose2d BlueCageThreeStartingLine = new Pose2d(7.14, 5.044, Rotation2d.fromDegrees(180));
     public static Pose2d BlueCageFourStartingLine = new Pose2d(7.14, 2.974, Rotation2d.fromDegrees(180));
-    public static Pose2d BlueCageFiveStartingLine = new Pose2d(7.14, 1.883, Rotation2d.fromDegrees(135));
-    public static Pose2d BlueCageSixStartingLine = new Pose2d(7.14, 0.792, Rotation2d.fromDegrees(135));
-
-    // Middle of line
+    public static Pose2d BlueCageFiveStartingLine = new Pose2d(7.14, 1.883, Rotation2d.fromDegrees(180));
+    public static Pose2d BlueCageSixStartingLine = new Pose2d(7.14, 0.792, Rotation2d.fromDegrees(180));
     public static Pose2d BlueMidOfLine = new Pose2d(7.14, 4.26, Rotation2d.fromDegrees(180));
+    public static Pose2d BlueCloseLeftMidViewable = new Pose2d(3.5, 5.8, Rotation2d.fromDegrees(-60));
+
 
     // Reef faces TODO: Find positions again if scoring positions are at different
     // distances from reef for each level
     // Close Left Reef Face
+    // Close Left Reef Face
     public static Pose2d BlueCloseLeftBranchA = new Pose2d(4.002, 5.174, Rotation2d.fromDegrees(-60));
-    public static Pose2d BlueCloseLeftAlgae = new Pose2d(3.834, 5.137, Rotation2d.fromDegrees(-60));
-    public static Pose2d BlueCloseLeftMidViewable = new Pose2d(3.5, 5.8, Rotation2d.fromDegrees(-60));
-
+    public static Pose2d BlueCloseLeftAlgae = new Pose2d(3.834 ,5.137, Rotation2d.fromDegrees(-60));
     public static Pose2d BlueCloseLeftBranchB = new Pose2d(3.717, 5.010, Rotation2d.fromDegrees(-60));
     public static int BlueDriverStationLeftFiducialId = 19;
 

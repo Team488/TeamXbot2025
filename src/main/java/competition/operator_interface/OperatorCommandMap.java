@@ -1,6 +1,7 @@
 package competition.operator_interface;
 
 import competition.auto_programs.FromCageScoreOneCoralAutoFactory;
+import competition.auto_programs.FromCurrentPositionScoreFarLeftBranchALevelFour;
 import competition.auto_programs.FromLeftCageScoreLeftFacesLevelFours;
 import competition.auto_programs.FromRightCageScoreRightFacesLevelFours;
 import competition.commandgroups.HeadingAssistedDriveAndScoreCommandGroup;
@@ -8,6 +9,8 @@ import competition.commandgroups.vision_path.PathDriveToCoralStationAndIntakeUnt
 import competition.commandgroups.vision_path.PathToReefFaceThenAlignCommandGroupFactory;
 import competition.commandgroups.PrepAlgaeSystemCommandGroupFactory;
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
+import competition.commandgroups.vision_path.PathDriveToCoralStationAndIntakeUntilCollected;
+import competition.commandgroups.vision_path.PathToReefFaceThenAlignCommandGroupFactory;
 import competition.simulation.commands.ResetSimulatedPose;
 import competition.subsystems.algae_arm.AlgaeArmSubsystem;
 import competition.subsystems.algae_arm.commands.ForceAlgaeArmCalibrated;
@@ -70,7 +73,8 @@ import static edu.wpi.first.units.Units.Degree;
 public class OperatorCommandMap {
 
     @Inject
-    public OperatorCommandMap() {}
+    public OperatorCommandMap() {
+    }
 
     @Inject
     public void setupDriverCommands(
@@ -113,7 +117,7 @@ public class OperatorCommandMap {
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(pathDriveToCoralStationAndIntakeUntilCollected.create());
         var branchAHeadingAssistedDriveAndScore = headingAssistedDriveAndScoreCommandGroupFactory.create(Landmarks.Branch.A);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(branchAHeadingAssistedDriveAndScore)
-                        .onFalse(homed);
+                .onFalse(homed);
         var branchBHeadingAssistedDriveAndScore = headingAssistedDriveAndScoreCommandGroupFactory.create(Landmarks.Branch.B);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(branchBHeadingAssistedDriveAndScore)
                 .onFalse(homed);
@@ -127,7 +131,6 @@ public class OperatorCommandMap {
 
         // operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(intakeCoralCommand);
         // operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(scoreCoralCommand);
-
 
 
         // (BLUE ALLIANCE) Below are different routes to test the SwerveSimpleTrajectoryCommand
@@ -196,7 +199,6 @@ public class OperatorCommandMap {
         // rotateTo90Degrees.includeOnSmartDashboard("RotateTo90Degrees");
         // rotateTo180Degrees.includeOnSmartDashboard("RotateTo180Degrees");
     }
-
 
 
     @Inject
@@ -361,27 +363,27 @@ public class OperatorCommandMap {
                                         Provider<SetAutonomousCommand> setAutonomousCommandProvider,
                                         Provider<FromCageScoreOneCoralAutoFactory> fromCageScoreOneLevelFourAutoFactProv,
                                         FromLeftCageScoreLeftFacesLevelFours fromLeftCageScoreLeftFacesLevelFours,
-                                        FromRightCageScoreRightFacesLevelFours fromRightCageScoreRightFacesLevelFours) {
-        var setFromLeftFarLeftBranchBLevelFour = setAutonomousCommandProvider.get();
-        setFromLeftFarLeftBranchBLevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFactProv.get().create(
-                Landmarks.BlueCageTwoStartingLine, Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR
+                                        FromCurrentPositionScoreFarLeftBranchALevelFour fromCurrentPositionScoreFarLeftBranchALevelFour) {
+        var setFromLeftFarLeftBranchALevelFour = setAutonomousCommandProvider.get();
+        setFromLeftFarLeftBranchALevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFactProv.get().create(
+                Landmarks.BlueCageTwoStartingLine, Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR
         ));
         oi.neoTrellis.getifAvailable(1).onTrue(setFromLeftFarLeftBranchBLevelFour); // temporary button
         setFromLeftFarLeftBranchBLevelFour.includeOnSmartDashboard("From Left Score Far Left Branch B Level 4 Auto");
 
-        var setFromMidFarBranchBLevelFour = setAutonomousCommandProvider.get();
-        setFromMidFarBranchBLevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFactProv.get().create(
-                Landmarks.BlueMidOfLine, Landmarks.ReefFace.FAR, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR
+        var setFromMidFarBranchALevelFour = setAutonomousCommandProvider.get();
+        setFromMidFarBranchALevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFactProv.get().create(
+                Landmarks.BlueMidOfLine, Landmarks.ReefFace.FAR, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR
         ));
-        oi.neoTrellis.getifAvailable(2).onTrue(setFromMidFarBranchBLevelFour); // temporary button
-        setFromMidFarBranchBLevelFour.includeOnSmartDashboard("From Mid Score Far Branch B Level 4 Auto");
+        oi.neoTrellis.getifAvailable(2).onTrue(setFromMidFarBranchALevelFour); // temporary button
+        setFromMidFarBranchALevelFour.includeOnSmartDashboard("From Mid Score Far Branch A Level 4 Auto");
 
-        var setFromRightFarRightBranchALevelFour = setAutonomousCommandProvider.get();
-        setFromRightFarRightBranchALevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFactProv.get().create(
-                Landmarks.BlueCageFiveStartingLine, Landmarks.ReefFace.FAR_RIGHT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR
+        var setFromRightFarRightBranchBLevelFour = setAutonomousCommandProvider.get();
+        setFromRightFarRightBranchBLevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFactProv.get().create(
+                Landmarks.BlueCageFiveStartingLine, Landmarks.ReefFace.FAR_RIGHT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR
         ));
-        oi.neoTrellis.getifAvailable(3).onTrue(setFromRightFarRightBranchALevelFour); // temporary button
-        setFromRightFarRightBranchALevelFour.includeOnSmartDashboard("From Right Score Far Right Branch A Level 4 Auto");
+        oi.neoTrellis.getifAvailable(3).onTrue(setFromRightFarRightBranchBLevelFour); // temporary button
+        setFromRightFarRightBranchBLevelFour.includeOnSmartDashboard("From Right Score Far Right Branch A Level 4 Auto");
 
         var setFromLeftCageScoreLeftFacesLevelFours = setAutonomousCommandProvider.get();
         setFromLeftCageScoreLeftFacesLevelFours.setAutoCommand(fromLeftCageScoreLeftFacesLevelFours);
