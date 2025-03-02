@@ -86,6 +86,27 @@ public class DeadWheelSubsystem extends BaseSubsystem {
     }
 
     public void update() {
+        EncoderValues result = calculateValues();
+
+        this.aKitLog.record("DeadWheelLeftAdjusted", leftEncoder.getAdjustedDistance());        
+        this.aKitLog.record("DeadWheelRgithAdjusted", rightEncoder.getAdjustedDistance());
+        this.aKitLog.record("DeadWheelFrontAdjusted", frontEncoder.getAdjustedDistance());
+        this.aKitLog.record("DeadWheelRearAdjusted", rearEncoder.getAdjustedDistance());
+
+        prevLeftDistance = result.leftDistance();
+        prevRightDistance = result.rightDistance();
+        prevFrontDistance = result.frontDistance();
+        prevRearDistance = result.rearDistance();
+
+        currentPose = new Pose2d(
+                currentPose.getX() + result.d_x(),
+                currentPose.getY() + result.d_y(),
+                currentPose.getRotation().plus(new Rotation2d(result.d_theta()))
+        );
+    }
+
+
+    public EncoderValues calculateValues() {
         double leftDistance = leftEncoder.getAdjustedDistance();
         double rightDistance = rightEncoder.getAdjustedDistance();
         double frontDistance = frontEncoder.getAdjustedDistance();
