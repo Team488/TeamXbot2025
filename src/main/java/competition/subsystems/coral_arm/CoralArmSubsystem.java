@@ -315,7 +315,8 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     }
   
     public boolean getIsTargetAngleScoring() {
-        return Degrees.of(scoreAngleDegrees.get()).isNear(targetAngle, Degrees.of(0.25));
+        return Degrees.of(L123ScoringAngle.get()).isNear(targetAngle, Degrees.of(0.25)) ||
+               Degrees.of(L4ScoringAngle.get()).isNear(targetAngle, Degrees.of(0.25));
     }
 
     
