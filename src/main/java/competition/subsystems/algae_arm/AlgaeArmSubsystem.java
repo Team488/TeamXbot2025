@@ -41,6 +41,7 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
     final DoubleProperty reefLowTopToBottomSweepEnd;
     final DoubleProperty reefHighSweepStart;
     final DoubleProperty reefHighSweepEnd;
+    final DoubleProperty repositionArmAmount;
 
     final Alert isNotCalibratedAlert = new Alert("AlgaeArm: not calibrated", Alert.AlertType.kWarning);
 
@@ -90,6 +91,7 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
         this.reefLowTopToBottomSweepEnd = propertyFactory.createPersistentProperty("ReefLowTopToBottomSweepEnd", 90.0);
         this.reefHighSweepStart = propertyFactory.createPersistentProperty("ReefHighSweepStart", 110.0);
         this.reefHighSweepEnd = propertyFactory.createPersistentProperty("ReefHighSweepEnd", 150.0);
+        this.repositionArmAmount = propertyFactory.createPersistentProperty("RepositionArmAmount", 5);
     }
 
     @Override
@@ -187,6 +189,14 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
             return this.bottomSensor.get();
         }
         return false;
+    }
+
+    public void repositionToTargetAngle(boolean goingUpHere) {
+        if (goingUpHere) {
+            targetAngle = getTargetValue().plus(Degrees.of(repositionArmAmount.get()));
+        } else {
+            targetAngle = getTargetValue().minus(Degrees.of(repositionArmAmount.get()));
+        }
     }
 
     @Override

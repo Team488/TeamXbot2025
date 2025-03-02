@@ -24,6 +24,7 @@ public class AlignToTagGlobalMovementWithCalculator extends BaseCommand {
     private int targetCameraID;
     private boolean isCameraBackwards;
     private Distance offset;
+    private boolean hasSetConfiguration = false;
 
     final AlignCameraToAprilTagCalculator calculator;
 
@@ -46,11 +47,17 @@ public class AlignToTagGlobalMovementWithCalculator extends BaseCommand {
         this.targetAprilTagID = targetAprilTagID;
         this.isCameraBackwards = isCameraBackwards;
         this.offset = Inches.of(offsetInInches);
+        this.hasSetConfiguration = true;
     }
 
     @Override
     public void initialize() {
         log.info("Initializing");
+        if (!hasSetConfiguration) {
+            cancel();
+            return;
+        }
+
         calculator.configureAndReset(targetAprilTagID, targetCameraID, offset, isCameraBackwards);
         pose.setAreVisionUpdatesDisabled(true);
     }
