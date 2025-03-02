@@ -6,9 +6,6 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
-import java.util.ArrayList;
-import java.util.List;
-import javax.inject.Inject;
 import org.kobe.xbot.Utilities.Entities.XTableValues;
 import xbot.common.logging.RobotAssertionManager;
 import xbot.common.properties.PropertyFactory;
@@ -19,6 +16,10 @@ import xbot.common.subsystems.drive.SwerveSimpleTrajectoryMode;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
 import xbot.common.subsystems.pose.BasePoseSubsystem;
 import xbot.common.trajectory.XbotSwervePoint;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SwerveBezierTrajectoryBase extends SwerveSimpleTrajectoryCommand {
     private final CoprocessorCommunicationSubsystem coprocessor;
@@ -116,7 +117,7 @@ public class SwerveBezierTrajectoryBase extends SwerveSimpleTrajectoryCommand {
         int totalSteps = totalSegments * STEPS_PER_SEGMENT;
         int globalStep = 0;
 
-        // Rotation start threshold (10% of the path)
+        // Rotation start threshold (50% of the path)
         double rotationStartThreshold = 0.5;
 
         // Process each Bézier segment.
@@ -155,13 +156,16 @@ public class SwerveBezierTrajectoryBase extends SwerveSimpleTrajectoryCommand {
                 double globalProgress = globalStep / (double) totalSteps;
 
                 Rotation2d targetRotation;
-
+                log.info(globalProgress);
                 if (globalProgress < rotationStartThreshold) {
                     // Before 10% progress, maintain the current heading.
+                    log.info("USING SAME ANGLE");
+
                     targetRotation =
                             Rotation2d.fromDegrees(pose.getCurrentHeading().getDegrees());
                 } else {
                     // After 10% progress, switch to the target rotation.
+                    log.info("NOW USING FINAL ROTATION {}", finalRotation);
                     targetRotation = finalRotation;
                 }
 

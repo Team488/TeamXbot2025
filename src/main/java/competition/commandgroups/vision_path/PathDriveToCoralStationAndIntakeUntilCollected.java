@@ -35,7 +35,7 @@ public class PathDriveToCoralStationAndIntakeUntilCollected {
         var driveToCoralStationThenDriveForward = new SequentialCommandGroup(
                 driveToCoralStationSectionCommand,
                 new InstantCommand(() -> {
-                    driveVectorSmall.setPose(driveToCoralStationSectionCommand.getTargetCoralStationSection());
+                    driveVectorSmall.setTargetPose(driveToCoralStationSectionCommand.getTargetCoralStationSection());
                 }),
                 driveVectorSmall
         );

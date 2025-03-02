@@ -17,14 +17,15 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import javax.inject.Inject;
 import org.kobe.xbot.Utilities.Entities.XTableValues;
 import xbot.common.logging.RobotAssertionManager;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
+
+import javax.inject.Inject;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Command to drive the robot to a specific coral station section.
@@ -36,6 +37,7 @@ public class PathDriveToNearestCoralStationSectionCommand
      * Target position for the coral station section.
      */
     Pose2d targetCoralStationSection;
+    Pose2d destinationPose;
 
     /**
      * Distance from the center of the robot to the outer bumper, in meters.
@@ -58,16 +60,16 @@ public class PathDriveToNearestCoralStationSectionCommand
      * @param pose                              The pose subsystem.
      * @param pf                                The property factory.
      * @param headingModuleFactory              Factory for creating heading
-     *     modules.
+     *                                          modules.
      * @param aprilTagVisionSubsystem           Vision subsystem for detecting
-     *     AprilTags.
+     *                                          AprilTags.
      * @param electricalContract                Electrical configuration of the
-     *     robot.
+     *                                          robot.
      * @param aprilTagFieldLayout               Field layout containing AprilTag
-     *     positions.
+     *                                          positions.
      * @param robotAssertionManager             Assertion manager for validation.
      * @param coprocessorCommunicationSubsystem Subsystem for communicating with a
-     *     coprocessor.
+     *                                          coprocessor.
      */
     @Inject
     public PathDriveToNearestCoralStationSectionCommand(DriveSubsystem drive,
@@ -127,11 +129,11 @@ public class PathDriveToNearestCoralStationSectionCommand
                 this.radiusOfRobot, targetCoralStationSection.getRotation());
         var destinationTranslation =
                 targetCoralStationSection.getTranslation().plus(deltaTranslation);
-        var destinationPose =
+        destinationPose =
                 new Pose2d(destinationTranslation, targetCoralStationSection.getRotation());
         this.setTarget(destinationPose);
         this.setAdditionalArguments(XTableValues.AdditionalArguments.newBuilder()
-                        .setAlliance(fromAlliance(DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue)))
+                .setAlliance(fromAlliance(DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue)))
                 .build());
         this.setSafeInches(25);
         this.setOptions(
@@ -142,8 +144,15 @@ public class PathDriveToNearestCoralStationSectionCommand
                         .build());
         super.initialize();
     }
+
     private XTableValues.Alliance fromAlliance(DriverStation.Alliance alliance) {
         return alliance.equals(DriverStation.Alliance.Blue) ? XTableValues.Alliance.BLUE : XTableValues.Alliance.RED;
+    }
+
+    @Override
+    public boolean isFinished() {
+        aKitLog.record("distanceToGoal", pose.getCurrentPose2d().getTranslation().getDistance(destinationPose.getTranslation()));
+        return super.isFinished() || (destinationPose != null && pose.getCurrentPose2d().getTranslation().getDistance(destinationPose.getTranslation()) < 0.2032);
     }
 
     public Pose2d getTargetCoralStationSection() {

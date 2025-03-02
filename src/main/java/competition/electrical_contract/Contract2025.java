@@ -350,21 +350,21 @@ public class Contract2025 extends ElectricalContract {
 
     @Override
     public DeviceInfo getLightsDio0() {
-        return new DeviceInfo("Lights0", 99); // invalid making bad was 2
+        return new DeviceInfo("Lights0", 30); // invalid making bad was 2
     }
 
     @Override
     public DeviceInfo getLightsDio1() {
-        return new DeviceInfo("Lights1", 98); // invalid making bad was 4
+        return new DeviceInfo("Lights1", 29); // invalid making bad was 4
     }
 
     @Override
     public DeviceInfo getLightsDio2() {
-        return new DeviceInfo("Lights2", 97); // invalid making bad was 7
+        return new DeviceInfo("Lights2", 28); // invalid making bad was 7
     }
 
     @Override
     public DeviceInfo getLightsDio3() {
-        return new DeviceInfo("Lights3", 96); // invalid was 8
+        return new DeviceInfo("Lights3", 27); // invalid was 8
     }
 }

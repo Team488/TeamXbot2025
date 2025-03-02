@@ -13,7 +13,7 @@ public class DriveVectorSmall extends BaseCommand {
     private double start;
     private double last = 0.25;
 
-    private Pose2d pose;
+    private Pose2d targetPose;
 
     private DriveSubsystem drive;
     private PoseSubsystem poseSubsystem;
@@ -25,6 +25,7 @@ public class DriveVectorSmall extends BaseCommand {
 
     @Override
     public void initialize() {
+        log.info("Initializing DriveVectorSmall");
         this.start = XTimer.getFPGATimestamp();
     }
 
@@ -33,19 +34,13 @@ public class DriveVectorSmall extends BaseCommand {
      */
     @Override
     public void execute() {
-        double angleRadians = pose.getRotation().getRadians();
-        double vx = Math.cos(angleRadians);
-        double vy = Math.sin(angleRadians);
-        double speedFactor = 0.25;
-        vx *= speedFactor;
-        vy *= speedFactor;
-        drive.drive(new XYPair(vx, vy), 0, false);
+        drive.move(XYPair.fromPolar(targetPose.getRotation().getDegrees() - 180, 0.25), 0);
     }
 
 
 
-    public DriveVectorSmall setPose(Pose2d pose) {
-        this.pose = pose;
+    public DriveVectorSmall setTargetPose(Pose2d targetPose) {
+        this.targetPose = targetPose;
         return this;
     }
 
@@ -58,8 +53,8 @@ public class DriveVectorSmall extends BaseCommand {
         return this;
     }
 
-    public Pose2d getPose() {
-        return pose;
+    public Pose2d getTargetPose() {
+        return targetPose;
     }
 
     /**
