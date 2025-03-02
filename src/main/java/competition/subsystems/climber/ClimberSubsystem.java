@@ -18,11 +18,24 @@ import static edu.wpi.first.units.Units.Volts;
 @Singleton
 public class ClimberSubsystem extends BaseSubsystem {
 
+    public enum PawlState{
+        RETRACTED,
+        EXTENDING,
+        ONCOOLDOWN,
+        EXTENDED,
+    }
+
+    public Time pawlTimestampStart = XTimer.getFPGATimestampTime();
+    public Time pawlTimestampEnd = pawlTimestampStart.plus(Seconds.of(1.5));
+    public Time pawlTimestampCooldown = pawlTimestampEnd.plus(Seconds.of(6));
+
     public final XCANMotorController climberMotor;
     public final DoubleProperty climberPower;
     public final ElectricalContract contract;
 
     public final XCANMotorController pawlMotor;
+
+    public PawlState currentPawlState;
 
     @Inject
     public ClimberSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
@@ -64,6 +77,45 @@ public class ClimberSubsystem extends BaseSubsystem {
     public void stop() {
         if (contract.isClimberMotorReady()) {
             this.climberMotor.setPower(0);
+        }
+    }
+
+    public void releaseClimberSolenoid(){
+        currentPawlState = decideState();
+
+        switch(currentPawlState){
+            case EXTENDING -> setPawlMotorPower(1);
+            case ONCOOLDOWN -> setPawlMotorPower(0);
+        }
+    }
+
+    public void resetPawlTimestampStart(){
+        pawlTimestampStart = XTimer.getFPGATimestampTime();
+    }
+
+    public PawlState decideState(){
+        pawlTimestampEnd = pawlTimestampStart.plus(Seconds.of(1.5));
+        pawlTimestampCooldown = pawlTimestampEnd.plus(Seconds.of(6));
+        
+        if (XTimer.getFPGATimestampTime().lt(pawlTimestampEnd)){
+            return PawlState.EXTENDING;
+        }
+
+        if (XTimer.getFPGATimestampTime().lt(pawlTimestampCooldown) && XTimer.getFPGATimestampTime().gt(pawlTimestampEnd)){
+            return PawlState.ONCOOLDOWN;
+        }
+
+        if (XTimer.getFPGATimestampTime().lt(pawlTimestampCooldown)){
+            return PawlState.EXTENDED;
+        }
+
+        return PawlState.RETRACTED;
+    }
+
+    @Override
+    public void periodic() {
+        if (currentPawlState == PawlState.ONCOOLDOWN){
+            setPawlMotorPower(0);
         }
     }
 }
