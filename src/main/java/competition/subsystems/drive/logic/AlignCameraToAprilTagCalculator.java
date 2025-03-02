@@ -109,12 +109,12 @@ public class AlignCameraToAprilTagCalculator {
         this.akitLog = new AKitLogger(prefix);
 
         pf.setPrefix(prefix);
-        interstitialDistance = pf.createPersistentProperty("InterstitialDistance-m", 2.0);
+        interstitialDistance = pf.createPersistentProperty("InterstitialDistance-m", 2.25);
         distanceFromInterstitialToAdvance = pf.createPersistentProperty("DistanceFromInterstitialToAdvance-m", 0.2);
-        approachSpeedFactor = pf.createPersistentProperty("ApproachSpeedFactor", 0.75);
+        approachSpeedFactor = pf.createPersistentProperty("ApproachSpeedFactor", 0.65);
         distanceToStartShoving = pf.createPersistentProperty("DistanceToStartShoving-m", 0.0762); // 3 inches
         shovePower = pf.createPersistentProperty("ShovePower", 0.25);
-        shoveDuration = pf.createPersistentProperty("ShoveDuration-s", 0.5);
+        shoveDuration = pf.createPersistentProperty("ShoveDuration-s", 0.25);
         maxTagAmbiguity = pf.createPersistentProperty("MaxTagAmbiguity", 0.5);
         maxHorizontalErrorMeters = pf.createPersistentProperty("MaxHorizontalError-m", 0.0508); // 2 inches
 
@@ -259,7 +259,13 @@ public class AlignCameraToAprilTagCalculator {
 
                 // Now, drive to that final point with locked-on heading.
                 var powers = drive.getPowerToAchieveFieldPosition(currentPose.getTranslation(), targetLocationOnField);
-                driveIntent = new XYPair(powers.getX(), powers.getY());
+
+                // If we are going too fast, cap the speed.
+                if (powers.getNorm() >  approachSpeedFactor.get()) {
+                    powers = new Translation2d(approachSpeedFactor.get(), powers.getAngle());
+                }
+
+                driveIntent = new XYPair(powers.getX(), powers.getY()).scale(approachSpeedFactor.get());
                 rotationIntent = headingModule.calculateHeadingPower(idealFinalHeadingDegrees);
 
                 // If we're quite close to the final point, advance to shoving into the reef or coral station.
@@ -299,6 +305,7 @@ public class AlignCameraToAprilTagCalculator {
         akitLog.record("Activity", activity);
         akitLog.record("TagAcquisitionState", tagAcquisitionState);
         akitLog.record("ErrorIsWithinBounds", isLastKnownErrorWithinBounds());
+        akitLog.record("LastKnownHorizontalErrorMeters", lastKnownHorizontalErrorMeters);
 
         return new AlignCameraToAprilTagAdvice(driveIntent, rotationIntent, tagAcquisitionState, activity);
     }

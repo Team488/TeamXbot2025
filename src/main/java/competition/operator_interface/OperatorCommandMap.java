@@ -8,6 +8,8 @@ import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
 import competition.simulation.commands.ResetSimulatedPose;
 import competition.subsystems.algae_arm.AlgaeArmSubsystem;
 import competition.subsystems.algae_arm.commands.ForceAlgaeArmCalibrated;
+import competition.subsystems.algae_arm.commands.RepositionAlgaeArmDown;
+import competition.subsystems.algae_arm.commands.RepositionAlgaeArmUp;
 import competition.subsystems.algae_arm.commands.SetAlgaeArmSetpointToTargetPosition;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionIntakeCommand;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionOutputCommand;
@@ -194,14 +196,16 @@ public class OperatorCommandMap {
     @Inject
     public void setUpOperatorCommands(OperatorInterface oi,
                                       PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
-                                      ScoreCoralCommand scoreCoralCommand, IntakeUntilCoralCollectedCommand intakeUntilCoralCollectedCommand,
-                                      ScoreWhenReadyCommand scoreWhenReadyCommand, ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
+                                      ScoreCoralCommand scoreCoralCommand,
+                                      ScoreWhenReadyCommand scoreWhenReadyCommand, 
+                                      ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
                                       ForceCoralArmCalibratedCommand forceCoralPivotCalibratedCommand,
                                       ForceAlgaeArmCalibrated forceAlgaeArmCalibrated,
                                       Provider<SetAlgaeArmSetpointToTargetPosition> setAlgaeArmProvider,
                                       AlgaeCollectionIntakeCommand intakeAlgae,
                                       AlgaeCollectionOutputCommand ejectAlgae,
                                       CoralArmSubsystem coralArmSubsystem,
+                                      IntakeCoralCommand intakeCoralCommand,
                                       PrepAlgaeSystemCommandGroupFactory prepAlgaeSystemCommandGroupFactory) {
         // Coral system buttons
         var prepL4 = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.FOUR);
@@ -215,7 +219,7 @@ public class OperatorCommandMap {
 
         var homed = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
-        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeUntilCoralCollectedCommand);
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeCoralCommand);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreCoralCommand);
 
         // combine all three claibration commands into one parallal command group
@@ -255,7 +259,9 @@ public class OperatorCommandMap {
             Provider<SetCoralArmTargetAngleCommand> setArmTargetAngleCommandProvider,
             Provider<SetElevatorTargetHeightCommand> setElevatorTargetHeightCommandProvider,
             ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
-            ForceCoralArmCalibratedCommand forceCoralArmCalibratedCommand) {
+            ForceCoralArmCalibratedCommand forceCoralArmCalibratedCommand,
+            RepositionAlgaeArmDown repositionAlgaeArmDown,
+            RepositionAlgaeArmUp repositionAlgaeArmUp) {
 
         var returnToBase = setElevatorTargetHeightCommandProvider.get();
         returnToBase.setHeight(Landmarks.CoralLevel.COLLECTING);
@@ -283,6 +289,10 @@ public class OperatorCommandMap {
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(riseToL4);
 
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.Back).onTrue(forceCoralArmCalibratedCommand);
+
+//        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(repositionAlgaeArmUp);
+//        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(repositionAlgaeArmDown);
+      
     }
 
     @Inject
