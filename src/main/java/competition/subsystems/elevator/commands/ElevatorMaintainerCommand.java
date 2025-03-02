@@ -14,6 +14,8 @@ import xbot.common.logic.CalibrationDecider;
 import xbot.common.logic.HumanVsMachineDecider;
 import xbot.common.math.MathUtils;
 import xbot.common.math.PIDManager;
+import xbot.common.properties.AngleProperty;
+import xbot.common.properties.DistanceProperty;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 
@@ -44,9 +46,10 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     TrapezoidProfileManager profileManager;
 
     final ElectricalContract contract;
-    final DoubleProperty coralArmCollisionAngleDegrees;
+    final AngleProperty coralArmCollisionAngleDegrees;
+    final DistanceProperty elevatorTargetChangingThreshold;
 
-    final Alert collisionSafetiesEngaged = new Alert("Elevator Arm: collision safeties engaged", Alert.AlertType.kWarning);
+    final Alert collisionSafetiesEngaged = new Alert("Elevator: collision safeties engaged", Alert.AlertType.kWarning);
 
     @Inject
     public ElevatorMaintainerCommand(ElevatorSubsystem elevator, CoralArmSubsystem coralArm, PropertyFactory pf,
@@ -73,7 +76,10 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         this.humanMaxPowerGoingDown = pf.createPersistentProperty("humanMaxPowerGoingDown", -0.2);
 
         this.gravityPIDConstantPower = pf.createPersistentProperty("gravityPIDConstant", 0.07416666);
-        this.coralArmCollisionAngleDegrees = pf.createPersistentProperty("CoralArmCollisionAngleDegrees", 120);
+        this.coralArmCollisionAngleDegrees = pf.createPersistentProperty(
+                "CoralArmCollisionAngleDegrees", Degrees.of(120));
+        this.elevatorTargetChangingThreshold = pf.createPersistentProperty(
+                "elevatorTargetChangingThresholdInches", Inches.of(3));
 
         decider.setDeadband(0.02);
     }
@@ -114,10 +120,12 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     @Override
     protected void calibratedMachineControlAction() {
 
-        var currentTarget = wouldHitBranch(elevator.getCurrentValue())
+        var wouldCollide = wouldHitBranch(elevator.getTargetValue());
+        var currentTarget = wouldCollide
                 ? elevator.getCurrentValue()
                 : elevator.getTargetValue();
 
+        collisionSafetiesEngaged.set(wouldCollide);
         aKitLog.setLogLevel(AKitLogger.LogLevel.DEBUG);
         aKitLog.record("PM-TargetValue", currentTarget.in(Meters));
         aKitLog.record("PM-CurrentValue", elevator.getCurrentValue().in(Meters));
@@ -136,8 +144,9 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     }
 
     private boolean wouldHitBranch(Distance targetValue) {
-        var coralArmAngleDangerous = coralArm.getCurrentValue().gt(Degrees.of(coralArmCollisionAngleDegrees.get()));
-        var elevatorIsMoving = elevator.getTargetValue() != elevator.getCurrentValue();
+        var coralArmAngleDangerous = coralArm.getCurrentValue().gt(coralArmCollisionAngleDegrees.get());
+        var elevatorIsMoving = Math.abs(targetValue.minus(elevator.getCurrentValue()).in(Inches)) >
+                elevatorTargetChangingThreshold.get().in(Inches);
         return coralArmAngleDangerous && elevatorIsMoving;
     }
 
