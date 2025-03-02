@@ -263,7 +263,7 @@ public class OperatorCommandMap {
             ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
             ForceCoralArmCalibratedCommand forceCoralArmCalibratedCommand,
             ReleaseClimberSolenoidCommand releaseClimberSolenoidCommand,
-            ManualControlPawlMotorCommand manualControlPawlMotorCommand) {
+            ManualControlPawlMotorCommand manualControlPawlMotorCommand,
             RepositionAlgaeArmDown repositionAlgaeArmDown,
             RepositionAlgaeArmUp repositionAlgaeArmUp) {
 
