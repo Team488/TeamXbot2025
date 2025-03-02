@@ -155,13 +155,10 @@ public class OperatorCommandMap {
         oneLength.logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
         oneLength.logic.setKeyPoints(points3);
 
-        oneLength.includeOnSmartDashboard("OneLengthTest");
+        // oneLength.includeOnSmartDashboard("OneLengthTest");
 
-        aroundBlueReef.includeOnSmartDashboard("AroundReefTest");
-        backAndFourth.includeOnSmartDashboard("BackAndForthTest");
-
-        // Don't think this is needed anymore, I'll keep it just in case
-        resetPoseCommand.includeOnSmartDashboard("ResetPoseToOriginCommand");
+        // aroundBlueReef.includeOnSmartDashboard("AroundReefTest");
+        // backAndFourth.includeOnSmartDashboard("BackAndForthTest");
 
         var driveWithPidNear = driveToLocationWithPIDProvider.get();
         driveWithPidNear.setLocationTarget(new Translation2d(1, 0));
@@ -184,13 +181,13 @@ public class OperatorCommandMap {
         var rotateTo180Degrees = rotationToHeadingWithHeadingModuleProvider.get();
         rotateTo180Degrees.setTargetHeading(Degree.of(180));
 
-        driveWithPidNear.includeOnSmartDashboard("DriveToLocationWithPIDNear");
-        driveWithPidFar.includeOnSmartDashboard("DriveToLocationWithPIDFar");
-        rotateTo5Degrees.includeOnSmartDashboard("RotateTo5Degrees");
-        rotateTo10Degrees.includeOnSmartDashboard("RotateTo10Degrees");
-        rotateTo45Degrees.includeOnSmartDashboard("RotateTo45Degrees");
-        rotateTo90Degrees.includeOnSmartDashboard("RotateTo90Degrees");
-        rotateTo180Degrees.includeOnSmartDashboard("RotateTo180Degrees");
+        // driveWithPidNear.includeOnSmartDashboard("DriveToLocationWithPIDNear");
+        // driveWithPidFar.includeOnSmartDashboard("DriveToLocationWithPIDFar");
+        // rotateTo5Degrees.includeOnSmartDashboard("RotateTo5Degrees");
+        // rotateTo10Degrees.includeOnSmartDashboard("RotateTo10Degrees");
+        // rotateTo45Degrees.includeOnSmartDashboard("RotateTo45Degrees");
+        // rotateTo90Degrees.includeOnSmartDashboard("RotateTo90Degrees");
+        // rotateTo180Degrees.includeOnSmartDashboard("RotateTo180Degrees");
     }
 
 
@@ -378,12 +375,5 @@ public class OperatorCommandMap {
         setFromLeftCageScoreLeftFacesLevelFours.setAutoCommand(fromLeftCageScoreLeftFacesLevelFours);
         oi.neoTrellis.getifAvailable(4).onTrue(setFromLeftCageScoreLeftFacesLevelFours); // temporary button
         setFromLeftCageScoreLeftFacesLevelFours.includeOnSmartDashboard("From Left Score Left Face's Level Fours Auto");
-    }
-
-    @Inject
-    public void setupSimulatorCommands(
-            ResetSimulatedPose resetPose
-    ) {
-        resetPose.includeOnSmartDashboard();
     }
 }
