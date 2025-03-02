@@ -86,6 +86,7 @@ public class ClimberSubsystem extends BaseSubsystem {
         switch(currentPawlState){
             case EXTENDING -> setPawlMotorPower(1);
             case ONCOOLDOWN -> setPawlMotorPower(0);
+            default -> setPawlMotorPower(0);
         }
     }
 
@@ -96,7 +97,7 @@ public class ClimberSubsystem extends BaseSubsystem {
     public PawlState decideState(){
         pawlTimestampEnd = pawlTimestampStart.plus(Seconds.of(1.5));
         pawlTimestampCooldown = pawlTimestampEnd.plus(Seconds.of(6));
-        
+
         if (XTimer.getFPGATimestampTime().lt(pawlTimestampEnd)){
             return PawlState.EXTENDING;
         }
