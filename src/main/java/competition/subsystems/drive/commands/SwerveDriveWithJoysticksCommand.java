@@ -39,4 +39,9 @@ public class SwerveDriveWithJoysticksCommand extends BaseCommand {
                 advice.centerOfRotationInches()
         );
     }
+
+    @Override
+    public void end(boolean interrupted) {
+        log.info("Ending");
+    }
 }

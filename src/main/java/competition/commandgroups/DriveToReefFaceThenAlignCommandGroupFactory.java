@@ -1,5 +1,6 @@
 package competition.commandgroups;
 
+import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.AlignToTagGlobalMovementWithCalculator;
 import competition.subsystems.drive.commands.DriveToReefFaceUntilDetectionCommand;
@@ -19,14 +20,17 @@ public class DriveToReefFaceThenAlignCommandGroupFactory {
     DriveToReefFaceUntilDetectionCommand driveToReefFaceCommand;
     AlignToTagGlobalMovementWithCalculator alignToReefWithAprilTagCommand;
     AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
+    DriveSubsystem drive;
 
     @Inject
     public DriveToReefFaceThenAlignCommandGroupFactory(DriveToReefFaceUntilDetectionCommand driveToReefFaceCommand,
                                                        AlignToTagGlobalMovementWithCalculator alignToReefWithAprilTagCommand,
-                                                       AprilTagVisionSubsystemExtended aprilTagVisionSubsystem) {
+                                                       AprilTagVisionSubsystemExtended aprilTagVisionSubsystem,
+                                                       DriveSubsystem drive) {
         this.driveToReefFaceCommand = driveToReefFaceCommand;
         this.alignToReefWithAprilTagCommand = alignToReefWithAprilTagCommand;
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
+        this.drive = drive;
     }
 
     public void setBranch(Landmarks.ReefFace reefFace, Landmarks.Branch branch) {
@@ -48,9 +52,11 @@ public class DriveToReefFaceThenAlignCommandGroupFactory {
                 () -> {
                     setBranch(targetReefFace, targetBranch);
                     return alignToReefWithAprilTagCommand;
-                }, Set.of()
+                }, Set.of(drive)
         );
-        group.addCommands(driveToReefFaceCommand, alignToReefCommand);
+        group.addCommands(
+//                driveToReefFaceCommand,
+                alignToReefCommand);
 
         return group;
     }
