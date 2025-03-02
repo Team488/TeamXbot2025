@@ -18,7 +18,6 @@ public class EmergencyAutonomousCommand extends BaseCommand {
     final DriveSubsystem drive;
     double startingTime;
     DoubleProperty moveRobotX;
-    DoubleProperty moveRobotY;
     DoubleProperty timeAmountToMove;
 
 
@@ -28,7 +27,6 @@ public class EmergencyAutonomousCommand extends BaseCommand {
         this.drive = drive;
         this.addRequirements(drive);
         this.moveRobotX = pf.createPersistentProperty("Move robot X", 1);
-        this.moveRobotY = pf.createPersistentProperty("Move robot Y", 0);
         this.timeAmountToMove= pf.createPersistentProperty("Seconds it moves",1);
 
     }
@@ -40,7 +38,7 @@ public class EmergencyAutonomousCommand extends BaseCommand {
 
     @Override
     public void execute() {
-        drive.move(new XYPair(moveRobotX.get(),moveRobotY.get()), 0);
+        drive.move(new XYPair(moveRobotX.get(), 0), 0);
     }
 
     @Override
