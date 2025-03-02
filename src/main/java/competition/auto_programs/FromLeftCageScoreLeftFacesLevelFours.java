@@ -18,8 +18,6 @@ public class FromLeftCageScoreLeftFacesLevelFours extends BaseAutonomousSequenti
     @Inject
     public FromLeftCageScoreLeftFacesLevelFours(AutonomousCommandSelector autoSelector,
                                                 PoseSubsystem pose,
-                                                DriveToFaceAndScoreCommandGroupFactory driveToFaceAndScoreFact,
-                                                DriveToStationAndIntakeUntilCollectedCommandGroupFactory driveToStationAndIntakeFact,
                                                 Provider<DriveToFaceAndScoreCommandGroupFactory> driveToFaceAndScoreFactProv,
                                                 Provider<DriveToStationAndIntakeUntilCollectedCommandGroupFactory> driveToStationAndIntakeFactProv,
                                                 PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFact,
@@ -52,31 +50,32 @@ public class FromLeftCageScoreLeftFacesLevelFours extends BaseAutonomousSequenti
         var driveAndScoreCloseLeftBranchBLevelFour = driveToFaceAndScoreFactProv.get().create(
                 Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR);
         this.addCommands(driveAndScoreCloseLeftBranchBLevelFour);
+//
+//        // Drive to left coral station, close section and intake coral until collected
+//        queueDriveAndIntakeMessageToAutoSelector(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.CLOSE);
+//        var driveToLeftStationCloseSectionAndIntake = driveToStationAndIntakeFactProv.get().create(
+//                Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.MID, false);
+//        this.addCommands(driveToLeftStationCloseSectionAndIntake);
+//
+//        // Drive to close left, branch A and score level four
+//        queueDriveAndScoreMessageToAutoSelector(Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR);
+//        var driveAndScoreCloseLeftBranchALevelFour = driveToFaceAndScoreFactProv.get().create(
+//                Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR);
+//        this.addCommands(driveAndScoreCloseLeftBranchALevelFour);
+//
+//        // Drive to left coral station, far section and intake coral until collected again
+//        queueDriveAndIntakeMessageToAutoSelector(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.FAR);
+//        var driveToLeftStationFarSectionAndIntakeSecond = driveToStationAndIntakeFactProv.get().create(
+//                Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.CLOSE, false);
+//        this.addCommands(driveToLeftStationFarSectionAndIntakeSecond);
+//
+//        // Drive to close, branch A and score level four
+//        queueDriveAndScoreMessageToAutoSelector(Landmarks.ReefFace.CLOSE, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR);
+//        var driveAndScoreCloseBranchALevelFour = driveToFaceAndScoreFactProv.get().create(
+//                Landmarks.ReefFace.CLOSE, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR);
+//        this.addCommands(driveAndScoreCloseBranchALevelFour);
 
-        // Drive to left coral station, close section and intake coral until collected
-        queueDriveAndIntakeMessageToAutoSelector(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.CLOSE);
-        var driveToLeftStationCloseSectionAndIntake = driveToStationAndIntakeFactProv.get().create(
-                Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.MID, false);
-        this.addCommands(driveToLeftStationCloseSectionAndIntake);
-
-        // Drive to close left, branch A and score level four
-        queueDriveAndScoreMessageToAutoSelector(Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR);
-        var driveAndScoreCloseLeftBranchALevelFour = driveToFaceAndScoreFactProv.get().create(
-                Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR);
-        this.addCommands(driveAndScoreCloseLeftBranchALevelFour);
-
-        // Drive to left coral station, far section and intake coral until collected again
-        queueDriveAndIntakeMessageToAutoSelector(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.FAR);
-        var driveToLeftStationFarSectionAndIntakeSecond = driveToStationAndIntakeFactProv.get().create(
-                Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.CLOSE, false);
-        this.addCommands(driveToLeftStationFarSectionAndIntakeSecond);
-
-        // Drive to close, branch A and score level four
-        queueDriveAndScoreMessageToAutoSelector(Landmarks.ReefFace.CLOSE, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR);
-        var driveAndScoreCloseBranchALevelFour = driveToFaceAndScoreFactProv.get().create(
-                Landmarks.ReefFace.CLOSE, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR);
-        this.addCommands(driveAndScoreCloseBranchALevelFour);
-
+        // TODO: replace this with drive and intake commandgroup instead
         var homeCoralSystem = prepCoralSystemCommandGroupFact.create(() -> Landmarks.CoralLevel.COLLECTING);
         this.addCommands(homeCoralSystem);
     }
