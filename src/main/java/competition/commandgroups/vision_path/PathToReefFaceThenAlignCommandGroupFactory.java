@@ -2,9 +2,13 @@ package competition.commandgroups.vision_path;
 
 import competition.subsystems.drive.commands.AlignToTagGlobalMovementWithCalculator;
 import competition.subsystems.drive.commands.vision_path.PathDriveToLocationUntilAprilTagDetection;
+import competition.subsystems.oracle.ReefCoordinateGenerator;
 import competition.subsystems.pose.Cameras;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -13,6 +17,7 @@ public class PathToReefFaceThenAlignCommandGroupFactory {
     Provider<PathDriveToLocationUntilAprilTagDetection> driveToReefFaceCommandProvider;
     Provider<AlignToTagGlobalMovementWithCalculator> alignToReefWithAprilTagCommandProvider;
     AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
+
 
     @Inject
     public PathToReefFaceThenAlignCommandGroupFactory(
@@ -42,7 +47,7 @@ public class PathToReefFaceThenAlignCommandGroupFactory {
         var group = new SequentialCommandGroup();
         PathDriveToLocationUntilAprilTagDetection driveToReefFaceCommand = driveToReefFaceCommandProvider.get();
         AlignToTagGlobalMovementWithCalculator alignToReefWithAprilTagCommand = alignToReefWithAprilTagCommandProvider.get();
-        driveToReefFaceCommand.setTarget(targetReefFace.getViewable(),
+        driveToReefFaceCommand.setTarget(targetReefFace, targetBranch,
                 aprilTagVisionSubsystem.getTargetAprilTagID(targetReefFace));
         setBranch(targetReefFace, targetBranch, alignToReefWithAprilTagCommand);
         group.addCommands(driveToReefFaceCommand, alignToReefWithAprilTagCommand);

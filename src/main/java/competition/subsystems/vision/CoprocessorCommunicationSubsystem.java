@@ -46,7 +46,8 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
         xtablesHeadingLocation = pf.createPersistentProperty("Xtables Heading Location", "target_heading");
 
         xTablesClientManager = XTablesClient.getDefaultClientAsynchronously();
-        this.orinVisionCoprocessorCommander = new VisionCoprocessorCommander(VisionCoprocessor.ORIN3_STATIC); // Connect to ORIN-3
+//        this.orinVisionCoprocessorCommander = new VisionCoprocessorCommander("10.4.88.7"); // Connect to ORIN-3
+        this.orinVisionCoprocessorCommander = new VisionCoprocessorCommander(VisionCoprocessor.LOCALHOST); // Connect to ORIN-3
 
         XTablesLogger.setLoggingLevel(Level.OFF);
 

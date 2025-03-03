@@ -213,7 +213,7 @@ public class OperatorCommandMap {
     private final Landmarks.Branch[] branches = new Landmarks.Branch[]{Landmarks.Branch.A, Landmarks.Branch.B};
     private final Landmarks.CoralLevel[] levels = new Landmarks.CoralLevel[]{Landmarks.CoralLevel.ONE,Landmarks.CoralLevel.TWO,Landmarks.CoralLevel.THREE, Landmarks.CoralLevel.FOUR};
     private void setNeotrellisButtons(OperatorInterface oi, PathToReefFaceThenAlignCommandGroupFactory pathToReefFaceThenAlignCommandGroupFactory){
-        int start = 8;
+        int start = 17;
         int step = 1;
         int idx = 0;
         for(Landmarks.ReefFace face : faces){
