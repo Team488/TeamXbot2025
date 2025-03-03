@@ -156,16 +156,12 @@ public class SwerveBezierTrajectoryBase extends SwerveSimpleTrajectoryCommand {
                 double globalProgress = globalStep / (double) totalSteps;
 
                 Rotation2d targetRotation;
-                log.info(globalProgress);
                 if (globalProgress < rotationStartThreshold) {
                     // Before 10% progress, maintain the current heading.
-                    log.info("USING SAME ANGLE");
-
                     targetRotation =
                             Rotation2d.fromDegrees(pose.getCurrentHeading().getDegrees());
                 } else {
                     // After 10% progress, switch to the target rotation.
-                    log.info("NOW USING FINAL ROTATION {}", finalRotation);
                     targetRotation = finalRotation;
                 }
 
