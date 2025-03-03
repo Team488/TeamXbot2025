@@ -285,13 +285,13 @@ public class PoseSubsystem extends BasePoseSubsystem {
 
     public Landmarks.CoralStation getClosestCoralStation() {
         Pose2d currentPose = getCurrentPose2d();
-        List<Pose2d> coralStationPoses = Arrays.asList(
-                convertBlueToRedIfNeeded(Landmarks.BlueLeftCoralStationMid),
-                convertBlueToRedIfNeeded(Landmarks.BlueRightCoralStationClose)
-        );
+        var leftCoralStation = convertBlueToRedIfNeeded(Landmarks.BlueLeftCoralStationMid);
+        var rightCoralStation = convertBlueToRedIfNeeded(Landmarks.BlueRightCoralStationMid);
+
+        List<Pose2d> coralStationPoses = Arrays.asList(leftCoralStation,rightCoralStation);
         HashMap<Pose2d, Landmarks.CoralStation> hashMap = new HashMap<>();
-        hashMap.put(convertBlueToRedIfNeeded(Landmarks.BlueLeftCoralStationMid),Landmarks.CoralStation.LEFT);
-        hashMap.put(convertBlueToRedIfNeeded(Landmarks.BlueRightCoralStationClose), Landmarks.CoralStation.RIGHT);
+        hashMap.put(leftCoralStation,Landmarks.CoralStation.LEFT);
+        hashMap.put(rightCoralStation, Landmarks.CoralStation.RIGHT);
 
         return hashMap.get(currentPose.nearest(coralStationPoses));
     }
