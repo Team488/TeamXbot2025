@@ -22,6 +22,7 @@ import competition.subsystems.coral_scorer.commands.ScoreCoralCommand;
 import competition.subsystems.coral_scorer.commands.ScoreWhenReadyCommand;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
+import competition.subsystems.drive.commands.AlignToSpecificHumanLoadingStationCommand;
 import competition.subsystems.drive.commands.CalibrateDriveCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
 import competition.subsystems.drive.commands.DriveToCoralStationSectionCommand;
@@ -82,17 +83,12 @@ public class OperatorCommandMap {
             SuperstructureAccordingToOracleCommand superstructureAccordingToOracle,
             DriveToClosestReefSectionWithVisionCommand driveToClosestReefSectionWithVisionCommand,
             DriveToCoralStationWithVisionCommand driveToCoralStationWithVisionCommand,
-            IntakeCoralCommand intakeCoralCommand,
-            SetCoralArmTargetAngleCommand setCoralArmTargetAngleCommand,
-            ScoreCoralCommand scoreCoralCommand,
-            TeleportToPositionCommand teleportToPositionCommand,
             PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
-            ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
-            ForceCoralArmCalibratedCommand forceCoralPivotCalibratedCommand,
             DebugSwerveModuleCommand debugModule,
             ChangeActiveSwerveModuleCommand changeActiveModule,
             SwerveDriveWithJoysticksCommand typicalSwerveDrive,
             HeadingAssistedDriveAndScoreCommandGroup.Factory headingAssistedDriveAndScoreCommandGroupFactory,
+            AlignToSpecificHumanLoadingStationCommand alignToLeftStation,
             DriveToNearestReefFaceWithPID driveToNearestReefFaceWithPID) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
@@ -113,6 +109,9 @@ public class OperatorCommandMap {
         operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
         operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(changeActiveModule);
         operatorInterface.driverGamepad.getPovIfAvailable(180).onTrue(typicalSwerveDrive);
+
+        alignToLeftStation.setCoralStation(Landmarks.CoralStation.LEFT);
+        operatorInterface.driverGamepad.getPovIfAvailable(270).whileTrue(alignToLeftStation);
 
         // operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(intakeCoralCommand);
         // operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(scoreCoralCommand);
