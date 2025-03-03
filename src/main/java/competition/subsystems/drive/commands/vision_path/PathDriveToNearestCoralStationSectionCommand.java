@@ -152,7 +152,8 @@ public class PathDriveToNearestCoralStationSectionCommand
     @Override
     public boolean isFinished() {
         aKitLog.record("distanceToGoal", pose.getCurrentPose2d().getTranslation().getDistance(destinationPose.getTranslation()));
-        return super.isFinished() || (destinationPose != null && pose.getCurrentPose2d().getTranslation().getDistance(destinationPose.getTranslation()) < 0.2032);
+        return super.isFinished() 
+        || (destinationPose != null && pose.getCurrentPose2d().getTranslation().getDistance(destinationPose.getTranslation()) < 0.2032);
     }
 
     public Pose2d getTargetCoralStationSection() {
