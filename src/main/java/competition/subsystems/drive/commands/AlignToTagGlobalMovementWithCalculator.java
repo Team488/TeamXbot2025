@@ -27,6 +27,8 @@ public class AlignToTagGlobalMovementWithCalculator extends BaseCommand {
     private boolean isCameraBackwards;
     private Distance offset;
     private boolean hasSetConfiguration = false;
+    private AlignCameraToAprilTagCalculator.Activity startingActivity = AlignCameraToAprilTagCalculator.Activity.Searching;
+    private boolean requireExcellentAlignment = true;
 
     final AlignCameraToAprilTagCalculator calculator;
 
@@ -45,11 +47,24 @@ public class AlignToTagGlobalMovementWithCalculator extends BaseCommand {
     }
 
     public void setConfigurations(int targetCameraID, int targetAprilTagID, boolean isCameraBackwards, double offsetInInches) {
+        setConfigurations(
+                targetCameraID,
+                targetAprilTagID,
+                isCameraBackwards,
+                offsetInInches,
+                AlignCameraToAprilTagCalculator.Activity.Searching,
+                true);
+    }
+
+    public void setConfigurations(int targetCameraID, int targetAprilTagID, boolean isCameraBackwards, double offsetInInches,
+    AlignCameraToAprilTagCalculator.Activity startingActivity, boolean requireExcellentAlignment) {
         this.targetCameraID = targetCameraID;
         this.targetAprilTagID = targetAprilTagID;
         this.isCameraBackwards = isCameraBackwards;
         this.offset = Inches.of(offsetInInches);
         this.hasSetConfiguration = true;
+        this.startingActivity = startingActivity;
+        this.requireExcellentAlignment = requireExcellentAlignment;
     }
 
     @Override
@@ -60,7 +75,8 @@ public class AlignToTagGlobalMovementWithCalculator extends BaseCommand {
             return;
         }
 
-        calculator.configureAndReset(targetAprilTagID, targetCameraID, offset, isCameraBackwards);
+        calculator.configureAndReset(targetAprilTagID, targetCameraID, offset,
+                isCameraBackwards, startingActivity, requireExcellentAlignment);
         pose.setAreVisionUpdatesDisabled(true);
     }
 

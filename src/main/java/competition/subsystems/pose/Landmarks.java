@@ -178,6 +178,27 @@ public class Landmarks {
         };
     }
 
+    public static CoralStation getCoralStationFromTagId(int tagId) {
+        return switch (tagId) {
+            case 1, 13 -> CoralStation.LEFT;
+            case 2, 12 -> CoralStation.RIGHT;
+            default -> CoralStation.LEFT; // How did you get here?
+        };
+    }
+
+    public static int getTagIdFromCoralStation(DriverStation.Alliance alliance, CoralStation station) {
+        return switch (alliance) {
+            case Blue -> switch (station) {
+                case LEFT -> 13;
+                case RIGHT -> 12;
+            };
+            case Red -> switch (station) {
+                case LEFT -> 1;
+                case RIGHT -> 2;
+            };
+        };
+    }
+
     public enum FieldElementType {
         REEF_FACE,
         CORAL_STATION,

@@ -4,6 +4,7 @@ import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.AlignToTagGlobalMovementWithCalculator;
 import competition.subsystems.drive.commands.DriveToReefFaceUntilDetectionCommand;
+import competition.subsystems.drive.logic.AlignCameraToAprilTagCalculator;
 import competition.subsystems.pose.Cameras;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
@@ -36,11 +37,13 @@ public class DriveToReefFaceThenAlignCommandGroupFactory {
     public void setBranch(Landmarks.ReefFace reefFace, Landmarks.Branch branch) {
         if (branch == Landmarks.Branch.A) {
             alignToReefWithAprilTagCommand.setConfigurations(Cameras.FRONT_RIGHT_CAMERA.getIndex(),
-                    aprilTagVisionSubsystem.getTargetAprilTagID(reefFace), false, 1);
+                    aprilTagVisionSubsystem.getTargetAprilTagID(reefFace), false, 1,
+                    AlignCameraToAprilTagCalculator.Activity.ApproachWhileCentering, true);
         }
         else {
             alignToReefWithAprilTagCommand.setConfigurations(Cameras.FRONT_LEFT_CAMERA.getIndex(),
-                    aprilTagVisionSubsystem.getTargetAprilTagID(reefFace), false, 1);
+                    aprilTagVisionSubsystem.getTargetAprilTagID(reefFace), false, 1,
+                    AlignCameraToAprilTagCalculator.Activity.ApproachWhileCentering, true);
         }
     }
 
