@@ -38,7 +38,7 @@ public class DriveToCoralStationInterstitialCommand extends SwerveSimpleTrajecto
 
         // Interstitial points to avoid rotating into the reef when going for coral station alignment
         Pose2d leftStationInterstitialPoint = new Pose2d(
-                Landmarks.BlueFarLeftBranchB.getX() - 0.9144, // TODO: Tune
+                Landmarks.BlueFarLeftBranchB.getX() - 0.9144, // TODO: Tune for better pathing
                 Landmarks.BlueFarLeftBranchB.getY() + 0.9144,
                 Landmarks.BlueFarLeftBranchB.getRotation());
         Pose2d rightStationInterstitialPoint = new Pose2d(
