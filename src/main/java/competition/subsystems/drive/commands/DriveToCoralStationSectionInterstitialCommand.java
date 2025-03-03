@@ -4,7 +4,6 @@ import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import xbot.common.logging.RobotAssertionManager;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.drive.SwervePointKinematics;
@@ -16,16 +15,16 @@ import xbot.common.trajectory.XbotSwervePoint;
 import javax.inject.Inject;
 import java.util.ArrayList;
 
-public class DriveToCoralStationSectionCommand extends SwerveSimpleTrajectoryCommand {
+public class DriveToCoralStationSectionInterstitialCommand extends SwerveSimpleTrajectoryCommand {
 
     Pose2d targetCoralStationSection;
     boolean kinematics = true;
     Landmarks.CoralStation station = Landmarks.CoralStation.LEFT;
 
     @Inject
-    public DriveToCoralStationSectionCommand(DriveSubsystem drive, PoseSubsystem pose,
-                                             PropertyFactory pf, HeadingModule.HeadingModuleFactory headingModuleFactory,
-                                             RobotAssertionManager robotAssertionManager) {
+    public DriveToCoralStationSectionInterstitialCommand(DriveSubsystem drive, PoseSubsystem pose,
+                                                         PropertyFactory pf, HeadingModule.HeadingModuleFactory headingModuleFactory,
+                                                         RobotAssertionManager robotAssertionManager) {
         super(drive, pose, pf, headingModuleFactory, robotAssertionManager);
     }
 
@@ -55,7 +54,7 @@ public class DriveToCoralStationSectionCommand extends SwerveSimpleTrajectoryCom
         }
         this.logic.setKeyPoints(swervePoints);
         if (kinematics) {
-            this.logic.setGlobalKinematicValues(new SwervePointKinematics(2, 0, 0, 2.5));
+            this.logic.setGlobalKinematicValues(new SwervePointKinematics(2, 0, 2.5, 2.5));
             this.logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
         }
         else {

@@ -2,10 +2,8 @@ package competition.commandgroups;
 
 import competition.subsystems.coral_scorer.commands.IntakeUntilCoralCollectedCommand;
 import competition.subsystems.drive.commands.AlignToSpecificHumanLoadingStationCommand;
-import competition.subsystems.drive.commands.DriveToCoralStationSectionCommand;
-import competition.subsystems.drive.commands.ShoveCoralStationCommand;
+import competition.subsystems.drive.commands.DriveToCoralStationSectionInterstitialCommand;
 import competition.subsystems.pose.Landmarks;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
@@ -13,14 +11,14 @@ import javax.inject.Inject;
 
 public class DriveToStationAndIntakeUntilCollectedCommandGroupFactory {
 
-    DriveToCoralStationSectionCommand driveToCoralStationSectionCommand;
+    DriveToCoralStationSectionInterstitialCommand driveToCoralStationSectionCommand;
     AlignToSpecificHumanLoadingStationCommand alignToCoralStationCommand;
     PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory;
     IntakeUntilCoralCollectedCommand intakeUntilCoralCollectedCommand;
 
 
     @Inject
-    public DriveToStationAndIntakeUntilCollectedCommandGroupFactory(DriveToCoralStationSectionCommand driveToCoralStationSectionCommand,
+    public DriveToStationAndIntakeUntilCollectedCommandGroupFactory(DriveToCoralStationSectionInterstitialCommand driveToCoralStationSectionCommand,
                                                                     AlignToSpecificHumanLoadingStationCommand alignToCoralStationCommand,
                                                                     PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
                                                                     IntakeUntilCoralCollectedCommand intakeUntilCoralCollectedCommand) {
