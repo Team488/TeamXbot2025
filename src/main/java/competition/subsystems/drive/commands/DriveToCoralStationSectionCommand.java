@@ -20,7 +20,7 @@ public class DriveToCoralStationSectionCommand extends SwerveSimpleTrajectoryCom
 
     Pose2d targetCoralStationSection;
     boolean kinematics = true;
-    boolean addPoint = false;
+    Landmarks.CoralStation station = Landmarks.CoralStation.LEFT;
 
     @Inject
     public DriveToCoralStationSectionCommand(DriveSubsystem drive, PoseSubsystem pose,
@@ -29,23 +29,30 @@ public class DriveToCoralStationSectionCommand extends SwerveSimpleTrajectoryCom
         super(drive, pose, pf, headingModuleFactory, robotAssertionManager);
     }
 
-    public void setTargetCoralStationSection(Landmarks.CoralStation station, Landmarks.CoralStationSection section, boolean addPoint) {
+    public void setTargetCoralStationSection(Landmarks.CoralStation station, Landmarks.CoralStationSection section) {
         this.targetCoralStationSection = Landmarks.getCoralStationSectionPose(station, section);
-        this.addPoint = addPoint;
+        this.station = station;
     }
 
     @Override
     public void initialize() {
         log.info("Initializing");
         ArrayList<XbotSwervePoint> swervePoints = new ArrayList<>();
-        Pose2d extraPoint = new Pose2d(
-                Landmarks.BlueCloseLeftBranchA.getX(),
-                Landmarks.BlueCloseLeftBranchA.getY() + 1.207008,
+        Pose2d extraLeftPoint = new Pose2d(
+                Landmarks.BlueFarLeftBranchB.getX(),
+                Landmarks.BlueFarLeftBranchB.getY() + 0.9144,
                 Landmarks.BlueFarLeftBranchB.getRotation());
-        if (addPoint) {
-            swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(extraPoint), 10));
+        Pose2d extraRightPoint = new Pose2d(
+                Landmarks.BlueFarRightBranchA.getX(),
+                Landmarks.BlueFarRightBranchA.getY() - 0.9144,
+                Landmarks.BlueFarLeftBranchA.getRotation());
+        if (station == Landmarks.CoralStation.LEFT) {
+            swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(extraLeftPoint), 10));
         }
-        swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(targetCoralStationSection), 10));
+        else {
+            // scared of going right on accident because testing, so commenting out
+//            swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(extraRightPoint), 10));
+        }
         this.logic.setKeyPoints(swervePoints);
         if (kinematics) {
             this.logic.setGlobalKinematicValues(new SwervePointKinematics(2, 0, 0, 2.5));

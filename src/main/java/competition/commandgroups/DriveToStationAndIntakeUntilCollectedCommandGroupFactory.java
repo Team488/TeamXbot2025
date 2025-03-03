@@ -1,6 +1,7 @@
 package competition.commandgroups;
 
 import competition.subsystems.coral_scorer.commands.IntakeUntilCoralCollectedCommand;
+import competition.subsystems.drive.commands.AlignToSpecificHumanLoadingStationCommand;
 import competition.subsystems.drive.commands.DriveToCoralStationSectionCommand;
 import competition.subsystems.drive.commands.ShoveCoralStationCommand;
 import competition.subsystems.pose.Landmarks;
@@ -13,37 +14,43 @@ import javax.inject.Inject;
 public class DriveToStationAndIntakeUntilCollectedCommandGroupFactory {
 
     DriveToCoralStationSectionCommand driveToCoralStationSectionCommand;
+    AlignToSpecificHumanLoadingStationCommand alignToCoralStationCommand;
     PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory;
-    ShoveCoralStationCommand shoveCoralStationCommand;
     IntakeUntilCoralCollectedCommand intakeUntilCoralCollectedCommand;
 
 
     @Inject
     public DriveToStationAndIntakeUntilCollectedCommandGroupFactory(DriveToCoralStationSectionCommand driveToCoralStationSectionCommand,
+                                                                    AlignToSpecificHumanLoadingStationCommand alignToCoralStationCommand,
                                                                     PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
-                                                                    ShoveCoralStationCommand shoveCoralStationCommand,
                                                                     IntakeUntilCoralCollectedCommand intakeUntilCoralCollectedCommand) {
         this.driveToCoralStationSectionCommand = driveToCoralStationSectionCommand;
+        this.alignToCoralStationCommand = alignToCoralStationCommand;
         this.prepCoralSystemCommandGroupFactory = prepCoralSystemCommandGroupFactory;
-        this.shoveCoralStationCommand = shoveCoralStationCommand;
         this.intakeUntilCoralCollectedCommand = intakeUntilCoralCollectedCommand;
     }
 
     public ParallelDeadlineGroup create(Landmarks.CoralStation station,
                                          Landmarks.CoralStationSection section,
                                          boolean addPoint) {
-        var driveThenShove = new SequentialCommandGroup();
+        var driveUntilIntake = new ParallelDeadlineGroup(intakeUntilCoralCollectedCommand);
 
-        var driveToCoralStationSectionWhilePrepping = new ParallelCommandGroup();
         var prepCoralSystem = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
-        driveToCoralStationSectionCommand.setTargetCoralStationSection(station, section, addPoint);
-        driveToCoralStationSectionWhilePrepping.addCommands(driveToCoralStationSectionCommand, prepCoralSystem);
 
-        shoveCoralStationCommand.setShoveAngle(station);
+        driveUntilIntake.addCommands(prepCoralSystem);
 
-        driveThenShove.addCommands(driveToCoralStationSectionWhilePrepping, shoveCoralStationCommand);
+        var driveToCoralStation = new SequentialCommandGroup();
 
-        return new ParallelDeadlineGroup(intakeUntilCoralCollectedCommand, driveThenShove);
+        if (addPoint) {
+            driveToCoralStationSectionCommand.setTargetCoralStationSection(station, section);
+            driveToCoralStation.addCommands(driveToCoralStationSectionCommand);
+        }
 
+        alignToCoralStationCommand.setCoralStation(station);
+        driveToCoralStation.addCommands(alignToCoralStationCommand);
+
+        driveUntilIntake.addCommands(driveToCoralStation);
+
+        return driveUntilIntake;
     }
 }
