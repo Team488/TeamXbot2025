@@ -14,9 +14,11 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 
 import java.util.Set;
+import javax.inject.Inject;
 
 public class DriveToNearestOpenReef extends DeferredCommand{
 
+    @Inject
     public DriveToNearestOpenReef(CoprocessorCommunicationSubsystem communicator, PathToFaceAndScoreCommandGroupFactory commandGroupFactory) {
         super(() -> {
             XTablesClient client = communicator.getXTablesManager().getOrNull();
@@ -27,6 +29,8 @@ public class DriveToNearestOpenReef extends DeferredCommand{
             try {
                 int bestAT = client.getInteger("BESTOPENREEF_AT");
                 int bestBranchIDX = client.getInteger("BESTOPENREEFBRANCH");
+
+                System.out.println(String.format("Best april tag id: %d Best branch idx: %d", bestAT, bestBranchIDX));
 
                 if (bestAT == -1 || bestBranchIDX == -1) {
                     return new InstantCommand(() -> System.out.println("No valid reef found, skipping command."));

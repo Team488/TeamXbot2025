@@ -4,6 +4,10 @@ import org.kobe.xbot.JClient.XTablesClient;
 import org.kobe.xbot.JClient.XTablesClientManager;
 import org.kobe.xbot.Utilities.Entities.VisionCoprocessor;
 import org.kobe.xbot.Utilities.Logger.XTablesLogger;
+
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+
 import org.kobe.xbot.Utilities.VisionCoprocessorCommander;
 import xbot.common.advantage.DataFrameRefreshable;
 import xbot.common.command.BaseSubsystem;
@@ -51,6 +55,23 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
 
         XTablesLogger.setLoggingLevel(Level.OFF);
 
+    }
+
+    @Override
+    public void periodic(){
+        super.periodic();
+        this.updateXTablesInformation();
+
+    }
+
+    private void updateXTablesInformation(){
+        XTablesClient client = this.xTablesClientManager.getOrNull();
+        if(client == null){
+            this.log.warn("Xtables client is returning null when trying to update xtables info!");
+            return;
+        }
+
+        client.putString("TEAM", DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue ? "Blue" : "Red");
     }
 
     public XTablesClientManager getXTablesManager(){

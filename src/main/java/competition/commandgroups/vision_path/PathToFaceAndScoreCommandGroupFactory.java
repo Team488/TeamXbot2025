@@ -16,7 +16,7 @@ public class PathToFaceAndScoreCommandGroupFactory {
             driveToReefFaceThenAlignCommandGroupFactory;
     PrepCoralSystemCommandGroupFactory prepCoralSystemFactory;
     Provider<ScoreWhenReadyCommand> scoreWhenReadyProvider;
-    MeasureDistanceBeforeScoringCommand measureDistanceBeforeScoringCommand;
+    Provider<MeasureDistanceBeforeScoringCommand> measureDistanceBeforeScoringCommandProvider;
 
     @Inject
     public PathToFaceAndScoreCommandGroupFactory(
@@ -24,13 +24,13 @@ public class PathToFaceAndScoreCommandGroupFactory {
                     driveToReefFaceThenAlignCommandGroupFactory,
             PrepCoralSystemCommandGroupFactory prepCoralSystemFactory,
             Provider<ScoreWhenReadyCommand> scoreWhenReadyProvider,
-            MeasureDistanceBeforeScoringCommand measureDistanceBeforeScoringCommand) {
+            Provider<MeasureDistanceBeforeScoringCommand> measureDistanceBeforeScoringCommandProvider) {
         this.driveToReefFaceThenAlignCommandGroupFactory =
                 driveToReefFaceThenAlignCommandGroupFactory;
         this.prepCoralSystemFactory = prepCoralSystemFactory;
         this.scoreWhenReadyProvider = scoreWhenReadyProvider;
-        this.measureDistanceBeforeScoringCommand =
-                measureDistanceBeforeScoringCommand;
+        this.measureDistanceBeforeScoringCommandProvider =
+        measureDistanceBeforeScoringCommandProvider;
     }
 
     public SequentialCommandGroup create(Landmarks.ReefFace targetReefFace,
@@ -43,6 +43,7 @@ public class PathToFaceAndScoreCommandGroupFactory {
                 driveToReefFaceThenAlignCommandGroupFactory.create(
                         targetReefFace, targetBranch);
         var prepCoralSystem = prepCoralSystemFactory.create(() -> targetLevel);
+        var measureDistanceBeforeScoringCommand = measureDistanceBeforeScoringCommandProvider.get();
         measureDistanceBeforeScoringCommand.setDistanceThreshold(Meters.of(1));
         var measureDistanceBeforePreppingSystem =
                 new SequentialCommandGroup(measureDistanceBeforeScoringCommand,

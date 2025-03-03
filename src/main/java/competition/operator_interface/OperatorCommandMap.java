@@ -106,7 +106,11 @@ public class OperatorCommandMap {
             PathDriveToCoralStationAndIntakeUntilCollected pathDriveToCoralStationAndIntakeUntilCollected,
             HeadingAssistedDriveAndScoreCommandGroup.Factory headingAssistedDriveAndScoreCommandGroupFactory,
             CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem,
-            PathToFaceAndScoreCommandGroupFactory pathToFaceAndScoreCommandGroupFactory) {
+            PathToFaceAndScoreCommandGroupFactory pathToFaceAndScoreCommandGroupFactory,
+            DriveToNearestOpenReef driveToNearestOpenReef) {
+        setNeotrellisButtons(operatorInterface,pathToReefFaceThenAlignCommandGroupFactory);
+
+
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
 
@@ -121,8 +125,10 @@ public class OperatorCommandMap {
         var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
 
         var homed = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(pathDriveToCoralStationAndIntakeUntilCollected.create());
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(sbtc);
+//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(driveToClosestReefSectionWithVisionCommand);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(pathDriveToCoralStationAndIntakeUntilCollected.create());
+        // operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(driveToNearestOpenReef);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(sbtc);
 
         var branchAHeadingAssistedDriveAndScore = headingAssistedDriveAndScoreCommandGroupFactory.create(Landmarks.Branch.A);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(branchAHeadingAssistedDriveAndScore)
