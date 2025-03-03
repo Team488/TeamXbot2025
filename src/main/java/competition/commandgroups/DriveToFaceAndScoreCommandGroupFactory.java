@@ -43,16 +43,18 @@ public class DriveToFaceAndScoreCommandGroupFactory {
     public SequentialCommandGroup create(Landmarks.ReefFace targetReefFace,
                                          Landmarks.Branch targetBranch,
                                          Landmarks.CoralLevel targetLevel) {
+        // Overarching command group — drives to branch and preps coral system once the robot is close enough to the reef, scores when ready
         var driveToFaceAndScoreCommandGroup = new SequentialCommandGroup();
 
-        var driveToFaceWhilePrepping = new ParallelCommandGroup();
+        // Drive to a branch while prepping the coral system once the robot is close enough
+        var driveToBranchWhilePrepping = new ParallelCommandGroup();
 
+        // Terminally approach to branch
         var driveToReefFaceThenAlign = driveToReefFaceThenAlignCommandGroupFactory.create(targetReefFace, targetBranch);
-        var measureDistanceThenPrep = new SequentialCommandGroup();
 
-        // TODO: Could put this inside of MeasureDistanceBeforeScoringCommand instead,
-        //  but don't want to mess with John's HeadingAssistedDriveAndScoreCommandGroup right now
-        double distanceThresholdInMeters = switch (targetLevel) {
+        // Prep coral system once robot is within a distance threshold
+        var measureDistanceThenPrep = new SequentialCommandGroup();
+        double distanceThresholdInMeters = switch (targetLevel) { // Distance threshold may be much bigger for lower levels
             case ONE -> levelOneDistanceThreshold.get();
             case TWO -> levelTwoDistanceThreshold.get();
             default -> levelFourDistanceThreshold.get(); // For safety, the default is the shortest distance which is probably L4
@@ -62,11 +64,11 @@ public class DriveToFaceAndScoreCommandGroupFactory {
         var prepCoralSystem = prepCoralSystemFactory.create(() -> targetLevel);
         measureDistanceThenPrep.addCommands(measureDistanceBeforeScoringCommand, prepCoralSystem);
 
-        driveToFaceWhilePrepping.addCommands(driveToReefFaceThenAlign, measureDistanceThenPrep);
+        driveToBranchWhilePrepping.addCommands(driveToReefFaceThenAlign, measureDistanceThenPrep);
 
         var scoreWhenReady = scoreWhenReadyProvider.get();
 
-        driveToFaceAndScoreCommandGroup.addCommands(driveToFaceWhilePrepping, scoreWhenReady);
+        driveToFaceAndScoreCommandGroup.addCommands(driveToBranchWhilePrepping, scoreWhenReady);
 
         return driveToFaceAndScoreCommandGroup;
     }

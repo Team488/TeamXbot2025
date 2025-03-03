@@ -42,7 +42,7 @@ public class FromLeftCageScoreLeftFacesLevelFours extends BaseAutonomousSequenti
         // Drive to left coral station, far section and intake coral until collected
         queueDriveAndIntakeMessageToAutoSelector(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.FAR);
         var driveToLeftStationFarSectionAndIntake = driveToStationAndIntakeFactProv.get().create(
-                Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.FAR, true);
+                Landmarks.CoralStation.LEFT, true);
         this.addCommands(driveToLeftStationFarSectionAndIntake);
 
         // Drive to close left, branch B and score level four
@@ -54,7 +54,7 @@ public class FromLeftCageScoreLeftFacesLevelFours extends BaseAutonomousSequenti
 //        // Drive to left coral station, close section and intake coral until collected
 //        queueDriveAndIntakeMessageToAutoSelector(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.CLOSE);
 //        var driveToLeftStationCloseSectionAndIntake = driveToStationAndIntakeFactProv.get().create(
-//                Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.MID, false);
+//                Landmarks.CoralStation.LEFT, false);
 //        this.addCommands(driveToLeftStationCloseSectionAndIntake);
 //
 //        // Drive to close left, branch A and score level four
@@ -66,7 +66,7 @@ public class FromLeftCageScoreLeftFacesLevelFours extends BaseAutonomousSequenti
 //        // Drive to left coral station, far section and intake coral until collected again
 //        queueDriveAndIntakeMessageToAutoSelector(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.FAR);
 //        var driveToLeftStationFarSectionAndIntakeSecond = driveToStationAndIntakeFactProv.get().create(
-//                Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.CLOSE, false);
+//                Landmarks.CoralStation.LEFT, false);
 //        this.addCommands(driveToLeftStationFarSectionAndIntakeSecond);
 //
 //        // Drive to close, branch A and score level four

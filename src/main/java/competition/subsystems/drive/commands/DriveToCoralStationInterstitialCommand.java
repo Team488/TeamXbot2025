@@ -15,21 +15,19 @@ import xbot.common.trajectory.XbotSwervePoint;
 import javax.inject.Inject;
 import java.util.ArrayList;
 
-public class DriveToCoralStationSectionInterstitialCommand extends SwerveSimpleTrajectoryCommand {
+public class DriveToCoralStationInterstitialCommand extends SwerveSimpleTrajectoryCommand {
 
-    Pose2d targetCoralStationSection;
     boolean kinematics = true;
     Landmarks.CoralStation station = Landmarks.CoralStation.LEFT;
 
     @Inject
-    public DriveToCoralStationSectionInterstitialCommand(DriveSubsystem drive, PoseSubsystem pose,
-                                                         PropertyFactory pf, HeadingModule.HeadingModuleFactory headingModuleFactory,
-                                                         RobotAssertionManager robotAssertionManager) {
+    public DriveToCoralStationInterstitialCommand(DriveSubsystem drive, PoseSubsystem pose,
+                                                  PropertyFactory pf, HeadingModule.HeadingModuleFactory headingModuleFactory,
+                                                  RobotAssertionManager robotAssertionManager) {
         super(drive, pose, pf, headingModuleFactory, robotAssertionManager);
     }
 
-    public void setTargetCoralStationSection(Landmarks.CoralStation station, Landmarks.CoralStationSection section) {
-        this.targetCoralStationSection = Landmarks.getCoralStationSectionPose(station, section);
+    public void setTargetCoralStationSection(Landmarks.CoralStation station) {
         this.station = station;
     }
 
@@ -37,23 +35,27 @@ public class DriveToCoralStationSectionInterstitialCommand extends SwerveSimpleT
     public void initialize() {
         log.info("Initializing");
         ArrayList<XbotSwervePoint> swervePoints = new ArrayList<>();
-        Pose2d extraLeftPoint = new Pose2d(
-                Landmarks.BlueFarLeftBranchB.getX(),
+
+        // Interstitial points to avoid rotating into the reef when going for coral station alignment
+        Pose2d leftStationInterstitialPoint = new Pose2d(
+                Landmarks.BlueFarLeftBranchB.getX() - 0.9144, // TODO: Tune
                 Landmarks.BlueFarLeftBranchB.getY() + 0.9144,
                 Landmarks.BlueFarLeftBranchB.getRotation());
-        Pose2d extraRightPoint = new Pose2d(
-                Landmarks.BlueFarRightBranchA.getX(),
+        Pose2d rightStationInterstitialPoint = new Pose2d(
+                Landmarks.BlueFarRightBranchA.getX() - 0.9144,
                 Landmarks.BlueFarRightBranchA.getY() - 0.9144,
                 Landmarks.BlueFarLeftBranchA.getRotation());
+
         if (station == Landmarks.CoralStation.LEFT) {
-            swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(extraLeftPoint), 10));
+            swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(leftStationInterstitialPoint), 10));
         }
         else {
-            // scared of going right on accident because testing, so commenting out
-//            swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(extraRightPoint), 10));
+            swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(rightStationInterstitialPoint), 10));
         }
         this.logic.setKeyPoints(swervePoints);
+
         if (kinematics) {
+            // Make sure goalVelocity is non-zero, or else the robot will wait until it's stopped at the interstitial point before continuing
             this.logic.setGlobalKinematicValues(new SwervePointKinematics(2, 0, 2.5, 2.5));
             this.logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
         }
