@@ -57,7 +57,6 @@ public class DriveToFaceAndScoreCommandGroupFactory {
             case TWO -> levelTwoDistanceThreshold.get();
             default -> levelFourDistanceThreshold.get(); // For safety, the default is the shortest distance which is probably L4
         };
-
         measureDistanceBeforeScoringCommand.setDistanceThreshold(Meters.of(distanceThresholdInMeters));
         measureDistanceBeforeScoringCommand.setBranch(targetBranch);
         var prepCoralSystem = prepCoralSystemFactory.create(() -> targetLevel);
