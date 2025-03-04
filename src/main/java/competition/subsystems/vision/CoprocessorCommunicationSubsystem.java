@@ -32,6 +32,7 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
     final StringProperty xtablesTargetPose;
     final StringProperty xtablesCoordinateLocation;
     final StringProperty xtablesHeadingLocation;
+    final StringProperty orinStaticIP;
 
     // always persisted xtables client manager instance
     private final XTablesClientManager xTablesClientManager;
@@ -48,9 +49,10 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
         xtablesTargetPose = pf.createPersistentProperty("Xtables Target Pose", "target_pose");
         xtablesCoordinateLocation = pf.createPersistentProperty("Xtables Coordinate Location", "target_waypoints");
         xtablesHeadingLocation = pf.createPersistentProperty("Xtables Heading Location", "target_heading");
+        orinStaticIP = pf.createPersistentProperty("Orin Static IP", "10.4.88.7");
 
         xTablesClientManager = XTablesClient.getDefaultClientAsynchronously();
-        this.orinVisionCoprocessorCommander = new VisionCoprocessorCommander("10.4.88.7"); // Connect to ORIN-3
+        this.orinVisionCoprocessorCommander = new VisionCoprocessorCommander(orinStaticIP.get()); // Connect to ORIN-3 with HTTP/2
         XTablesLogger.setLoggingLevel(Level.OFF);
 
     }
@@ -65,7 +67,6 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
     private void updateXTablesInformation(){
         XTablesClient client = this.xTablesClientManager.getOrNull();
         if(client == null){
-            this.log.warn("Xtables client is returning null when trying to update xtables info!");
             return;
         }
 

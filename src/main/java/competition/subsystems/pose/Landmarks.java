@@ -125,21 +125,12 @@ public class Landmarks {
     }
 
     public enum ReefFace {
-        CLOSE(BlueCloseMidViewable),
-        CLOSE_LEFT(BlueCloseLeftMidViewable),
-        CLOSE_RIGHT(BlueCloseRightMidViewable),
-        FAR(BlueFarMidViewable),
-        FAR_LEFT(BlueFarLeftMidViewable),
-        FAR_RIGHT(BlueFarRightMidViewable);
-        final Pose2d viewable;
-
-        ReefFace(Pose2d viewableLocation) {
-            this.viewable = viewableLocation;
-        }
-
-        public Pose2d getViewable() {
-            return viewable;
-        }
+        CLOSE,
+        CLOSE_LEFT,
+        CLOSE_RIGHT,
+        FAR,
+        FAR_LEFT,
+        FAR_RIGHT;
     }
 
     public enum ReefAlgae {
