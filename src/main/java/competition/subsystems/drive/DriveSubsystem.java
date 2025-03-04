@@ -45,11 +45,10 @@ import static edu.wpi.first.units.Units.Volts;
         private final DoubleProperty driveToWaypointsSpeed;
         private final DoubleProperty driveToWaypointsDurationPerPoint;
 
-        @Inject
-        public DriveSubsystem(PIDManagerFactory pidFactory, PropertyFactory pf,
-                              @FrontLeftDrive SwerveComponent frontLeftSwerve, @FrontRightDrive SwerveComponent frontRightSwerve,
-                              @RearLeftDrive SwerveComponent rearLeftSwerve, @RearRightDrive SwerveComponent rearRightSwerve,
-                              ElectricalContract contract) {
+    @Inject
+    public DriveSubsystem(PIDManagerFactory pidFactory, PropertyFactory pf,
+                          @FrontLeftDrive SwerveComponent frontLeftSwerve, @FrontRightDrive SwerveComponent frontRightSwerve,
+                          @RearLeftDrive SwerveComponent rearLeftSwerve, @RearRightDrive SwerveComponent rearRightSwerve, ElectricalContract electricalContract) {
 
             super(pidFactory, pf, frontLeftSwerve, frontRightSwerve, rearLeftSwerve, rearRightSwerve, contract);
             log.info("Creating DriveSubsystem");
@@ -57,31 +56,31 @@ import static edu.wpi.first.units.Units.Volts;
             pf.setPrefix(this.getPrefix());
             pf.setDefaultLevel(Property.PropertyLevel.Important);
 
-            this.sysIdDrive = new SysIdRoutine(
-                    new SysIdRoutine.Config(
-                            Volts.of(getMaxTargetSpeedMetersPerSecond() / 5).per(Second),
-                            Volts.of(getMaxTargetSpeedMetersPerSecond()),
-                            Seconds.of(6),
-                            (state) -> org.littletonrobotics.junction.Logger.recordOutput(this.getPrefix() + "/SysIdState-Drive", state.toString())),
-                    new SysIdRoutine.Mechanism(
-                            (Voltage volts) -> move(new XYPair(volts.in(Volts), 0), 0),
-                            null,
-                            this
-                    )
-            );
+        this.sysIdDrive = new SysIdRoutine(
+                new SysIdRoutine.Config(
+                        Volts.of(getMaxTargetSpeedMetersPerSecond() / 5).per(Second),
+                        Volts.of(getMaxTargetSpeedMetersPerSecond()),
+                        Seconds.of(6),
+                        (state) -> org.littletonrobotics.junction.Logger.recordOutput(this.getPrefix() + "/SysIdState-Drive", state.toString())),
+                new SysIdRoutine.Mechanism(
+                        (Voltage volts) -> move(new XYPair(volts.in(Volts), 0), 0),
+                        null,
+                        this
+                )
+        );
 
-            this.sysIdRotation = new SysIdRoutine(
-                    new SysIdRoutine.Config(
-                            Volts.of(getMaxTargetTurnRate() / 5).per(Second),
-                            Volts.of(getMaxTargetTurnRate()),
-                            Seconds.of(6),
-                            (state) -> org.littletonrobotics.junction.Logger.recordOutput(this.getPrefix() + "/SysIdState-Rotation", state.toString())),
-                    new SysIdRoutine.Mechanism(
-                            (Voltage volts) -> move(new XYPair(), volts.in(Volts)),
-                            null,
-                            this
-                    )
-            );
+        this.sysIdRotation = new SysIdRoutine(
+                new SysIdRoutine.Config(
+                        Volts.of(getMaxTargetTurnRate() / 5).per(Second),
+                        Volts.of(getMaxTargetTurnRate()),
+                        Seconds.of(6),
+                        (state) -> org.littletonrobotics.junction.Logger.recordOutput(this.getPrefix() + "/SysIdState-Rotation", state.toString())),
+                new SysIdRoutine.Mechanism(
+                        (Voltage volts) -> move(new XYPair(), volts.in(Volts)),
+                        null,
+                        this
+                )
+        );
 
             driveToWaypointsSpeed = pf.createPersistentProperty("Speed to drive to waypoints", 2); // meters/s
             driveToWaypointsDurationPerPoint = pf.createPersistentProperty("Time to drive to waypoints", 0.1); // seconds
@@ -119,19 +118,19 @@ import static edu.wpi.first.units.Units.Volts;
             this.lookAtPointActive = lookAtPointActive;
         }
 
-        public InstantCommand createSetStaticHeadingTargetCommand(Supplier<Rotation2d> staticHeadingTarget) {
-            return new InstantCommand(() -> {
-                setStaticHeadingTarget(staticHeadingTarget.get());
-                setStaticHeadingTargetActive(true);}
-            );
-        }
+    public InstantCommand createSetStaticHeadingTargetCommand(Supplier<Rotation2d> staticHeadingTarget) {
+        return new InstantCommand(() -> {
+            setStaticHeadingTarget(staticHeadingTarget.get());
+            setStaticHeadingTargetActive(true);}
+        );
+    }
 
-        public InstantCommand createSetLookAtPointTargetCommand(Supplier<Translation2d> lookAtPointTarget) {
-            return new InstantCommand(() -> {
-                setLookAtPointTarget(lookAtPointTarget.get());
-                setLookAtPointTargetActive(true);}
-            );
-        }
+    public InstantCommand createSetLookAtPointTargetCommand(Supplier<Translation2d> lookAtPointTarget) {
+        return new InstantCommand(() -> {
+            setLookAtPointTarget(lookAtPointTarget.get());
+            setLookAtPointTargetActive(true);}
+        );
+    }
 
         public InstantCommand createClearAllHeadingTargetsCommand() {
             return new InstantCommand(() -> {
@@ -140,41 +139,41 @@ import static edu.wpi.first.units.Units.Volts;
             });
         }
 
-        /**
-         * Gets a command to run the SysId drive routine in the quasistatic mode.
-         * @param direction The direction to run the SysId routine.
-         * @return The command to run the SysId routine.
-         */
-        public Command sysIdQuasistaticDrive(SysIdRoutine.Direction direction) {
-            return sysIdDrive.quasistatic(direction);
-        }
+    /**
+     * Gets a command to run the SysId drive routine in the quasistatic mode.
+     * @param direction The direction to run the SysId routine.
+     * @return The command to run the SysId routine.
+     */
+    public Command sysIdQuasistaticDrive(SysIdRoutine.Direction direction) {
+        return sysIdDrive.quasistatic(direction);
+    }
 
-        /**
-         * Gets a command to run the SysId drive routine in the dynamic mode.
-         * @param direction The direction to run the SysId routine.
-         * @return The command to run the SysId routine.
-         */
-        public Command sysIdDynamicDrive(SysIdRoutine.Direction direction) {
-            return sysIdDrive.dynamic(direction);
-        }
+    /**
+     * Gets a command to run the SysId drive routine in the dynamic mode.
+     * @param direction The direction to run the SysId routine.
+     * @return The command to run the SysId routine.
+     */
+    public Command sysIdDynamicDrive(SysIdRoutine.Direction direction) {
+        return sysIdDrive.dynamic(direction);
+    }
 
-        /**
-         * Gets a command to run the SysId rotation routine in the quasistatic mode.
-         * @param direction The direction to run the SysId routine.
-         * @return The command to run the SysId routine.
-         */
-        public Command sysIdQuasistaticRotation(SysIdRoutine.Direction direction) {
-            return sysIdRotation.quasistatic(direction);
-        }
+    /**
+     * Gets a command to run the SysId rotation routine in the quasistatic mode.
+     * @param direction The direction to run the SysId routine.
+     * @return The command to run the SysId routine.
+     */
+    public Command sysIdQuasistaticRotation(SysIdRoutine.Direction direction) {
+        return sysIdRotation.quasistatic(direction);
+    }
 
-        /**
-         * Gets a command to run the SysId rotation routine in the dynamic mode.
-         * @param direction The direction to run the SysId routine.
-         * @return The command to run the SysId routine.
-         */
-        public Command sysIdDynamicRotation(SysIdRoutine.Direction direction) {
-            return sysIdRotation.dynamic(direction);
-        }
+    /**
+     * Gets a command to run the SysId rotation routine in the dynamic mode.
+     * @param direction The direction to run the SysId routine.
+     * @return The command to run the SysId routine.
+     */
+    public Command sysIdDynamicRotation(SysIdRoutine.Direction direction) {
+        return sysIdRotation.dynamic(direction);
+    }
 
         public DoubleProperty getDriveToWaypointsSpeed() {
             return driveToWaypointsSpeed;
@@ -184,11 +183,11 @@ import static edu.wpi.first.units.Units.Volts;
             return driveToWaypointsDurationPerPoint;
         }
 
-        public Translation2d getPowerToAchieveFieldPosition(Translation2d current, Translation2d target) {
-            var goalVector = target.minus(current);
-            // This essentially says "our goal is X distance away from where we are now.
-            // Assume we are at zero. How much power should we use to go X distance?"
-            double drivePower = getPositionalPid().calculate(goalVector.getNorm(), 0);
-            return new Translation2d(drivePower, goalVector.getAngle());
-        }
+    public Translation2d getPowerToAchieveFieldPosition(Translation2d current, Translation2d target) {
+        var goalVector = target.minus(current);
+        // This essentially says "our goal is X distance away from where we are now.
+        // Assume we are at zero. How much power should we use to go X distance?"
+        double drivePower = getPositionalPid().calculate(goalVector.getNorm(), 0);
+        return new Translation2d(drivePower, goalVector.getAngle());
     }
+}
