@@ -128,9 +128,8 @@ public class OperatorCommandMap {
 
         var homed = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
 //        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(driveToClosestReefSectionWithVisionCommand);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(pathDriveToCoralStationAndIntakeUntilCollected.create());
-        // operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(driveToNearestOpenReef);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(sbtc);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(pathDriveToCoralStationAndIntakeUntilCollected.create());
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(driveToNearestReefFaceWithPID);
 
         var branchAHeadingAssistedDriveAndScore = headingAssistedDriveAndScoreCommandGroupFactory.create(Landmarks.Branch.A);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(branchAHeadingAssistedDriveAndScore)
