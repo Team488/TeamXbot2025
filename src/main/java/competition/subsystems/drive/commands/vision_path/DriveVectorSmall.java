@@ -17,6 +17,7 @@ public class DriveVectorSmall extends BaseCommand {
 
     private DriveSubsystem drive;
     private PoseSubsystem poseSubsystem;
+
     @Inject
     public DriveVectorSmall(DriveSubsystem driveSubsystem, PoseSubsystem poseSubsystem) {
         drive = driveSubsystem;
@@ -34,9 +35,9 @@ public class DriveVectorSmall extends BaseCommand {
      */
     @Override
     public void execute() {
-        drive.move(XYPair.fromPolar(targetPose.getRotation().getDegrees() - 180, 0.25), 0);
+        drive.fieldOrientedDrive(XYPair.fromPolar(targetPose.getRotation().getDegrees() - 180, 0.25),
+                0, poseSubsystem.getCurrentHeading().getDegrees(), new XYPair(0, 0));
     }
-
 
 
     public DriveVectorSmall setTargetPose(Pose2d targetPose) {
@@ -71,8 +72,6 @@ public class DriveVectorSmall extends BaseCommand {
     /**
      * The action to take when the command ends. Called when either the command finishes normally, or
      * when it interrupted/canceled.
-     *
-
      *
      * @param interrupted whether the command was interrupted/canceled
      */
