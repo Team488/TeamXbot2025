@@ -44,30 +44,8 @@ public class SwerveBezierTrajectoryBase extends SwerveSimpleTrajectoryCommand {
 
     @Override
     public void initialize() {
-        //        this.logic.setVelocityMode(SwerveSimpleTrajectoryMode.ConstantVelocity);
         this.logic.setPrioritizeRotationIfCloseToGoal(true);
         this.logic.setDistanceThresholdToPrioritizeRotation(1.5);
-        //        XTablesClient client = this.coprocessor.tryGetXTablesClient();
-        //        if (client != null) {
-        //            XTableValues.BezierCurves curves =
-        //            client.getBezierCurves("bezier_path"); if (curves != null &&
-        //            !curves.getCurvesList().isEmpty()) {
-        //                final XTableValues.TraversalOptions options =
-        //                curves.hasOptions() ? curves.getOptions() : null; double
-        //                acceleration = DEFAULT_ACCELERATION; double
-        //                metersPerSecond = DEFAULT_METERS_PER_SECOND_VELOCITY; if
-        //                (options != null) {
-        //                    if (options.hasMetersPerSecond()) {
-        //                        metersPerSecond = options.getMetersPerSecond();
-        //                    }
-        //                    if (options.hasAccelerationMetersPerSecond()) {
-        //                        acceleration =
-        //                        options.getAccelerationMetersPerSecond();
-        //                    }
-        //                }
-        //                setSegmentedBezierCurve(curves, options);
-        //            }
-        //        }
         super.initialize();
     }
 
@@ -77,10 +55,6 @@ public class SwerveBezierTrajectoryBase extends SwerveSimpleTrajectoryCommand {
                 getSegmentedBezierCurveSwervePoints(bezierCurves, options));
     }
 
-    //    public void setMultiSegmentedBezierCurve(List<XTableValues.BezierCurves>
-    //    bezierCurves) {
-    //        this.logic.setKeyPoints(getMultiSegmentedBezierCurveSwervePoints(bezierCurves));
-    //    }
 
     public List<XbotSwervePoint> getSegmentedBezierCurveSwervePoints(
             XTableValues.BezierCurves bezierCurves,
