@@ -35,6 +35,10 @@ public class DriveVectorSmall extends BaseCommand {
      */
     @Override
     public void execute() {
+        if(this.isFinished()) {
+            drive.stop(); // Drive.stop doesnt stop unless called continuously
+            return;
+        }
         drive.fieldOrientedDrive(XYPair.fromPolar(targetPose.getRotation().getDegrees() - 180, 0.25),
                 0, poseSubsystem.getCurrentHeading().getDegrees(), new XYPair(0, 0));
     }
