@@ -37,20 +37,33 @@ public class DriveToCoralStationInterstitialCommand extends SwerveSimpleTrajecto
         ArrayList<XbotSwervePoint> swervePoints = new ArrayList<>();
 
         // Interstitial points to avoid rotating into the reef when going for coral station alignment
-        Pose2d leftStationInterstitialPoint = new Pose2d(
-                Landmarks.BlueFarLeftBranchB.getX() - 0.9144, // TODO: Tune for better pathing
-                Landmarks.BlueFarLeftBranchB.getY() + 0.9144,
+        Pose2d firstLeftStationInterstitialPoint = new Pose2d(
+                Landmarks.BlueFarLeftBranchB.getX() - 0.8, // TODO: Tune for better pathing
+                Landmarks.BlueFarLeftBranchB.getY() + 0.5,
                 Landmarks.BlueFarLeftBranchB.getRotation());
-        Pose2d rightStationInterstitialPoint = new Pose2d(
-                Landmarks.BlueFarRightBranchA.getX() - 0.9144,
-                Landmarks.BlueFarRightBranchA.getY() - 0.9144,
-                Landmarks.BlueFarLeftBranchA.getRotation());
+        Pose2d secondLeftStationInterstitialPoint = new Pose2d(
+                firstLeftStationInterstitialPoint.getX() - 0.5,
+                firstLeftStationInterstitialPoint.getY(),
+                firstLeftStationInterstitialPoint.getRotation()
+        );
+
+        Pose2d firstRightStationInterstitialPoint = new Pose2d(
+                Landmarks.BlueFarRightBranchA.getX() - 0.8,
+                Landmarks.BlueFarRightBranchA.getY() - 0.5,
+                Landmarks.BlueFarRightBranchA.getRotation());
+        Pose2d secondRightStationInterstitialPoint = new Pose2d(
+                firstRightStationInterstitialPoint.getX() - 0.5,
+                firstRightStationInterstitialPoint.getY(),
+                firstRightStationInterstitialPoint.getRotation()
+        );
 
         if (station == Landmarks.CoralStation.LEFT) {
-            swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(leftStationInterstitialPoint), 10));
+            swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(firstLeftStationInterstitialPoint), 10));
+            swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(secondLeftStationInterstitialPoint), 10));
         }
         else {
-            swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(rightStationInterstitialPoint), 10));
+            swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(firstRightStationInterstitialPoint), 10));
+            swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(secondRightStationInterstitialPoint), 10));
         }
         this.logic.setKeyPoints(swervePoints);
 
