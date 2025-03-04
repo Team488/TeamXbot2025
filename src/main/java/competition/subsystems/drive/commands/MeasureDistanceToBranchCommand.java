@@ -12,12 +12,12 @@ import java.util.function.Supplier;
 
 import static edu.wpi.first.units.Units.Meters;
 
-public class MeasureDistanceBeforeScoringCommand extends BaseCommand {
+public class MeasureDistanceToBranchCommand extends BaseCommand {
     PoseSubsystem pose;
     Supplier<Distance> distanceThresholdSupplier;
     Landmarks.Branch branch = Landmarks.Branch.A;
     @Inject
-    public MeasureDistanceBeforeScoringCommand(PoseSubsystem pose) {
+    public MeasureDistanceToBranchCommand(PoseSubsystem pose) {
         this.pose = pose;
     }
     @Override
@@ -30,13 +30,13 @@ public class MeasureDistanceBeforeScoringCommand extends BaseCommand {
     }
     @Override
     public boolean isFinished() {
-        Pose2d targetReefFacePose = Landmarks.getBranchPose(pose.getReefFaceFromAngle(), branch);
-        aKitLog.record("targetReefPose", targetReefFacePose);
+        Pose2d targetBranchPose = Landmarks.getBranchPose(pose.getReefFaceFromAngle(), branch);
+        aKitLog.record("targetBranchPose", targetBranchPose);
         aKitLog.record("distance ", pose.getCurrentPose2d().getTranslation()
-                .getDistance(targetReefFacePose.getTranslation()));
+                .getDistance(targetBranchPose.getTranslation()));
         aKitLog.record("branch", branch.name());
 
-        return pose.getCurrentPose2d().getTranslation().getDistance(targetReefFacePose.getTranslation())
+        return pose.getCurrentPose2d().getTranslation().getDistance(targetBranchPose.getTranslation())
                 < distanceThresholdSupplier.get().in(Meters);
 
     }
