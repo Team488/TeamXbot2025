@@ -19,26 +19,26 @@ public class DriveToCoralStationInterstitialCommand extends SwerveSimpleTrajecto
 
     boolean kinematics = true;
     Landmarks.CoralStation station = Landmarks.CoralStation.LEFT;
-    double endingThresholdInMeters = 0.8;
+    double endingThresholdInMeters = 1;
 
     // Interstitial points to avoid rotating into the reef when going for coral station alignment
     Pose2d firstLeftStationInterstitialPoint = new Pose2d(
-            Landmarks.BlueFarLeftBranchB.getX() - 0.8, // TODO: Tune for better pathing
-            Landmarks.BlueFarLeftBranchB.getY() + 0.7,
+            Landmarks.BlueFarLeftBranchB.getX() - 0.5, // TODO: Tune for better pathing
+            Landmarks.BlueFarLeftBranchB.getY() + 0.8,
             Landmarks.BlueFarLeftBranchB.getRotation());
     Pose2d secondLeftStationInterstitialPoint = new Pose2d(
-            firstLeftStationInterstitialPoint.getX() - 1,
-            firstLeftStationInterstitialPoint.getY() - 0.4,
+            firstLeftStationInterstitialPoint.getX() - 1.8,
+            firstLeftStationInterstitialPoint.getY() - 1,
             Landmarks.BlueLeftCoralStationMid.getRotation()
     );
 
     Pose2d firstRightStationInterstitialPoint = new Pose2d(
-            Landmarks.BlueFarRightBranchA.getX() - 0.8,
-            Landmarks.BlueFarRightBranchA.getY() - 0.7,
+            Landmarks.BlueFarRightBranchA.getX() - 0.5,
+            Landmarks.BlueFarRightBranchA.getY() - 0.8,
             Landmarks.BlueFarRightBranchA.getRotation());
     Pose2d secondRightStationInterstitialPoint = new Pose2d(
-            firstRightStationInterstitialPoint.getX() - 1,
-            firstRightStationInterstitialPoint.getY() + 0.4,
+            firstRightStationInterstitialPoint.getX() - 1.8,
+            firstRightStationInterstitialPoint.getY() + 1,
             Landmarks.BlueRightCoralStationMid.getRotation()
     );
 
@@ -70,7 +70,7 @@ public class DriveToCoralStationInterstitialCommand extends SwerveSimpleTrajecto
 
         if (kinematics) {
             // Make sure goalVelocity is non-zero, or else the robot will wait until it's stopped at the interstitial point before continuing
-            this.logic.setGlobalKinematicValues(new SwervePointKinematics(2, 0, 2.5, 2.5));
+            this.logic.setGlobalKinematicValues(new SwervePointKinematics(2, 0, 4, 4.5));
             this.logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
         }
         else {
