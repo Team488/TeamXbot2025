@@ -6,7 +6,9 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import competition.electrical_contract.ElectricalContract;
+import competition.subsystems.coral_arm.CoralArmSubsystem;
 import competition.subsystems.coral_scorer.CoralScorerSubsystem;
+import competition.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.wpilibj.DriverStation;
 import xbot.common.command.BaseSubsystem;
 import xbot.common.controls.actuators.XDigitalOutput;
@@ -22,6 +24,8 @@ public class LightSubsystem extends BaseSubsystem {
 
     final AutonomousCommandSelector autonomousCommandSelector;
     final CoralScorerSubsystem coralScorerSubsystem;
+    final CoralArmSubsystem coralArmSubsystem;
+    final ElevatorSubsystem elevatorSubsystem;
 
     LightsStateMessage state = LightsStateMessage.NoCode;
     DIOInt dioInt;
@@ -29,7 +33,7 @@ public class LightSubsystem extends BaseSubsystem {
     public enum LightsStateMessage{
         // we never send NoCode, it's implicit when the robot is off
         // and all of the DIOs float high
-        NoCode(0),
+        NoCode(15),
         RobotDisabledDefault(1),
         RobotDisabledAuto(2),
         RobotEnabled(3),
@@ -86,9 +90,13 @@ public class LightSubsystem extends BaseSubsystem {
     public LightSubsystem(XDigitalOutputFactory digitalOutputFactory,
                           ElectricalContract contract,
                           AutonomousCommandSelector autonomousCommandSelector,
-                          CoralScorerSubsystem coralScorerSubsystem) {
+                          CoralScorerSubsystem coralScorerSubsystem,
+                          CoralArmSubsystem coralArmSubsystem,
+                          ElevatorSubsystem elevatorSubsystem) {
         this.autonomousCommandSelector = autonomousCommandSelector;
         this.coralScorerSubsystem = coralScorerSubsystem;
+        this.coralArmSubsystem = coralArmSubsystem;
+        this.elevatorSubsystem = elevatorSubsystem;
         XDigitalOutput[] dios = {
             digitalOutputFactory.create(contract.getLightsDio0().channel), 
             digitalOutputFactory.create(contract.getLightsDio1().channel), 
@@ -109,6 +117,11 @@ public class LightSubsystem extends BaseSubsystem {
             currentState = LightsStateMessage.CoralPresent;
         } else if (coralScorerSubsystem.getCoralScorerState() == CoralScorerSubsystem.CoralScorerState.INTAKING) {
             currentState = LightsStateMessage.RequestCoralFromHuman;
+        } else if (DriverStation.getMatchTime() > 230 && DriverStation.isTeleop() && DriverStation.isDisabled()) {
+            currentState = LightsStateMessage.Victory;
+        } else if (coralScorerSubsystem.hasCoral() && coralArmSubsystem.getIsTargetAngleScoring()
+                && coralArmSubsystem.isMaintainerAtGoal() && elevatorSubsystem.isMaintainerAtGoal()) {
+            currentState = LightsStateMessage.ReadyToScore;
         } else {
             currentState = LightsStateMessage.RobotEnabled;
         }
