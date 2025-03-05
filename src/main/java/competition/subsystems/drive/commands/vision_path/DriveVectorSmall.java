@@ -70,7 +70,7 @@ public class DriveVectorSmall extends BaseCommand {
      */
     @Override
     public boolean isFinished() {
-        return (XTimer.getFPGATimestamp() - this.start) > this.last;
+        return (XTimer.getFPGATimestamp() - this.start) >= this.last;
     }
 
     /**

@@ -48,7 +48,9 @@ import static edu.wpi.first.units.Units.Volts;
     @Inject
     public DriveSubsystem(PIDManagerFactory pidFactory, PropertyFactory pf,
                           @FrontLeftDrive SwerveComponent frontLeftSwerve, @FrontRightDrive SwerveComponent frontRightSwerve,
-                          @RearLeftDrive SwerveComponent rearLeftSwerve, @RearRightDrive SwerveComponent rearRightSwerve, ElectricalContract electricalContract) {
+                          @RearLeftDrive SwerveComponent rearLeftSwerve,
+                          @RearRightDrive SwerveComponent rearRightSwerve,
+                          ElectricalContract electricalContract) {
 
             super(pidFactory, pf, frontLeftSwerve, frontRightSwerve, rearLeftSwerve, rearRightSwerve, contract);
             log.info("Creating DriveSubsystem");
