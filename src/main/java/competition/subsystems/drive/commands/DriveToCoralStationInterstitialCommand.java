@@ -49,7 +49,7 @@ public class DriveToCoralStationInterstitialCommand extends SwerveSimpleTrajecto
 
         Pose2d firstRightStationInterstitialPoint = new Pose2d(
                 Landmarks.BlueFarRightBranchA.getX() - 0.8,
-                Landmarks.BlueFarRightBranchA.getY() - 0.5,
+                Landmarks.BlueFarRightBranchA.getY() - 1,
                 Landmarks.BlueFarRightBranchA.getRotation());
         Pose2d secondRightStationInterstitialPoint = new Pose2d(
                 firstRightStationInterstitialPoint.getX() - 0.5,
