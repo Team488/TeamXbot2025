@@ -3,6 +3,7 @@ package competition.operator_interface;
 import competition.auto_programs.FromCageScoreOneCoralAutoFactory;
 import competition.auto_programs.FromLeftCageScoreLeftFacesLevelFours;
 import competition.auto_programs.FromRightCageScoreRightFacesLevelFours;
+import competition.auto_programs.BlueMidCagePushRobotLevelFoursAuto;
 import competition.commandgroups.HeadingAssistedDriveAndScoreCommandGroup;
 import competition.commandgroups.PrepAlgaeSystemCommandGroupFactory;
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
@@ -27,7 +28,6 @@ import competition.subsystems.drive.commands.AlignToSpecificHumanLoadingStationC
 import competition.subsystems.drive.commands.CalibrateDriveCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
 import competition.subsystems.drive.commands.DriveToClosestReefSectionWithVisionCommand;
-import competition.subsystems.drive.commands.DriveToCoralStationInterstitialCommand;
 import competition.subsystems.drive.commands.DriveToCoralStationWithVisionCommand;
 import competition.subsystems.drive.commands.DriveToLocationWithPID;
 import competition.subsystems.drive.commands.DriveToNearestReefFaceWithPID;
@@ -44,7 +44,6 @@ import competition.subsystems.pose.commands.ResetPoseCommand;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import xbot.common.controls.sensors.XXboxController;
 import xbot.common.subsystems.autonomous.SetAutonomousCommand;
 import xbot.common.subsystems.drive.SwervePointKinematics;
@@ -350,7 +349,8 @@ public class OperatorCommandMap {
                                         Provider<SetAutonomousCommand> setAutonomousCommandProvider,
                                         Provider<FromCageScoreOneCoralAutoFactory> fromCageScoreOneLevelFourAutoFactProv,
                                         FromLeftCageScoreLeftFacesLevelFours fromLeftCageScoreLeftFacesLevelFours,
-                                        FromRightCageScoreRightFacesLevelFours fromRightCageScoreRightFacesLevelFours) {
+                                        FromRightCageScoreRightFacesLevelFours fromRightCageScoreRightFacesLevelFours,
+                                        BlueMidCagePushRobotLevelFoursAuto blueMidCagePushRobotLevelFoursAuto) {
         var setFromLeftFarLeftBranchBLevelFour = setAutonomousCommandProvider.get();
         setFromLeftFarLeftBranchBLevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFactProv.get().create(
                 Landmarks.BlueCageOneStartingLine, Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR
@@ -381,6 +381,12 @@ public class OperatorCommandMap {
         setFromRightCageScoreRightFacesLevelFours.setAutoCommand(fromRightCageScoreRightFacesLevelFours);
         oi.neoTrellis.getifAvailable(5).onTrue(setFromRightCageScoreRightFacesLevelFours);
         setFromRightCageScoreRightFacesLevelFours.includeOnSmartDashboard("From Right Score Right Face Level Fours auto");
+
+        var setMidCagePushRobotAuto = setAutonomousCommandProvider.get();
+        setMidCagePushRobotAuto.setAutoCommand(blueMidCagePushRobotLevelFoursAuto);
+        oi.neoTrellis.getifAvailable(6).onTrue(setMidCagePushRobotAuto);
+        setMidCagePushRobotAuto.includeOnSmartDashboard("Blue Mid Cage Push Robot Level Fours Auto");
+
     }
 
     @Inject
