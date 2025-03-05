@@ -130,5 +130,12 @@ public class TrapezoidProfileManager {
         previousSetpoint = setpoint.position;
         return setpoint.position;
     }
+
+    public TrapezoidProfileAdvice getRecommendedPositionAndVelocityForTime() {
+        var setpoint = profile.calculate(XTimer.getFPGATimestampTime().minus(profileStartTime).in(Seconds), initialState, goalState);
+        this.previousSetpointTime.mut_replace(XTimer.getFPGATimestampTime());
+        previousSetpoint = setpoint.position;
+        return new TrapezoidProfileAdvice(setpoint.position, setpoint.velocity);
+    }
     
 }

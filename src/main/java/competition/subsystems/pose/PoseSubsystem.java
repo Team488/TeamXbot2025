@@ -26,7 +26,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import org.kobe.xbot.JClient.XTablesClient;
 import org.kobe.xbot.Utilities.Entities.BatchedPushRequests;
+import xbot.common.advantage.AKitLogger;
 import xbot.common.controls.sensors.XGyro.XGyroFactory;
+import xbot.common.controls.sensors.XTimer;
 import xbot.common.math.WrappedRotation2d;
 import xbot.common.properties.BooleanProperty;
 import xbot.common.properties.Property;
@@ -163,16 +165,34 @@ public class PoseSubsystem extends BasePoseSubsystem {
         totalDistanceX = robotPose.getX();
         totalDistanceY = robotPose.getY();
 
-        double prevTotalDistanceX = totalDistanceX;
-        double prevTotalDistanceY = totalDistanceY;
         this.velocityX = ((totalDistanceX - prevTotalDistanceX));
         this.velocityY = ((totalDistanceY - prevTotalDistanceY));
-        this.totalVelocity = (Math.sqrt(Math.pow(velocityX, 2.0) + Math.pow(velocityY, 2.0))); // Unnecessary?
+        double deltaTime = XTimer.getFPGATimestamp() - previousTimestamp;
+        if (deltaTime < 0.0001) {
+            // protecting against future divide by zero
+            deltaTime = 0.0001;
+        }
+
+        prevTotalDistanceX = totalDistanceX;
+        prevTotalDistanceY = totalDistanceY;
+        previousTimestamp = XTimer.getFPGATimestamp();
+
+        aKitLog.setLogLevel(AKitLogger.LogLevel.INFO);
+
+        var motionThisTick = Math.sqrt(Math.pow(velocityX, 2.0) + Math.pow(velocityY, 2.0));
+
+        this.totalVelocity = motionThisTick / deltaTime;
+        aKitLog.record("TotalVelocity", this.totalVelocity);
     }
+
+    double prevTotalDistanceX;
+    double prevTotalDistanceY;
+    double previousTimestamp = 0;
 
     public double getAbsoluteVelocity() {
         return this.totalVelocity;
     }
+
 
     /**
      * Get a command that resets the pose estimator to the current vision estimate
