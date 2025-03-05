@@ -18,7 +18,7 @@ public class EmergencyAutonomousCommand extends BaseCommand {
     final DriveSubsystem drive;
     double startingTime;
     DoubleProperty moveRobotX;
-    DoubleProperty timeAmountToMove;
+    final DoubleProperty timeAmountToMove;
 
 
     @Inject
