@@ -44,7 +44,7 @@ public class ShoveCoralStationCommand extends BaseCommand {
     @Override
     public void initialize() {
         log.info("Initializing");
-        pose.setAreVisionUpdatesDisabled(true);
+        pose.setPreferOdometryToVision(true);
         startTime = XTimer.getFPGATimestamp();
     }
 
@@ -61,7 +61,7 @@ public class ShoveCoralStationCommand extends BaseCommand {
 
     @Override
     public void end(boolean interrupted) {
-        pose.setAreVisionUpdatesDisabled(false);
+        pose.setPreferOdometryToVision(false);
         drive.stop();
     }
 }
