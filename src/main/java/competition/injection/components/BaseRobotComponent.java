@@ -11,6 +11,7 @@ import competition.subsystems.algae_arm.AlgaeArmSubsystem;
 import competition.subsystems.algae_collection.AlgaeCollectionSubsystem;
 import competition.subsystems.coral_arm.CoralArmSubsystem;
 import competition.subsystems.coral_scorer.CoralScorerSubsystem;
+import competition.subsystems.drive.commands.EmergencyAutonomousCommand;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import competition.subsystems.oracle.OracleSubsystem;
 import competition.subsystems.oracle.ReefCoordinateGenerator;
@@ -73,4 +74,6 @@ public abstract class BaseRobotComponent extends BaseComponent {
     public abstract AlgaeArmSubsystem algaeArmSubsystem();
 
     public abstract AlgaeCollectionSubsystem algaeCollectionSubsystem();
+
+    public abstract EmergencyAutonomousCommand emergencyAutonomousCommand();
 }
