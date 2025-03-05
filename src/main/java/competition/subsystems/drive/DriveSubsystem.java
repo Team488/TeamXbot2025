@@ -52,7 +52,7 @@ import static edu.wpi.first.units.Units.Volts;
                           @RearRightDrive SwerveComponent rearRightSwerve,
                           ElectricalContract electricalContract) {
 
-            super(pidFactory, pf, frontLeftSwerve, frontRightSwerve, rearLeftSwerve, rearRightSwerve, contract);
+            super(pidFactory, pf, frontLeftSwerve, frontRightSwerve, rearLeftSwerve, rearRightSwerve, electricalContract);
             log.info("Creating DriveSubsystem");
 
             pf.setPrefix(this.getPrefix());

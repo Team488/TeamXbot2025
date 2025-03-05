@@ -32,7 +32,7 @@ public class FromCurrentPositionScoreFarLeftBranchALevelFour
         this.addCommands(pathAndCurveScoreFarLeftBranchALevelFour);
         this.addCommands(
                 driveToStationAndIntakeUntilCollectedCommandGroupFactory.create(
-                        Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.MID, false));
+                        Landmarks.CoralStation.LEFT, false));
         var driveAndScoreCloseLeftBranchALevelFour =
                 driveToFaceAndScoreCommandGroupFactory.create(
                         Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.A,

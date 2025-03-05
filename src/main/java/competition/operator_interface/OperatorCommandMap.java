@@ -405,8 +405,8 @@ public class OperatorCommandMap {
         setFromLeftFarLeftBranchALevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFactProv.get().create(
                 Landmarks.BlueCageTwoStartingLine, Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR
         ));
-        oi.neoTrellis.getifAvailable(1).onTrue(setFromLeftFarLeftBranchBLevelFour); // temporary button
-        setFromLeftFarLeftBranchBLevelFour.includeOnSmartDashboard("From Left Score Far Left Branch B Level 4 Auto");
+        oi.neoTrellis.getifAvailable(1).onTrue(setFromLeftFarLeftBranchALevelFour); // temporary button
+        setFromLeftFarLeftBranchALevelFour.includeOnSmartDashboard("From Left Score Far Left Branch B Level 4 Auto");
 
         var setFromMidFarBranchALevelFour = setAutonomousCommandProvider.get();
         setFromMidFarBranchALevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFactProv.get().create(
@@ -428,7 +428,7 @@ public class OperatorCommandMap {
         setFromLeftCageScoreLeftFacesLevelFours.includeOnSmartDashboard("From Left Score Left Face Level Fours Auto");
 
         var setFromRightCageScoreRightFacesLevelFours = setAutonomousCommandProvider.get();
-        setFromRightCageScoreRightFacesLevelFours.setAutoCommand(fromRightCageScoreRightFacesLevelFours);
+        setFromRightCageScoreRightFacesLevelFours.setAutoCommand(setFromRightCageScoreRightFacesLevelFours);
         oi.neoTrellis.getifAvailable(5).onTrue(setFromRightCageScoreRightFacesLevelFours);
         setFromRightCageScoreRightFacesLevelFours.includeOnSmartDashboard("From Right Score Right Face Level Fours auto");
     }
