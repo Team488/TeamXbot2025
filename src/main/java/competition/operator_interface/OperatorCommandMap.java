@@ -376,7 +376,7 @@ public class OperatorCommandMap {
         var setFromRightCageScoreRightFacesLevelFours = setAutonomousCommandProvider.get();
         setFromRightCageScoreRightFacesLevelFours.setAutoCommand(fromRightCageScoreRightFacesLevelFours);
         oi.neoTrellis.getifAvailable(5).onTrue(setFromRightCageScoreRightFacesLevelFours);
-        setFromLeftCageScoreLeftFacesLevelFours.includeOnSmartDashboard("From Right Score Right Face Level Fours auto");
+        setFromRightCageScoreRightFacesLevelFours.includeOnSmartDashboard("From Right Score Right Face Level Fours auto");
     }
 
     @Inject
