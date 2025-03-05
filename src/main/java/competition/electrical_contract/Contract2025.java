@@ -15,6 +15,7 @@ import xbot.common.injection.electrical_contract.CANMotorControllerInfo;
 import xbot.common.injection.electrical_contract.CANMotorControllerOutputConfig;
 import xbot.common.injection.electrical_contract.CameraInfo;
 import xbot.common.injection.electrical_contract.DeviceInfo;
+import xbot.common.injection.electrical_contract.IMUInfo;
 import xbot.common.injection.electrical_contract.MotorControllerType;
 import xbot.common.injection.electrical_contract.CANMotorControllerOutputConfig.InversionType;
 import xbot.common.injection.swerve.SwerveInstance;
@@ -281,6 +282,11 @@ public class Contract2025 extends ElectricalContract {
             case "RearRightDrive" -> new XYPair(-12, -12);
             default -> new XYPair(0, 0);
         };
+    }
+
+    @Override
+    public IMUInfo getGyroInfo() {
+        return new IMUInfo(CANBusId.DefaultCanivore, 10);
     }
 
     @Override

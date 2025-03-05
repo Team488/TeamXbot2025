@@ -8,6 +8,8 @@ import java.util.function.Supplier;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import competition.electrical_contract.ElectricalContract;
+import competition.injection.RobotOverride;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
@@ -55,9 +57,12 @@ public class PoseSubsystem extends BasePoseSubsystem {
     protected Optional<SwerveModulePosition[]> simulatedModulePositions = Optional.empty();
 
     @Inject
-    public PoseSubsystem(XGyroFactory gyroFactory, PropertyFactory propManager, DriveSubsystem drive,
-                         AprilTagVisionSubsystemExtended aprilTagVisionSubsystem, CoprocessorCommunicationSubsystem coprocessorComms) {
-        super(gyroFactory, propManager);
+    public PoseSubsystem(@RobotOverride XGyroFactory gyroFactory,
+                         ElectricalContract electricalContract,
+                         PropertyFactory propManager, DriveSubsystem drive,
+                         AprilTagVisionSubsystemExtended aprilTagVisionSubsystem,
+                         CoprocessorCommunicationSubsystem coprocessorComms) {
+        super(gyroFactory.create(electricalContract.getGyroInfo()), propManager);
         this.drive = drive;
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
         this.coprocessorComms = coprocessorComms;
