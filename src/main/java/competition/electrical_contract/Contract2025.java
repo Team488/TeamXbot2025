@@ -350,21 +350,21 @@ public class Contract2025 extends ElectricalContract {
 
     @Override
     public DeviceInfo getLightsDio0() {
-        return new DeviceInfo("Lights0", 2);
+        return new DeviceInfo("Lights0", 10);
     }
 
     @Override
     public DeviceInfo getLightsDio1() {
-        return new DeviceInfo("Lights1", 4);
+        return new DeviceInfo("Lights1", 11);
     }
 
     @Override
     public DeviceInfo getLightsDio2() {
-        return new DeviceInfo("Lights2", 7);
+        return new DeviceInfo("Lights2", 12);
     }
 
     @Override
     public DeviceInfo getLightsDio3() {
-        return new DeviceInfo("Lights3", 8);
+        return new DeviceInfo("Lights3", 13);
     }
 }
