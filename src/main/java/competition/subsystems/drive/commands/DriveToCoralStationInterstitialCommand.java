@@ -19,6 +19,28 @@ public class DriveToCoralStationInterstitialCommand extends SwerveSimpleTrajecto
 
     boolean kinematics = true;
     Landmarks.CoralStation station = Landmarks.CoralStation.LEFT;
+    double endingThresholdInMeters = 1;
+
+    // Interstitial points to avoid rotating into the reef when going for coral station alignment
+    Pose2d firstLeftStationInterstitialPoint = new Pose2d(
+            Landmarks.BlueFarLeftBranchB.getX() - 0.5, // TODO: Tune for better pathing
+            Landmarks.BlueFarLeftBranchB.getY() + 0.8,
+            Landmarks.BlueFarLeftBranchB.getRotation());
+    Pose2d secondLeftStationInterstitialPoint = new Pose2d(
+            firstLeftStationInterstitialPoint.getX() - 1.8,
+            firstLeftStationInterstitialPoint.getY() - 1,
+            Landmarks.BlueLeftCoralStationMid.getRotation()
+    );
+
+    Pose2d firstRightStationInterstitialPoint = new Pose2d(
+            Landmarks.BlueFarRightBranchA.getX() - 0.5,
+            Landmarks.BlueFarRightBranchA.getY() - 0.8,
+            Landmarks.BlueFarRightBranchA.getRotation());
+    Pose2d secondRightStationInterstitialPoint = new Pose2d(
+            firstRightStationInterstitialPoint.getX() - 1.8,
+            firstRightStationInterstitialPoint.getY() + 1,
+            Landmarks.BlueRightCoralStationMid.getRotation()
+    );
 
     @Inject
     public DriveToCoralStationInterstitialCommand(DriveSubsystem drive, PoseSubsystem pose,
@@ -36,27 +58,6 @@ public class DriveToCoralStationInterstitialCommand extends SwerveSimpleTrajecto
         log.info("Initializing");
         ArrayList<XbotSwervePoint> swervePoints = new ArrayList<>();
 
-        // Interstitial points to avoid rotating into the reef when going for coral station alignment
-        Pose2d firstLeftStationInterstitialPoint = new Pose2d(
-                Landmarks.BlueFarLeftBranchB.getX() - 0.8, // TODO: Tune for better pathing
-                Landmarks.BlueFarLeftBranchB.getY() + 1,
-                Landmarks.BlueFarLeftBranchB.getRotation());
-        Pose2d secondLeftStationInterstitialPoint = new Pose2d(
-                firstLeftStationInterstitialPoint.getX() - 0.5,
-                firstLeftStationInterstitialPoint.getY(),
-                firstLeftStationInterstitialPoint.getRotation()
-        );
-
-        Pose2d firstRightStationInterstitialPoint = new Pose2d(
-                Landmarks.BlueFarRightBranchA.getX() - 0.8,
-                Landmarks.BlueFarRightBranchA.getY() - 1,
-                Landmarks.BlueFarRightBranchA.getRotation());
-        Pose2d secondRightStationInterstitialPoint = new Pose2d(
-                firstRightStationInterstitialPoint.getX() - 0.5,
-                firstRightStationInterstitialPoint.getY(),
-                firstRightStationInterstitialPoint.getRotation()
-        );
-
         if (station == Landmarks.CoralStation.LEFT) {
             swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(firstLeftStationInterstitialPoint), 10));
             swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(secondLeftStationInterstitialPoint), 10));
@@ -69,7 +70,7 @@ public class DriveToCoralStationInterstitialCommand extends SwerveSimpleTrajecto
 
         if (kinematics) {
             // Make sure goalVelocity is non-zero, or else the robot will wait until it's stopped at the interstitial point before continuing
-            this.logic.setGlobalKinematicValues(new SwervePointKinematics(2, 0, 2.5, 2.5));
+            this.logic.setGlobalKinematicValues(new SwervePointKinematics(2, 0, 4, 4.5));
             this.logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
         }
         else {
@@ -77,5 +78,11 @@ public class DriveToCoralStationInterstitialCommand extends SwerveSimpleTrajecto
             this.logic.setVelocityMode(SwerveSimpleTrajectoryMode.ConstantVelocity);
         }
         super.initialize();
+    }
+
+    @Override
+    public boolean isFinished() {
+        var point = station == Landmarks.CoralStation.LEFT ? secondLeftStationInterstitialPoint : secondRightStationInterstitialPoint;
+        return pose.getCurrentPose2d().minus(point).getTranslation().getNorm() < endingThresholdInMeters;
     }
 }
