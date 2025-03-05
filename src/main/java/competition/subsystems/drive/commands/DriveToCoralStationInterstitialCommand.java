@@ -19,6 +19,28 @@ public class DriveToCoralStationInterstitialCommand extends SwerveSimpleTrajecto
 
     boolean kinematics = true;
     Landmarks.CoralStation station = Landmarks.CoralStation.LEFT;
+    double endingThresholdInMeters = 0.8;
+
+    // Interstitial points to avoid rotating into the reef when going for coral station alignment
+    Pose2d firstLeftStationInterstitialPoint = new Pose2d(
+            Landmarks.BlueFarLeftBranchB.getX() - 0.8, // TODO: Tune for better pathing
+            Landmarks.BlueFarLeftBranchB.getY() + 0.7,
+            Landmarks.BlueFarLeftBranchB.getRotation());
+    Pose2d secondLeftStationInterstitialPoint = new Pose2d(
+            firstLeftStationInterstitialPoint.getX() - 1,
+            firstLeftStationInterstitialPoint.getY() - 0.4,
+            Landmarks.BlueLeftCoralStationMid.getRotation()
+    );
+
+    Pose2d firstRightStationInterstitialPoint = new Pose2d(
+            Landmarks.BlueFarRightBranchA.getX() - 0.8,
+            Landmarks.BlueFarRightBranchA.getY() - 0.7,
+            Landmarks.BlueFarRightBranchA.getRotation());
+    Pose2d secondRightStationInterstitialPoint = new Pose2d(
+            firstRightStationInterstitialPoint.getX() - 1,
+            firstRightStationInterstitialPoint.getY() + 0.4,
+            Landmarks.BlueRightCoralStationMid.getRotation()
+    );
 
     @Inject
     public DriveToCoralStationInterstitialCommand(DriveSubsystem drive, PoseSubsystem pose,
@@ -35,27 +57,6 @@ public class DriveToCoralStationInterstitialCommand extends SwerveSimpleTrajecto
     public void initialize() {
         log.info("Initializing");
         ArrayList<XbotSwervePoint> swervePoints = new ArrayList<>();
-
-        // Interstitial points to avoid rotating into the reef when going for coral station alignment
-        Pose2d firstLeftStationInterstitialPoint = new Pose2d(
-                Landmarks.BlueFarLeftBranchB.getX() - 0.8, // TODO: Tune for better pathing
-                Landmarks.BlueFarLeftBranchB.getY() + 1,
-                Landmarks.BlueFarLeftBranchB.getRotation());
-        Pose2d secondLeftStationInterstitialPoint = new Pose2d(
-                firstLeftStationInterstitialPoint.getX() - 0.5,
-                firstLeftStationInterstitialPoint.getY(),
-                firstLeftStationInterstitialPoint.getRotation()
-        );
-
-        Pose2d firstRightStationInterstitialPoint = new Pose2d(
-                Landmarks.BlueFarRightBranchA.getX() - 0.8,
-                Landmarks.BlueFarRightBranchA.getY() - 1,
-                Landmarks.BlueFarRightBranchA.getRotation());
-        Pose2d secondRightStationInterstitialPoint = new Pose2d(
-                firstRightStationInterstitialPoint.getX() - 0.5,
-                firstRightStationInterstitialPoint.getY(),
-                firstRightStationInterstitialPoint.getRotation()
-        );
 
         if (station == Landmarks.CoralStation.LEFT) {
             swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(firstLeftStationInterstitialPoint), 10));
@@ -77,5 +78,11 @@ public class DriveToCoralStationInterstitialCommand extends SwerveSimpleTrajecto
             this.logic.setVelocityMode(SwerveSimpleTrajectoryMode.ConstantVelocity);
         }
         super.initialize();
+    }
+
+    @Override
+    public boolean isFinished() {
+        var point = station == Landmarks.CoralStation.LEFT ? secondLeftStationInterstitialPoint : secondRightStationInterstitialPoint;
+        return pose.getCurrentPose2d().minus(point).getTranslation().getNorm() < endingThresholdInMeters;
     }
 }
