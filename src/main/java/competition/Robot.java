@@ -44,6 +44,7 @@ public class Robot extends BaseRobot {
     @Override
     protected void initializeSystems() {
         super.initializeSystems();
+
         getInjectorComponent().subsystemDefaultCommandMap();
         getInjectorComponent().operatorCommandMap();
         getInjectorComponent().swerveDefaultCommandMap();
@@ -55,6 +56,8 @@ public class Robot extends BaseRobot {
         if (BaseRobot.isSimulation()) {
             simulator = getInjectorComponent().simulator();
         }
+
+        autonomousCommandSelector.setCurrentAutonomousCommand(getInjectorComponent().emergencyAutonomousCommand());
 
 
         dataFrameRefreshables.add(getInjectorComponent().driveSubsystem());

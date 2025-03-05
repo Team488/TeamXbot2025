@@ -32,7 +32,6 @@ import xbot.common.properties.BooleanProperty;
 import xbot.common.properties.Property;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.pose.BasePoseSubsystem;
-import xbot.common.subsystems.vision.AprilTagVisionSubsystem;
 
 @Singleton
 public class PoseSubsystem extends BasePoseSubsystem {
@@ -49,7 +48,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
     public static final Distance fieldXMidpointInMeters = Meters.of(8.7785);
     public static final Distance fieldYMidpointInMeters = Meters.of(4.025);
 
-    private boolean areVisionUpdatesDisabled = false;
+    private boolean preferOdometryToVision = false;
 
 
     // only used when simulating the robot
@@ -92,7 +91,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
 
     @Override
     protected void updateOdometry() {
-        XTablesClient xTablesClient = this.coprocessorComms.getXTablesManager().getOrNull();
+
         String xtablesPrefix = "PoseSubsystem";
         // Package all requests into single message to ensure all data is synchronized and updated at once.
         BatchedPushRequests batchedPushRequests = new BatchedPushRequests();
@@ -111,23 +110,22 @@ public class PoseSubsystem extends BasePoseSubsystem {
                 getSwerveModulePositions()
         );
 
-        if (!areVisionUpdatesDisabled) {
-            this.aprilTagVisionSubsystem.getAllPoseObservations().forEach(observation -> {
-                fullSwerveOdometry.addVisionMeasurement(
-                        observation.visionRobotPoseMeters(),
-                        observation.timestampSeconds(),
-                        observation.visionMeasurementStdDevs()
-                );
-            });
-        }
+        this.aprilTagVisionSubsystem.getAllPoseObservations().forEach(observation -> {
+            fullSwerveOdometry.addVisionMeasurement(
+                    observation.visionRobotPoseMeters(),
+                    observation.timestampSeconds(),
+                    observation.visionMeasurementStdDevs()
+            );
+        });
 
         // Report poses
-        Pose2d estimatedPosition = new Pose2d(
+        Pose2d odometryOnlyRobotPose = new Pose2d(
                 onlyWheelsGyroSwerveOdometry.getEstimatedPosition().getTranslation(),
                 getCurrentHeadingGyroOnly()
         );
-        aKitLog.record("OdometryOnlyRobotPose", estimatedPosition);
-        batchedPushRequests.putPose2d(xtablesPrefix + ".OdometryOnlyRobotPose", estimatedPosition);
+
+        aKitLog.record("OdometryOnlyRobotPose", odometryOnlyRobotPose);
+        batchedPushRequests.putPose2d(xtablesPrefix + ".OdometryOnlyRobotPose", odometryOnlyRobotPose);
 
         Pose2d visionEnhancedPosition = new Pose2d(
                 fullSwerveOdometry.getEstimatedPosition().getTranslation(),
@@ -136,9 +134,14 @@ public class PoseSubsystem extends BasePoseSubsystem {
         aKitLog.record("VisionEnhancedPose", visionEnhancedPosition);
         batchedPushRequests.putPose2d(xtablesPrefix + ".VisionEnhancedPose", visionEnhancedPosition);
 
-        Pose2d robotPose = this.useVisionAssistedPose.get() ? visionEnhancedPosition : estimatedPosition;
+        Pose2d robotPose = odometryOnlyRobotPose;
+        if (this.useVisionAssistedPose.get() && !preferOdometryToVision) {
+            robotPose = visionEnhancedPosition;
+        }
+
         aKitLog.record("RobotPose", robotPose);
         batchedPushRequests.putPose2d(xtablesPrefix + ".RobotPose", robotPose);
+        XTablesClient xTablesClient = this.coprocessorComms.getXTablesManager().getOrNull();
         if (xTablesClient != null) {
             // This is asynchronous - does not block & sends all updates in a single "packet"
             xTablesClient.sendBatchedPushRequests(batchedPushRequests);
@@ -336,8 +339,14 @@ public class PoseSubsystem extends BasePoseSubsystem {
         return Commands.runOnce(() -> setCurrentPosition(PoseSubsystem.convertBlueToRedIfNeeded(bluePose))).ignoringDisable(true);
     }
 
-    public void setAreVisionUpdatesDisabled(boolean disableVisionUpdates) {
-        this.areVisionUpdatesDisabled = disableVisionUpdates;
+    public void setPreferOdometryToVision(boolean preferOdometryToVision) {
+        this.preferOdometryToVision = preferOdometryToVision;
+        if (preferOdometryToVision) {
+            // If we are disabling vision updates, we need to "snap" the odometry estimate to the vision estimate.
+            // This is because we will be using the odometry estimate while vision is being supresse, and we need
+            // to avoid any callers of the PoseSubsystem experiencing discontinuities.
+            resetPoseEstimator(fullSwerveOdometry.getEstimatedPosition());
+        }
     }
 
     public DriverRelativeCameraValues getDriverRelativeCameraToUse(boolean hasCameraFlippedDriverRelative, int cameraToUse) {
