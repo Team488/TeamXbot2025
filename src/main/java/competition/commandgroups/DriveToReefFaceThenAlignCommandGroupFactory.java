@@ -58,7 +58,6 @@ public class DriveToReefFaceThenAlignCommandGroupFactory {
                 }, Set.of(drive)
         );
         group.addCommands(
-//                driveToReefFaceCommand,
                 alignToReefCommand);
 
         return group;
