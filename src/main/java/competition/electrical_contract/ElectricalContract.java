@@ -5,11 +5,12 @@ import edu.wpi.first.units.measure.Distance;
 import xbot.common.injection.electrical_contract.CANMotorControllerInfo;
 import xbot.common.injection.electrical_contract.DeviceInfo;
 import xbot.common.injection.electrical_contract.XCameraElectricalContract;
+import xbot.common.injection.electrical_contract.XDeadwheelElectricalContract;
 import xbot.common.injection.electrical_contract.XSwerveDriveElectricalContract;
 import xbot.common.injection.swerve.SwerveInstance;
 import xbot.common.math.XYPair;
 
-public abstract class ElectricalContract implements XSwerveDriveElectricalContract, XCameraElectricalContract {
+public abstract class ElectricalContract implements XSwerveDriveElectricalContract, XCameraElectricalContract, XDeadwheelElectricalContract {
 
     public abstract boolean isDriveReady();
 
