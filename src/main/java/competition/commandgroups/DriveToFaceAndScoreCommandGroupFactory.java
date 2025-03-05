@@ -35,11 +35,11 @@ public class DriveToFaceAndScoreCommandGroupFactory {
         this.prepCoralSystemFactory = prepCoralSystemFactory;
         this.scoreWhenReadyProvider = scoreWhenReadyProvider;
 
+        pf.setPrefix("DriveToFaceAndScoreCommandGroupFactory");
         levelOneDistanceThreshold = pf.createPersistentProperty("LevelOneDistanceThresholdInMeters", 0.5);
         levelTwoDistanceThreshold = pf.createPersistentProperty("LevelTwoDistanceThresholdInMeters", 0.5);
         levelFourDistanceThreshold = pf.createPersistentProperty("LevelFourDistanceThresholdInMeters", 0.5);
 
-        pf.setPrefix("DriveToFaceAndScoreCommandGroupFactory");
     }
 
     public SequentialCommandGroup create(Landmarks.ReefFace targetReefFace,
