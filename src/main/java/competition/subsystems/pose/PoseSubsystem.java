@@ -1,6 +1,7 @@
 package competition.subsystems.pose;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -282,6 +283,19 @@ public class PoseSubsystem extends BasePoseSubsystem {
                 convertBlueToRedIfNeeded(Landmarks.BlueFarRightAlgae));
 
         return currentPose.nearest(reefFacePoses);
+    }
+
+    public Landmarks.CoralStation getClosestCoralStation() {
+        Pose2d currentPose = getCurrentPose2d();
+        var leftCoralStation = convertBlueToRedIfNeeded(Landmarks.BlueLeftCoralStationMid);
+        var rightCoralStation = convertBlueToRedIfNeeded(Landmarks.BlueRightCoralStationMid);
+
+        List<Pose2d> coralStationPoses = Arrays.asList(leftCoralStation,rightCoralStation);
+        HashMap<Pose2d, Landmarks.CoralStation> hashMap = new HashMap<>();
+        hashMap.put(leftCoralStation,Landmarks.CoralStation.LEFT);
+        hashMap.put(rightCoralStation, Landmarks.CoralStation.RIGHT);
+
+        return hashMap.get(currentPose.nearest(coralStationPoses));
     }
 
     public Landmarks.ReefFace getReefFaceFromAngle() {
