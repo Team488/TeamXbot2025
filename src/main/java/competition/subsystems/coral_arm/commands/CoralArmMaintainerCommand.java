@@ -46,7 +46,7 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
                                      HumanVsMachineDecider.HumanVsMachineDeciderFactory hvmFactory,
                                      TrapezoidProfileManager.Factory trapzoidProfileManagerFactory,
                                      OperatorInterface oi) {
-        super(armPivotSubsystem, pf, hvmFactory, 2, 0.25);
+        super(armPivotSubsystem, pf, hvmFactory, 2, 0.10);
         this.coralArm = armPivotSubsystem;
         this.algaeArm = algaeArm;
         this.elevator = elevator;

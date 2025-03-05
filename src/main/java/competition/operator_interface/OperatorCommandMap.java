@@ -21,6 +21,7 @@ import competition.subsystems.coral_scorer.commands.IntakeCoralCommand;
 import competition.subsystems.coral_scorer.commands.ScoreCoralCommand;
 import competition.subsystems.coral_scorer.commands.ScoreWhenReadyCommand;
 import competition.subsystems.drive.DriveSubsystem;
+import competition.subsystems.drive.commands.AlignToNearestCoralStationCommand;
 import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.AlignToSpecificHumanLoadingStationCommand;
 import competition.subsystems.drive.commands.CalibrateDriveCommand;
@@ -87,7 +88,8 @@ public class OperatorCommandMap {
             SwerveDriveWithJoysticksCommand typicalSwerveDrive,
             HeadingAssistedDriveAndScoreCommandGroup.Factory headingAssistedDriveAndScoreCommandGroupFactory,
             AlignToSpecificHumanLoadingStationCommand alignToLeftStation,
-            DriveToNearestReefFaceWithPID driveToNearestReefFaceWithPID) {
+            DriveToNearestReefFaceWithPID driveToNearestReefFaceWithPID,
+            AlignToNearestCoralStationCommand alignToNearestCoralStationCommand) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
 
@@ -101,7 +103,7 @@ public class OperatorCommandMap {
 
         var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
 
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(driveToCoralStationWithVisionCommand);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(alignToNearestCoralStationCommand);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(driveToNearestReefFaceWithPID);
 
         operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
