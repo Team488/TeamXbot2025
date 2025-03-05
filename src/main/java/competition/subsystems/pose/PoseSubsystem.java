@@ -91,7 +91,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
 
     @Override
     protected void updateOdometry() {
-        XTablesClient xTablesClient = this.coprocessorComms.getXTablesManager().getOrNull();
+
         String xtablesPrefix = "PoseSubsystem";
         // Package all requests into single message to ensure all data is synchronized and updated at once.
         BatchedPushRequests batchedPushRequests = new BatchedPushRequests();
@@ -141,6 +141,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
 
         aKitLog.record("RobotPose", robotPose);
         batchedPushRequests.putPose2d(xtablesPrefix + ".RobotPose", robotPose);
+        XTablesClient xTablesClient = this.coprocessorComms.getXTablesManager().getOrNull();
         if (xTablesClient != null) {
             // This is asynchronous - does not block & sends all updates in a single "packet"
             xTablesClient.sendBatchedPushRequests(batchedPushRequests);
