@@ -31,6 +31,7 @@ import competition.subsystems.drive.commands.DriveToClosestReefSectionWithVision
 import competition.subsystems.drive.commands.DriveToCoralStationWithVisionCommand;
 import competition.subsystems.drive.commands.DriveToLocationWithPID;
 import competition.subsystems.drive.commands.DriveToNearestReefFaceWithPID;
+import competition.subsystems.drive.commands.EmergencyAutonomousCommand;
 import competition.subsystems.drive.commands.RotateToHeadingWithHeadingModule;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.drive.commands.TeleportToPositionCommand;
@@ -349,7 +350,8 @@ public class OperatorCommandMap {
     public void setupAutonomousCommands(OperatorInterface oi,
                                         Provider<SetAutonomousCommand> setAutonomousCommandProvider,
                                         Provider<FromCageScoreOneCoralAutoFactory> fromCageScoreOneLevelFourAutoFactProv,
-                                        FromLeftCageScoreLeftFacesLevelFours fromLeftCageScoreLeftFacesLevelFours) {
+                                        FromLeftCageScoreLeftFacesLevelFours fromLeftCageScoreLeftFacesLevelFours,
+                                        EmergencyAutonomousCommand emergencyAutonomousCommand) {
         var setFromLeftFarLeftBranchALevelFour = setAutonomousCommandProvider.get();
         setFromLeftFarLeftBranchALevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFactProv.get().create(
                 Landmarks.BlueCageTwoStartingLine, Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR
@@ -375,6 +377,13 @@ public class OperatorCommandMap {
         setFromLeftCageScoreLeftFacesLevelFours.setAutoCommand(fromLeftCageScoreLeftFacesLevelFours);
         oi.neoTrellis.getifAvailable(4).onTrue(setFromLeftCageScoreLeftFacesLevelFours); // temporary button
         setFromLeftCageScoreLeftFacesLevelFours.includeOnSmartDashboard("From Left Score Left Face's Level Fours Auto");
+
+        var setEmergencyAutonomousCommand = setAutonomousCommandProvider.get();
+        setEmergencyAutonomousCommand.setAutoCommand(emergencyAutonomousCommand);
+        oi.neoTrellis.getifAvailable(31).onTrue(emergencyAutonomousCommand);
+        setEmergencyAutonomousCommand.includeOnSmartDashboard("EMERGENCYAUTO");
+
+
     }
 
     @Inject
