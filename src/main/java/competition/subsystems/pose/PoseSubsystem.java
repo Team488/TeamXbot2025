@@ -48,7 +48,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
     public static final Distance fieldXMidpointInMeters = Meters.of(8.7785);
     public static final Distance fieldYMidpointInMeters = Meters.of(4.025);
 
-    private boolean areVisionUpdatesTemporarilyDisabled = false;
+    private boolean preferOdometryToVision = false;
 
 
     // only used when simulating the robot
@@ -135,7 +135,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
         batchedPushRequests.putPose2d(xtablesPrefix + ".VisionEnhancedPose", visionEnhancedPosition);
 
         Pose2d robotPose = odometryOnlyRobotPose;
-        if (this.useVisionAssistedPose.get() && !areVisionUpdatesTemporarilyDisabled) {
+        if (this.useVisionAssistedPose.get() && !preferOdometryToVision) {
             robotPose = visionEnhancedPosition;
         }
 
@@ -339,9 +339,9 @@ public class PoseSubsystem extends BasePoseSubsystem {
         return Commands.runOnce(() -> setCurrentPosition(PoseSubsystem.convertBlueToRedIfNeeded(bluePose))).ignoringDisable(true);
     }
 
-    public void setDisableVisionUpdatesAndPrioritizeOdometry(boolean disableVisionUpdatesAndPrioritizeOdometry) {
-        this.areVisionUpdatesTemporarilyDisabled = disableVisionUpdatesAndPrioritizeOdometry;
-        if (disableVisionUpdatesAndPrioritizeOdometry) {
+    public void setPreferOdometryToVision(boolean preferOdometryToVision) {
+        this.preferOdometryToVision = preferOdometryToVision;
+        if (preferOdometryToVision) {
             // If we are disabling vision updates, we need to "snap" the odometry estimate to the vision estimate.
             // This is because we will be using the odometry estimate while vision is being supresse, and we need
             // to avoid any callers of the PoseSubsystem experiencing discontinuities.

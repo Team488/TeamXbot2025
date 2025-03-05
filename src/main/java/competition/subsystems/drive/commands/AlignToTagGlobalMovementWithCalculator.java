@@ -75,7 +75,7 @@ public class AlignToTagGlobalMovementWithCalculator extends BaseCommand {
 
         calculator.configureAndReset(targetAprilTagID, targetCameraID, offset,
                 isCameraBackwards, startingActivity, requireExcellentAlignment);
-        pose.setDisableVisionUpdatesAndPrioritizeOdometry(true);
+        pose.setPreferOdometryToVision(true);
     }
 
     @Override
@@ -96,7 +96,7 @@ public class AlignToTagGlobalMovementWithCalculator extends BaseCommand {
 
     @Override
     public void end(boolean interrupted) {
-        pose.setDisableVisionUpdatesAndPrioritizeOdometry(false);
+        pose.setPreferOdometryToVision(false);
         drive.stop();
     }
 }
