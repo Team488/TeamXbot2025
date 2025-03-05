@@ -2,6 +2,7 @@ package competition.operator_interface;
 
 import competition.auto_programs.FromCageScoreOneCoralAutoFactory;
 import competition.auto_programs.FromLeftCageScoreLeftFacesLevelFours;
+import competition.auto_programs.FromRightCageScoreRightFacesLevelFours;
 import competition.commandgroups.HeadingAssistedDriveAndScoreCommandGroup;
 import competition.commandgroups.PrepAlgaeSystemCommandGroupFactory;
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
@@ -344,7 +345,8 @@ public class OperatorCommandMap {
     public void setupAutonomousCommands(OperatorInterface oi,
                                         Provider<SetAutonomousCommand> setAutonomousCommandProvider,
                                         Provider<FromCageScoreOneCoralAutoFactory> fromCageScoreOneLevelFourAutoFactProv,
-                                        FromLeftCageScoreLeftFacesLevelFours fromLeftCageScoreLeftFacesLevelFours) {
+                                        FromLeftCageScoreLeftFacesLevelFours fromLeftCageScoreLeftFacesLevelFours,
+                                        FromRightCageScoreRightFacesLevelFours fromRightCageScoreRightFacesLevelFours) {
         var setFromLeftFarLeftBranchBLevelFour = setAutonomousCommandProvider.get();
         setFromLeftFarLeftBranchBLevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFactProv.get().create(
                 Landmarks.BlueCageTwoStartingLine, Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR
@@ -370,6 +372,11 @@ public class OperatorCommandMap {
         setFromLeftCageScoreLeftFacesLevelFours.setAutoCommand(fromLeftCageScoreLeftFacesLevelFours);
         oi.neoTrellis.getifAvailable(4).onTrue(setFromLeftCageScoreLeftFacesLevelFours); // temporary button
         setFromLeftCageScoreLeftFacesLevelFours.includeOnSmartDashboard("From Left Score Left Face Level Fours Auto");
+
+        var setFromRightCageScoreRightFacesLevelFours = setAutonomousCommandProvider.get();
+        setFromRightCageScoreRightFacesLevelFours.setAutoCommand(fromRightCageScoreRightFacesLevelFours);
+        oi.neoTrellis.getifAvailable(5).onTrue(setFromRightCageScoreRightFacesLevelFours);
+        setFromLeftCageScoreLeftFacesLevelFours.includeOnSmartDashboard("From Right Score Right Face Level Fours auto");
     }
 
     @Inject
