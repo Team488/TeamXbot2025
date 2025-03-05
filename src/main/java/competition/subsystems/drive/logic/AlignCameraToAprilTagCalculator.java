@@ -77,6 +77,8 @@ public class AlignCameraToAprilTagCalculator {
 
     double lastKnownHorizontalErrorMeters = 0;
     double shoveStartTime = 0;
+    private Activity startingActivity = Activity.Searching;
+    private boolean requireExcellentAlignment = true;
 
     public static Translation2d generateAlignmentPointOffset(Distance robotCenterToOuterBumperX, CameraInfo cameraInfo,
                                                              Distance offset, boolean isCameraBackwards) {
@@ -109,12 +111,12 @@ public class AlignCameraToAprilTagCalculator {
         this.akitLog = new AKitLogger(prefix);
 
         pf.setPrefix(prefix);
-        interstitialDistance = pf.createPersistentProperty("InterstitialDistance-m", 2.0);
+        interstitialDistance = pf.createPersistentProperty("InterstitialDistance-m", 2.25);
         distanceFromInterstitialToAdvance = pf.createPersistentProperty("DistanceFromInterstitialToAdvance-m", 0.2);
-        approachSpeedFactor = pf.createPersistentProperty("ApproachSpeedFactor", 0.75);
+        approachSpeedFactor = pf.createPersistentProperty("ApproachSpeedFactor", 0.65);
         distanceToStartShoving = pf.createPersistentProperty("DistanceToStartShoving-m", 0.0762); // 3 inches
         shovePower = pf.createPersistentProperty("ShovePower", 0.25);
-        shoveDuration = pf.createPersistentProperty("ShoveDuration-s", 0.5);
+        shoveDuration = pf.createPersistentProperty("ShoveDuration-s", 0.25);
         maxTagAmbiguity = pf.createPersistentProperty("MaxTagAmbiguity", 0.5);
         maxHorizontalErrorMeters = pf.createPersistentProperty("MaxHorizontalError-m", 0.0508); // 2 inches
 
@@ -124,19 +126,26 @@ public class AlignCameraToAprilTagCalculator {
     private void reset() {
         drive.getPositionalPid().reset();
         tagAcquisitionState = TagAcquisitionState.NeverSeen;
-        activity = Activity.Searching;
+        activity = startingActivity;
     }
 
     public void configureAndReset(int targetAprilTagID, int targetCameraID, Distance offset,
                                   boolean isCameraBackwards) {
-        reset();
+        configureAndReset(targetAprilTagID, targetCameraID, offset, isCameraBackwards, Activity.Searching, true);
+    }
 
+    public void configureAndReset(int targetAprilTagID, int targetCameraID, Distance offset,
+                                  boolean isCameraBackwards, Activity startingActivity,
+                                    boolean requireExcellentAlignment) {
+        this.startingActivity = startingActivity;
+        this.requireExcellentAlignment = requireExcellentAlignment;
         this.targetAprilTagID = targetAprilTagID;
         this.targetCameraID = targetCameraID;
         this.isCameraBackwards = isCameraBackwards;
 
+        reset();
+
         this.initialHeading = pose.getCurrentPose2d().getRotation().getDegrees();
-        this.isCameraBackwards = isCameraBackwards;
 
         CameraInfo cameraInfo = electricalContract.getCameraInfo()[targetCameraID];
         this.cameraRotation = cameraInfo.position().getRotation();
@@ -163,17 +172,27 @@ public class AlignCameraToAprilTagCalculator {
         interstitialPoint = new Pose2d();
         Landmarks.FieldElementType elementType = Landmarks.getFieldElementTypeForAprilTag(targetAprilTagID);
 
+        var alliance = DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
+
         if (elementType == Landmarks.FieldElementType.REEF_FACE) {
             interstitialPoint = reefCoordinateGenerator.getPoseRelativeToReefFaceAndBranch(
-                            DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue),
+                            alliance,
                             Landmarks.getReefFaceFromTagId(targetAprilTagID),
                             isLeft ? Landmarks.Branch.B : Landmarks.Branch.A,
                             Meters.of(interstitialDistance.get()),
                             Meters.zero()
                     );
         } else if (elementType == Landmarks.FieldElementType.CORAL_STATION) {
-            // TODO - figure this out once we have a rear-facing camera
-            int foo = 0;
+            // From the Tag ID, figure out which coral station this is
+            var station = Landmarks.getCoralStationFromTagId(targetAprilTagID);
+            // From the station, get its pose
+            var coralStationPose = PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.getCoralStationSectionPose(station, Landmarks.CoralStationSection.MID));
+            // From the pose, project a point in front of it
+            var vectorToInterstitialPoint = new Translation2d(interstitialDistance.get(), coralStationPose.getRotation());
+            interstitialPoint = new Pose2d(
+                    coralStationPose.getTranslation().plus(vectorToInterstitialPoint),
+                    coralStationPose.getRotation()
+            );
         }
 
         akitLog.record("InterstitialPoint", interstitialPoint);
@@ -259,14 +278,20 @@ public class AlignCameraToAprilTagCalculator {
 
                 // Now, drive to that final point with locked-on heading.
                 var powers = drive.getPowerToAchieveFieldPosition(currentPose.getTranslation(), targetLocationOnField);
-                driveIntent = new XYPair(powers.getX(), powers.getY());
+
+                // If we are going too fast, cap the speed.
+                if (powers.getNorm() >  approachSpeedFactor.get()) {
+                    powers = new Translation2d(approachSpeedFactor.get(), powers.getAngle());
+                }
+
+                driveIntent = new XYPair(powers.getX(), powers.getY()).scale(approachSpeedFactor.get());
                 rotationIntent = headingModule.calculateHeadingPower(idealFinalHeadingDegrees);
 
                 // If we're quite close to the final point, advance to shoving into the reef or coral station.
                 if (currentPose.getTranslation().getDistance(targetLocationOnField) < distanceToStartShoving.get()) {
                     // We need to make a decision. If our error is small enough, we should advance to shove.
                     // However, if our error is large, we should retreat and try again.
-                    if (isLastKnownErrorWithinBounds()) {
+                    if (isLastKnownErrorWithinBounds() || !requireExcellentAlignment) {
                         activity = Activity.Shove;
                         shoveStartTime = XTimer.getFPGATimestamp();
                     } else {
@@ -282,7 +307,13 @@ public class AlignCameraToAprilTagCalculator {
 
                 // We know the ideal angle the robot will be pointing at, so we can quickly construct a shove vector
                 // in that direction.
-                driveIntent = XYPair.fromPolar(idealFinalHeadingDegrees, shovePower.get());
+
+                double shoveDirection = idealFinalHeadingDegrees;
+                if (isCameraBackwards) {
+                    shoveDirection += 180;
+                }
+
+                driveIntent = XYPair.fromPolar(shoveDirection, shovePower.get());
                 rotationIntent = headingModule.calculateHeadingPower(idealFinalHeadingDegrees);
 
                 // If we've been shoving for a while, we're done.
@@ -299,6 +330,7 @@ public class AlignCameraToAprilTagCalculator {
         akitLog.record("Activity", activity);
         akitLog.record("TagAcquisitionState", tagAcquisitionState);
         akitLog.record("ErrorIsWithinBounds", isLastKnownErrorWithinBounds());
+        akitLog.record("LastKnownHorizontalErrorMeters", lastKnownHorizontalErrorMeters);
 
         return new AlignCameraToAprilTagAdvice(driveIntent, rotationIntent, tagAcquisitionState, activity);
     }
@@ -338,6 +370,7 @@ public class AlignCameraToAprilTagCalculator {
         // Use WPI libraries to transform the relative goal into a field-oriented goal. That way, if we ever lose the tag,
         // we can still attempt to move to this target location
         targetLocationOnField = currentPose.transformBy(relativeGoalTransform).getTranslation();
+        akitLog.record("TargetLocationOnField", targetLocationOnField);
     }
 
     public boolean recommendIsFinished() {

@@ -1,14 +1,16 @@
 package competition.electrical_contract;
 
+import static edu.wpi.first.units.Units.Meters;
 import edu.wpi.first.units.measure.Distance;
 import xbot.common.injection.electrical_contract.CANMotorControllerInfo;
 import xbot.common.injection.electrical_contract.DeviceInfo;
 import xbot.common.injection.electrical_contract.XCameraElectricalContract;
+import xbot.common.injection.electrical_contract.XDeadwheelElectricalContract;
 import xbot.common.injection.electrical_contract.XSwerveDriveElectricalContract;
 import xbot.common.injection.swerve.SwerveInstance;
 import xbot.common.math.XYPair;
 
-public abstract class ElectricalContract implements XSwerveDriveElectricalContract, XCameraElectricalContract {
+public abstract class ElectricalContract implements XSwerveDriveElectricalContract, XCameraElectricalContract, XDeadwheelElectricalContract {
 
     public abstract boolean isDriveReady();
 
@@ -70,7 +72,20 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
 
     public abstract Distance getDistanceFromCenterToOuterBumperX();
 
+    public Distance getRadiusOfRobot() {
+        var distanceToOuterBumerInMeters = this.getDistanceFromCenterToOuterBumperX().in(Meters);
+        return Meters.of(Math.sqrt(Math.pow(distanceToOuterBumerInMeters, 2.0) * 2.0));
+    }
+
     public abstract CANMotorControllerInfo getClimberMotor();
 
     public abstract  boolean isClimberMotorReady();
+
+    public abstract DeviceInfo getLightsDio0();
+
+    public abstract DeviceInfo getLightsDio1();
+
+    public abstract DeviceInfo getLightsDio2();
+
+    public abstract DeviceInfo getLightsDio3();
 }

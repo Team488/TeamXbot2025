@@ -13,9 +13,6 @@ import competition.injection.components.DaggerSimulationComponent;
 import competition.operator_interface.OperatorInterface;
 import competition.simulation.BaseSimulator;
 import competition.subsystems.pose.PoseSubsystem;
-import edu.wpi.first.hal.AllianceStationID;
-import edu.wpi.first.wpilibj.simulation.DriverStationSim;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Preferences;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -47,6 +44,7 @@ public class Robot extends BaseRobot {
     @Override
     protected void initializeSystems() {
         super.initializeSystems();
+
         getInjectorComponent().subsystemDefaultCommandMap();
         getInjectorComponent().operatorCommandMap();
         getInjectorComponent().swerveDefaultCommandMap();
@@ -58,6 +56,8 @@ public class Robot extends BaseRobot {
         if (BaseRobot.isSimulation()) {
             simulator = getInjectorComponent().simulator();
         }
+
+        autonomousCommandSelector.setCurrentAutonomousCommand(getInjectorComponent().emergencyAutonomousCommand());
 
 
         dataFrameRefreshables.add(getInjectorComponent().driveSubsystem());

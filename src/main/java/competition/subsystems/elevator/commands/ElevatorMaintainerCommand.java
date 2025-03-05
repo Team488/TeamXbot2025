@@ -59,7 +59,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
                                      PIDManager.PIDManagerFactory pidf,
                                      OperatorInterface oi,
                                      ElectricalContract contract){
-        super(elevator, pf, hvmFactory, Inches.of(1).in(Meters), 0.2);
+        super(elevator, pf, hvmFactory, Inches.of(1.5).in(Meters), 0.1);
         pf.setPrefix(this);
         this.elevator = elevator;
         this.coralArm = coralArm;

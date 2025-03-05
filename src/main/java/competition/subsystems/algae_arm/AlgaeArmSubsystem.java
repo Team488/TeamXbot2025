@@ -3,6 +3,7 @@ package competition.subsystems.algae_arm;
 import competition.electrical_contract.ElectricalContract;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.wpilibj.Alert;
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
@@ -12,6 +13,7 @@ import xbot.common.injection.electrical_contract.DeviceInfo;
 import xbot.common.math.MathUtils;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
+import xbot.common.properties.Property.PropertyLevel;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -26,7 +28,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 @Singleton
 public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
     public final XCANMotorController armMotor;
-    Angle targetAngle = Degree.of(0);
+    public final MutAngle targetAngle = Degrees.mutable(0);
     final ElectricalContract electricalContract;
     double rotationsAtZero;
     boolean isCalibrated = false;
@@ -41,6 +43,7 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
     final DoubleProperty reefLowTopToBottomSweepEnd;
     final DoubleProperty reefHighSweepStart;
     final DoubleProperty reefHighSweepEnd;
+    final DoubleProperty repositionArmAmount;
 
     final Alert isNotCalibratedAlert = new Alert("AlgaeArm: not calibrated", Alert.AlertType.kWarning);
 
@@ -80,8 +83,11 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
         } else {
             this.bottomSensor = null;
         }
-        this.degreesPerRotation = propertyFactory.createPersistentProperty("DegreesPerRotation", 13.523);
 
+        this.repositionArmAmount = propertyFactory.createPersistentProperty("RepositionArmAmount", 5);
+        
+        this.degreesPerRotation = propertyFactory.createPersistentProperty("DegreesPerRotation", 4.559);
+        
         this.rangeOfMotionInDegrees = propertyFactory.createPersistentProperty("RangeOfMotionInDegrees", 160.0);
         this.groundCollectionDegrees = propertyFactory.createPersistentProperty("GroundCollectionDegrees", 45.0);
         this.reefLowBottomToTopSweepStart = propertyFactory.createPersistentProperty("ReefLowBottomToTopSweepStart", 90.0);
@@ -132,7 +138,7 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
     @Override
     public void setTargetValue(Angle value) {
-        targetAngle = value;
+        targetAngle.mut_replace(value);
     }
 
     public void setTargetValue(AlgaeArmPositions position) {
@@ -187,6 +193,14 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
             return this.bottomSensor.get();
         }
         return false;
+    }
+
+    public void repositionToTargetAngle(boolean goingUpHere) {
+        if (goingUpHere) {
+            targetAngle.mut_replace(getTargetValue().plus(Degrees.of(repositionArmAmount.get())));
+        } else {
+            targetAngle.mut_replace(getTargetValue().minus(Degrees.of(repositionArmAmount.get())));
+        }
     }
 
     @Override
