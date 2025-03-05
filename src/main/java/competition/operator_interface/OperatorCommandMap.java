@@ -21,13 +21,16 @@ import competition.subsystems.coral_scorer.commands.IntakeUntilCoralCollectedCom
 import competition.subsystems.coral_scorer.commands.ScoreCoralCommand;
 import competition.subsystems.coral_scorer.commands.ScoreWhenReadyCommand;
 import competition.subsystems.drive.DriveSubsystem;
+import competition.subsystems.drive.commands.AlignToNearestCoralStationCommand;
 import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
+import competition.subsystems.drive.commands.AlignToSpecificHumanLoadingStationCommand;
 import competition.subsystems.drive.commands.CalibrateDriveCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
+import competition.subsystems.drive.commands.DriveToCoralStationSectionCommand;
 import competition.subsystems.drive.commands.DriveToClosestReefSectionWithVisionCommand;
 import competition.subsystems.drive.commands.DriveToCoralStationWithVisionCommand;
 import competition.subsystems.drive.commands.DriveToLocationWithPID;
-import competition.subsystems.drive.commands.EmergencyAutonomousCommand;
+import competition.subsystems.drive.commands.DriveToNearestReefFaceWithPID;
 import competition.subsystems.drive.commands.RotateToHeadingWithHeadingModule;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.drive.commands.TeleportToPositionCommand;
@@ -81,17 +84,14 @@ public class OperatorCommandMap {
             SuperstructureAccordingToOracleCommand superstructureAccordingToOracle,
             DriveToClosestReefSectionWithVisionCommand driveToClosestReefSectionWithVisionCommand,
             DriveToCoralStationWithVisionCommand driveToCoralStationWithVisionCommand,
-            IntakeCoralCommand intakeCoralCommand,
-            SetCoralArmTargetAngleCommand setCoralArmTargetAngleCommand,
-            ScoreCoralCommand scoreCoralCommand,
-            TeleportToPositionCommand teleportToPositionCommand,
             PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
-            ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
-            ForceCoralArmCalibratedCommand forceCoralPivotCalibratedCommand,
             DebugSwerveModuleCommand debugModule,
             ChangeActiveSwerveModuleCommand changeActiveModule,
             SwerveDriveWithJoysticksCommand typicalSwerveDrive,
-            HeadingAssistedDriveAndScoreCommandGroup.Factory headingAssistedDriveAndScoreCommandGroupFactory) {
+            HeadingAssistedDriveAndScoreCommandGroup.Factory headingAssistedDriveAndScoreCommandGroupFactory,
+            AlignToSpecificHumanLoadingStationCommand alignToLeftStation,
+            DriveToNearestReefFaceWithPID driveToNearestReefFaceWithPID,
+            AlignToNearestCoralStationCommand alignToNearestCoralStationCommand) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
 
@@ -105,19 +105,15 @@ public class OperatorCommandMap {
 
         var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
 
-        var homed = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
-//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(driveToClosestReefSectionWithVisionCommand);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(driveToCoralStationWithVisionCommand);
-        var branchAHeadingAssistedDriveAndScore = headingAssistedDriveAndScoreCommandGroupFactory.create(Landmarks.Branch.A);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(branchAHeadingAssistedDriveAndScore)
-                        .onFalse(homed);
-        var branchBHeadingAssistedDriveAndScore = headingAssistedDriveAndScoreCommandGroupFactory.create(Landmarks.Branch.B);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(branchBHeadingAssistedDriveAndScore)
-                .onFalse(homed);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(alignToNearestCoralStationCommand);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(driveToNearestReefFaceWithPID);
 
         operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
         operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(changeActiveModule);
         operatorInterface.driverGamepad.getPovIfAvailable(180).onTrue(typicalSwerveDrive);
+
+        alignToLeftStation.setCoralStation(Landmarks.CoralStation.LEFT);
+        operatorInterface.driverGamepad.getPovIfAvailable(270).whileTrue(alignToLeftStation);
 
         // operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(intakeCoralCommand);
         // operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(scoreCoralCommand);
@@ -156,13 +152,10 @@ public class OperatorCommandMap {
         oneLength.logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
         oneLength.logic.setKeyPoints(points3);
 
-        oneLength.includeOnSmartDashboard("OneLengthTest");
+        // oneLength.includeOnSmartDashboard("OneLengthTest");
 
-        aroundBlueReef.includeOnSmartDashboard("AroundReefTest");
-        backAndFourth.includeOnSmartDashboard("BackAndForthTest");
-
-        // Don't think this is needed anymore, I'll keep it just in case
-        resetPoseCommand.includeOnSmartDashboard("ResetPoseToOriginCommand");
+        // aroundBlueReef.includeOnSmartDashboard("AroundReefTest");
+        // backAndFourth.includeOnSmartDashboard("BackAndForthTest");
 
         var driveWithPidNear = driveToLocationWithPIDProvider.get();
         driveWithPidNear.setLocationTarget(new Translation2d(1, 0));
@@ -185,13 +178,13 @@ public class OperatorCommandMap {
         var rotateTo180Degrees = rotationToHeadingWithHeadingModuleProvider.get();
         rotateTo180Degrees.setTargetHeading(Degree.of(180));
 
-        driveWithPidNear.includeOnSmartDashboard("DriveToLocationWithPIDNear");
-        driveWithPidFar.includeOnSmartDashboard("DriveToLocationWithPIDFar");
-        rotateTo5Degrees.includeOnSmartDashboard("RotateTo5Degrees");
-        rotateTo10Degrees.includeOnSmartDashboard("RotateTo10Degrees");
-        rotateTo45Degrees.includeOnSmartDashboard("RotateTo45Degrees");
-        rotateTo90Degrees.includeOnSmartDashboard("RotateTo90Degrees");
-        rotateTo180Degrees.includeOnSmartDashboard("RotateTo180Degrees");
+        // driveWithPidNear.includeOnSmartDashboard("DriveToLocationWithPIDNear");
+        // driveWithPidFar.includeOnSmartDashboard("DriveToLocationWithPIDFar");
+        // rotateTo5Degrees.includeOnSmartDashboard("RotateTo5Degrees");
+        // rotateTo10Degrees.includeOnSmartDashboard("RotateTo10Degrees");
+        // rotateTo45Degrees.includeOnSmartDashboard("RotateTo45Degrees");
+        // rotateTo90Degrees.includeOnSmartDashboard("RotateTo90Degrees");
+        // rotateTo180Degrees.includeOnSmartDashboard("RotateTo180Degrees");
     }
 
 
@@ -244,6 +237,9 @@ public class OperatorCommandMap {
 
         var homeAlgaeArm = prepAlgaeSystemCommandGroupFactory.create(AlgaeArmSubsystem.AlgaeArmPositions.FullyRetracted);
         oi.operatorGamepad.getPovIfAvailable(90).onTrue(homeAlgaeArm);
+
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(intakeAlgae);
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(ejectAlgae);
     }
 
     @Inject
@@ -309,25 +305,6 @@ public class OperatorCommandMap {
     }
 
     @Inject
-    public void setupAutonomousCommandsSelection(OperatorInterface oi,
-                                                 Provider<SetAutonomousCommand> setAutonomousCommandProvider,
-                                                 DriveToLocationWithPID driveToLocationWithPID,
-                                                 EmergencyAutonomousCommand emergencyAutonomousCommand
-                                                 ){
-
-        var setEmergencyAutonomousCommand = setAutonomousCommandProvider.get();
-        setEmergencyAutonomousCommand.setAutoCommand(emergencyAutonomousCommand);
-        oi.neoTrellis.getifAvailable(31).onTrue(emergencyAutonomousCommand);
-        setEmergencyAutonomousCommand.includeOnSmartDashboard("EMERGENCYAUTO, move robot forward");
-
-
-
-
-
-
-    }
-
-    @Inject
     public void setupSysIdCommands(
 
             DriveSubsystem drive,
@@ -380,12 +357,12 @@ public class OperatorCommandMap {
         oi.neoTrellis.getifAvailable(1).onTrue(setFromLeftFarLeftBranchALevelFour); // temporary button
         setFromLeftFarLeftBranchALevelFour.includeOnSmartDashboard("From Left Score Far Left Branch A Level 4 Auto");
 
-        var setFromMidFarBranchALevelFour = setAutonomousCommandProvider.get();
-        setFromMidFarBranchALevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFactProv.get().create(
-                Landmarks.BlueMidOfLine, Landmarks.ReefFace.FAR, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR
+        var setFromMidFarBranchBLevelFour = setAutonomousCommandProvider.get();
+        setFromMidFarBranchBLevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFactProv.get().create(
+                Landmarks.BlueMidOfLine, Landmarks.ReefFace.FAR, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR
         ));
-        oi.neoTrellis.getifAvailable(2).onTrue(setFromMidFarBranchALevelFour); // temporary button
-        setFromMidFarBranchALevelFour.includeOnSmartDashboard("From Mid Score Far Branch A Level 4 Auto");
+        oi.neoTrellis.getifAvailable(2).onTrue(setFromMidFarBranchBLevelFour); // temporary button
+        setFromMidFarBranchBLevelFour.includeOnSmartDashboard("From Mid Score Far Branch B Level 4 Auto");
 
         var setFromRightFarRightBranchBLevelFour = setAutonomousCommandProvider.get();
         setFromRightFarRightBranchBLevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFactProv.get().create(

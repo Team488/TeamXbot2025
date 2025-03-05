@@ -4,6 +4,7 @@ import competition.electrical_contract.ElectricalContract;
 import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -16,6 +17,7 @@ import xbot.common.controls.sensors.XDutyCycleEncoder;
 import xbot.common.math.MathUtils;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
+import xbot.common.properties.Property.PropertyLevel;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -32,7 +34,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     public final XCANMotorController armMotor;
     public final XDutyCycleEncoder armAbsoluteEncoder;
     public final XDigitalInput lowSensor;
-    Angle targetAngle = Degrees.of(0);
+    public final MutAngle targetAngle = Degrees.mutable(0);
     ElectricalContract electricalContract;
 
     double periodicTickCounter;
@@ -89,12 +91,14 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
             this.lowSensor = null;
         }
 
-        this.degreesPerRotations = propertyFactory.createPersistentProperty("Degrees Per Rotations", 5.790);
-        this.rangeOfMotionDegrees = propertyFactory.createPersistentProperty("Range of Motion in Degrees", 150);
         this.level123ScoringAngle = propertyFactory.createPersistentProperty("Level 1/2/3 Scoring Angle", 125);
         this.level4ScoringAngle = propertyFactory.createPersistentProperty("Level 4 Scoring Angle", 150);
+        propertyFactory.setDefaultLevel(PropertyLevel.Debug);
         this.humanLoadAngleDegrees = propertyFactory.createPersistentProperty("Human Loading Angle in Degrees", 0);
+        this.degreesPerRotations = propertyFactory.createPersistentProperty("Degrees Per Rotations", 5.790);
+        this.rangeOfMotionDegrees = propertyFactory.createPersistentProperty("Range of Motion in Degrees", 150);
         this.powerWhenNotCalibrated = propertyFactory.createPersistentProperty("Power When Not Calibrated", 0.25);
+        propertyFactory.setDefaultLevel(PropertyLevel.Important);
     }
 
     @Override
@@ -155,7 +159,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
     @Override
     public void setTargetValue(Angle value) {
-        targetAngle = value;
+        targetAngle.mut_replace(value);
     }
 
     public void setTargetAngle(Landmarks.CoralLevel value) {

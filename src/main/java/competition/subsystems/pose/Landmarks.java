@@ -19,12 +19,12 @@ public class Landmarks {
 
     // Auto starting positions
     // Blue cages - cages are labeled 1-6 from north to south, the x value has the robot's back bumper lined up with the auto line
-    public static Pose2d BlueCageOneStartingLine = new Pose2d(7.14, 7.262, Rotation2d.fromDegrees(180));
-    public static Pose2d BlueCageTwoStartingLine = new Pose2d(7.14, 6.135, Rotation2d.fromDegrees(180));
+    public static Pose2d BlueCageOneStartingLine = new Pose2d(7.14, 7.262, Rotation2d.fromDegrees(-135));
+    public static Pose2d BlueCageTwoStartingLine = new Pose2d(7.14, 6.135, Rotation2d.fromDegrees(-135));
     public static Pose2d BlueCageThreeStartingLine = new Pose2d(7.14, 5.044, Rotation2d.fromDegrees(180));
     public static Pose2d BlueCageFourStartingLine = new Pose2d(7.14, 2.974, Rotation2d.fromDegrees(180));
-    public static Pose2d BlueCageFiveStartingLine = new Pose2d(7.14, 1.883, Rotation2d.fromDegrees(180));
-    public static Pose2d BlueCageSixStartingLine = new Pose2d(7.14, 0.792, Rotation2d.fromDegrees(180));
+    public static Pose2d BlueCageFiveStartingLine = new Pose2d(7.14, 1.883, Rotation2d.fromDegrees(135));
+    public static Pose2d BlueCageSixStartingLine = new Pose2d(7.14, 0.792, Rotation2d.fromDegrees(135));
 
     // Middle of line
     public static Pose2d BlueMidOfLine = new Pose2d(7.14, 4.26, Rotation2d.fromDegrees(180));
@@ -175,6 +175,27 @@ public class Landmarks {
             case 9, 22 -> ReefFace.FAR_RIGHT;
             case 8, 17 -> ReefFace.CLOSE_RIGHT;
             default -> ReefFace.CLOSE; // How did you get here?
+        };
+    }
+
+    public static CoralStation getCoralStationFromTagId(int tagId) {
+        return switch (tagId) {
+            case 1, 13 -> CoralStation.LEFT;
+            case 2, 12 -> CoralStation.RIGHT;
+            default -> CoralStation.LEFT; // How did you get here?
+        };
+    }
+
+    public static int getTagIdFromCoralStation(DriverStation.Alliance alliance, CoralStation station) {
+        return switch (alliance) {
+            case Blue -> switch (station) {
+                case LEFT -> 13;
+                case RIGHT -> 12;
+            };
+            case Red -> switch (station) {
+                case LEFT -> 1;
+                case RIGHT -> 2;
+            };
         };
     }
 
