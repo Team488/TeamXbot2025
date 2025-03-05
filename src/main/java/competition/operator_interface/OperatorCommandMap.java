@@ -377,11 +377,6 @@ public class OperatorCommandMap {
         setFromLeftCageScoreLeftFacesLevelFours.setAutoCommand(fromLeftCageScoreLeftFacesLevelFours);
         oi.neoTrellis.getifAvailable(4).onTrue(setFromLeftCageScoreLeftFacesLevelFours); // temporary button
         setFromLeftCageScoreLeftFacesLevelFours.includeOnSmartDashboard("From Left Score Left Face's Level Fours Auto");
-
-        var setEmergencyAutonomousCommand = setAutonomousCommandProvider.get();
-        setEmergencyAutonomousCommand.setAutoCommand(emergencyAutonomousCommand);
-        oi.neoTrellis.getifAvailable(31).onTrue(emergencyAutonomousCommand);
-        setEmergencyAutonomousCommand.includeOnSmartDashboard("EMERGENCYAUTO");
     }
 
     @Inject
