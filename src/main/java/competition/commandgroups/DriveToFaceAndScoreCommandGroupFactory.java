@@ -17,7 +17,7 @@ import static edu.wpi.first.units.Units.Meters;
 public class DriveToFaceAndScoreCommandGroupFactory {
 
     DriveToReefFaceThenAlignCommandGroupFactory driveToReefFaceThenAlignCommandGroupFactory;
-    MeasureDistanceBeforeScoringCommand measureDistanceBeforeScoringCommand;
+    Provider<MeasureDistanceBeforeScoringCommand> measureDistanceBeforeScoringCommandProvider;
     PrepCoralSystemCommandGroupFactory prepCoralSystemFactory;
     Provider<ScoreWhenReadyCommand> scoreWhenReadyProvider;
 
@@ -27,12 +27,12 @@ public class DriveToFaceAndScoreCommandGroupFactory {
 
     @Inject
     public DriveToFaceAndScoreCommandGroupFactory(DriveToReefFaceThenAlignCommandGroupFactory driveToReefFaceThenAlignCommandGroupFactory,
-                                                  MeasureDistanceBeforeScoringCommand measureDistanceBeforeScoringCommand,
+                                                  Provider<MeasureDistanceBeforeScoringCommand> measureDistanceBeforeScoringCommandProvider,
                                                   PrepCoralSystemCommandGroupFactory prepCoralSystemFactory,
                                                   Provider<ScoreWhenReadyCommand> scoreWhenReadyProvider,
                                                   PropertyFactory pf) {
         this.driveToReefFaceThenAlignCommandGroupFactory = driveToReefFaceThenAlignCommandGroupFactory;
-        this.measureDistanceBeforeScoringCommand = measureDistanceBeforeScoringCommand;
+        this.measureDistanceBeforeScoringCommandProvider = measureDistanceBeforeScoringCommandProvider;
         this.prepCoralSystemFactory = prepCoralSystemFactory;
         this.scoreWhenReadyProvider = scoreWhenReadyProvider;
 
@@ -62,6 +62,9 @@ public class DriveToFaceAndScoreCommandGroupFactory {
             case TWO -> levelTwoDistanceThreshold.get();
             default -> levelFourDistanceThreshold.get(); // For safety, the default is the shortest distance which is probably L4
         };
+
+        var measureDistanceBeforeScoringCommand = measureDistanceBeforeScoringCommandProvider.get();
+
         measureDistanceBeforeScoringCommand.setDistanceThreshold(distanceThresholdInMeters);
         measureDistanceBeforeScoringCommand.setBranch(targetBranch);
         var prepCoralSystem = prepCoralSystemFactory.create(() -> targetLevel);
