@@ -186,7 +186,7 @@ public class AlignCameraToAprilTagCalculator {
             // From the Tag ID, figure out which coral station this is
             var station = Landmarks.getCoralStationFromTagId(targetAprilTagID);
             // From the station, get its pose
-            var coralStationPose = Landmarks.getCoralStationSectionPose(station, Landmarks.CoralStationSection.MID);
+            var coralStationPose = PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.getCoralStationSectionPose(station, Landmarks.CoralStationSection.MID));
             // From the pose, project a point in front of it
             var vectorToInterstitialPoint = new Translation2d(interstitialDistance.get(), coralStationPose.getRotation());
             interstitialPoint = new Pose2d(
