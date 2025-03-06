@@ -69,7 +69,8 @@ public class AlignWithCreeperCommand extends BaseCommand {
                                    CoprocessorCommunicationSubsystem coprocessorCommunications,
                                    ElectricalContract electricalContract, PoseSubsystem pose,
                                    HeadingModule.HeadingModuleFactory headingModuleFactory,
-                                   ReefCoordinateGenerator reefCoordinateGenerator, PropertyFactory pf) {
+                                   ReefCoordinateGenerator reefCoordinateGenerator,
+                                   PropertyFactory pf) {
         this.addRequirements(drive);
         this.drive = drive;
         this.coprocessorCommunicationSubsystem = coprocessorCommunications;
@@ -103,8 +104,7 @@ public class AlignWithCreeperCommand extends BaseCommand {
             cancel();
             return;
         }
-        // Determine active camera and retrieve its corresponding resolution and
-        // hostname.
+        // Determine active camera and retrieve its corresponding resolution and hostname.
         String hostname;
         if (camera.equals(Cameras.FRONT_LEFT_CAMERA)) {
             resolution = (int) photonVisionFrontLeftResX.get();
@@ -117,8 +117,7 @@ public class AlignWithCreeperCommand extends BaseCommand {
             cancel();
             return;
         }
-        // Subscribe to vision data channels to ensure processing of only fresh
-        // data.
+        // Subscribe to vision data channels to ensure processing of only fresh data.
         leftDistanceSubscriber =
                 client.subscribe(hostname + "." + tableLeftDistance, 1);
         rightDistanceSubscriber =
