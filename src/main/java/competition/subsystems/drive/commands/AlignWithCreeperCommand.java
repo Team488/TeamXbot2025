@@ -1,0 +1,213 @@
+package competition.subsystems.drive.commands;
+
+import competition.electrical_contract.ElectricalContract;
+import competition.subsystems.drive.DriveSubsystem;
+import competition.subsystems.oracle.ReefCoordinateGenerator;
+import competition.subsystems.pose.Cameras;
+import competition.subsystems.pose.PoseSubsystem;
+import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
+import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
+import org.kobe.xbot.JClient.CachedSubscriber;
+import org.kobe.xbot.JClient.XTablesClient;
+import xbot.common.command.BaseCommand;
+import xbot.common.math.XYPair;
+import xbot.common.properties.DoubleProperty;
+import xbot.common.properties.PropertyFactory;
+import xbot.common.properties.StringProperty;
+import xbot.common.subsystems.drive.control_logic.HeadingModule;
+
+import javax.inject.Inject;
+
+/**
+ * Command to align the robot with a creeper target using vision-based error measurements.
+ * <p>
+ * This command retrieves error values (in pixels) from the vision system via the coprocessor, normalizes
+ * the error relative to the camera resolution, applies a gain factor to scale the drive power appropriately,
+ * and then moves the robot to align with the target.
+ * </p>
+ */
+public class AlignWithCreeperCommand extends BaseCommand {
+    final HeadingModule headingModule;
+    final DriveSubsystem drive;
+    final PoseSubsystem pose;
+    final CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem;
+
+    private final String tableLeftDistance = "verticalEdgeLeftDistancePx";
+    private final String tableRightDistance = "verticalEdgeRightDistancePx";
+    private final String tableCenteredConfidently = "verticalAlignedConfidently";
+
+    private final StringProperty photonVisionFrontLeftHostname;
+    private final StringProperty photonVisionFrontRightHostname;
+
+    private final DoubleProperty photonVisionFrontLeftResX;
+    private final DoubleProperty photonVisionFrontRightResX;
+    private final DoubleProperty driveGain;
+
+    private Cameras camera;
+    private int resolution;
+    private CachedSubscriber leftDistanceSubscriber;
+    private CachedSubscriber rightDistanceSubscriber;
+    private CachedSubscriber centeredConfidentlySubscriber;
+
+    protected Boolean isCenteredConfidently;
+
+    /**
+     * Constructs a new AlignWithCreeperCommand.
+     *
+     * @param vision                    the vision subsystem used for target detection.
+     * @param drive                     the drive subsystem for robot movement.
+     * @param coprocessorCommunications subsystem for communicating with the coprocessor.
+     * @param electricalContract        the electrical contract.
+     * @param pose                      the pose subsystem.
+     * @param headingModuleFactory      factory to create heading modules.
+     * @param reefCoordinateGenerator   the coordinate generator.
+     * @param pf                        the property factory for persistent properties.
+     */
+    @Inject
+    public AlignWithCreeperCommand(AprilTagVisionSubsystemExtended vision, DriveSubsystem drive,
+                                   CoprocessorCommunicationSubsystem coprocessorCommunications,
+                                   ElectricalContract electricalContract, PoseSubsystem pose,
+                                   HeadingModule.HeadingModuleFactory headingModuleFactory,
+                                   ReefCoordinateGenerator reefCoordinateGenerator,
+                                   PropertyFactory pf) {
+        this.addRequirements(drive);
+        this.headingModule = headingModuleFactory.create(drive.getRotateToHeadingPid());
+        this.drive = drive;
+        this.pose = pose;
+        this.coprocessorCommunicationSubsystem = coprocessorCommunications;
+        pf.setPrefix("AlignWithCreeperCommand/");
+        this.driveGain = pf.createPersistentProperty("Drive Gain", 0.5);
+        this.photonVisionFrontLeftHostname = pf.createPersistentProperty("Photon Vision Front Left Hostname", "photonvisionfrontleft");
+        this.photonVisionFrontRightHostname = pf.createPersistentProperty("Photon Vision Front Right Hostname", "photonvisionfrontright");
+        this.photonVisionFrontLeftResX = pf.createPersistentProperty("Photon Vision Front Left Resoulution X", 800);
+        this.photonVisionFrontRightResX = pf.createPersistentProperty("Photon Vision Front Right Resoulution X", 800);
+    }
+
+    /**
+     * Initializes the command.
+     * <p>
+     * This method attempts to obtain an XTablesClient from the coprocessor communication subsystem.
+     * If the client is null or the camera value is unknown, the command is canceled.
+     * It then sets up subscribers for the left distance, right distance, and alignment confidence.
+     * </p>
+     */
+    @Override
+    public void initialize() {
+        XTablesClient client = this.coprocessorCommunicationSubsystem.tryGetXTablesClient();
+        if (client == null) {
+            log.warn("CoprocessorCommunicationSubsystem could not get XTablesClient");
+            cancel();
+            return;
+        }
+        // Get the appropriate camera resolution & table.
+        String hostname;
+        if (camera.equals(Cameras.FRONT_LEFT_CAMERA)) {
+            resolution = (int) photonVisionFrontLeftResX.get();
+            hostname = photonVisionFrontLeftHostname.get();
+        } else if (camera.equals(Cameras.FRONT_RIGHT_CAMERA)) {
+            resolution = (int) photonVisionFrontRightResX.get();
+            hostname = photonVisionFrontRightHostname.get();
+        } else {
+            log.warn("Unknown camera value, stopping to prevent unknown drive!");
+            cancel();
+            return;
+        }
+        // Subscribe to channels ensuring that only new data is used for processing.
+        leftDistanceSubscriber = client.subscribe(hostname + "." + tableLeftDistance, 1);
+        rightDistanceSubscriber = client.subscribe(hostname + "." + tableRightDistance, 1);
+        centeredConfidentlySubscriber = client.subscribe(hostname + "." + tableRightDistance, 1);
+    }
+
+    /**
+     * Executes the alignment logic.
+     * <p>
+     * This method retrieves error values from the vision system via subscribed channels.
+     * It computes a normalized error relative to the camera resolution, applies a gain factor to scale the drive power,
+     * clamps the result to the range [-1, 1], and adjusts the direction based on which side (left or right) the error is measured.
+     * Finally, it commands the drive subsystem to move accordingly.
+     * </p>
+     */
+    @Override
+    public void execute() {
+        super.execute();
+        XTablesClient client = this.coprocessorCommunicationSubsystem.tryGetXTablesClient();
+        if (client == null) {
+            return;
+        }
+
+        try {
+            isCenteredConfidently = this.centeredConfidentlySubscriber.getAsBoolean(null);
+            Integer leftDistance = this.leftDistanceSubscriber.getAsInteger(null);
+            Integer rightDistance = this.rightDistanceSubscriber.getAsInteger(null);
+
+            if (isCenteredConfidently == null) {
+                // There is no new data
+                return;
+            } else if(isCenteredConfidently) {
+                // The robot is already aligned.
+                drive.stop();
+                return;
+            }
+            boolean offToTheLeft;
+            if (leftDistance == null && rightDistance == null) {
+                log.warn("Could not get left OR right distance from camera!");
+                return;
+            } else if (leftDistance == null) {
+                offToTheLeft = false;
+            } else if (rightDistance == null) {
+                offToTheLeft = true;
+            } else {
+                offToTheLeft = leftDistance < rightDistance;
+            }
+            // Select the error value in pixels from the appropriate side.
+            int moveErrorPx = offToTheLeft ? leftDistance : rightDistance;
+
+            // Compute a normalized error as a fraction of the resolution.
+            double normalizedError = (double) moveErrorPx / resolution;
+
+            // Apply a gain factor to scale the output drive power, preventing full power usage.
+            double drivePower = driveGain.get() * normalizedError;
+
+            // Clamp the output drive power to the range [-1, 1].
+            drivePower = Math.max(-1.0, Math.min(1.0, drivePower));
+
+            // Invert the drive power if off to the left to correct the movement direction.
+            if (offToTheLeft) {
+                drivePower = -drivePower;
+            }
+            XYPair pair = new XYPair(0, drivePower);
+            this.drive.move(pair, 0);
+
+        } catch (Exception e) {
+            log.error(e);
+        }
+    }
+
+    /**
+     * Checks if the alignment is completed.
+     *
+     * @return true if the vision system indicates the robot is confidently aligned, false otherwise.
+     */
+    @Override
+    public boolean isFinished() {
+        return this.isCenteredConfidently;
+    }
+
+    /**
+     * Ends the command.
+     * <p>
+     * This method is called when the command finishes either normally or due to interruption.
+     * It stops the drive subsystem and logs a warning if the command was interrupted.
+     * </p>
+     *
+     * @param interrupted true if the command was interrupted or canceled.
+     */
+    @Override
+    public void end(boolean interrupted) {
+        super.end(interrupted);
+        if (interrupted) {
+            log.warn("Interrupted while waiting for Creeper command");
+        }
+        drive.stop();
+    }
+}
