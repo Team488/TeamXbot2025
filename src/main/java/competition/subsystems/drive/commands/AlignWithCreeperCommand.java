@@ -148,11 +148,6 @@ public class AlignWithCreeperCommand extends BaseCommand {
     @Override
     public void execute() {
         super.execute();
-        XTablesClient client =
-                this.coprocessorCommunicationSubsystem.tryGetXTablesClient();
-        if (client == null) {
-            return;
-        }
 
         try {
             isCenteredConfidently =
@@ -171,15 +166,19 @@ public class AlignWithCreeperCommand extends BaseCommand {
             }
             // Determine which side the misalignment error should be taken from.
             boolean offToTheLeft;
-            if (leftDistance == null && rightDistance == null) {
+            if (leftDistance == null || rightDistance == null){
+                // should never happen, as the vision code will always send at least a -1
+                log.warn("Vision offsets are returning null! Is alignment up?");
+            }
+            if (leftDistance == -1 && rightDistance == -1) {
                 log.warn("No valid left or right distance measurements received from the camera.");
                 return;
-            } else if (leftDistance == null) {
-                offToTheLeft = false;
-            } else if (rightDistance == null) {
-                offToTheLeft = true;
+            } else if (leftDistance == -1) {
+                offToTheLeft = false; // we dont see left edge, means right side is "too" visible eg off to the right
+            } else if (rightDistance == -1) {
+                offToTheLeft = true; // we dont see right  edge, means left side is "too" visible eg off to the left
             } else {
-                offToTheLeft = leftDistance < rightDistance;
+                offToTheLeft = leftDistance < rightDistance; // we see both edges, so the one that is "closer to the center" is the one we are off by
             }
             // Choose the pixel error value from the side indicating misalignment.
             int moveErrorPx = offToTheLeft ? leftDistance : rightDistance;
@@ -204,9 +203,9 @@ public class AlignWithCreeperCommand extends BaseCommand {
             // Clamp the drive power to the safe range of [-1, 1].
             drivePower = Math.max(-1.0, Math.min(1.0, drivePower));
 
-            // Reverse the drive power sign if misalignment is to the left to ensure
+            // Reverse the drive power sign if misalignment is to the right (negative axis) to ensure
             // proper movement direction.
-            if (offToTheLeft) {
+            if (!offToTheLeft) {
                 drivePower = -drivePower;
             }
             // Create the drive command vector (Only drive power along the Y-axis,
