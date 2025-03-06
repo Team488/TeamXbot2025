@@ -99,7 +99,7 @@ public class AlignWithCreeperCommand extends BaseCommand {
             cancel();
             return;
         }
-        // Get the appropriate camera resolution & table.
+        // Determine active camera and retrieve its corresponding resolution and hostname.
         String hostname;
         if (camera.equals(Cameras.FRONT_LEFT_CAMERA)) {
             resolution = (int) photonVisionFrontLeftResX.get();
@@ -112,7 +112,7 @@ public class AlignWithCreeperCommand extends BaseCommand {
             cancel();
             return;
         }
-        // Subscribe to channels ensuring that only new data is used for processing.
+        // Subscribe to vision data channels to ensure processing of only fresh data.
         leftDistanceSubscriber = client.subscribe(hostname + "." + tableLeftDistance, 1);
         rightDistanceSubscriber = client.subscribe(hostname + "." + tableRightDistance, 1);
         centeredConfidentlySubscriber = client.subscribe(hostname + "." + tableRightDistance, 1);
@@ -148,6 +148,7 @@ public class AlignWithCreeperCommand extends BaseCommand {
                 drive.stop();
                 return;
             }
+            // Determine which side the misalignment error should be taken from.
             boolean offToTheLeft;
             if (leftDistance == null && rightDistance == null) {
                 log.warn("Could not get left OR right distance from camera!");
@@ -159,22 +160,23 @@ public class AlignWithCreeperCommand extends BaseCommand {
             } else {
                 offToTheLeft = leftDistance < rightDistance;
             }
-            // Select the error value in pixels from the appropriate side.
+            // Choose the pixel error value from the side indicating misalignment.
             int moveErrorPx = offToTheLeft ? leftDistance : rightDistance;
 
-            // Compute a normalized error as a fraction of the resolution.
+            // Calculate the normalized error as a fraction of the camera resolution.
             double normalizedError = (double) moveErrorPx / resolution;
 
-            // Apply a gain factor to scale the output drive power, preventing full power usage.
+            // Scale the normalized error using the drive gain to compute the drive power.
             double drivePower = driveGain.get() * normalizedError;
 
-            // Clamp the output drive power to the range [-1, 1].
+            // Clamp the drive power to the safe range of [-1, 1].
             drivePower = Math.max(-1.0, Math.min(1.0, drivePower));
 
-            // Invert the drive power if off to the left to correct the movement direction.
+            // Reverse the drive power sign if misalignment is to the left to ensure proper movement direction.
             if (offToTheLeft) {
                 drivePower = -drivePower;
             }
+            // Create the drive command vector (Only drive power along the Y-axis, side-to-side).
             XYPair pair = new XYPair(0, drivePower);
             this.drive.move(pair, 0);
 
