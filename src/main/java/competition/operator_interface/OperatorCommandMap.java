@@ -26,9 +26,6 @@ import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.AlignToSpecificHumanLoadingStationCommand;
 import competition.subsystems.drive.commands.CalibrateDriveCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
-import competition.subsystems.drive.commands.DriveToClosestReefSectionWithVisionCommand;
-import competition.subsystems.drive.commands.DriveToCoralStationInterstitialCommand;
-import competition.subsystems.drive.commands.DriveToCoralStationWithVisionCommand;
 import competition.subsystems.drive.commands.DriveToLocationWithPID;
 import competition.subsystems.drive.commands.DriveToNearestReefFaceWithPID;
 import competition.subsystems.drive.commands.RotateToHeadingWithHeadingModule;
@@ -44,7 +41,6 @@ import competition.subsystems.pose.commands.ResetPoseCommand;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import xbot.common.controls.sensors.XXboxController;
 import xbot.common.subsystems.autonomous.SetAutonomousCommand;
 import xbot.common.subsystems.drive.SwervePointKinematics;
@@ -69,29 +65,11 @@ import static edu.wpi.first.units.Units.Degree;
 public class OperatorCommandMap {
 
     @Inject
-    public OperatorCommandMap() {}
+    public OperatorCommandMap() {
+    }
 
     @Inject
-    public void setupDriverCommands(
-            OperatorInterface operatorInterface,
-            SetRobotHeadingCommand resetHeading,
-            Provider<AlignToReefWithAprilTagCommand> alignToReefWithAprilTagProvider,
-            Provider<SwerveSimpleTrajectoryCommand> swerveSimpleTrajectoryCommandProvider,
-            Provider<DriveToLocationWithPID> driveToLocationWithPIDProvider,
-            Provider<RotateToHeadingWithHeadingModule> rotationToHeadingWithHeadingModuleProvider,
-            ResetPoseCommand resetPoseCommand,
-            DriveAccordingToOracleCommand driveAccordingToOracle,
-            SuperstructureAccordingToOracleCommand superstructureAccordingToOracle,
-            DriveToClosestReefSectionWithVisionCommand driveToClosestReefSectionWithVisionCommand,
-            DriveToCoralStationWithVisionCommand driveToCoralStationWithVisionCommand,
-            PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
-            DebugSwerveModuleCommand debugModule,
-            ChangeActiveSwerveModuleCommand changeActiveModule,
-            SwerveDriveWithJoysticksCommand typicalSwerveDrive,
-            HeadingAssistedDriveAndScoreCommandGroup.Factory headingAssistedDriveAndScoreCommandGroupFactory,
-            AlignToSpecificHumanLoadingStationCommand alignToLeftStation,
-            DriveToNearestReefFaceWithPID driveToNearestReefFaceWithPID,
-            AlignToNearestCoralStationCommand alignToNearestCoralStationCommand) {
+    public void setupDriverCommands(OperatorInterface operatorInterface, SetRobotHeadingCommand resetHeading, Provider<AlignToReefWithAprilTagCommand> alignToReefWithAprilTagProvider, Provider<SwerveSimpleTrajectoryCommand> swerveSimpleTrajectoryCommandProvider, Provider<DriveToLocationWithPID> driveToLocationWithPIDProvider, Provider<RotateToHeadingWithHeadingModule> rotationToHeadingWithHeadingModuleProvider, ResetPoseCommand resetPoseCommand, DriveAccordingToOracleCommand driveAccordingToOracle, SuperstructureAccordingToOracleCommand superstructureAccordingToOracle, PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory, DebugSwerveModuleCommand debugModule, ChangeActiveSwerveModuleCommand changeActiveModule, SwerveDriveWithJoysticksCommand typicalSwerveDrive, HeadingAssistedDriveAndScoreCommandGroup.Factory headingAssistedDriveAndScoreCommandGroupFactory, AlignToSpecificHumanLoadingStationCommand alignToLeftStation, DriveToNearestReefFaceWithPID driveToNearestReefFaceWithPID, AlignToNearestCoralStationCommand alignToNearestCoralStationCommand) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
 
@@ -117,7 +95,6 @@ public class OperatorCommandMap {
 
         // operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(intakeCoralCommand);
         // operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(scoreCoralCommand);
-
 
 
         // (BLUE ALLIANCE) Below are different routes to test the SwerveSimpleTrajectoryCommand
@@ -188,21 +165,8 @@ public class OperatorCommandMap {
     }
 
 
-
     @Inject
-    public void setUpOperatorCommands(OperatorInterface oi,
-                                      PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
-                                      ScoreCoralCommand scoreCoralCommand,
-                                      ScoreWhenReadyCommand scoreWhenReadyCommand, 
-                                      ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
-                                      ForceCoralArmCalibratedCommand forceCoralPivotCalibratedCommand,
-                                      ForceAlgaeArmCalibrated forceAlgaeArmCalibrated,
-                                      Provider<SetAlgaeArmSetpointToTargetPosition> setAlgaeArmProvider,
-                                      AlgaeCollectionIntakeCommand intakeAlgae,
-                                      AlgaeCollectionOutputCommand ejectAlgae,
-                                      CoralArmSubsystem coralArmSubsystem,
-                                      IntakeCoralCommand intakeCoralCommand,
-                                      PrepAlgaeSystemCommandGroupFactory prepAlgaeSystemCommandGroupFactory) {
+    public void setUpOperatorCommands(OperatorInterface oi, PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory, ScoreCoralCommand scoreCoralCommand, ScoreWhenReadyCommand scoreWhenReadyCommand, ForceElevatorCalibratedCommand forceElevatorCalibratedCommand, ForceCoralArmCalibratedCommand forceCoralPivotCalibratedCommand, ForceAlgaeArmCalibrated forceAlgaeArmCalibrated, Provider<SetAlgaeArmSetpointToTargetPosition> setAlgaeArmProvider, AlgaeCollectionIntakeCommand intakeAlgae, AlgaeCollectionOutputCommand ejectAlgae, CoralArmSubsystem coralArmSubsystem, IntakeCoralCommand intakeCoralCommand, PrepAlgaeSystemCommandGroupFactory prepAlgaeSystemCommandGroupFactory) {
         // Coral system buttons
         var prepL4 = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.FOUR);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
@@ -219,10 +183,7 @@ public class OperatorCommandMap {
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreCoralCommand);
 
         // combine all three claibration commands into one parallal command group
-        var calibrateAll = Commands.parallel(
-                forceElevatorCalibratedCommand,
-                forceCoralPivotCalibratedCommand,
-                forceAlgaeArmCalibrated).ignoringDisable(true);
+        var calibrateAll = Commands.parallel(forceElevatorCalibratedCommand, forceCoralPivotCalibratedCommand, forceAlgaeArmCalibrated).ignoringDisable(true);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(calibrateAll);
 
         // Algae system buttons
@@ -251,16 +212,7 @@ public class OperatorCommandMap {
     // and many do dangerous things like bypass various safeties or force the robot into states that aren't useful
     // (e.g. only driving a single swerve module at a time for testing purposes).
     @Inject
-    public void setupSuperstructureGamepadCommands(
-            OperatorInterface oi,
-            IntakeCoralCommand intakeCoralCommand,
-            ScoreCoralCommand scoreCoralCommand,
-            Provider<SetCoralArmTargetAngleCommand> setArmTargetAngleCommandProvider,
-            Provider<SetElevatorTargetHeightCommand> setElevatorTargetHeightCommandProvider,
-            ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
-            ForceCoralArmCalibratedCommand forceCoralArmCalibratedCommand,
-            RepositionAlgaeArmDown repositionAlgaeArmDown,
-            RepositionAlgaeArmUp repositionAlgaeArmUp) {
+    public void setupSuperstructureGamepadCommands(OperatorInterface oi, IntakeCoralCommand intakeCoralCommand, ScoreCoralCommand scoreCoralCommand, Provider<SetCoralArmTargetAngleCommand> setArmTargetAngleCommandProvider, Provider<SetElevatorTargetHeightCommand> setElevatorTargetHeightCommandProvider, ForceElevatorCalibratedCommand forceElevatorCalibratedCommand, ForceCoralArmCalibratedCommand forceCoralArmCalibratedCommand, RepositionAlgaeArmDown repositionAlgaeArmDown, RepositionAlgaeArmUp repositionAlgaeArmUp) {
 
         var returnToBase = setElevatorTargetHeightCommandProvider.get();
         returnToBase.setHeight(Landmarks.CoralLevel.COLLECTING);
@@ -291,25 +243,20 @@ public class OperatorCommandMap {
 
 //        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(repositionAlgaeArmUp);
 //        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(repositionAlgaeArmDown);
-      
+
     }
 
     @Inject
     public void setUpButtonCommands(OperatorInterface oi, CoralArmSubsystem coralArmSubsystem) {
-        oi.neoTrellis.getifAvailable(9)
-                .onTrue(coralArmSubsystem.createSetTargetCoralLevelCommand(Landmarks.CoralLevel.TWO));
-        oi.neoTrellis.getifAvailable(10)
-                .onTrue(coralArmSubsystem.createSetTargetCoralLevelCommand(Landmarks.CoralLevel.THREE));
-        oi.neoTrellis.getifAvailable(11)
-                .onTrue(coralArmSubsystem.createSetTargetCoralLevelCommand(Landmarks.CoralLevel.FOUR));
+        oi.neoTrellis.getifAvailable(9).onTrue(coralArmSubsystem.createSetTargetCoralLevelCommand(Landmarks.CoralLevel.TWO));
+        oi.neoTrellis.getifAvailable(10).onTrue(coralArmSubsystem.createSetTargetCoralLevelCommand(Landmarks.CoralLevel.THREE));
+        oi.neoTrellis.getifAvailable(11).onTrue(coralArmSubsystem.createSetTargetCoralLevelCommand(Landmarks.CoralLevel.FOUR));
     }
 
     @Inject
     public void setupSysIdCommands(
 
-            DriveSubsystem drive,
-            ElevatorSubsystem elevator
-    ) {
+            DriveSubsystem drive, ElevatorSubsystem elevator) {
 /*
         oi.algaeAndSysIdGamepad.getifAvailable(XXboxController.XboxButton.A)
                 .whileTrue(drive.sysIdQuasistaticRotation(SysIdRoutine.Direction.kForward)
@@ -346,29 +293,19 @@ public class OperatorCommandMap {
     }
 
     @Inject
-    public void setupAutonomousCommands(OperatorInterface oi,
-                                        Provider<SetAutonomousCommand> setAutonomousCommandProvider,
-                                        Provider<FromCageScoreOneCoralAutoFactory> fromCageScoreOneLevelFourAutoFactProv,
-                                        FromLeftCageScoreLeftFacesLevelFours fromLeftCageScoreLeftFacesLevelFours,
-                                        FromRightCageScoreRightFacesLevelFours fromRightCageScoreRightFacesLevelFours) {
+    public void setupAutonomousCommands(OperatorInterface oi, Provider<SetAutonomousCommand> setAutonomousCommandProvider, Provider<FromCageScoreOneCoralAutoFactory> fromCageScoreOneLevelFourAutoFactProv, FromLeftCageScoreLeftFacesLevelFours fromLeftCageScoreLeftFacesLevelFours, FromRightCageScoreRightFacesLevelFours fromRightCageScoreRightFacesLevelFours) {
         var setFromLeftFarLeftBranchBLevelFour = setAutonomousCommandProvider.get();
-        setFromLeftFarLeftBranchBLevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFactProv.get().create(
-                Landmarks.BlueCageOneStartingLine, Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR
-        ));
+        setFromLeftFarLeftBranchBLevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFactProv.get().create(Landmarks.BlueCageOneStartingLine, Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR));
         oi.neoTrellis.getifAvailable(1).onTrue(setFromLeftFarLeftBranchBLevelFour); // temporary button
         setFromLeftFarLeftBranchBLevelFour.includeOnSmartDashboard("From Left Score Far Left Branch B Level 4 Auto");
 
         var setFromMidFarBranchBLevelFour = setAutonomousCommandProvider.get();
-        setFromMidFarBranchBLevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFactProv.get().create(
-                Landmarks.BlueMidOfLine, Landmarks.ReefFace.FAR, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR
-        ));
+        setFromMidFarBranchBLevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFactProv.get().create(Landmarks.BlueMidOfLine, Landmarks.ReefFace.FAR, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR));
         oi.neoTrellis.getifAvailable(2).onTrue(setFromMidFarBranchBLevelFour); // temporary button
         setFromMidFarBranchBLevelFour.includeOnSmartDashboard("From Mid Score Far Branch B Level 4 Auto");
 
         var setFromRightFarRightBranchALevelFour = setAutonomousCommandProvider.get();
-        setFromRightFarRightBranchALevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFactProv.get().create(
-                Landmarks.BlueCageSixStartingLine, Landmarks.ReefFace.FAR_RIGHT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR
-        ));
+        setFromRightFarRightBranchALevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFactProv.get().create(Landmarks.BlueCageSixStartingLine, Landmarks.ReefFace.FAR_RIGHT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR));
         oi.neoTrellis.getifAvailable(3).onTrue(setFromRightFarRightBranchALevelFour); // temporary button
         setFromRightFarRightBranchALevelFour.includeOnSmartDashboard("From Right Score Far Right Branch A Level 4 Auto");
 
@@ -384,9 +321,7 @@ public class OperatorCommandMap {
     }
 
     @Inject
-    public void setupSimulatorCommands(
-            ResetSimulatedPose resetPose
-    ) {
+    public void setupSimulatorCommands(ResetSimulatedPose resetPose) {
         resetPose.includeOnSmartDashboard();
     }
 }

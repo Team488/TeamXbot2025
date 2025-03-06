@@ -50,7 +50,7 @@ public class AlignWithCreeperCommand extends BaseCommand {
     private CachedSubscriber centeredConfidentlySubscriber;
 
     protected Boolean isCenteredConfidently;
-    protected double normalizedError;
+    protected Double normalizedError;
 
     /**
      * Constructs a new AlignWithCreeperCommand.
@@ -89,7 +89,7 @@ public class AlignWithCreeperCommand extends BaseCommand {
         this.photonVisionFrontRightResX = pf.createPersistentProperty(
                 "Photon Vision Front Right Resoulution X", 800);
         this.errorThresholdPercentage = pf.createPersistentProperty(
-                "Pixel Error Threshold Percentage", 5);
+                "Pixel Error Threshold Percentage", 0.05);
     }
 
     /**
@@ -103,6 +103,7 @@ public class AlignWithCreeperCommand extends BaseCommand {
      */
     @Override
     public void initialize() {
+        log.info("Initializing AlignWithCreeperCommand");
         XTablesClient client =
                 this.coprocessorCommunicationSubsystem.tryGetXTablesClient();
         if (client == null) {
@@ -126,11 +127,15 @@ public class AlignWithCreeperCommand extends BaseCommand {
         }
         // Subscribe to vision data channels to ensure processing of only fresh data.
         leftDistanceSubscriber =
-                client.subscribe(hostname + "." + tableLeftDistance, 1);
+                client.subscribe(tableLeftDistance, 1);
         rightDistanceSubscriber =
-                client.subscribe(hostname + "." + tableRightDistance, 1);
+                client.subscribe(tableRightDistance, 1);
         centeredConfidentlySubscriber =
-                client.subscribe(hostname + "." + tableRightDistance, 1);
+                client.subscribe(tableCenteredConfidently, 1);
+
+        // Reset values on initilize
+        this.normalizedError = null;
+        this.isCenteredConfidently = null;
     }
 
     /**
@@ -146,12 +151,10 @@ public class AlignWithCreeperCommand extends BaseCommand {
      */
     @Override
     public void execute() {
-        super.execute();
         isCenteredConfidently =
                 this.centeredConfidentlySubscriber.getAsBoolean(null);
         Integer leftDistance = this.leftDistanceSubscriber.getAsInteger(null);
         Integer rightDistance = this.rightDistanceSubscriber.getAsInteger(null);
-
         if (isCenteredConfidently == null) {
             // No new vision data received; do nothing.
             return;
@@ -169,7 +172,7 @@ public class AlignWithCreeperCommand extends BaseCommand {
             offToTheLeft = false;
         } else if (rightDistance == null || rightDistance == -1) {
             offToTheLeft = true;
-        } else {
+        }  else {
             offToTheLeft = leftDistance < rightDistance;
         }
         // Choose the pixel error value from the side indicating misalignment.
@@ -215,7 +218,7 @@ public class AlignWithCreeperCommand extends BaseCommand {
     @Override
     public boolean isFinished() {
         return (this.isCenteredConfidently != null && this.isCenteredConfidently)
-                || (normalizedError <= errorThresholdPercentage.get());
+                || (normalizedError != null && normalizedError <= errorThresholdPercentage.get());
     }
 
     /**
