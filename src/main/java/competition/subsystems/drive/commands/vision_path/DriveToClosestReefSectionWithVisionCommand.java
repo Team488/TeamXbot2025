@@ -27,7 +27,12 @@ public class DriveToClosestReefSectionWithVisionCommand extends PathDriveToLocat
     private final DriveSubsystem driveSubsystem;
 
     @Inject
-    DriveToClosestReefSectionWithVisionCommand(PoseSubsystem pose, DriveSubsystem drive, CoprocessorCommunicationSubsystem coprocessorComms, PropertyFactory pf, HeadingModule.HeadingModuleFactory headingModuleFactory, RobotAssertionManager assertionManager, ElectricalContract electricalContract, AprilTagFieldLayout aprilTagFieldLayout, AprilTagVisionSubsystemExtended aprilTagVisionSubsystem) {
+    DriveToClosestReefSectionWithVisionCommand(
+            PoseSubsystem pose, DriveSubsystem drive,
+                                               CoprocessorCommunicationSubsystem coprocessorComms,
+            PropertyFactory pf, HeadingModule.HeadingModuleFactory headingModuleFactory,
+            RobotAssertionManager assertionManager, ElectricalContract electricalContract,
+            AprilTagFieldLayout aprilTagFieldLayout, AprilTagVisionSubsystemExtended aprilTagVisionSubsystem) {
         super(drive, pose, pf, headingModuleFactory, aprilTagVisionSubsystem, assertionManager, coprocessorComms);
         this.aprilTagFieldLayout = aprilTagFieldLayout;
         this.driveSubsystem = drive;
@@ -38,10 +43,13 @@ public class DriveToClosestReefSectionWithVisionCommand extends PathDriveToLocat
         this.log.info("Alliance: {}", alliance);
         var reefSections = Landmarks.getAllianceReefFiducialIds(alliance);
         this.log.info("reef sections: {}", reefSections);
-        List<Pose2d> reefPoses = reefSections.stream().map(this.aprilTagFieldLayout::getTagPose).filter(Optional::isPresent).flatMap(Optional::stream).map(Pose3d::toPose2d).collect(Collectors.toList());
+        List<Pose2d> reefPoses = reefSections.stream().map(this.aprilTagFieldLayout::getTagPose)
+                .filter(Optional::isPresent).flatMap(Optional::stream).map(Pose3d::toPose2d)
+                .collect(Collectors.toList());
 
         if (reefPoses.isEmpty()) {
-            reefPoses = Arrays.stream(ReefFace.values()).map(Landmarks::getReefFacePose).collect(Collectors.toList());
+            reefPoses = Arrays.stream(ReefFace.values()).map(Landmarks::getReefFacePose)
+                    .collect(Collectors.toList());
         }
 
         var robotPose = this.pose.getCurrentPose2d();
@@ -52,9 +60,14 @@ public class DriveToClosestReefSectionWithVisionCommand extends PathDriveToLocat
     public void initialize() {
         Pose2d pose = getClosestReefPose();
         this.setTarget(pose);
-        this.setAdditionalArguments(XTableValues.AdditionalArguments.newBuilder().setAlliance(Landmarks.fromAlliance(DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue))).build());
+        this.setAdditionalArguments(XTableValues.AdditionalArguments.newBuilder()
+                .setAlliance(Landmarks.fromAlliance(DriverStation.getAlliance()
+                        .orElse(DriverStation.Alliance.Blue))).build());
         this.setSafeInches(25);
-        this.setOptions(XTableValues.TraversalOptions.newBuilder().setMetersPerSecond(driveSubsystem.getDriveToWaypointsSpeed().get()).setAccelerationMetersPerSecond(driveSubsystem.getMaxAccelerationMetersPerSecondSquared()).setFinalRotationDegrees(pose.getRotation().getDegrees()).build());
+        this.setOptions(XTableValues.TraversalOptions.newBuilder()
+                .setMetersPerSecond(driveSubsystem.getDriveToWaypointsSpeed().get())
+                .setAccelerationMetersPerSecond(driveSubsystem.getMaxAccelerationMetersPerSecondSquared())
+                .setFinalRotationDegrees(pose.getRotation().getDegrees()).build());
         super.initialize();
     }
 }

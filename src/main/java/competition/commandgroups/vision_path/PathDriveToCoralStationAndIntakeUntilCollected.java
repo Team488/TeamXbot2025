@@ -20,7 +20,8 @@ public class PathDriveToCoralStationAndIntakeUntilCollected {
 
 
     @Inject
-    public PathDriveToCoralStationAndIntakeUntilCollected(PathDriveToNearestCoralStationSectionCommand driveToCoralStationSectionCommand,
+    public PathDriveToCoralStationAndIntakeUntilCollected(
+            PathDriveToNearestCoralStationSectionCommand driveToCoralStationSectionCommand,
                                                           PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
                                                           IntakeUntilCoralCollectedCommand intakeUntilCoralCollectedCommand,
                                                           DriveVectorSmall driveVectorSmall) {
