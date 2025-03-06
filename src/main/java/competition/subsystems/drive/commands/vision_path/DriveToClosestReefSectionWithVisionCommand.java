@@ -61,7 +61,7 @@ public class DriveToClosestReefSectionWithVisionCommand extends PathDriveToLocat
         Pose2d pose = getClosestReefPose();
         this.setTarget(pose);
         this.setAdditionalArguments(XTableValues.AdditionalArguments.newBuilder()
-                .setAlliance(Landmarks.fromAlliance(DriverStation.getAlliance()
+                .setAlliance(CoprocessorCommunicationSubsystem.fromAlliance(DriverStation.getAlliance()
                         .orElse(DriverStation.Alliance.Blue))).build());
         this.setSafeInches(25);
         this.setOptions(XTableValues.TraversalOptions.newBuilder()

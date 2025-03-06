@@ -1,8 +1,10 @@
 package competition.subsystems.vision;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import org.kobe.xbot.JClient.XTablesClient;
 import org.kobe.xbot.JClient.XTablesClientManager;
 import org.kobe.xbot.Utilities.Entities.VisionCoprocessor;
+import org.kobe.xbot.Utilities.Entities.XTableValues;
 import org.kobe.xbot.Utilities.Logger.XTablesLogger;
 import org.kobe.xbot.Utilities.VisionCoprocessorCommander;
 import xbot.common.advantage.DataFrameRefreshable;
@@ -73,6 +75,10 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
 
     public VisionCoprocessorCommander getOrinVisionCoprocessorCommander() {
         return this.orinVisionCoprocessorCommander;
+    }
+
+    public static XTableValues.Alliance fromAlliance(DriverStation.Alliance alliance) {
+        return alliance.equals(DriverStation.Alliance.Blue) ? XTableValues.Alliance.BLUE : XTableValues.Alliance.RED;
     }
 
 }

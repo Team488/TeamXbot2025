@@ -133,7 +133,7 @@ public class PathDriveToNearestCoralStationSectionCommand
                 new Pose2d(destinationTranslation, targetCoralStationSection.getRotation());
         this.setTarget(destinationPose);
         this.setAdditionalArguments(XTableValues.AdditionalArguments.newBuilder()
-                .setAlliance(Landmarks.fromAlliance(DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue)))
+                .setAlliance(CoprocessorCommunicationSubsystem.fromAlliance(DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue)))
                 .build());
         this.setSafeInches(25);
         this.setOptions(

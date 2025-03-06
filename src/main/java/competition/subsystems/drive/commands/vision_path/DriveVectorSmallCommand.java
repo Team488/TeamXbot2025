@@ -9,7 +9,7 @@ import xbot.common.math.XYPair;
 
 import javax.inject.Inject;
 
-public class DriveVectorSmall extends BaseCommand {
+public class DriveVectorSmallCommand extends BaseCommand {
     private double start;
     private double last = 0.25;
 
@@ -21,14 +21,14 @@ public class DriveVectorSmall extends BaseCommand {
     private boolean backwards = false;
 
     @Inject
-    public DriveVectorSmall(DriveSubsystem driveSubsystem, PoseSubsystem poseSubsystem) {
+    public DriveVectorSmallCommand(DriveSubsystem driveSubsystem, PoseSubsystem poseSubsystem) {
         drive = driveSubsystem;
         this.poseSubsystem = poseSubsystem;
     }
 
     @Override
     public void initialize() {
-        log.info("Initializing DriveVectorSmall");
+        log.info("Initializing DriveVectorSmallCommand");
         this.start = XTimer.getFPGATimestamp();
     }
 
@@ -50,12 +50,12 @@ public class DriveVectorSmall extends BaseCommand {
     }
 
 
-    public DriveVectorSmall setTargetPose(Pose2d targetPose) {
+    public DriveVectorSmallCommand setTargetPose(Pose2d targetPose) {
         this.targetPose = targetPose;
         return this;
     }
 
-    public DriveVectorSmall setBackwards(boolean backwards) {
+    public DriveVectorSmallCommand setBackwards(boolean backwards) {
         this.backwards = backwards;
         return this;
     }
@@ -64,7 +64,7 @@ public class DriveVectorSmall extends BaseCommand {
         return last;
     }
 
-    public DriveVectorSmall setLast(double last) {
+    public DriveVectorSmallCommand setLast(double last) {
         this.last = last;
         return this;
     }

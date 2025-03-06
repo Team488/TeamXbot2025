@@ -241,7 +241,4 @@ public class Landmarks {
                 return new ArrayList<Integer>();
         }
     }
-    public static XTableValues.Alliance fromAlliance(DriverStation.Alliance alliance) {
-        return alliance.equals(DriverStation.Alliance.Blue) ? XTableValues.Alliance.BLUE : XTableValues.Alliance.RED;
-    }
 }

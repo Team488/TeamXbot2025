@@ -2,7 +2,7 @@ package competition.commandgroups.vision_path;
 
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
 import competition.subsystems.coral_scorer.commands.IntakeUntilCoralCollectedCommand;
-import competition.subsystems.drive.commands.vision_path.DriveVectorSmall;
+import competition.subsystems.drive.commands.vision_path.DriveVectorSmallCommand;
 import competition.subsystems.drive.commands.vision_path.PathDriveToNearestCoralStationSectionCommand;
 import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -16,7 +16,7 @@ public class PathDriveToCoralStationAndIntakeUntilCollected {
     PathDriveToNearestCoralStationSectionCommand driveToCoralStationSectionCommand;
     PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory;
     IntakeUntilCoralCollectedCommand intakeUntilCoralCollectedCommand;
-    DriveVectorSmall driveVectorSmall;
+    DriveVectorSmallCommand driveVectorSmallCommand;
 
 
     @Inject
@@ -24,11 +24,11 @@ public class PathDriveToCoralStationAndIntakeUntilCollected {
             PathDriveToNearestCoralStationSectionCommand driveToCoralStationSectionCommand,
                                                           PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
                                                           IntakeUntilCoralCollectedCommand intakeUntilCoralCollectedCommand,
-                                                          DriveVectorSmall driveVectorSmall) {
+                                                          DriveVectorSmallCommand driveVectorSmallCommand) {
         this.driveToCoralStationSectionCommand = driveToCoralStationSectionCommand;
         this.prepCoralSystemCommandGroupFactory = prepCoralSystemCommandGroupFactory;
         this.intakeUntilCoralCollectedCommand = intakeUntilCoralCollectedCommand;
-        this.driveVectorSmall = driveVectorSmall;
+        this.driveVectorSmallCommand = driveVectorSmallCommand;
     }
 
     public ParallelDeadlineGroup create() {
@@ -36,10 +36,10 @@ public class PathDriveToCoralStationAndIntakeUntilCollected {
         var driveToCoralStationThenDriveForward = new SequentialCommandGroup(
                 driveToCoralStationSectionCommand,
                 new InstantCommand(() -> {
-                    driveVectorSmall.setBackwards(true);
-                    driveVectorSmall.setTargetPose(driveToCoralStationSectionCommand.getTargetCoralStationSection());
+                    driveVectorSmallCommand.setBackwards(true);
+                    driveVectorSmallCommand.setTargetPose(driveToCoralStationSectionCommand.getTargetCoralStationSection());
                 }),
-                driveVectorSmall
+                driveVectorSmallCommand
         );
         var prepCoralSystem = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
         driveToCoralStationSectionWhilePrepping.addCommands(driveToCoralStationThenDriveForward, prepCoralSystem);

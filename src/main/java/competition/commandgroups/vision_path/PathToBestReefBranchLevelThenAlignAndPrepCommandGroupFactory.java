@@ -18,6 +18,7 @@ import org.kobe.xbot.Utilities.Entities.XTableValues;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
+import static competition.subsystems.vision.CoprocessorCommunicationSubsystem.fromAlliance;
 import static edu.wpi.first.units.Units.Meters;
 
 public class PathToBestReefBranchLevelThenAlignAndPrepCommandGroupFactory {
@@ -93,7 +94,4 @@ public class PathToBestReefBranchLevelThenAlignAndPrepCommandGroupFactory {
         };
     }
 
-    private XTableValues.Alliance fromAlliance(DriverStation.Alliance alliance) {
-        return alliance.equals(DriverStation.Alliance.Blue) ? XTableValues.Alliance.BLUE : XTableValues.Alliance.RED;
-    }
 }
