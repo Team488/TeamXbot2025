@@ -141,10 +141,10 @@ public class AlignWithCreeperCommand extends BaseCommand {
             Integer rightDistance = this.rightDistanceSubscriber.getAsInteger(null);
 
             if (isCenteredConfidently == null) {
-                // There is no new data
+                // No new vision data received; do nothing.
                 return;
             } else if(isCenteredConfidently) {
-                // The robot is already aligned.
+                // Alignment is achieved; stop any drive movement.
                 drive.stop();
                 return;
             }
