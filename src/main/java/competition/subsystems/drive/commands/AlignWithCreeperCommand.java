@@ -7,7 +7,6 @@ import competition.subsystems.pose.Cameras;
 import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
-import javax.inject.Inject;
 import org.kobe.xbot.JClient.CachedSubscriber;
 import org.kobe.xbot.JClient.XTablesClient;
 import xbot.common.command.BaseCommand;
@@ -16,6 +15,8 @@ import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.properties.StringProperty;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
+
+import javax.inject.Inject;
 
 /**
  * Command to align the robot with a creeper target using vision-based error
@@ -39,6 +40,8 @@ public class AlignWithCreeperCommand extends BaseCommand {
     private final DoubleProperty photonVisionFrontLeftResX;
     private final DoubleProperty photonVisionFrontRightResX;
     private final DoubleProperty driveGain;
+    private final DoubleProperty errorThresholdPercentage;
+
 
     private Cameras camera;
     private int resolution;
@@ -52,16 +55,16 @@ public class AlignWithCreeperCommand extends BaseCommand {
      * Constructs a new AlignWithCreeperCommand.
      *
      * @param vision                    the vision subsystem used for target
-     *     detection.
+     *                                  detection.
      * @param drive                     the drive subsystem for robot movement.
      * @param coprocessorCommunications subsystem for communicating with the
-     *     coprocessor.
+     *                                  coprocessor.
      * @param electricalContract        the electrical contract.
      * @param pose                      the pose subsystem.
      * @param headingModuleFactory      factory to create heading modules.
      * @param reefCoordinateGenerator   the coordinate generator.
      * @param pf                        the property factory for persistent
-     *     properties.
+     *                                  properties.
      */
     @Inject
     public AlignWithCreeperCommand(AprilTagVisionSubsystemExtended vision,
@@ -84,6 +87,8 @@ public class AlignWithCreeperCommand extends BaseCommand {
                 "Photon Vision Front Left Resoulution X", 800);
         this.photonVisionFrontRightResX = pf.createPersistentProperty(
                 "Photon Vision Front Right Resoulution X", 800);
+        this.errorThresholdPercentage = pf.createPersistentProperty(
+                "Pixel Error Threshold Percentage", 5);
     }
 
     /**
@@ -100,7 +105,8 @@ public class AlignWithCreeperCommand extends BaseCommand {
         XTablesClient client =
                 this.coprocessorCommunicationSubsystem.tryGetXTablesClient();
         if (client == null) {
-            log.warn("CoprocessorCommunicationSubsystem could not get XTablesClient");
+            log.warn("Failed to obtain a valid XTablesClient from CoprocessorCommunicationSubsystem. " +
+                    "Aborting command initialization.");
             cancel();
             return;
         }
@@ -113,7 +119,7 @@ public class AlignWithCreeperCommand extends BaseCommand {
             resolution = (int) photonVisionFrontRightResX.get();
             hostname = photonVisionFrontRightHostname.get();
         } else {
-            log.warn("Unknown camera value, stopping to prevent unknown drive!");
+            log.warn("Encountered an unrecognized camera value. Aborting command to avoid unintended drive behavior.");
             cancel();
             return;
         }
@@ -163,7 +169,7 @@ public class AlignWithCreeperCommand extends BaseCommand {
             // Determine which side the misalignment error should be taken from.
             boolean offToTheLeft;
             if (leftDistance == null && rightDistance == null) {
-                log.warn("Could not get left OR right distance from camera!");
+                log.warn("No valid left or right distance measurements received from the camera.");
                 return;
             } else if (leftDistance == null) {
                 offToTheLeft = false;
@@ -177,6 +183,15 @@ public class AlignWithCreeperCommand extends BaseCommand {
 
             // Calculate the normalized error as a fraction of the camera resolution.
             double normalizedError = (double) moveErrorPx / resolution;
+
+            // If the error is within the acceptable range, log a message and exit the adjustment routine.
+            double errorThreshold = errorThresholdPercentage.get();
+            if (normalizedError <= errorThreshold) {
+                log.info("Alignment error {} is within acceptable limits (threshold: {}). No adjustment necessary.",
+                        normalizedError, errorThreshold);
+                drive.stop();
+                return;
+            }
 
             // Scale the normalized error using the drive gain to compute the drive
             // power.
@@ -204,7 +219,7 @@ public class AlignWithCreeperCommand extends BaseCommand {
      * Checks if the alignment is completed.
      *
      * @return true if the vision system indicates the robot is confidently
-     *     aligned, false otherwise.
+     * aligned, false otherwise.
      */
     @Override
     public boolean isFinished() {
@@ -225,7 +240,7 @@ public class AlignWithCreeperCommand extends BaseCommand {
     public void end(boolean interrupted) {
         super.end(interrupted);
         if (interrupted) {
-            log.warn("Interrupted while waiting for Creeper command");
+            log.warn("Alignment command interrupted before completion.");
         }
         drive.stop();
     }
@@ -244,7 +259,7 @@ public class AlignWithCreeperCommand extends BaseCommand {
      *
      * @param camera the camera to set.
      * @return this instance of AlignWithCreeperCommand, allowing for method
-     *     chaining.
+     * chaining.
      */
     public AlignWithCreeperCommand setCamera(Cameras camera) {
         this.camera = camera;
