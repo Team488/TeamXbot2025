@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
+import org.kobe.xbot.Utilities.Entities.XTableValues;
 
 import javax.inject.Singleton;
 
@@ -239,5 +240,8 @@ public class Landmarks {
             default:
                 return new ArrayList<Integer>();
         }
+    }
+    public static XTableValues.Alliance fromAlliance(DriverStation.Alliance alliance) {
+        return alliance.equals(DriverStation.Alliance.Blue) ? XTableValues.Alliance.BLUE : XTableValues.Alliance.RED;
     }
 }

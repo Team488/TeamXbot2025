@@ -133,7 +133,7 @@ public class PathDriveToNearestCoralStationSectionCommand
                 new Pose2d(destinationTranslation, targetCoralStationSection.getRotation());
         this.setTarget(destinationPose);
         this.setAdditionalArguments(XTableValues.AdditionalArguments.newBuilder()
-                .setAlliance(fromAlliance(DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue)))
+                .setAlliance(Landmarks.fromAlliance(DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue)))
                 .build());
         this.setSafeInches(25);
         this.setOptions(
@@ -143,10 +143,6 @@ public class PathDriveToNearestCoralStationSectionCommand
                         .setFinalRotationDegrees(destinationPose.getRotation().getDegrees())
                         .build());
         super.initialize();
-    }
-
-    private XTableValues.Alliance fromAlliance(DriverStation.Alliance alliance) {
-        return alliance.equals(DriverStation.Alliance.Blue) ? XTableValues.Alliance.BLUE : XTableValues.Alliance.RED;
     }
 
     @Override
