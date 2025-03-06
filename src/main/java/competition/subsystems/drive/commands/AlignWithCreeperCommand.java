@@ -27,6 +27,8 @@ import javax.inject.Inject;
  * </p>
  */
 public class AlignWithCreeperCommand extends BaseCommand {
+    private int NUMFORCESTOPS = 30;
+    
     final DriveSubsystem drive;
     final CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem;
 
@@ -164,6 +166,7 @@ public class AlignWithCreeperCommand extends BaseCommand {
             } else if (isCenteredConfidently) {
                 // Alignment is achieved; stop any drive movement.
                 drive.stop();
+                NUMFORCESTOPS--;
                 return;
             }
             // Determine which side the misalignment error should be taken from.
@@ -190,6 +193,7 @@ public class AlignWithCreeperCommand extends BaseCommand {
                 log.info("Alignment error {} is within acceptable limits (threshold: {}). No adjustment necessary.",
                         normalizedError, errorThreshold);
                 drive.stop();
+                NUMFORCESTOPS--;
                 return;
             }
 
@@ -223,7 +227,7 @@ public class AlignWithCreeperCommand extends BaseCommand {
      */
     @Override
     public boolean isFinished() {
-        return this.isCenteredConfidently != null && this.isCenteredConfidently;
+        return this.NUMFORCESTOPS <= 0;
     }
 
     /**
