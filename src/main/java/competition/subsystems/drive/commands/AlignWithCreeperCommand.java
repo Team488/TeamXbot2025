@@ -105,8 +105,8 @@ public class AlignWithCreeperCommand extends BaseCommand {
         XTablesClient client =
                 this.coprocessorCommunicationSubsystem.tryGetXTablesClient();
         if (client == null) {
-            log.warn("Failed to obtain a valid XTablesClient from CoprocessorCommunicationSubsystem. " +
-                    "Aborting command initialization.");
+            log.warn("Failed to obtain a valid XTablesClient from CoprocessorCommunicationSubsystem. "
+                    + "Aborting command initialization.");
             cancel();
             return;
         }
