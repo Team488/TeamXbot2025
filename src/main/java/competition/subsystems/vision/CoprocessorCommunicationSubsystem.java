@@ -2,6 +2,7 @@ package competition.subsystems.vision;
 
 import org.kobe.xbot.JClient.XTablesClient;
 import org.kobe.xbot.JClient.XTablesClientManager;
+import org.kobe.xbot.Utilities.Entities.VisionCoprocessor;
 import org.kobe.xbot.Utilities.Logger.XTablesLogger;
 import org.kobe.xbot.Utilities.VisionCoprocessorCommander;
 import xbot.common.advantage.DataFrameRefreshable;
@@ -46,7 +47,7 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
         xTablesClientManager = XTablesClient.getDefaultClientAsynchronously();
         XTablesLogger.setLoggingLevel(Level.OFF);
 
-        this.orinVisionCoprocessorCommander = new VisionCoprocessorCommander("10.4.88.7");
+        this.orinVisionCoprocessorCommander = new VisionCoprocessorCommander(VisionCoprocessor.ORIN3_STATIC);
     }
 
     public XTablesClientManager getXTablesManager(){
