@@ -30,15 +30,15 @@ public class MeasureDistanceBeforeScoringCommand extends BaseCommand {
     }
     @Override
     public boolean isFinished() {
-        Pose2d targetReefFacePose = Landmarks.getBranchPose(pose.getReefFaceFromAngle(), branch);
+        Pose2d targetReefFacePose = PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.getBranchPose(pose.getReefFaceFromAngle(), branch));
         aKitLog.record("targetReefPose", targetReefFacePose);
         aKitLog.record("distance ", pose.getCurrentPose2d().getTranslation()
                 .getDistance(targetReefFacePose.getTranslation()));
         aKitLog.record("branch", branch.name());
+        aKitLog.record("targetReefFace", pose.getReefFaceFromAngle());
 
         return pose.getCurrentPose2d().getTranslation().getDistance(targetReefFacePose.getTranslation())
                 < distanceThresholdSupplier.get().in(Meters);
-
     }
 
     public void setDistanceThresholdSupplier(Supplier<Distance> distanceThresholdSupplier) {
