@@ -61,9 +61,11 @@ public class DriveHermiteSplineCommand extends BaseCommand {
         XYPair velocityIntent = new XYPair(
                 advice.velocity().getX() / drive.getMaxTargetSpeedMetersPerSecond(),
                 advice.velocity().getY() / drive.getMaxTargetSpeedMetersPerSecond());
-        if (advice.timeFrozen()) {
+        /*if (advice.timeFrozen()) {
             velocityIntent = new XYPair(0, 0);
         }
+
+         */
 
         // Position - spline will be outputting a position that we should be at. We need to PID to that position.
         var positionTranslation = drive.getPowerToAchieveFieldPosition(currentPosition, advice.position());

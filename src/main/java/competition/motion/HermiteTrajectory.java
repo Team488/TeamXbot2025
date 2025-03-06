@@ -20,7 +20,7 @@ public class HermiteTrajectory {
 
     @Inject
     public HermiteTrajectory() {
-        trapezoid = new TrapezoidProfile(new TrapezoidProfile.Constraints(2, 1));
+        trapezoid = new TrapezoidProfile(new TrapezoidProfile.Constraints(2, 2));
     }
 
     public void setSpline(CubicHermiteSpline spline) {
