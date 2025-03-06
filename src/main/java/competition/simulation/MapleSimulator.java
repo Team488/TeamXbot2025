@@ -17,6 +17,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.Distance;
 import xbot.common.advantage.AKitLogger;
 import xbot.common.controls.sensors.mock_adapters.MockGyro;
+import xbot.common.logic.TimeStableValidator;
 
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
@@ -48,6 +49,7 @@ public class MapleSimulator implements BaseSimulator {
     final LightsSimulator lightsSimulator;
 
     final Distance humanLoadingDistanceThreshold = Meters.of(0.5);
+    final TimeStableValidator humanLoadValidator = new TimeStableValidator(1);
 
     // maple-sim stuff ----------------------------
     final DriveTrainSimulationConfig config;
@@ -184,8 +186,9 @@ public class MapleSimulator implements BaseSimulator {
                 }
             }
         }
+        var robotNearHumanStable = humanLoadValidator.checkStable(robotNearHumanLoading);
 
-        if (elevatorAtCollectionHeight && armAtCollectionAngle && coralScorerIsIntaking && robotNearHumanLoading) {
+        if (elevatorAtCollectionHeight && armAtCollectionAngle && coralScorerIsIntaking && robotNearHumanStable) {
             coralScorerSimulator.simulateCoralLoad();
         }
     }
