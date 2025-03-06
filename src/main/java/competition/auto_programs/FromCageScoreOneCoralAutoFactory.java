@@ -8,7 +8,7 @@ import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import xbot.common.command.BaseSequentialCommandGroup;
 import xbot.common.subsystems.autonomous.AutonomousCommandSelector;
 
 import javax.inject.Inject;
@@ -39,6 +39,7 @@ public class FromCageScoreOneCoralAutoFactory {
                                          Landmarks.ReefFace targetReefFace, Landmarks.Branch targetBranch,
                                          Landmarks.CoralLevel targetLevel) {
         var auto = new BaseAutonomousSequentialCommandGroup(autoSelector);
+        auto.setName("FromCageScoreOneCoralAuto");
 
         var startInFrontOfCage = pose.createSetPositionCommand(PoseSubsystem.convertBlueToRedIfNeeded(startingLocation));
         auto.addCommands(startInFrontOfCage);

@@ -4,6 +4,7 @@ import competition.subsystems.coral_arm.commands.SetCoralArmTargetAngleCommand;
 import competition.subsystems.elevator.commands.SetElevatorTargetHeightCommand;
 import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import xbot.common.command.BaseParallelCommandGroup;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -22,8 +23,9 @@ public class PrepCoralSystemCommandGroupFactory {
         this.setCoralArmTargetAngleCommandProvider = setCoralArmTargetAngleCommandProvider;
     }
 
-    public ParallelCommandGroup create(Supplier<Landmarks.CoralLevel> coralLevelSupplier) {
-        var group = new ParallelCommandGroup();
+    public BaseParallelCommandGroup create(Supplier<Landmarks.CoralLevel> coralLevelSupplier) {
+        var group = new BaseParallelCommandGroup();
+        group.setName("PrepCoralSystemCommandGroup");
 
         var setElevatorTargetHeightCommand = setElevatorTargetHeightCommandProvider.get();
         setElevatorTargetHeightCommand.setHeightSupplier(coralLevelSupplier);

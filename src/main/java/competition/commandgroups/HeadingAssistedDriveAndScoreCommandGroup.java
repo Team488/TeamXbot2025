@@ -12,13 +12,13 @@ import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import xbot.common.command.BaseSequentialCommandGroup;
 
 import javax.inject.Provider;
 
 import static edu.wpi.first.units.Units.Meters;
 
-public class HeadingAssistedDriveAndScoreCommandGroup extends SequentialCommandGroup {
+public class HeadingAssistedDriveAndScoreCommandGroup extends BaseSequentialCommandGroup {
     CoralArmSubsystem coralArmSubsystem;
 
 
@@ -47,8 +47,9 @@ public class HeadingAssistedDriveAndScoreCommandGroup extends SequentialCommandG
 
         this.addCommands(driveToReefFaceFromAngleCommand);
         measureDistanceBeforeScoringCommand.setDistanceThreshold(Meters.of(1));
-        var measureDistanceBeforePreppingCoralSystem = new SequentialCommandGroup(measureDistanceBeforeScoringCommand,
+        var measureDistanceBeforePreppingCoralSystem = new BaseSequentialCommandGroup(measureDistanceBeforeScoringCommand,
                 prepCoralSystemCommandGroup);
+        measureDistanceBeforePreppingCoralSystem.setName("measureDistanceBeforePreppingCoralSystem");
         var alignWhilePrepping = new ParallelCommandGroup(alignToReefWithAprilTagWithCameraCommand,
                 measureDistanceBeforePreppingCoralSystem);
         this.addCommands(alignWhilePrepping);

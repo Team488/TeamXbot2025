@@ -1,10 +1,10 @@
 package competition.auto_programs;
 
 import competition.subsystems.pose.Landmarks;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import xbot.common.command.BaseSequentialCommandGroup;
 import xbot.common.subsystems.autonomous.AutonomousCommandSelector;
 
-public class BaseAutonomousSequentialCommandGroup extends SequentialCommandGroup {
+public class BaseAutonomousSequentialCommandGroup extends BaseSequentialCommandGroup {
 
     final AutonomousCommandSelector autoSelector;
 

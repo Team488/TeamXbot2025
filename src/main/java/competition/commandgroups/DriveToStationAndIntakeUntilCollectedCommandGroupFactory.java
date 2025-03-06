@@ -5,7 +5,8 @@ import competition.subsystems.drive.commands.AlignToSpecificHumanLoadingStationC
 import competition.subsystems.drive.commands.DriveToCoralStationInterstitialCommand;
 import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import xbot.common.command.BaseParallelDeadlineGroup;
+import xbot.common.command.BaseSequentialCommandGroup;
 
 import javax.inject.Inject;
 
@@ -28,17 +29,19 @@ public class DriveToStationAndIntakeUntilCollectedCommandGroupFactory {
         this.intakeUntilCoralCollectedCommand = intakeUntilCoralCollectedCommand;
     }
 
-    public ParallelDeadlineGroup create(Landmarks.CoralStation station,
+    public BaseParallelDeadlineGroup create(Landmarks.CoralStation station,
                                          boolean addPoint) {
         // Overarching command group — preps coral system and drives to coral station at the same time, command group stops if a coral is collected
-        var driveUntilIntake = new ParallelDeadlineGroup(intakeUntilCoralCollectedCommand);
+        var driveUntilIntake = new BaseParallelDeadlineGroup(intakeUntilCoralCollectedCommand);
+        driveUntilIntake.setName("driveUntilIntake");
 
         // Prep coral system to coral collection
         var prepCoralSystem = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
         driveUntilIntake.addCommands(prepCoralSystem);
 
         // Drive to coral station using terminal approach, have an interstitial point if needed
-        var driveToCoralStation = new SequentialCommandGroup();
+        var driveToCoralStation = new BaseSequentialCommandGroup();
+        driveToCoralStation.setName("driveToCoralStation");
         // We can add an interstitial point between scoring at the reef and terminally approaching to the coral station to avoid rotating into the reef
         if (addPoint) {
             driveToCoralStationSectionCommand.setTargetCoralStationSection(station);

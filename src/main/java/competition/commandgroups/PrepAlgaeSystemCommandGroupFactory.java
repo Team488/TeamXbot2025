@@ -6,11 +6,12 @@ import competition.subsystems.algae_collection.commands.AlgaeCollectionIntakeCom
 import competition.subsystems.algae_collection.commands.AlgaeCollectionOutputCommand;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionStopCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import xbot.common.command.BaseParallelCommandGroup;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-public class PrepAlgaeSystemCommandGroupFactory extends ParallelCommandGroup {
+public class PrepAlgaeSystemCommandGroupFactory extends BaseParallelCommandGroup {
     Provider<SetAlgaeArmSetpointToTargetPosition> setAlgaeArmSetpointToTargetPositionProvider;
     Provider<AlgaeCollectionOutputCommand> algaeCollectionOutputCommandProvider;
     Provider<AlgaeCollectionIntakeCommand> algaeCollectionIntakeCommandProvider;

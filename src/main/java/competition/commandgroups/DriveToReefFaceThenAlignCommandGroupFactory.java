@@ -9,7 +9,7 @@ import competition.subsystems.pose.Cameras;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import xbot.common.command.BaseSequentialCommandGroup;
 import xbot.common.controls.sensors.XXboxController;
 
 import javax.inject.Inject;
@@ -47,8 +47,9 @@ public class DriveToReefFaceThenAlignCommandGroupFactory {
         }
     }
 
-    public SequentialCommandGroup create(Landmarks.ReefFace targetReefFace, Landmarks.Branch targetBranch) {
-        var group = new SequentialCommandGroup();
+    public BaseSequentialCommandGroup create(Landmarks.ReefFace targetReefFace, Landmarks.Branch targetBranch) {
+        var group = new BaseSequentialCommandGroup();
+        group.setName("DriveToReefFaceThenAlignCommandGroup");
 
         var driveToReefFaceCommand = driveToReefFaceCommandProvider.get();
         var alignToReefWithAprilTagCommand = alignToReefWithAprilTagCommandProvider.get();
