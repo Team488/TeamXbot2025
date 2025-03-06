@@ -8,11 +8,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Units;
-import org.kobe.xbot.JClient.XTablesClient;
-import org.kobe.xbot.JClient.XTablesClientManager;
-import org.kobe.xbot.Utilities.VisionCoprocessorCommander;
 import org.kobe.xbot.Utilities.Entities.XTableValues;
-import org.kobe.xbot.Utilities.Entities.VisionCoprocessor;
 import xbot.common.logging.RobotAssertionManager;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.drive.SwerveSimpleBezierCommand;
@@ -21,7 +17,6 @@ import xbot.common.trajectory.XbotSwervePoint;
 
 import javax.inject.Inject;
 import java.util.AbstractMap;
-import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -133,7 +128,7 @@ public class DriveToBezierCurvesWithVisionCommand extends SwerveSimpleBezierComm
             .setFinalRotationTurnSpeedFactor(2)
             .build();
 
-        var commander = this.coprocessorComms.getVisionCoprocessorCommander();
+        var commander = this.coprocessorComms.getOrinVisionCoprocessorCommander();
 
         XTableValues.BezierCurves curves = commander
                 .requestBezierPathWithOptions(XTableValues.RequestVisionCoprocessorMessage.newBuilder()
