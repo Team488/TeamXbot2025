@@ -50,6 +50,7 @@ public class AlignWithCreeperCommand extends BaseCommand {
     private CachedSubscriber centeredConfidentlySubscriber;
 
     protected Boolean isCenteredConfidently;
+    protected double normalizedError;
 
     /**
      * Constructs a new AlignWithCreeperCommand.
@@ -146,73 +147,63 @@ public class AlignWithCreeperCommand extends BaseCommand {
     @Override
     public void execute() {
         super.execute();
-        XTablesClient client =
-                this.coprocessorCommunicationSubsystem.tryGetXTablesClient();
-        if (client == null) {
+        isCenteredConfidently =
+                this.centeredConfidentlySubscriber.getAsBoolean(null);
+        Integer leftDistance = this.leftDistanceSubscriber.getAsInteger(null);
+        Integer rightDistance = this.rightDistanceSubscriber.getAsInteger(null);
+
+        if (isCenteredConfidently == null) {
+            // No new vision data received; do nothing.
+            return;
+        } else if (isCenteredConfidently) {
+            // Alignment is achieved; stop any drive movement.
+            drive.stop();
+            return;
+        }
+        // Determine which side the misalignment error should be taken from.
+        boolean offToTheLeft;
+        if (leftDistance == null && rightDistance == null) {
+            log.warn("No valid left or right distance measurements received from the camera.");
+            return;
+        } else if (leftDistance == null || leftDistance == -1) {
+            offToTheLeft = false;
+        } else if (rightDistance == null || rightDistance == -1) {
+            offToTheLeft = true;
+        } else {
+            offToTheLeft = leftDistance < rightDistance;
+        }
+        // Choose the pixel error value from the side indicating misalignment.
+        int moveErrorPx = offToTheLeft ? leftDistance : rightDistance;
+
+        // Calculate the normalized error as a fraction of the camera resolution.
+        normalizedError = (double) moveErrorPx / resolution;
+
+        // If the error is within the acceptable range, log a message and exit the adjustment routine.
+        double errorThreshold = errorThresholdPercentage.get();
+        if (normalizedError <= errorThreshold) {
+            log.info("Alignment error {} is within acceptable limits (threshold: {}). No adjustment necessary.",
+                    normalizedError, errorThreshold);
+            drive.stop();
             return;
         }
 
-        try {
-            isCenteredConfidently =
-                    this.centeredConfidentlySubscriber.getAsBoolean(null);
-            Integer leftDistance = this.leftDistanceSubscriber.getAsInteger(null);
-            Integer rightDistance = this.rightDistanceSubscriber.getAsInteger(null);
+        // Scale the normalized error using the drive gain to compute the drive
+        // power.
+        double drivePower = driveGain.get() * normalizedError;
 
-            if (isCenteredConfidently == null) {
-                // No new vision data received; do nothing.
-                return;
-            } else if (isCenteredConfidently) {
-                // Alignment is achieved; stop any drive movement.
-                drive.stop();
-                return;
-            }
-            // Determine which side the misalignment error should be taken from.
-            boolean offToTheLeft;
-            if (leftDistance == null && rightDistance == null) {
-                log.warn("No valid left or right distance measurements received from the camera.");
-                return;
-            } else if (leftDistance == null) {
-                offToTheLeft = false;
-            } else if (rightDistance == null) {
-                offToTheLeft = true;
-            } else {
-                offToTheLeft = leftDistance < rightDistance;
-            }
-            // Choose the pixel error value from the side indicating misalignment.
-            int moveErrorPx = offToTheLeft ? leftDistance : rightDistance;
+        // Clamp the drive power to the safe range of [-1, 1].
+        drivePower = Math.max(-1.0, Math.min(1.0, drivePower));
 
-            // Calculate the normalized error as a fraction of the camera resolution.
-            double normalizedError = (double) moveErrorPx / resolution;
-
-            // If the error is within the acceptable range, log a message and exit the adjustment routine.
-            double errorThreshold = errorThresholdPercentage.get();
-            if (normalizedError <= errorThreshold) {
-                log.info("Alignment error {} is within acceptable limits (threshold: {}). No adjustment necessary.",
-                        normalizedError, errorThreshold);
-                drive.stop();
-                return;
-            }
-
-            // Scale the normalized error using the drive gain to compute the drive
-            // power.
-            double drivePower = driveGain.get() * normalizedError;
-
-            // Clamp the drive power to the safe range of [-1, 1].
-            drivePower = Math.max(-1.0, Math.min(1.0, drivePower));
-
-            // Reverse the drive power sign if misalignment is to the left to ensure
-            // proper movement direction.
-            if (offToTheLeft) {
-                drivePower = -drivePower;
-            }
-            // Create the drive command vector (Only drive power along the Y-axis,
-            // side-to-side).
-            XYPair pair = new XYPair(0, drivePower);
-            this.drive.move(pair, 0);
-
-        } catch (Exception e) {
-            log.error(e);
+        // Reverse the drive power sign if misalignment is to the left to ensure
+        // proper movement direction.
+        if (offToTheLeft) {
+            drivePower = -drivePower;
         }
+        // Create the drive command vector (Only drive power along the Y-axis,
+        // side-to-side).
+        XYPair pair = new XYPair(0, drivePower);
+        this.drive.move(pair, 0);
+
     }
 
     /**
@@ -223,7 +214,8 @@ public class AlignWithCreeperCommand extends BaseCommand {
      */
     @Override
     public boolean isFinished() {
-        return this.isCenteredConfidently != null && this.isCenteredConfidently;
+        return (this.isCenteredConfidently != null && this.isCenteredConfidently)
+                || (normalizedError <= errorThresholdPercentage.get());
     }
 
     /**
