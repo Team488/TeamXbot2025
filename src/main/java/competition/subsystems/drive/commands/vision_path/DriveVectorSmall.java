@@ -18,6 +18,8 @@ public class DriveVectorSmall extends BaseCommand {
     private DriveSubsystem drive;
     private PoseSubsystem poseSubsystem;
 
+    private boolean backwards = false;
+
     @Inject
     public DriveVectorSmall(DriveSubsystem driveSubsystem, PoseSubsystem poseSubsystem) {
         drive = driveSubsystem;
@@ -35,16 +37,26 @@ public class DriveVectorSmall extends BaseCommand {
      */
     @Override
     public void execute() {
-        if(this.isFinished()) {
+        if (this.isFinished()) {
             drive.stop(); // Drive.stop doesnt stop unless called continuously
             return;
         }
-       drive.move(new XYPair(-0.25, 0), 0);
+        XYPair pair = new XYPair(0.25, 0);
+        if (backwards) {
+            pair = pair.scale(-1);
+
+        }
+        drive.move(pair, 0);
     }
 
 
     public DriveVectorSmall setTargetPose(Pose2d targetPose) {
         this.targetPose = targetPose;
+        return this;
+    }
+
+    public DriveVectorSmall setBackwards(boolean backwards) {
+        this.backwards = backwards;
         return this;
     }
 

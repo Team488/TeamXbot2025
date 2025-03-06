@@ -6,6 +6,7 @@ import competition.auto_programs.FromRightCageScoreRightFacesLevelFours;
 import competition.commandgroups.HeadingAssistedDriveAndScoreCommandGroup;
 import competition.commandgroups.PrepAlgaeSystemCommandGroupFactory;
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
+import competition.commandgroups.vision_path.PathDriveToCoralStationAndIntakeUntilCollected;
 import competition.simulation.commands.ResetSimulatedPose;
 import competition.subsystems.algae_arm.AlgaeArmSubsystem;
 import competition.subsystems.algae_arm.commands.ForceAlgaeArmCalibrated;
@@ -26,9 +27,6 @@ import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.AlignToSpecificHumanLoadingStationCommand;
 import competition.subsystems.drive.commands.CalibrateDriveCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
-import competition.subsystems.drive.commands.DriveToClosestReefSectionWithVisionCommand;
-import competition.subsystems.drive.commands.DriveToCoralStationInterstitialCommand;
-import competition.subsystems.drive.commands.DriveToCoralStationWithVisionCommand;
 import competition.subsystems.drive.commands.DriveToLocationWithPID;
 import competition.subsystems.drive.commands.DriveToNearestReefFaceWithPID;
 import competition.subsystems.drive.commands.RotateToHeadingWithHeadingModule;
@@ -82,8 +80,7 @@ public class OperatorCommandMap {
             ResetPoseCommand resetPoseCommand,
             DriveAccordingToOracleCommand driveAccordingToOracle,
             SuperstructureAccordingToOracleCommand superstructureAccordingToOracle,
-            DriveToClosestReefSectionWithVisionCommand driveToClosestReefSectionWithVisionCommand,
-            DriveToCoralStationWithVisionCommand driveToCoralStationWithVisionCommand,
+            PathDriveToCoralStationAndIntakeUntilCollected driveToCoralStationWithVisionCommand,
             PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
             DebugSwerveModuleCommand debugModule,
             ChangeActiveSwerveModuleCommand changeActiveModule,
