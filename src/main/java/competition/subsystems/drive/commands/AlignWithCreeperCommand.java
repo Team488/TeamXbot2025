@@ -223,7 +223,7 @@ public class AlignWithCreeperCommand extends BaseCommand {
      */
     @Override
     public boolean isFinished() {
-        return this.isCenteredConfidently;
+        return this.isCenteredConfidently != null && this.isCenteredConfidently;
     }
 
     /**
