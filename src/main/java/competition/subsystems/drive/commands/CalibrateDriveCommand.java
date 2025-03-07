@@ -122,6 +122,7 @@ public class CalibrateDriveCommand extends BaseCommand {
 
     @Override
     public void end(boolean interrupted) {
+        super.end(interrupted);
         // Perform final analysis.
         double averageDeltaPosition = logDeltaPositions();
 

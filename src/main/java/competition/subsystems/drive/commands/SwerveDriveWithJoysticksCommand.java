@@ -42,6 +42,7 @@ public class SwerveDriveWithJoysticksCommand extends BaseCommand {
 
     @Override
     public void end(boolean interrupted) {
+        super.end(interrupted);
         log.info("Ending");
     }
 }

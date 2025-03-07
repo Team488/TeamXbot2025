@@ -97,6 +97,7 @@ public class AlignToTagGlobalMovementWithCalculator extends BaseCommand {
 
     @Override
     public void end(boolean interrupted) {
+        super.end(interrupted);
         pose.setPreferOdometryToVision(false);
         drive.stop();
     }
