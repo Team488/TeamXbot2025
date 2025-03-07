@@ -23,13 +23,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class DriveToClosestReefSectionWithVisionCommand extends PathDriveToLocation {
+public class PathDriveToClosestReefSectionWithVisionCommand extends PathDriveToLocation {
     private final AprilTagFieldLayout aprilTagFieldLayout;
     private final DriveSubsystem driveSubsystem;
     private final ElectricalContract electricalContract;
 
     @Inject
-    DriveToClosestReefSectionWithVisionCommand(
+    PathDriveToClosestReefSectionWithVisionCommand(
             PoseSubsystem pose, DriveSubsystem drive,
             CoprocessorCommunicationSubsystem coprocessorComms,
             PropertyFactory pf, HeadingModule.HeadingModuleFactory headingModuleFactory,
