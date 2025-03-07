@@ -3,11 +3,16 @@ package competition.subsystems.drive.commands.vision_path;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.units.measure.Time;
 import xbot.common.command.BaseCommand;
 import xbot.common.controls.sensors.XTimer;
 import xbot.common.math.XYPair;
+import xbot.common.properties.DoubleProperty;
+import xbot.common.properties.PropertyFactory;
 
 import javax.inject.Inject;
+
+import static edu.wpi.first.units.Units.Seconds;
 
 public class DriveVectorSmallCommand extends BaseCommand {
     private double start;
@@ -20,10 +25,16 @@ public class DriveVectorSmallCommand extends BaseCommand {
 
     private boolean backwards = false;
 
+    private DoubleProperty drivePower;
+
     @Inject
-    public DriveVectorSmallCommand(DriveSubsystem driveSubsystem, PoseSubsystem poseSubsystem) {
+    public DriveVectorSmallCommand(DriveSubsystem driveSubsystem,
+                                   PoseSubsystem poseSubsystem,
+                                   PropertyFactory pf) {
+
         drive = driveSubsystem;
         this.poseSubsystem = poseSubsystem;
+        this.drivePower = pf.createPersistentProperty("DrivePower", 0.5);
     }
 
     @Override
@@ -41,7 +52,7 @@ public class DriveVectorSmallCommand extends BaseCommand {
             drive.stop(); // Drive.stop doesnt stop unless called continuously
             return;
         }
-        XYPair pair = new XYPair(0.50, 0);
+        XYPair pair = new XYPair(drivePower.get(), 0);
         if (backwards) {
             pair = pair.scale(-1);
 
@@ -60,12 +71,12 @@ public class DriveVectorSmallCommand extends BaseCommand {
         return this;
     }
 
-    public double getLast() {
-        return last;
+    public Time getLast() {
+        return duration;
     }
 
-    public DriveVectorSmallCommand setLast(double last) {
-        this.last = last;
+    public DriveVectorSmallCommand setLast(Time last) {
+        this.duration = last;
         return this;
     }
 
@@ -81,7 +92,7 @@ public class DriveVectorSmallCommand extends BaseCommand {
      */
     @Override
     public boolean isFinished() {
-        return (XTimer.getFPGATimestamp() - this.start) >= this.last;
+        return (XTimer.getFPGATimestamp() - this.start) >= this.duration.in(Seconds);
     }
 
     /**
