@@ -322,9 +322,9 @@ public class PoseSubsystem extends BasePoseSubsystem {
     public Landmarks.ReefFace getReefFaceFromAngle() {
         double currentAngleInDegrees;
         if (useVisionAssistedPose.get()) {
-            currentAngleInDegrees = fullSwerveOdometry.getEstimatedPosition().getRotation().getDegrees();
+            currentAngleInDegrees = PoseSubsystem.convertBlueToRedIfNeeded(fullSwerveOdometry.getEstimatedPosition().getRotation()).getDegrees();
         } else {
-            currentAngleInDegrees = onlyWheelsGyroSwerveOdometry.getEstimatedPosition().getRotation().getDegrees();
+            currentAngleInDegrees =  PoseSubsystem.convertBlueToRedIfNeeded(onlyWheelsGyroSwerveOdometry.getEstimatedPosition().getRotation()).getDegrees();
         }
         
         if (currentAngleInDegrees > 150 || currentAngleInDegrees < -150) {

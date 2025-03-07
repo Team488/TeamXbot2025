@@ -41,6 +41,7 @@ import competition.subsystems.oracle.commands.DriveAccordingToOracleCommand;
 import competition.subsystems.oracle.commands.SuperstructureAccordingToOracleCommand;
 import competition.subsystems.pose.Cameras;
 import competition.subsystems.pose.Landmarks;
+import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.pose.commands.ResetPoseCommand;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -77,25 +78,22 @@ public class OperatorCommandMap {
             OperatorInterface operatorInterface,
             SetRobotHeadingCommand resetHeading,
             Provider<AlignToReefWithAprilTagCommand> alignToReefWithAprilTagProvider,
-            Provider<SwerveSimpleTrajectoryCommand> swerveSimpleTrajectoryCommandProvider,
-            Provider<DriveToLocationWithPID> driveToLocationWithPIDProvider,
-            Provider<RotateToHeadingWithHeadingModule> rotationToHeadingWithHeadingModuleProvider,
-            ResetPoseCommand resetPoseCommand,
             DriveAccordingToOracleCommand driveAccordingToOracle,
             SuperstructureAccordingToOracleCommand superstructureAccordingToOracle,
-            DriveToClosestReefSectionWithVisionCommand driveToClosestReefSectionWithVisionCommand,
-            DriveToCoralStationWithVisionCommand driveToCoralStationWithVisionCommand,
-            PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
             DebugSwerveModuleCommand debugModule,
             ChangeActiveSwerveModuleCommand changeActiveModule,
             SwerveDriveWithJoysticksCommand typicalSwerveDrive,
-            HeadingAssistedDriveAndScoreCommandGroup.Factory headingAssistedDriveAndScoreCommandGroupFactory,
-            AlignToSpecificHumanLoadingStationCommand alignToLeftStation,
             DriveToNearestReefFaceWithPID driveToNearestReefFaceWithPID,
             AlignToNearestCoralStationCommand alignToNearestCoralStationCommand,
-            DriveHermiteSplineCommand hermite) {
+            DriveHermiteSplineCommand hermite,
+            DriveSubsystem drive, PoseSubsystem pose) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
+
+        var pointAtNearestCoralStation = drive.createSetStaticHeadingTargetCommand(() ->
+                PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.getCoralStationSectionPose(pose.getClosestCoralStation(), Landmarks.CoralStationSection.MID)
+                        .getRotation()));
+        var clearPointAtHeading = drive.createClearAllHeadingTargetsCommand();
 
         var alignToReefWithAprilTagWithLeftCamera = alignToReefWithAprilTagProvider.get();
         alignToReefWithAprilTagWithLeftCamera.setConfigurations(Cameras.FRONT_LEFT_CAMERA.getIndex(), false, -2, true);
@@ -107,86 +105,23 @@ public class OperatorCommandMap {
 
         var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
 
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(alignToNearestCoralStationCommand);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(pointAtNearestCoralStation)
+                .onFalse(clearPointAtHeading);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(driveToNearestReefFaceWithPID);
 
         operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
         operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(changeActiveModule);
         operatorInterface.driverGamepad.getPovIfAvailable(180).onTrue(typicalSwerveDrive);
 
-        alignToLeftStation.setCoralStation(Landmarks.CoralStation.LEFT);
         operatorInterface.driverGamepad.getPovIfAvailable(270).whileTrue(hermite);
-
-        // operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(intakeCoralCommand);
-        // operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(scoreCoralCommand);
-
-
 
         // (BLUE ALLIANCE) Below are different routes to test the SwerveSimpleTrajectoryCommand
         // I don't think createPotentiallyFilppedXbotSwervePoint works under OperatorCommandMap
         SwervePointKinematics kinematicValuesForTesting = new SwervePointKinematics(1, 0, 0, 5);
 
-        var aroundBlueReef = swerveSimpleTrajectoryCommandProvider.get();
-        List<XbotSwervePoint> points1 = new ArrayList<>();
-        points1.add(new XbotSwervePoint(new Translation2d(6.5, 6.5), new Rotation2d(0), 10));
-        points1.add(new XbotSwervePoint(new Translation2d(2.2, 6.5), new Rotation2d(0), 10));
-        points1.add(new XbotSwervePoint(new Translation2d(2.2, 1.5), new Rotation2d(0), 10));
-        points1.add(new XbotSwervePoint(new Translation2d(6.5, 1.5), new Rotation2d(0), 10));
-        aroundBlueReef.logic.setGlobalKinematicValues(kinematicValuesForTesting);
-        aroundBlueReef.logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
-        aroundBlueReef.logic.setKeyPoints(points1);
-
-        var backAndFourth = swerveSimpleTrajectoryCommandProvider.get();
-        List<XbotSwervePoint> points2 = new ArrayList<>();
-        points2.add(new XbotSwervePoint(new Translation2d(6.5, 6.5), new Rotation2d(0), 10));
-        points2.add(new XbotSwervePoint(new Translation2d(2.2, 6.5), new Rotation2d(0), 10));
-        points2.add(new XbotSwervePoint(new Translation2d(6.5, 6.5), new Rotation2d(0), 10));
-        points2.add(new XbotSwervePoint(new Translation2d(2.2, 6.5), new Rotation2d(0), 10));
-        points2.add(new XbotSwervePoint(new Translation2d(6.5, 6.5), new Rotation2d(0), 10));
-        backAndFourth.logic.setGlobalKinematicValues(kinematicValuesForTesting);
-        backAndFourth.logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
-        backAndFourth.logic.setKeyPoints(points2);
-
-        var oneLength = swerveSimpleTrajectoryCommandProvider.get();
-        List<XbotSwervePoint> points3 = new ArrayList<>();
-        points3.add(new XbotSwervePoint(new Translation2d(3, 0), new Rotation2d(0), 10));
-        oneLength.logic.setGlobalKinematicValues(kinematicValuesForTesting);
-        oneLength.logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
-        oneLength.logic.setKeyPoints(points3);
-
-        // oneLength.includeOnSmartDashboard("OneLengthTest");
-
-        // aroundBlueReef.includeOnSmartDashboard("AroundReefTest");
-        // backAndFourth.includeOnSmartDashboard("BackAndForthTest");
-
-        var driveWithPidNear = driveToLocationWithPIDProvider.get();
-        driveWithPidNear.setLocationTarget(new Translation2d(1, 0));
-
-        var driveWithPidFar = driveToLocationWithPIDProvider.get();
-        driveWithPidFar.setLocationTarget(new Translation2d(3, 0));
-
-        var rotateTo5Degrees = rotationToHeadingWithHeadingModuleProvider.get();
-        rotateTo5Degrees.setTargetHeading(Degree.of(5));
-
-        var rotateTo10Degrees = rotationToHeadingWithHeadingModuleProvider.get();
-        rotateTo10Degrees.setTargetHeading(Degree.of(10));
-
-        var rotateTo45Degrees = rotationToHeadingWithHeadingModuleProvider.get();
-        rotateTo45Degrees.setTargetHeading(Degree.of(45));
-
-        var rotateTo90Degrees = rotationToHeadingWithHeadingModuleProvider.get();
-        rotateTo90Degrees.setTargetHeading(Degree.of(90));
-
-        var rotateTo180Degrees = rotationToHeadingWithHeadingModuleProvider.get();
-        rotateTo180Degrees.setTargetHeading(Degree.of(180));
-
-        // driveWithPidNear.includeOnSmartDashboard("DriveToLocationWithPIDNear");
-        // driveWithPidFar.includeOnSmartDashboard("DriveToLocationWithPIDFar");
-        // rotateTo5Degrees.includeOnSmartDashboard("RotateTo5Degrees");
-        // rotateTo10Degrees.includeOnSmartDashboard("RotateTo10Degrees");
-        // rotateTo45Degrees.includeOnSmartDashboard("RotateTo45Degrees");
-        // rotateTo90Degrees.includeOnSmartDashboard("RotateTo90Degrees");
-        // rotateTo180Degrees.includeOnSmartDashboard("RotateTo180Degrees");
+//        operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
+//        operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(changeActiveModule);
+//        operatorInterface.driverGamepad.getPovIfAvailable(180).onTrue(typicalSwerveDrive);
     }
 
 
@@ -235,10 +170,10 @@ public class OperatorCommandMap {
         oi.operatorGamepad.getPovIfAvailable(0).onTrue(removeHighAlgae);
 
         var collectGroundAlgae = prepAlgaeSystemCommandGroupFactory.create(AlgaeArmSubsystem.AlgaeArmPositions.GroundCollection);
-        oi.operatorGamepad.getPovIfAvailable(270).onTrue(collectGroundAlgae);
+        oi.operatorGamepad.getPovIfAvailable(90).onTrue(collectGroundAlgae);
 
         var homeAlgaeArm = prepAlgaeSystemCommandGroupFactory.create(AlgaeArmSubsystem.AlgaeArmPositions.FullyRetracted);
-        oi.operatorGamepad.getPovIfAvailable(90).onTrue(homeAlgaeArm);
+        oi.operatorGamepad.getPovIfAvailable(270).onTrue(homeAlgaeArm);
 
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(intakeAlgae);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(ejectAlgae);
