@@ -11,7 +11,7 @@ import javax.inject.Inject;
 
 public class DriveVectorSmallCommand extends BaseCommand {
     private double start;
-    private double last = 0.25;
+    private Time duration = Seconds.of(0.25);
 
     private Pose2d targetPose;
 
