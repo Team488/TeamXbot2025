@@ -17,8 +17,8 @@ import xbot.common.subsystems.drive.control_logic.HeadingModule;
 
 import javax.inject.Inject;
 
-public class PathDriveToLocationUntilAprilTagDetection
-        extends PathDriveToLocation {
+public class PathDriveToLocationCommandUntilAprilTagDetection
+        extends PathDriveToLocationCommand {
     int aprilTagID;
 
     AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
@@ -30,7 +30,7 @@ public class PathDriveToLocationUntilAprilTagDetection
 
 
     @Inject
-    public PathDriveToLocationUntilAprilTagDetection(
+    public PathDriveToLocationCommandUntilAprilTagDetection(
             BaseSwerveDriveSubsystem drive, PoseSubsystem pose, PropertyFactory pf,
             HeadingModule.HeadingModuleFactory headingModuleFactory,
             AprilTagVisionSubsystemExtended aprilTagVisionSubsystem,
@@ -43,7 +43,7 @@ public class PathDriveToLocationUntilAprilTagDetection
         this.reefCoordinateGenerator = reefCoordinateGenerator;
     }
 
-    public PathDriveToLocationUntilAprilTagDetection setTarget(
+    public PathDriveToLocationCommandUntilAprilTagDetection setTarget(
             Landmarks.ReefFace reefFace, Landmarks.Branch branch, int aprilTagID) {
         this.face = reefFace;
         this.branch = branch;

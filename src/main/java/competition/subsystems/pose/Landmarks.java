@@ -114,12 +114,26 @@ public class Landmarks {
     }
 
     public enum ReefFace {
-        CLOSE,
-        CLOSE_LEFT,
-        CLOSE_RIGHT,
-        FAR,
-        FAR_LEFT,
-        FAR_RIGHT
+        CLOSE(RedDriverStationCenterFiducialId, BlueDriverStationCenterFiducialId),
+        CLOSE_LEFT(RedDriverStationLeftFiducialId, BlueDriverStationLeftFiducialId),
+        CLOSE_RIGHT(RedDriverStationRightFiducialId, BlueDriverStationRigthFiducialId),
+        FAR(RedBargeCenterFiducialId, BlueBargeCenterFiducialId),
+        FAR_LEFT(RedBargeLeftFiducialId, BlueBargeLeftFiducialId),
+        FAR_RIGHT(RedBargeRightFiducialId, BlueBargeRightFiducialId);
+        private final int redID;
+        private final int blueID;
+        ReefFace(int redAprilTagID, int blueAprilTagID) {
+          this.redID = redAprilTagID;
+          this.blueID = blueAprilTagID;
+        }
+
+        public int getRedAprilTagID() {
+            return redID;
+        }
+
+        public int getBlueAprilTagID() {
+            return blueID;
+        }
     }
 
     public enum ReefAlgae {

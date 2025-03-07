@@ -31,8 +31,8 @@ import java.util.stream.Collectors;
  * Command to drive the robot to a specific coral station section.
  * Uses AprilTag vision data to determine target positions dynamically.
  */
-public class PathDriveToNearestCoralStationSectionCommand
-        extends PathDriveToLocation {
+public class PathDriveToNearestCoralStationSectionCommandCommand
+        extends PathDriveToLocationCommand {
     /**
      * Target position for the coral station section.
      */
@@ -56,7 +56,7 @@ public class PathDriveToNearestCoralStationSectionCommand
 
 
     /**
-     * Constructs the PathDriveToNearestCoralStationSectionCommand.
+     * Constructs the PathDriveToNearestCoralStationSectionCommandCommand.
      *
      * @param drive                             The drive subsystem.
      * @param pose                              The pose subsystem.
@@ -74,14 +74,14 @@ public class PathDriveToNearestCoralStationSectionCommand
      *                                          coprocessor.
      */
     @Inject
-    public PathDriveToNearestCoralStationSectionCommand(DriveSubsystem drive,
-                                                        PoseSubsystem pose, PropertyFactory pf,
-                                                        HeadingModule.HeadingModuleFactory headingModuleFactory,
-                                                        AprilTagVisionSubsystemExtended aprilTagVisionSubsystem,
-                                                        ElectricalContract electricalContract,
-                                                        AprilTagFieldLayout aprilTagFieldLayout,
-                                                        RobotAssertionManager robotAssertionManager,
-                                                        CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem) {
+    public PathDriveToNearestCoralStationSectionCommandCommand(DriveSubsystem drive,
+                                                               PoseSubsystem pose, PropertyFactory pf,
+                                                               HeadingModule.HeadingModuleFactory headingModuleFactory,
+                                                               AprilTagVisionSubsystemExtended aprilTagVisionSubsystem,
+                                                               ElectricalContract electricalContract,
+                                                               AprilTagFieldLayout aprilTagFieldLayout,
+                                                               RobotAssertionManager robotAssertionManager,
+                                                               CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem) {
         super(drive, pose, pf, headingModuleFactory, aprilTagVisionSubsystem,
                 robotAssertionManager, coprocessorCommunicationSubsystem);
         this.radiusOfRobot = electricalContract.getDistanceFromCenterToOuterBumperX().in(Units.Meters);

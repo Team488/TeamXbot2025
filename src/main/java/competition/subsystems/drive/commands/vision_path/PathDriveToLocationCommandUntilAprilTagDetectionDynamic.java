@@ -13,11 +13,11 @@ import xbot.common.subsystems.drive.control_logic.HeadingModule;
 
 import javax.inject.Inject;
 
-public class PathDriveToLocationUntilAprilTagDetectionDynamic
-        extends PathDriveToLocation {
+public class PathDriveToLocationCommandUntilAprilTagDetectionDynamic
+        extends PathDriveToLocationCommand {
     AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
     @Inject
-    public PathDriveToLocationUntilAprilTagDetectionDynamic(
+    public PathDriveToLocationCommandUntilAprilTagDetectionDynamic(
             BaseSwerveDriveSubsystem drive, PoseSubsystem pose, PropertyFactory pf,
             HeadingModule.HeadingModuleFactory headingModuleFactory,
             AprilTagVisionSubsystemExtended aprilTagVisionSubsystem,
@@ -28,7 +28,7 @@ public class PathDriveToLocationUntilAprilTagDetectionDynamic
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
     }
 
-    public PathDriveToLocationUntilAprilTagDetectionDynamic setTarget(
+    public PathDriveToLocationCommandUntilAprilTagDetectionDynamic setTarget(
             Pose2d target) {
         super.setTarget(target);
         return this;

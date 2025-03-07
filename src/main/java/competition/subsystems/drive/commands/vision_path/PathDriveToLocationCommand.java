@@ -20,7 +20,7 @@ import javax.inject.Inject;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class PathDriveToLocation extends SwerveBezierTrajectoryBase {
+public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
     Pose2d target;
 
     private final VisionCoprocessorCommander commander;
@@ -36,12 +36,12 @@ public class PathDriveToLocation extends SwerveBezierTrajectoryBase {
     private CoprocessorCommunicationSubsystem coprocessor;
 
     @Inject
-    public PathDriveToLocation(BaseSwerveDriveSubsystem drive, PoseSubsystem pose,
-                               PropertyFactory pf,
-                               HeadingModule.HeadingModuleFactory headingModuleFactory,
-                               AprilTagVisionSubsystemExtended aprilTagVisionSubsystem,
-                               RobotAssertionManager robotAssertionManager,
-                               CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem) {
+    public PathDriveToLocationCommand(BaseSwerveDriveSubsystem drive, PoseSubsystem pose,
+                                      PropertyFactory pf,
+                                      HeadingModule.HeadingModuleFactory headingModuleFactory,
+                                      AprilTagVisionSubsystemExtended aprilTagVisionSubsystem,
+                                      RobotAssertionManager robotAssertionManager,
+                                      CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem) {
         super(drive, pose, pf, headingModuleFactory, robotAssertionManager,
                 coprocessorCommunicationSubsystem);
         this.commander =
@@ -52,29 +52,29 @@ public class PathDriveToLocation extends SwerveBezierTrajectoryBase {
         routingCircle = new ReefRoutingCircle(center, 2);
     }
 
-    public PathDriveToLocation setTarget(Pose2d target) {
+    public PathDriveToLocationCommand setTarget(Pose2d target) {
         this.target = target;
         return this;
     }
 
-    public PathDriveToLocation setOptions(
+    public PathDriveToLocationCommand setOptions(
             XTableValues.TraversalOptions traversalOptions) {
         this.traversalOptions = traversalOptions;
         return this;
     }
 
-    public PathDriveToLocation setSafeInches(int safeInches) {
+    public PathDriveToLocationCommand setSafeInches(int safeInches) {
         this.safeInches = safeInches;
         return this;
     }
 
-    public PathDriveToLocation setAdditionalArguments(XTableValues.AdditionalArguments additionalArguments) {
+    public PathDriveToLocationCommand setAdditionalArguments(XTableValues.AdditionalArguments additionalArguments) {
         this.additionalArguments = additionalArguments;
         return this;
     }
 
     public static void setUseBackupPointToPoint(boolean useBackupPointToPoint) {
-        PathDriveToLocation.useBackupPointToPoint = useBackupPointToPoint;
+        PathDriveToLocationCommand.useBackupPointToPoint = useBackupPointToPoint;
     }
 
     @Override

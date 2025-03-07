@@ -1,7 +1,7 @@
 package competition.commandgroups.vision_path;
 
 import competition.subsystems.drive.commands.AlignToTagGlobalMovementWithCalculator;
-import competition.subsystems.drive.commands.vision_path.PathDriveToLocationUntilAprilTagDetection;
+import competition.subsystems.drive.commands.vision_path.PathDriveToLocationCommandUntilAprilTagDetection;
 import competition.subsystems.pose.Cameras;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
@@ -11,14 +11,14 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 
 public class PathToReefFaceThenAlignCommandGroupFactory {
-    Provider<PathDriveToLocationUntilAprilTagDetection> driveToReefFaceCommandProvider;
+    Provider<PathDriveToLocationCommandUntilAprilTagDetection> driveToReefFaceCommandProvider;
     Provider<AlignToTagGlobalMovementWithCalculator> alignToReefWithAprilTagCommandProvider;
     AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
 
 
     @Inject
     public PathToReefFaceThenAlignCommandGroupFactory(
-            Provider<PathDriveToLocationUntilAprilTagDetection> driveToReefFaceCommandProvider,
+            Provider<PathDriveToLocationCommandUntilAprilTagDetection> driveToReefFaceCommandProvider,
             Provider<AlignToTagGlobalMovementWithCalculator> alignToReefWithAprilTagCommandProvider,
             AprilTagVisionSubsystemExtended aprilTagVisionSubsystem) {
         this.driveToReefFaceCommandProvider = driveToReefFaceCommandProvider;
@@ -42,7 +42,7 @@ public class PathToReefFaceThenAlignCommandGroupFactory {
     public SequentialCommandGroup create(
             Landmarks.ReefFace targetReefFace, Landmarks.Branch targetBranch) {
         var group = new SequentialCommandGroup();
-        PathDriveToLocationUntilAprilTagDetection driveToReefFaceCommand = driveToReefFaceCommandProvider.get();
+        PathDriveToLocationCommandUntilAprilTagDetection driveToReefFaceCommand = driveToReefFaceCommandProvider.get();
         AlignToTagGlobalMovementWithCalculator alignToReefWithAprilTagCommand = alignToReefWithAprilTagCommandProvider.get();
         driveToReefFaceCommand.setTarget(targetReefFace, targetBranch,
                 aprilTagVisionSubsystem.getTargetAprilTagID(targetReefFace));
