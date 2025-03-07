@@ -28,7 +28,7 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
     private static boolean useBackupPointToPoint = false;
 
     private XTableValues.TraversalOptions traversalOptions;
-    private int safeInches = 10;
+    private Distance safeDistance = Inches.of(10);
     private final ReefRoutingCircle routingCircle;
     private XTableValues.AdditionalArguments additionalArguments;
 
