@@ -142,8 +142,8 @@ public class Landmarks {
     }
 
     public enum Branch {
-        A(Meters.of(2)),
-        B(Meters.of(2));
+        A(Meters.of(-0.165)),
+        B(Meters.of(0.165));
         private final Distance offsetFromReefAprilTagCenter;
 
         Branch(Distance offsetFromReefAprilTagCenter) {
