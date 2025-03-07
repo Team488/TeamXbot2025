@@ -36,10 +36,10 @@ public class MeasureDistanceBeforeScoringCommand extends BaseCommand {
         aKitLog.record("distance ", pose.getCurrentPose2d().getTranslation()
                 .getDistance(targetReefFacePose.getTranslation()));
         aKitLog.record("branch", branch.name());
+        aKitLog.record("targetReefFace", pose.getReefFaceFromAngle());
 
         return pose.getCurrentPose2d().getTranslation().getDistance(targetReefFacePose.getTranslation())
                 < distanceThresholdSupplier.get().in(Meters);
-
     }
 
     public void setDistanceThresholdSupplier(Supplier<Distance> distanceThresholdSupplier) {
