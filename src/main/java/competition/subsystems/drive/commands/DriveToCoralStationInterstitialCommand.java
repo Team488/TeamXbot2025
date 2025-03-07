@@ -58,9 +58,9 @@ public class DriveToCoralStationInterstitialCommand extends SwerveBezierTrajecto
         log.info("Initializing");
 
         if (station == Landmarks.CoralStation.LEFT) {
-            setBezierConfiguration(firstLeftStationInterstitialPoint.getTranslation(), secondLeftStationInterstitialPoint, 10);
+            setBezierConfiguration(firstLeftStationInterstitialPoint.getTranslation(), secondLeftStationInterstitialPoint, 5);
         } else {
-            setBezierConfiguration(firstRightStationInterstitialPoint.getTranslation(), secondRightStationInterstitialPoint, 10);
+            setBezierConfiguration(firstRightStationInterstitialPoint.getTranslation(), secondRightStationInterstitialPoint, 5);
         }
 
         if (kinematics) {
