@@ -94,7 +94,7 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
         this.reefLowBottomToTopSweepEnd = propertyFactory.createPersistentProperty("ReefLowBottomToTopSweepEnd", 150.0);
         this.reefLowTopToBottomSweepStart = propertyFactory.createPersistentProperty("ReefLowTopToBottomSweepStart", 150.0);
         this.reefLowTopToBottomSweepEnd = propertyFactory.createPersistentProperty("ReefLowTopToBottomSweepEnd", 90.0);
-        this.reefHighSweepStart = propertyFactory.createPersistentProperty("ReefHighSweepStart", 110.0);
+        this.reefHighSweepStart = propertyFactory.createPersistentProperty("ReefHighSweepStart", 160.0);
         this.reefHighSweepEnd = propertyFactory.createPersistentProperty("ReefHighSweepEnd", 150.0);
     }
 

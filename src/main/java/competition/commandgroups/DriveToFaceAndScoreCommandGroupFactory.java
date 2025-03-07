@@ -4,9 +4,7 @@ import competition.subsystems.coral_scorer.commands.ScoreWhenReadyCommand;
 import competition.subsystems.drive.commands.MeasureDistanceBeforeScoringCommand;
 import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import xbot.common.command.BaseParallelCommandGroup;
-import xbot.common.command.BaseSequentialCommandGroup;
 import xbot.common.command.BaseSequentialCommandGroup;
 import xbot.common.properties.DistanceProperty;
 import xbot.common.properties.PropertyFactory;
@@ -53,7 +51,7 @@ public class DriveToFaceAndScoreCommandGroupFactory {
         driveToFaceAndScoreCommandGroup.setName("driveToFaceAndScoreCommandGroup");
 
         // Drive to a branch while prepping the coral system once the robot is close enough
-        var driveToBranchWhilePrepping = new BaseParallelCommandGroup();
+        var driveToBranchWhilePrepping = new BaseSequentialCommandGroup();
         driveToBranchWhilePrepping.setName("driveToBranchWhilePrepping");
 
         // Terminally approach to branch
@@ -73,7 +71,7 @@ public class DriveToFaceAndScoreCommandGroupFactory {
         measureDistanceBeforeScoringCommand.setDistanceThreshold(distanceThresholdInMeters);
         measureDistanceBeforeScoringCommand.setBranch(targetBranch);
         var prepCoralSystem = prepCoralSystemFactory.create(() -> targetLevel);
-        measureDistanceThenPrep.addCommands(measureDistanceBeforeScoringCommand, prepCoralSystem);
+        measureDistanceThenPrep.addCommands(prepCoralSystem);
 
         driveToBranchWhilePrepping.addCommands(driveToReefFaceThenAlign, measureDistanceThenPrep);
 

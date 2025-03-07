@@ -84,6 +84,6 @@ public class DriveToCoralStationInterstitialCommand extends SwerveSimpleTrajecto
     @Override
     public boolean isFinished() {
         var point = station == Landmarks.CoralStation.LEFT ? secondLeftStationInterstitialPoint : secondRightStationInterstitialPoint;
-        return pose.getCurrentPose2d().minus(point).getTranslation().getNorm() < endingThresholdInMeters;
+        return pose.getCurrentPose2d().minus(PoseSubsystem.convertBlueToRedIfNeeded(point)).getTranslation().getNorm() < endingThresholdInMeters;
     }
 }

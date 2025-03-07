@@ -15,17 +15,17 @@ public class PrepAlgaeSystemCommandGroupFactory extends BaseParallelCommandGroup
     Provider<SetAlgaeArmSetpointToTargetPosition> setAlgaeArmSetpointToTargetPositionProvider;
     Provider<AlgaeCollectionOutputCommand> algaeCollectionOutputCommandProvider;
     Provider<AlgaeCollectionIntakeCommand> algaeCollectionIntakeCommandProvider;
-    AlgaeCollectionStopCommand algaeCollectionStopCommand;
+    Provider<AlgaeCollectionStopCommand> algaeCollectionStopCommandProvider;
 
     @Inject
     public PrepAlgaeSystemCommandGroupFactory(Provider<SetAlgaeArmSetpointToTargetPosition> setAlgaeArmSetpointToTargetPositionProvider,
                                               Provider<AlgaeCollectionOutputCommand> algaeCollectionOutputCommandProvider,
                                               Provider<AlgaeCollectionIntakeCommand> algaeCollectionIntakeCommandProvider,
-                                              AlgaeCollectionStopCommand algaeCollectionStopCommand) {
+                                              Provider<AlgaeCollectionStopCommand> algaeCollectionStopCommandProvider) {
         this.setAlgaeArmSetpointToTargetPositionProvider = setAlgaeArmSetpointToTargetPositionProvider;
         this.algaeCollectionOutputCommandProvider = algaeCollectionOutputCommandProvider;
         this.algaeCollectionIntakeCommandProvider = algaeCollectionIntakeCommandProvider;
-        this.algaeCollectionStopCommand = algaeCollectionStopCommand;
+        this.algaeCollectionStopCommandProvider = algaeCollectionStopCommandProvider;
     }
 
     public ParallelCommandGroup create(AlgaeArmSubsystem.AlgaeArmPositions algaeArmPositions) {
@@ -41,7 +41,7 @@ public class PrepAlgaeSystemCommandGroupFactory extends BaseParallelCommandGroup
             group.addCommands(setAlgaeArmSetpointToTarget, algaeCollectionIntake);
         }
         else if (algaeArmPositions == AlgaeArmSubsystem.AlgaeArmPositions.FullyRetracted) {
-            group.addCommands(setAlgaeArmSetpointToTarget, algaeCollectionStopCommand);
+            group.addCommands(setAlgaeArmSetpointToTarget, algaeCollectionStopCommandProvider.get());
         }
         else {
             group.addCommands(setAlgaeArmSetpointToTarget, algaeCollectionOutput);

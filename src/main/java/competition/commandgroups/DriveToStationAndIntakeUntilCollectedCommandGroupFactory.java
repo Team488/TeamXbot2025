@@ -45,7 +45,7 @@ public class DriveToStationAndIntakeUntilCollectedCommandGroupFactory {
         // We can add an interstitial point between scoring at the reef and terminally approaching to the coral station to avoid rotating into the reef
         if (addPoint) {
             driveToCoralStationSectionCommand.setTargetCoralStationSection(station);
-            driveToCoralStation.addCommands(driveToCoralStationSectionCommand);
+            driveToCoralStation.addCommands(driveToCoralStationSectionCommand.withTimeout(2.0));
         }
         alignToCoralStationCommand.setCoralStation(station);
         driveToCoralStation.addCommands(alignToCoralStationCommand);
