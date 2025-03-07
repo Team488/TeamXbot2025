@@ -17,6 +17,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.Distance;
 import xbot.common.advantage.AKitLogger;
 import xbot.common.controls.sensors.mock_adapters.MockGyro;
+import xbot.common.logic.TimeStableValidator;
 
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
@@ -47,7 +48,8 @@ public class MapleSimulator implements BaseSimulator {
     final AlgaeArmSimulator algaeArmSimulator;
     final LightsSimulator lightsSimulator;
 
-    final Distance humanLoadingDistanceThreshold = Meters.of(0.5);
+    final Distance humanLoadingDistanceThreshold = Meters.of(0.2);
+    final TimeStableValidator humanLoadValidator = new TimeStableValidator(1);
 
     // maple-sim stuff ----------------------------
     final DriveTrainSimulationConfig config;
@@ -171,7 +173,9 @@ public class MapleSimulator implements BaseSimulator {
         var coralScorerIsIntaking = coralScorerSimulator.isIntaking();
         var elevatorAtCollectionHeight = elevatorSimulator.isAtCollectionHeight();
         var armAtCollectionAngle = coralArmSimulator.isAtCollectionAngle();
-        Pose2d[] coralStations = {Landmarks.BlueLeftCoralStationMid, Landmarks.BlueRightCoralStationMid};
+        Pose2d[] coralStations = { Landmarks.BlueLeftCoralStationMid, Landmarks.BlueRightCoralStationMid,
+                PoseSubsystem.convertBluetoRed(Landmarks.BlueLeftCoralStationMid),
+                PoseSubsystem.convertBluetoRed(Landmarks.BlueRightCoralStationMid) };
         var currentPose = this.getGroundTruthPose();
         var robotNearHumanLoading = false; 
         for (Pose2d station : coralStations) {
@@ -184,8 +188,9 @@ public class MapleSimulator implements BaseSimulator {
                 }
             }
         }
+        var robotNearHumanStable = humanLoadValidator.checkStable(robotNearHumanLoading);
 
-        if (elevatorAtCollectionHeight && armAtCollectionAngle && coralScorerIsIntaking && robotNearHumanLoading) {
+        if (elevatorAtCollectionHeight && armAtCollectionAngle && coralScorerIsIntaking && robotNearHumanStable) {
             coralScorerSimulator.simulateCoralLoad();
         }
     }
