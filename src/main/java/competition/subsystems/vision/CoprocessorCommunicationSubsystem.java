@@ -36,6 +36,9 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
 
     private final VisionCoprocessorCommander orinVisionCoprocessorCommander;
 
+    private boolean useBackupPointToPointForPathplanning = false;
+
+
 
     @Inject
     public CoprocessorCommunicationSubsystem(PropertyFactory pf, RobotAssertionManager assertionManager) {
@@ -50,6 +53,15 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
         XTablesLogger.setLoggingLevel(Level.OFF);
 
         this.orinVisionCoprocessorCommander = new VisionCoprocessorCommander(VisionCoprocessor.ORIN3_STATIC);
+    }
+
+    public boolean isUseBackupPointToPointForPathplanning() {
+        return useBackupPointToPointForPathplanning;
+    }
+
+    public CoprocessorCommunicationSubsystem setUseBackupPointToPointForPathplanning(boolean useBackupPointToPointForPathplanning) {
+        this.useBackupPointToPointForPathplanning = useBackupPointToPointForPathplanning;
+        return this;
     }
 
     public XTablesClientManager getXTablesManager(){
