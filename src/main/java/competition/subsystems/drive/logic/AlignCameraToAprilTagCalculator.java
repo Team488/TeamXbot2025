@@ -299,8 +299,8 @@ public class AlignCameraToAprilTagCalculator {
                         shoveStartTime = XTimer.getFPGATimestamp();
                     } else {
                         activity = Activity.ApproachWhileCentering;
-                        oi.operatorGamepad.getRumbleManager().rumbleGamepad(oi.getOperatorGamepadRumbleIntensitiy(),.75);
-                        oi.driverGamepad.getRumbleManager().rumbleGamepad(oi.getDriverGamepadRumbleIntensitity(), .75);
+                        oi.operatorGamepad.getRumbleManager().rumbleGamepad(1,.75);
+                        oi.driverGamepad.getRumbleManager().rumbleGamepad(1, .75);
                     }
                 }
                 break;
