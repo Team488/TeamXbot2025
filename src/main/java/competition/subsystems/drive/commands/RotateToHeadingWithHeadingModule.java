@@ -35,6 +35,7 @@ public class RotateToHeadingWithHeadingModule extends BaseCommand {
 
     @Override
     public void initialize() {
+        super.initialize();
         log.info("Initializing");
         pose.setCurrentPoseInMeters(new Pose2d(pose.getCurrentPose2d().getTranslation(), new Rotation2d(0)));
     }

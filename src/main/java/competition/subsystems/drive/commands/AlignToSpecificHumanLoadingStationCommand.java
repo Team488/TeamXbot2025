@@ -32,6 +32,7 @@ public class AlignToSpecificHumanLoadingStationCommand extends AlignToTagGlobalM
 
     @Override
     public void initialize() {
+        super.initialize();
         var alliance = DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
         this.setConfigurations(
                 2,

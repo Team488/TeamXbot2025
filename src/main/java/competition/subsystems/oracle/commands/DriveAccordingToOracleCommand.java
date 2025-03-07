@@ -43,6 +43,7 @@ public class DriveAccordingToOracleCommand extends BaseCommand {
 
     @Override
     public void initialize() {
+        super.initialize();
         log.info("Initializing");
         oracle.requestReevaluation();
         setNewInstruction();

@@ -23,6 +23,7 @@ public class ScoreWhenReadyCommand extends BaseCommand {
 
     @Override
     public void initialize() {
+        super.initialize();
         log.info("Initializing");
     }
 

@@ -34,6 +34,7 @@ public class DriveToNearestReefFaceUntilDetectionCommand extends SwerveSimpleTra
 
     @Override
     public void initialize() {
+        super.initialize();
         log.info("Initializing");
 
         targetReefFacePose = pose.getClosestReefFacePose();

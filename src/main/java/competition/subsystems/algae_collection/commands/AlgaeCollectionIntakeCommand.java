@@ -16,6 +16,7 @@ public class AlgaeCollectionIntakeCommand extends BaseCommand {
 
     @Override
     public void initialize() {
+        super.initialize();
         algae.intake();
     }
 }

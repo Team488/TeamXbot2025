@@ -29,6 +29,7 @@ public class DriveToLocationWithPID extends BaseCommand {
 
     @Override
     public void initialize() {
+        super.initialize();
         log.info("Initializing");
         // Reset rotation as well just in case
         pose.setCurrentPoseInMeters(new Pose2d(0, 0, new Rotation2d(0)));

@@ -43,6 +43,7 @@ public class ShoveCoralStationCommand extends BaseCommand {
 
     @Override
     public void initialize() {
+        super.initialize();
         log.info("Initializing");
         pose.setPreferOdometryToVision(true);
         startTime = XTimer.getFPGATimestamp();

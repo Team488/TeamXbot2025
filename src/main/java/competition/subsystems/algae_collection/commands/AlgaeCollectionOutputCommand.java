@@ -16,6 +16,7 @@ public class AlgaeCollectionOutputCommand extends BaseCommand {
 
     @Override
     public void initialize() {
+        super.initialize();
         algae.output();
     }
 }

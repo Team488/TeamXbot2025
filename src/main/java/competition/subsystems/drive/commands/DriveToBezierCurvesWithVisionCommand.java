@@ -50,6 +50,7 @@ public class DriveToBezierCurvesWithVisionCommand extends SwerveSimpleBezierComm
 
     @Override
     public void initialize() {
+        super.initialize();
         if (retrieveCurvesFromVision()) {
             super.initialize();
         }

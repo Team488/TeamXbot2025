@@ -42,6 +42,7 @@ public class DriveToNearestReefFaceWithPID extends BaseCommand {
 
     @Override
     public void initialize() {
+        super.initialize();
         log.info("Initializing");
 
         Pose2d closestPose = pose.getClosestReefFacePose();

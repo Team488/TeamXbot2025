@@ -30,6 +30,7 @@ public class SuperstructureAccordingToOracleCommand extends BaseCommand {
     }
 
     public void initialize() {
+        super.initialize();
         log.info("Initializing");
         oracle.requestReevaluation();
         setNewInstruction();

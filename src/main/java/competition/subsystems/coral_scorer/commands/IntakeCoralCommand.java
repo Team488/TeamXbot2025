@@ -21,6 +21,7 @@ public class IntakeCoralCommand extends BaseCommand {
 
     @Override
     public void initialize() {
+        super.initialize();
         coral.setCoralScorerState(CoralScorerSubsystem.CoralScorerState.INTAKING);
     }
 

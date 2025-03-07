@@ -55,6 +55,7 @@ public class DriveToCoralStationInterstitialCommand extends SwerveSimpleTrajecto
 
     @Override
     public void initialize() {
+        super.initialize();
         log.info("Initializing");
         ArrayList<XbotSwervePoint> swervePoints = new ArrayList<>();
 

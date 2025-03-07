@@ -67,6 +67,7 @@ public class AlignToTagGlobalMovementWithCalculator extends BaseCommand {
 
     @Override
     public void initialize() {
+        super.initialize();
         log.info("Initializing");
         if (!hasSetConfiguration) {
             cancel();

@@ -16,6 +16,7 @@ public class AlgaeCollectionStopCommand extends BaseCommand {
 
     @Override
     public void initialize() {
+        super.initialize();
         algae.stop();
     }
 }

@@ -38,6 +38,7 @@ public class DriveToReefFaceUntilDetectionCommand extends SwerveSimpleTrajectory
 
     @Override
     public void initialize() {
+        super.initialize();
         log.info("Initializing");
         ArrayList<XbotSwervePoint> swervePoints = new ArrayList<>();
         swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(targetReefFacePose), 10));

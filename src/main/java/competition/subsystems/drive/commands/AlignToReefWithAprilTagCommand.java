@@ -42,6 +42,7 @@ public class AlignToReefWithAprilTagCommand extends AlignToTagGlobalMovementWith
 
     @Override
     public void initialize() {
+        super.initialize();
         log.info("Initializing");
         if (!hasSetConfiguration) {
             cancel();

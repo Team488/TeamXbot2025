@@ -33,6 +33,7 @@ public class EmergencyAutonomousCommand extends BaseCommand {
 
     @Override
     public void initialize() {
+        super.initialize();
         startingTime = XTimer.getFPGATimestamp();
     }
 

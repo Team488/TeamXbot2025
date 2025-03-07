@@ -45,6 +45,7 @@ public class DriveToReefFaceFromAngleUntilDetectionCommand extends SwerveSimpleT
 
     @Override
     public void initialize() {
+        super.initialize();
         log.info("Initializing");
 
         currentPose = pose.getCurrentPose2d();

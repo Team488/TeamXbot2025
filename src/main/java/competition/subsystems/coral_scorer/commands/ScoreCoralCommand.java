@@ -17,6 +17,7 @@ public class ScoreCoralCommand extends BaseCommand {
 
     @Override
     public void initialize() {
+        super.initialize();
         coral.setCoralScorerState(CoralScorerSubsystem.CoralScorerState.SCORING);
     }
 

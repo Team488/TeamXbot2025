@@ -46,6 +46,7 @@ public class DriveToReefFaceInterstitialCommand extends SwerveSimpleTrajectoryCo
 
     @Override
     public void initialize() {
+        super.initialize();
         log.info("Initializing");
         ArrayList<XbotSwervePoint> swervePoints = new ArrayList<>();
 
