@@ -34,6 +34,7 @@ public class DriveVectorSmallCommand extends BaseCommand {
 
         drive = driveSubsystem;
         this.poseSubsystem = poseSubsystem;
+        pf.setPrefix("DriveVectorSmallCommand/");
         this.drivePower = pf.createPersistentProperty("DrivePower", 0.5);
     }
 

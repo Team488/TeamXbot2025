@@ -5,6 +5,8 @@
  */
 package competition.subsystems.drive.commands.vision_path;
 
+import static edu.wpi.first.units.Units.Meters;
+
 import competition.electrical_contract.ElectricalContract;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.Landmarks;
@@ -18,17 +20,14 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import javax.inject.Inject;
 import org.kobe.xbot.Utilities.Entities.XTableValues;
 import xbot.common.logging.RobotAssertionManager;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
-
-import javax.inject.Inject;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static edu.wpi.first.units.Units.Meters;
 
 /**
  * Command to drive the robot to a specific coral station section.
@@ -57,8 +56,7 @@ public class PathDriveToNearestCoralStationSectionCommandCommand
     private Pose2d coralStationTarget;
     private final ElectricalContract electricalContract;
 
-    private final static Distance goalThreshold = Meters.of(0.1016);
-
+    private final Distance goalThreshold = Meters.of(0.1016);
 
     /**
      * Constructs the PathDriveToNearestCoralStationSectionCommandCommand.
@@ -79,17 +77,18 @@ public class PathDriveToNearestCoralStationSectionCommandCommand
      *                                          coprocessor.
      */
     @Inject
-    public PathDriveToNearestCoralStationSectionCommandCommand(DriveSubsystem drive,
-                                                               PoseSubsystem pose, PropertyFactory pf,
-                                                               HeadingModule.HeadingModuleFactory headingModuleFactory,
-                                                               AprilTagVisionSubsystemExtended aprilTagVisionSubsystem,
-                                                               ElectricalContract electricalContract,
-                                                               AprilTagFieldLayout aprilTagFieldLayout,
-                                                               RobotAssertionManager robotAssertionManager,
-                                                               CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem) {
+    public PathDriveToNearestCoralStationSectionCommandCommand(
+            DriveSubsystem drive, PoseSubsystem pose, PropertyFactory pf,
+            HeadingModule.HeadingModuleFactory headingModuleFactory,
+            AprilTagVisionSubsystemExtended aprilTagVisionSubsystem,
+            ElectricalContract electricalContract,
+            AprilTagFieldLayout aprilTagFieldLayout,
+            RobotAssertionManager robotAssertionManager,
+            CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem) {
         super(drive, pose, pf, headingModuleFactory, aprilTagVisionSubsystem,
                 robotAssertionManager, coprocessorCommunicationSubsystem);
-        this.radiusOfRobot = electricalContract.getDistanceFromCenterToOuterBumperX().in(Meters);
+        this.radiusOfRobot =
+                electricalContract.getDistanceFromCenterToOuterBumperX().in(Meters);
         this.aprilTagFieldLayout = aprilTagFieldLayout;
         this.driveSubsystem = drive;
         this.electricalContract = electricalContract;
@@ -138,19 +137,22 @@ public class PathDriveToNearestCoralStationSectionCommandCommand
                 this.radiusOfRobot, targetCoralStationSection.getRotation());
         var destinationTranslation =
                 targetCoralStationSection.getTranslation().plus(deltaTranslation);
-        destinationPose =
-                new Pose2d(destinationTranslation, targetCoralStationSection.getRotation());
+        destinationPose = new Pose2d(
+                destinationTranslation, targetCoralStationSection.getRotation());
         this.setTarget(destinationPose);
-        this.setAdditionalArguments(XTableValues.AdditionalArguments.newBuilder()
-                .setAlliance(CoprocessorCommunicationSubsystem.fromAlliance(DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue)))
-                .build());
+        this.setAdditionalArguments(
+                XTableValues.AdditionalArguments.newBuilder()
+                        .setAlliance(CoprocessorCommunicationSubsystem.fromAlliance(
+                                DriverStation.getAlliance().orElse(
+                                        DriverStation.Alliance.Blue)))
+                        .build());
         this.setSafeDistance(
-                electricalContract.getDiagonalDistanceDifferenceOfRobotRadius()
-                        );
+                electricalContract.getDiagonalDistanceDifferenceOfRobotRadius());
         this.setOptions(
                 XTableValues.TraversalOptions.newBuilder()
                         .setMetersPerSecond(driveSubsystem.getDriveToWaypointsSpeed().get())
-                        .setAccelerationMetersPerSecond(driveSubsystem.getMaxAccelerationMetersPerSecondSquared())
+                        .setAccelerationMetersPerSecond(
+                                driveSubsystem.getMaxAccelerationMetersPerSecondSquared())
                         .setFinalRotationDegrees(destinationPose.getRotation().getDegrees())
                         .build());
         super.initialize();
@@ -158,9 +160,14 @@ public class PathDriveToNearestCoralStationSectionCommandCommand
 
     @Override
     public boolean isFinished() {
-        aKitLog.record("distanceToGoal", pose.getCurrentPose2d().getTranslation().getDistance(destinationPose.getTranslation()));
+        aKitLog.record("distanceToGoal",
+                pose.getCurrentPose2d().getTranslation().getDistance(
+                        destinationPose.getTranslation()));
         return super.isFinished()
-                || (destinationPose != null && pose.getCurrentPose2d().getTranslation().getDistance(destinationPose.getTranslation()) < goalThreshold.in(Units.Meters));
+                || (destinationPose != null
+                && pose.getCurrentPose2d().getTranslation().getDistance(
+                destinationPose.getTranslation())
+                < goalThreshold.in(Units.Meters));
     }
 
     public Pose2d getTargetCoralStationSection() {
