@@ -10,7 +10,9 @@ import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.units.DistanceUnit;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import org.kobe.xbot.Utilities.Entities.XTableValues;
 import xbot.common.logging.RobotAssertionManager;
@@ -66,7 +68,9 @@ public class PathDriveToClosestReefSectionCommandCommand extends PathDriveToLoca
         this.setAdditionalArguments(XTableValues.AdditionalArguments.newBuilder()
                 .setAlliance(CoprocessorCommunicationSubsystem.fromAlliance(DriverStation.getAlliance()
                         .orElse(DriverStation.Alliance.Blue))).build());
-        this.setSafeInches((int) electricalContract.getDiagonalDistanceDifferenceOfRobotRadius().in(Units.Inches));
+        this.setSafeInches(Distance.ofRelativeUnits(
+                electricalContract.getDiagonalDistanceDifferenceOfRobotRadius()
+                .in(Units.Inches), Units.Inches));
         this.setOptions(XTableValues.TraversalOptions.newBuilder()
                 .setMetersPerSecond(driveSubsystem.getDriveToWaypointsSpeed().get())
                 .setAccelerationMetersPerSecond(driveSubsystem.getMaxAccelerationMetersPerSecondSquared())

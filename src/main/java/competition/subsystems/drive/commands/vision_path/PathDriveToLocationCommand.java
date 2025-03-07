@@ -7,6 +7,7 @@ import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.units.measure.Distance;
 import org.kobe.xbot.JClient.XTablesClient;
 import org.kobe.xbot.Utilities.Entities.XTableValues;
 import org.kobe.xbot.Utilities.VisionCoprocessorCommander;
@@ -19,6 +20,8 @@ import xbot.common.trajectory.XbotSwervePoint;
 import javax.inject.Inject;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import static edu.wpi.first.units.Units.Inches;
 
 public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
     Pose2d target;
@@ -63,8 +66,8 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
         return this;
     }
 
-    public PathDriveToLocationCommand setSafeInches(int safeInches) {
-        this.safeInches = safeInches;
+    public PathDriveToLocationCommand setSafeInches(Distance safeDistance) {
+        this.safeDistance = safeDistance;
         return this;
     }
 
@@ -92,7 +95,7 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
                         .setX(target.getX()) // Set goal Pose2d X value.
                         .setY(target.getY()) // Set goal Pose2d Y value.
                         .build())
-                .setSafeDistanceInches(safeInches);
+                .setSafeDistanceInches(safeDistance.in(Inches));
         if (traversalOptions != null) {
             message.setOptions(traversalOptions);
         }

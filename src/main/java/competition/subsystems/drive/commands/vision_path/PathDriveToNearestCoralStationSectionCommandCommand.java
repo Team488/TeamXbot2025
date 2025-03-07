@@ -16,6 +16,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import org.kobe.xbot.Utilities.Entities.XTableValues;
 import xbot.common.logging.RobotAssertionManager;
@@ -138,7 +139,9 @@ public class PathDriveToNearestCoralStationSectionCommandCommand
         this.setAdditionalArguments(XTableValues.AdditionalArguments.newBuilder()
                 .setAlliance(CoprocessorCommunicationSubsystem.fromAlliance(DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue)))
                 .build());
-        this.setSafeInches((int) electricalContract.getDiagonalDistanceDifferenceOfRobotRadius().in(Units.Inches));
+        this.setSafeInches(Distance.ofRelativeUnits(
+                electricalContract.getDiagonalDistanceDifferenceOfRobotRadius()
+                        .in(Units.Inches), Units.Inches));
         this.setOptions(
                 XTableValues.TraversalOptions.newBuilder()
                         .setMetersPerSecond(driveSubsystem.getDriveToWaypointsSpeed().get())
@@ -151,8 +154,8 @@ public class PathDriveToNearestCoralStationSectionCommandCommand
     @Override
     public boolean isFinished() {
         aKitLog.record("distanceToGoal", pose.getCurrentPose2d().getTranslation().getDistance(destinationPose.getTranslation()));
-        return super.isFinished() 
-        || (destinationPose != null && pose.getCurrentPose2d().getTranslation().getDistance(destinationPose.getTranslation()) < 0.1016);
+        return super.isFinished()
+                || (destinationPose != null && pose.getCurrentPose2d().getTranslation().getDistance(destinationPose.getTranslation()) < 0.1016);
     }
 
     public Pose2d getTargetCoralStationSection() {
