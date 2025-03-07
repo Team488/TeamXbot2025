@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static edu.wpi.first.units.Units.Meters;
+
 /**
  * Command to drive the robot to a specific coral station section.
  * Uses AprilTag vision data to determine target positions dynamically.
@@ -54,6 +56,8 @@ public class PathDriveToNearestCoralStationSectionCommandCommand
 
     private Pose2d coralStationTarget;
     private final ElectricalContract electricalContract;
+
+    private final static Distance goalThreshold = Meters.of(0.1016);
 
 
     /**
@@ -85,7 +89,7 @@ public class PathDriveToNearestCoralStationSectionCommandCommand
                                                                CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem) {
         super(drive, pose, pf, headingModuleFactory, aprilTagVisionSubsystem,
                 robotAssertionManager, coprocessorCommunicationSubsystem);
-        this.radiusOfRobot = electricalContract.getDistanceFromCenterToOuterBumperX().in(Units.Meters);
+        this.radiusOfRobot = electricalContract.getDistanceFromCenterToOuterBumperX().in(Meters);
         this.aprilTagFieldLayout = aprilTagFieldLayout;
         this.driveSubsystem = drive;
         this.electricalContract = electricalContract;
@@ -129,6 +133,7 @@ public class PathDriveToNearestCoralStationSectionCommandCommand
     public void initialize() {
         log.info("Initializing");
         targetCoralStationSection = this.getCoralStationPose();
+        log.info("Picked up coral station at: {}", targetCoralStationSection);
         var deltaTranslation = new Translation2d(
                 this.radiusOfRobot, targetCoralStationSection.getRotation());
         var destinationTranslation =
@@ -139,9 +144,9 @@ public class PathDriveToNearestCoralStationSectionCommandCommand
         this.setAdditionalArguments(XTableValues.AdditionalArguments.newBuilder()
                 .setAlliance(CoprocessorCommunicationSubsystem.fromAlliance(DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue)))
                 .build());
-        this.setSafeInches(Distance.ofRelativeUnits(
+        this.setSafeDistance(
                 electricalContract.getDiagonalDistanceDifferenceOfRobotRadius()
-                        .in(Units.Inches), Units.Inches));
+                        );
         this.setOptions(
                 XTableValues.TraversalOptions.newBuilder()
                         .setMetersPerSecond(driveSubsystem.getDriveToWaypointsSpeed().get())
@@ -155,7 +160,7 @@ public class PathDriveToNearestCoralStationSectionCommandCommand
     public boolean isFinished() {
         aKitLog.record("distanceToGoal", pose.getCurrentPose2d().getTranslation().getDistance(destinationPose.getTranslation()));
         return super.isFinished()
-                || (destinationPose != null && pose.getCurrentPose2d().getTranslation().getDistance(destinationPose.getTranslation()) < 0.1016);
+                || (destinationPose != null && pose.getCurrentPose2d().getTranslation().getDistance(destinationPose.getTranslation()) < goalThreshold.in(Units.Meters));
     }
 
     public Pose2d getTargetCoralStationSection() {

@@ -66,7 +66,7 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
         return this;
     }
 
-    public PathDriveToLocationCommand setSafeInches(Distance safeDistance) {
+    public PathDriveToLocationCommand setSafeDistance(Distance safeDistance) {
         this.safeDistance = safeDistance;
         return this;
     }
