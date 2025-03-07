@@ -7,7 +7,6 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 
 import javax.inject.Singleton;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -108,7 +107,7 @@ public class Landmarks {
     }
 
     private void addNamedLocation(DriverStation.Alliance alliance, ReefFace face, Branch branch, CoralLevel level,
-            Pose2d location) {
+                                  Pose2d location) {
         String name = alliance.toString() + face.toString() + branch.toString() + level.toString();
         namesToLocations.put(name, location);
     }
@@ -122,9 +121,10 @@ public class Landmarks {
         FAR_RIGHT(RedBargeRightFiducialId, BlueBargeRightFiducialId);
         private final int redID;
         private final int blueID;
+
         ReefFace(int redAprilTagID, int blueAprilTagID) {
-          this.redID = redAprilTagID;
-          this.blueID = blueAprilTagID;
+            this.redID = redAprilTagID;
+            this.blueID = blueAprilTagID;
         }
 
         public int getRedAprilTagID() {
@@ -142,8 +142,17 @@ public class Landmarks {
     }
 
     public enum Branch {
-        A,
-        B
+        A(Meters.of(2)),
+        B(Meters.of(2));
+        private final Distance offsetFromReefAprilTagCenter;
+
+        Branch(Distance offsetFromReefAprilTagCenter) {
+            this.offsetFromReefAprilTagCenter = offsetFromReefAprilTagCenter;
+        }
+
+        public Distance getOffsetFromReefAprilTagCenter() {
+            return offsetFromReefAprilTagCenter;
+        }
     }
 
     public enum CoralLevel {
