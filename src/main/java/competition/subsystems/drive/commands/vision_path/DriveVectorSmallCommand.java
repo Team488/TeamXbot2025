@@ -41,7 +41,7 @@ public class DriveVectorSmallCommand extends BaseCommand {
             drive.stop(); // Drive.stop doesnt stop unless called continuously
             return;
         }
-        XYPair pair = new XYPair(0.25, 0);
+        XYPair pair = new XYPair(0.50, 0);
         if (backwards) {
             pair = pair.scale(-1);
 

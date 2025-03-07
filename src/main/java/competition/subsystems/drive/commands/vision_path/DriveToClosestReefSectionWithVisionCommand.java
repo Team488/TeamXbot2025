@@ -10,6 +10,7 @@ import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import org.kobe.xbot.Utilities.Entities.XTableValues;
 import xbot.common.logging.RobotAssertionManager;
@@ -25,17 +26,19 @@ import java.util.stream.Collectors;
 public class DriveToClosestReefSectionWithVisionCommand extends PathDriveToLocation {
     private final AprilTagFieldLayout aprilTagFieldLayout;
     private final DriveSubsystem driveSubsystem;
+    private final ElectricalContract electricalContract;
 
     @Inject
     DriveToClosestReefSectionWithVisionCommand(
             PoseSubsystem pose, DriveSubsystem drive,
-                                               CoprocessorCommunicationSubsystem coprocessorComms,
+            CoprocessorCommunicationSubsystem coprocessorComms,
             PropertyFactory pf, HeadingModule.HeadingModuleFactory headingModuleFactory,
             RobotAssertionManager assertionManager, ElectricalContract electricalContract,
             AprilTagFieldLayout aprilTagFieldLayout, AprilTagVisionSubsystemExtended aprilTagVisionSubsystem) {
         super(drive, pose, pf, headingModuleFactory, aprilTagVisionSubsystem, assertionManager, coprocessorComms);
         this.aprilTagFieldLayout = aprilTagFieldLayout;
         this.driveSubsystem = drive;
+        this.electricalContract = electricalContract;
     }
 
     private Pose2d getClosestReefPose() {
@@ -63,7 +66,7 @@ public class DriveToClosestReefSectionWithVisionCommand extends PathDriveToLocat
         this.setAdditionalArguments(XTableValues.AdditionalArguments.newBuilder()
                 .setAlliance(CoprocessorCommunicationSubsystem.fromAlliance(DriverStation.getAlliance()
                         .orElse(DriverStation.Alliance.Blue))).build());
-        this.setSafeInches(25);
+        this.setSafeInches((int) electricalContract.getDiagonalDistanceDifferenceOfRobotRadius().in(Units.Inches));
         this.setOptions(XTableValues.TraversalOptions.newBuilder()
                 .setMetersPerSecond(driveSubsystem.getDriveToWaypointsSpeed().get())
                 .setAccelerationMetersPerSecond(driveSubsystem.getMaxAccelerationMetersPerSecondSquared())

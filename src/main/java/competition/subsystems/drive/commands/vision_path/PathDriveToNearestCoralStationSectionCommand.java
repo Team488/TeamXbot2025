@@ -52,6 +52,8 @@ public class PathDriveToNearestCoralStationSectionCommand
     private final DriveSubsystem driveSubsystem;
 
     private Pose2d coralStationTarget;
+    private final ElectricalContract electricalContract;
+
 
     /**
      * Constructs the PathDriveToNearestCoralStationSectionCommand.
@@ -85,6 +87,7 @@ public class PathDriveToNearestCoralStationSectionCommand
         this.radiusOfRobot = electricalContract.getDistanceFromCenterToOuterBumperX().in(Units.Meters);
         this.aprilTagFieldLayout = aprilTagFieldLayout;
         this.driveSubsystem = drive;
+        this.electricalContract = electricalContract;
     }
 
     /**
@@ -135,7 +138,7 @@ public class PathDriveToNearestCoralStationSectionCommand
         this.setAdditionalArguments(XTableValues.AdditionalArguments.newBuilder()
                 .setAlliance(CoprocessorCommunicationSubsystem.fromAlliance(DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue)))
                 .build());
-        this.setSafeInches(25);
+        this.setSafeInches((int) electricalContract.getDiagonalDistanceDifferenceOfRobotRadius().in(Units.Inches));
         this.setOptions(
                 XTableValues.TraversalOptions.newBuilder()
                         .setMetersPerSecond(driveSubsystem.getDriveToWaypointsSpeed().get())
@@ -149,7 +152,7 @@ public class PathDriveToNearestCoralStationSectionCommand
     public boolean isFinished() {
         aKitLog.record("distanceToGoal", pose.getCurrentPose2d().getTranslation().getDistance(destinationPose.getTranslation()));
         return super.isFinished() 
-        || (destinationPose != null && pose.getCurrentPose2d().getTranslation().getDistance(destinationPose.getTranslation()) < 0.2032);
+        || (destinationPose != null && pose.getCurrentPose2d().getTranslation().getDistance(destinationPose.getTranslation()) < 0.1016);
     }
 
     public Pose2d getTargetCoralStationSection() {
