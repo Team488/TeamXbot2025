@@ -15,6 +15,8 @@ import xbot.common.controls.actuators.XDigitalOutput;
 import xbot.common.controls.actuators.XDigitalOutput.XDigitalOutputFactory;
 import xbot.common.subsystems.autonomous.AutonomousCommandSelector;
 
+import java.util.Objects;
+
 
 @Singleton
 public class LightSubsystem extends BaseSubsystem {
@@ -113,21 +115,26 @@ public class LightSubsystem extends BaseSubsystem {
         // Not sure about if the way we are checking the shooter is correct (and collector)
         if (!dsEnabled) {
             currentState = LightsStateMessage.RobotDisabledDefault;
-        } else if (coralScorerSubsystem.confidentlyHasCoral()) {
-            currentState = LightsStateMessage.CoralPresent;
-        } else if (coralScorerSubsystem.getCoralScorerState() == CoralScorerSubsystem.CoralScorerState.INTAKING) {
-            currentState = LightsStateMessage.RequestCoralFromHuman;
-        } else if (DriverStation.getMatchTime() > 230 && DriverStation.isTeleop() && DriverStation.isDisabled()) {
-            currentState = LightsStateMessage.Victory;
-        } else if (coralScorerSubsystem.hasCoral() && coralArmSubsystem.getIsTargetAngleScoring()
-                && coralArmSubsystem.isMaintainerAtGoal() && elevatorSubsystem.isMaintainerAtGoal()) {
-            currentState = LightsStateMessage.ReadyToScore;
+            if (DriverStation.getMatchTime() > 230 && DriverStation.isTeleop()) {
+                currentState = LightsStateMessage.Victory;
+            }
+            if (!Objects.equals(autonomousCommandSelector.getProgramName(), "EmergencyAutonomousCommand")) {
+                currentState = LightsStateMessage.RobotDisabledAuto;
+            }
         } else {
-            currentState = LightsStateMessage.RobotEnabled;
+            if (coralScorerSubsystem.confidentlyHasCoral() && coralArmSubsystem.getIsTargetAngleScoring()
+                    && coralArmSubsystem.isMaintainerAtGoal() && elevatorSubsystem.isMaintainerAtGoal()) {
+                currentState = LightsStateMessage.ReadyToScore;
+            } else if (coralScorerSubsystem.confidentlyHasCoral()) {
+                currentState = LightsStateMessage.CoralPresent;
+            } else if (coralScorerSubsystem.getCoralScorerState() == CoralScorerSubsystem.CoralScorerState.INTAKING) {
+                currentState = LightsStateMessage.RequestCoralFromHuman;
+            } else {
+                currentState = LightsStateMessage.RobotEnabled;
+            }
         }
         return currentState;
     }
-
     public void sendState(LightsStateMessage state) {
         dioInt.setDIOInt(state.getValue());
     }
