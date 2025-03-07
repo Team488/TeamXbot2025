@@ -26,6 +26,7 @@ public class BaseAutonomousSequentialCommandGroup extends SequentialCommandGroup
     public void queueDriveAndIntakeMessageToAutoSelector(Landmarks.CoralStation targetStation,
                                                          Landmarks.CoralStationSection targetSection) {
         String message = "Drive to " + targetStation + " coral station, " + targetSection + " section and intake coral until collected";
+        queueMessageToAutoSelector(message);
     }
 
 }

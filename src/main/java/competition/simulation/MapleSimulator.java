@@ -17,6 +17,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.Distance;
 import xbot.common.advantage.AKitLogger;
 import xbot.common.controls.sensors.mock_adapters.MockGyro;
+import xbot.common.logic.TimeStableValidator;
 
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
@@ -47,7 +48,8 @@ public class MapleSimulator implements BaseSimulator {
     final AlgaeArmSimulator algaeArmSimulator;
     final LightsSimulator lightsSimulator;
 
-    final Distance humanLoadingDistanceThreshold = Meters.of(0.5);
+    final Distance humanLoadingDistanceThreshold = Meters.of(0.2);
+    final TimeStableValidator humanLoadValidator = new TimeStableValidator(1);
 
     // maple-sim stuff ----------------------------
     final DriveTrainSimulationConfig config;
@@ -86,7 +88,7 @@ public class MapleSimulator implements BaseSimulator {
         });
 
         // starting middle ish of the field on blue
-        var startingPose = new Pose2d(6, 4, new Rotation2d());
+        var startingPose = new Pose2d(7, 7 , new Rotation2d());
 
         // Creating the SelfControlledSwerveDriveSimulation instance
         this.swerveDriveSimulation = new SelfControlledSwerveDriveSimulation(
@@ -184,8 +186,9 @@ public class MapleSimulator implements BaseSimulator {
                 }
             }
         }
+        var robotNearHumanStable = humanLoadValidator.checkStable(robotNearHumanLoading);
 
-        if (elevatorAtCollectionHeight && armAtCollectionAngle && coralScorerIsIntaking && robotNearHumanLoading) {
+        if (elevatorAtCollectionHeight && armAtCollectionAngle && coralScorerIsIntaking && robotNearHumanStable) {
             coralScorerSimulator.simulateCoralLoad();
         }
     }
