@@ -30,7 +30,7 @@ import javax.inject.Inject;
  * </p>
  */
 public class AlignWithCreeperCommand extends BaseCommand {
-    private boolean FORCESTOP = false;
+    private boolean forceStop = false;
     private int runIter = 0;
     
     final DriveSubsystem drive;
@@ -45,12 +45,12 @@ public class AlignWithCreeperCommand extends BaseCommand {
 
     private final DoubleProperty photonVisionFrontLeftResX;
     private final DoubleProperty photonVisionFrontRightResX;
-    private final DoubleProperty ITERSPERRUN;
+    private final DoubleProperty itersPerRUn;
     private final DoubleProperty driveGain;
     private final DoubleProperty logNegativityOffset;
     private final DoubleProperty logScalar;
     private final DoubleProperty logErrScalar;
-    private final DoubleProperty MAXERR;
+    private final DoubleProperty maxError;
     private final DoubleProperty errorThresholdPercentage;
 
     private CachedSubscriber isCenteredConfidentlySubscriber;
@@ -91,11 +91,11 @@ public class AlignWithCreeperCommand extends BaseCommand {
         this.coprocessorCommunicationSubsystem = coprocessorCommunications;
         pf.setPrefix("AlignWithCreeperCommand/");
         this.driveGain = pf.createPersistentProperty("Drive Gain", 0.3);
-        this.ITERSPERRUN = pf.createPersistentProperty("Iters per run", 5);
+        this.itersPerRUn = pf.createPersistentProperty("Iters per run", 5);
         this.logNegativityOffset = pf.createPersistentProperty("Log Negativity, lower means more negative closer to zero", 0.3);
         this.logScalar = pf.createPersistentProperty("Log Scalar", 8);
         this.logErrScalar = pf.createPersistentProperty("Log input Err Scalar", 10);
-        this.MAXERR = pf.createPersistentProperty("Max Error", 0.3);
+        this.maxError = pf.createPersistentProperty("Max Error", 0.3);
         this.photonVisionFrontLeftHostname = pf.createPersistentProperty(
                 "Photon Vision Front Left Hostname", "photonvisionfrontleft");
         this.photonVisionFrontRightHostname = pf.createPersistentProperty(
@@ -119,7 +119,7 @@ public class AlignWithCreeperCommand extends BaseCommand {
      */
     @Override
     public void initialize() {
-        FORCESTOP = false;
+        forceStop = false;
         runIter = 0;
         isCenteredConfidently = false;
         XTablesClient client =
@@ -175,7 +175,7 @@ public class AlignWithCreeperCommand extends BaseCommand {
     public void execute() {
         super.execute();
 
-        if(FORCESTOP){
+        if(forceStop){
             log.info("FORCE STOP");
             drive.stop();
             return;
@@ -185,7 +185,7 @@ public class AlignWithCreeperCommand extends BaseCommand {
         
         // hack to add some periodiciy to the command
         runIter++;
-        if(runIter < ITERSPERRUN.get()){
+        if(runIter < itersPerRUn.get()){
             return;
         }
         runIter = 0; // reset
@@ -199,7 +199,7 @@ public class AlignWithCreeperCommand extends BaseCommand {
             if (isCenteredConfidently == null) {
                 // No new vision data received; do nothing.
                 log.warn("Centered confidently is returning null!");
-                FORCESTOP = true;
+                forceStop = true;
                 cancel();
                 return;
             }
@@ -214,13 +214,13 @@ public class AlignWithCreeperCommand extends BaseCommand {
             if (leftDistance == null || rightDistance == null){
                 // should never happen, as the vision code will always send at least a -1
                 log.warn("Vision offsets are returning null! Is alignment up?");
-                FORCESTOP = true;
+                forceStop = true;
                 cancel();
                 return;
             }
             if (leftDistance == -1 && rightDistance == -1) {
                 log.warn("No valid left or right distance measurements received from the camera.");
-                FORCESTOP = true;
+                forceStop = true;
                 cancel();
                 return;
             } else if (leftDistance == -1) {
@@ -284,17 +284,18 @@ public class AlignWithCreeperCommand extends BaseCommand {
     }
 
     // scaled cost function
-    private double costFunc(int Lerr, int Rerr){
-        if(Lerr == -1 || Rerr == -1){
+    private double costFunc(int leftErrPX, int rightErrPX){
+        if(leftErrPX == -1 || rightErrPX == -1){
             // much too off aligned
-            return MAXERR.get();
+            return maxError.get();
         }
         // abs error
-        double err = (double) Math.abs(Lerr-Rerr);
-        // this error function takes advantage of the fact that log is negative when the input is less that 1, to add some sort of "slowing down when we get close"
+        double err = (double) Math.abs(leftErrPX-rightErrPX);
+        // this error function takes advantage of the fact that log is negative when the input is less that 1, 
+        // to add some sort of "slowing down when we get close"
         // to make this never happen, set the negativity offset to 1
         double errFunc = Math.log(err/logErrScalar.get()+logNegativityOffset.get())/logScalar.get(); 
-        return Math.max(-MAXERR.get(), Math.min(errFunc, MAXERR.get()));
+        return Math.max(-maxError.get(), Math.min(errFunc, maxError.get()));
     }
 
     /**
