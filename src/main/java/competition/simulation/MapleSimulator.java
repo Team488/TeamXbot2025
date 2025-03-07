@@ -173,7 +173,9 @@ public class MapleSimulator implements BaseSimulator {
         var coralScorerIsIntaking = coralScorerSimulator.isIntaking();
         var elevatorAtCollectionHeight = elevatorSimulator.isAtCollectionHeight();
         var armAtCollectionAngle = coralArmSimulator.isAtCollectionAngle();
-        Pose2d[] coralStations = {Landmarks.BlueLeftCoralStationMid, Landmarks.BlueRightCoralStationMid};
+        Pose2d[] coralStations = { Landmarks.BlueLeftCoralStationMid, Landmarks.BlueRightCoralStationMid,
+                PoseSubsystem.convertBluetoRed(Landmarks.BlueLeftCoralStationMid),
+                PoseSubsystem.convertBluetoRed(Landmarks.BlueRightCoralStationMid) };
         var currentPose = this.getGroundTruthPose();
         var robotNearHumanLoading = false; 
         for (Pose2d station : coralStations) {
