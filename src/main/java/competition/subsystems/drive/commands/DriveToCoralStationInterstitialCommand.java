@@ -4,7 +4,6 @@ import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import xbot.common.logging.RobotAssertionManager;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.drive.SwervePointKinematics;
@@ -59,16 +58,15 @@ public class DriveToCoralStationInterstitialCommand extends SwerveBezierTrajecto
         ArrayList<XbotSwervePoint> swervePoints = new ArrayList<>();
 
         if (station == Landmarks.CoralStation.LEFT) {
-            var controlPoints = new ArrayList<Translation2d>();
-            controlPoints.add(firstLeftStationInterstitialPoint.getTranslation());
-            setBezierConfiguration(controlPoints, secondLeftStationInterstitialPoint, 10);
+            setBezierConfiguration(firstLeftStationInterstitialPoint.getTranslation(), secondLeftStationInterstitialPoint, 10);
 
 //            swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(firstLeftStationInterstitialPoint), 10));
 //            swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(secondLeftStationInterstitialPoint), 10));
         }
         else {
-            swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(firstRightStationInterstitialPoint), 10));
-            swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(secondRightStationInterstitialPoint), 10));
+            setBezierConfiguration(firstRightStationInterstitialPoint.getTranslation(), secondRightStationInterstitialPoint, 10);
+//            swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(firstRightStationInterstitialPoint), 10));
+//            swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(secondRightStationInterstitialPoint), 10));
         }
         this.logic.setKeyPoints(swervePoints);
 

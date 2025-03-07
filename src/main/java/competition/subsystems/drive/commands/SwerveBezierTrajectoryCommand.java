@@ -57,6 +57,14 @@ public class SwerveBezierTrajectoryCommand extends SwerveSimpleTrajectoryCommand
         hasSetConfiguration = true;
     }
 
+    public void setBezierConfiguration(Translation2d controlPoint, Pose2d endPoint, int steps) {
+        this.controlPoints = new ArrayList<>();
+        this.controlPoints.add(controlPoint);
+        this.steps = steps;
+        this.endPoint = endPoint;
+        hasSetConfiguration = true;
+    }
+
     /**
      * Generates a Bézier curve for our command!
      */
