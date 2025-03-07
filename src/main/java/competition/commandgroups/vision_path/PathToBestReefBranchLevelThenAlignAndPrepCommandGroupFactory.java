@@ -57,7 +57,7 @@ public class PathToBestReefBranchLevelThenAlignAndPrepCommandGroupFactory {
                                     .setGoalToBestReefBranch(true)
                             .build());
                 }),
-                driveToReefFaceCommandUntilAprilTagDetection,
+                pathDriveToLocationUntilAprilTagDetectionDynamic,
 
                 // Step 2: Extract data after driving is done
                 new InstantCommand(() -> {
@@ -77,7 +77,7 @@ public class PathToBestReefBranchLevelThenAlignAndPrepCommandGroupFactory {
                 new ParallelCommandGroup(alignToReefWithAprilTagCommand,
                         new SequentialCommandGroup(measureDistanceBeforeScoringCommand,
                                 prepCoralSystemFactory.create(() ->
-                                        toCoralLevel(driveToReefFaceCommandUntilAprilTagDetection.curves
+                                        toCoralLevel(pathDriveToLocationUntilAprilTagDetectionDynamic.curves
                         .getAlignToReefAprilTagOptions().getBranchLevel())),
                         scoreWhenReadyProvider.get()))
         );
