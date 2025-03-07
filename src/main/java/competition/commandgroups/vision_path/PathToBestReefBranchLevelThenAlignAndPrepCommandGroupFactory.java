@@ -23,7 +23,7 @@ import static edu.wpi.first.units.Units.Meters;
 
 public class PathToBestReefBranchLevelThenAlignAndPrepCommandGroupFactory {
 
-    PathDriveToLocationUntilAprilTagDetectionDynamic driveToReefFaceCommandUntilAprilTagDetection;
+    Provider<PathDriveToLocationUntilAprilTagDetectionDynamic> driveToReefFaceCommandUntilAprilTagDetection;
     AlignToTagGlobalMovementWithCalculator alignToReefWithAprilTagCommand;
     AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
     PrepCoralSystemCommandGroupFactory prepCoralSystemFactory;
@@ -32,7 +32,7 @@ public class PathToBestReefBranchLevelThenAlignAndPrepCommandGroupFactory {
 
     @Inject
     public PathToBestReefBranchLevelThenAlignAndPrepCommandGroupFactory(
-            PathDriveToLocationUntilAprilTagDetectionDynamic driveToReefFaceCommandUntilAprilTagDetection,
+            Provider<PathDriveToLocationUntilAprilTagDetectionDynamic> driveToReefFaceCommandUntilAprilTagDetection,
             AlignToTagGlobalMovementWithCalculator alignToReefWithAprilTagCommand,
             AprilTagVisionSubsystemExtended aprilTagVisionSubsystem,
             PrepCoralSystemCommandGroupFactory prepCoralSystemFactory,
@@ -47,11 +47,12 @@ public class PathToBestReefBranchLevelThenAlignAndPrepCommandGroupFactory {
     }
 
     public SequentialCommandGroup create() {
+        PathDriveToLocationUntilAprilTagDetectionDynamic pathDriveToLocationUntilAprilTagDetectionDynamic = driveToReefFaceCommandUntilAprilTagDetection.get();
         return new SequentialCommandGroup(
                 // Step 1: Configure and Run Path Drive
                 new InstantCommand(() -> {
-                    driveToReefFaceCommandUntilAprilTagDetection.setTarget(new Pose2d());
-                    driveToReefFaceCommandUntilAprilTagDetection.setAdditionalArguments(XTableValues.AdditionalArguments.newBuilder()
+                    pathDriveToLocationUntilAprilTagDetectionDynamic.setTarget(new Pose2d());
+                    pathDriveToLocationUntilAprilTagDetectionDynamic.setAdditionalArguments(XTableValues.AdditionalArguments.newBuilder()
                                     .setAlliance(fromAlliance(DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue)))
                                     .setGoalToBestReefBranch(true)
                             .build());
@@ -60,17 +61,17 @@ public class PathToBestReefBranchLevelThenAlignAndPrepCommandGroupFactory {
 
                 // Step 2: Extract data after driving is done
                 new InstantCommand(() -> {
-                    if (driveToReefFaceCommandUntilAprilTagDetection.curves.hasAlignToReefAprilTagOptions()) {
-                        int cameraIndex = driveToReefFaceCommandUntilAprilTagDetection.curves.getAlignToReefAprilTagOptions().getCamera()
+                    if (pathDriveToLocationUntilAprilTagDetectionDynamic.curves.hasAlignToReefAprilTagOptions()) {
+                        int cameraIndex = pathDriveToLocationUntilAprilTagDetectionDynamic.curves.getAlignToReefAprilTagOptions().getCamera()
                                 .equals(XTableValues.AprilTagCamera.FRONT_LEFT) ? Cameras.FRONT_LEFT_CAMERA.getIndex() :
                                 Cameras.FRONT_RIGHT_CAMERA.getIndex();
 
                         alignToReefWithAprilTagCommand.setConfigurations(cameraIndex,
-                                driveToReefFaceCommandUntilAprilTagDetection.curves.getAlignToReefAprilTagOptions()
+                                pathDriveToLocationUntilAprilTagDetectionDynamic.curves.getAlignToReefAprilTagOptions()
                                         .getAprilTagID(),false, -2);
                         measureDistanceBeforeScoringCommand.setDistanceThreshold(Meters.of(1));
                     } else {
-                        alignToReefWithAprilTagCommand.end(true); // Not sure if it cancels it or not.
+                        alignToReefWithAprilTagCommand.cancel();
                     }
                 }),
                 new ParallelCommandGroup(alignToReefWithAprilTagCommand,
