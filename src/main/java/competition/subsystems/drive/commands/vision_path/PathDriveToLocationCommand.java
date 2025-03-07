@@ -27,9 +27,6 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
     Pose2d target;
 
     private final VisionCoprocessorCommander commander;
-
-    private static boolean useBackupPointToPoint = false;
-
     private XTableValues.TraversalOptions traversalOptions;
     private Distance safeDistance = Inches.of(10);
     private final ReefRoutingCircle routingCircle;
@@ -75,52 +72,49 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
         this.additionalArguments = additionalArguments;
         return this;
     }
-
-    public static void setUseBackupPointToPoint(boolean useBackupPointToPoint) {
-        PathDriveToLocationCommand.useBackupPointToPoint = useBackupPointToPoint;
-    }
-
     @Override
     public void initialize() {
         log.info("Initializing");
         Pose2d startingPose = pose.getCurrentPose2d();
-        curves = null;
-
-        XTableValues.RequestVisionCoprocessorMessage.Builder message = XTableValues.RequestVisionCoprocessorMessage.newBuilder()
-                .setStart(XTableValues.ControlPoint.newBuilder()
-                        .setY(startingPose.getY()) // Set Pose2d Y value.
-                        .setX(startingPose.getX()) // Set Pose2d X value.
-                        .build())
-                .setEnd(XTableValues.ControlPoint.newBuilder()
-                        .setX(target.getX()) // Set goal Pose2d X value.
-                        .setY(target.getY()) // Set goal Pose2d Y value.
-                        .build())
-                .setSafeDistanceInches(safeDistance.in(Inches));
-        if (traversalOptions != null) {
-            message.setOptions(traversalOptions);
-        }
-        if (additionalArguments != null) {
-            message.setArguments(additionalArguments);
-        }
-        curves = commander.requestBezierPathWithOptions(
-                message
-                        .build(),
-                3000, TimeUnit.MILLISECONDS); // When should it give up and return
-        // null for any reason?
-
-        if (curves == null) {
-            useBackupPointToPoint = true;
-            log.warn("No curves returned from vision coprocessor within timeout! "
-                    + "Using P2P from now on.");
-            cancel();
-            return;
-        } else {
-            this.setSegmentedBezierCurve(curves, curves.getOptions());
-            XTablesClient client = this.coprocessor.getXTablesManager().getOrNull();
-            if (client != null) {
-                log.info("Logged bezier curves onto XTABLES.");
-                client.putBezierCurves("bezier_path", curves);
+        if(!coprocessor.isUseBackupPointToPointForPathplanning()) {
+            curves = null;
+            XTableValues.RequestVisionCoprocessorMessage.Builder message = XTableValues.RequestVisionCoprocessorMessage.newBuilder()
+                    .setStart(XTableValues.ControlPoint.newBuilder()
+                            .setY(startingPose.getY()) // Set Pose2d Y value.
+                            .setX(startingPose.getX()) // Set Pose2d X value.
+                            .build())
+                    .setEnd(XTableValues.ControlPoint.newBuilder()
+                            .setX(target.getX()) // Set goal Pose2d X value.
+                            .setY(target.getY()) // Set goal Pose2d Y value.
+                            .build())
+                    .setSafeDistanceInches(safeDistance.in(Inches));
+            if (traversalOptions != null) {
+                message.setOptions(traversalOptions);
             }
+            if (additionalArguments != null) {
+                message.setArguments(additionalArguments);
+            }
+            curves = commander.requestBezierPathWithOptions(
+                    message
+                            .build(),
+                    3000, TimeUnit.MILLISECONDS); // When should it give up and return
+            // null for any reason?
+
+            if (curves == null) {
+                log.warn("There was not any curves responded from the coprocessor ORIN!");
+                cancel();
+                return;
+            } else {
+                this.setSegmentedBezierCurve(curves, curves.getOptions());
+                XTablesClient client = this.coprocessor.getXTablesManager().getOrNull();
+                if (client != null) {
+                    log.info("Logged bezier curves onto XTABLES.");
+                    client.putBezierCurves("bezier_path", curves);
+                }
+            }
+        } else {
+            // Use backup Point To Point if settings allow to.
+            pointToPoint();
         }
         super.initialize();
     }
