@@ -51,6 +51,7 @@ public class PathToBestReefBranchLevelThenAlignAndPrepCommandGroupFactory {
         return new SequentialCommandGroup(
                 // Step 1: Configure and Run Path Drive
                 new InstantCommand(() -> {
+                    // This will auto get replaced by XTABLES Vision Coprocessor.
                     pathDriveToLocationUntilAprilTagDetectionDynamic.setTarget(new Pose2d());
                     pathDriveToLocationUntilAprilTagDetectionDynamic.setAdditionalArguments(XTableValues.AdditionalArguments.newBuilder()
                                     .setAlliance(fromAlliance(DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue)))
