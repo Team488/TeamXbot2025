@@ -1,6 +1,7 @@
 package competition.subsystems.drive.logic;
 
 import competition.electrical_contract.ElectricalContract;
+import competition.operator_interface.OperatorInterface;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.oracle.ReefCoordinateGenerator;
 import competition.subsystems.pose.Landmarks;
@@ -59,6 +60,7 @@ public class AlignCameraToAprilTagCalculator {
     final AKitLogger akitLog;
     final ElectricalContract electricalContract;
     final ReefCoordinateGenerator reefCoordinateGenerator;
+    final OperatorInterface oi;
 
     int targetAprilTagID;
     int targetCameraID;
@@ -116,7 +118,7 @@ public class AlignCameraToAprilTagCalculator {
     public AlignCameraToAprilTagCalculator(AprilTagVisionSubsystemExtended vision, DriveSubsystem drive,
                                            ElectricalContract electricalContract, PoseSubsystem pose,
                                            HeadingModule.HeadingModuleFactory headingModuleFactory, ReefCoordinateGenerator reefCoordinateGenerator,
-                                           PropertyFactory pf) {
+                                           PropertyFactory pf, OperatorInterface oi) {
         this.aprilTagVisionSubsystem = vision;
         this.headingModule = headingModuleFactory.create(drive.getRotateToHeadingPid());
         this.drive = drive;
@@ -124,6 +126,7 @@ public class AlignCameraToAprilTagCalculator {
         this.electricalContract = electricalContract;
         this.reefCoordinateGenerator = reefCoordinateGenerator;
         this.akitLog = new AKitLogger(prefix);
+        this.oi = oi;
 
         pf.setPrefix(prefix);
         interstitialDistance = pf.createPersistentProperty("InterstitialDistance-m", 2.25);
@@ -333,6 +336,8 @@ public class AlignCameraToAprilTagCalculator {
                         shoveStartTime = XTimer.getFPGATimestamp();
                     } else {
                         activity = Activity.ApproachWhileCentering;
+                        oi.operatorGamepad.getRumbleManager().rumbleGamepad(1,.75);
+                        oi.driverGamepad.getRumbleManager().rumbleGamepad(1, .75);
                     }
                 }
                 break;
