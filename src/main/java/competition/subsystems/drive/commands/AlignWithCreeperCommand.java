@@ -12,8 +12,12 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 import org.kobe.xbot.JClient.CachedSubscriber;
 import org.kobe.xbot.JClient.XTablesClient;
+
+import xbot.common.advantage.AKitLogger;
 import xbot.common.command.BaseCommand;
+import xbot.common.math.PIDManager;
 import xbot.common.math.XYPair;
+import xbot.common.math.PIDManager.PIDManagerFactory;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.properties.StringProperty;
@@ -31,7 +35,7 @@ import javax.inject.Inject;
  */
 public class AlignWithCreeperCommand extends BaseCommand {
     private boolean forceStop = false;
-    private int runIter = 0;
+    private final PIDManager pidManager;
     
     final DriveSubsystem drive;
     final CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem;
@@ -85,9 +89,11 @@ public class AlignWithCreeperCommand extends BaseCommand {
                                    ElectricalContract electricalContract, PoseSubsystem pose,
                                    HeadingModule.HeadingModuleFactory headingModuleFactory,
                                    ReefCoordinateGenerator reefCoordinateGenerator,
-                                   PropertyFactory pf) {
+                                   PropertyFactory pf,
+                                   PIDManagerFactory pidFactory) {
         this.addRequirements(drive);
         this.drive = drive;
+        this.pidManager = pidFactory.create("AlignWithCreeperCommand", 0, 0, 0);
         this.coprocessorCommunicationSubsystem = coprocessorCommunications;
         pf.setPrefix("AlignWithCreeperCommand/");
         this.driveGain = pf.createPersistentProperty("Drive Gain", 0.3);
@@ -120,7 +126,6 @@ public class AlignWithCreeperCommand extends BaseCommand {
     @Override
     public void initialize() {
         forceStop = false;
-        runIter = 0;
         isCenteredConfidently = false;
         XTablesClient client =
                 this.coprocessorCommunicationSubsystem.tryGetXTablesClient();
@@ -182,20 +187,15 @@ public class AlignWithCreeperCommand extends BaseCommand {
         }
         
 
-        
-        // hack to add some periodiciy to the command
-        runIter++;
-        if(runIter < itersPerRUn.get()){
-            return;
-        }
-        runIter = 0; // reset
-
         try {
             this.isCenteredConfidently = this.isCenteredConfidentlySubscriber.getAsBoolean(null);
             Integer leftDistance = this.leftOffsetPixelsSubscriber.getAsInteger(null);
             Integer rightDistance = this.rightOffsetPixelsSubscriber.getAsInteger(null);
-            log.info(String.format("Loff %d Roff %d ifConf %b" , leftDistance,rightDistance,isCenteredConfidently));
             
+            aKitLog.record("Is Centered confidently", this.isCenteredConfidently);
+            aKitLog.record("Left Distance Pixels", leftDistance);
+            aKitLog.record("Right Distance Pixels", rightDistance);
+
             if (isCenteredConfidently == null) {
                 // No new vision data received; do nothing.
                 log.warn("Centered confidently is returning null!");
@@ -209,6 +209,7 @@ public class AlignWithCreeperCommand extends BaseCommand {
             //     log.info("Vision is saying we are centered confidently!");
             //     return;
             // }
+
             // Determine which side the misalignment error should be taken from.
             boolean offToTheLeft;
             if (leftDistance == null || rightDistance == null){
@@ -234,17 +235,9 @@ public class AlignWithCreeperCommand extends BaseCommand {
             
             // Calculate the error as a function of the left and right distance from the center.
             double error = costFunc(leftDistance, rightDistance);
-            log.info("Normalized error: " + error);
+            aKitLog.record("creeper error from cost function: ",error);
             
             // If the error is within the acceptable range, log a message and exit the adjustment routine.
-            
-            // double errorThresholdPIX = errorThresholdPercentage.get();
-            // if (normalizedError <= errorThreshold) {
-            //     log.info("Alignment error {} is within acceptable limits (threshold: {}). No adjustment necessary.",
-            //             normalizedError, errorThreshold);
-            //     FORCESTOP = true;
-            //     return;
-            // }
             
             // add sign (right is negative)            
             if (offToTheLeft) {
@@ -255,28 +248,15 @@ public class AlignWithCreeperCommand extends BaseCommand {
 
             // Scale the normalized error using the drive gain to compute the drive
             // power.
-            double drivePower = driveGain.get() * error;
+            double drivePower = driveGain.get() * pidManager.calculate(0, error);
 
-            // Clamp the drive power to the safe range of [-1, 1].
-            drivePower = Math.max(-1, Math.min(1, drivePower));
-
-            
-            
-
-            // sim issue where if drive power is below a certain amount, the robot does not move.
-            // if(Math.abs(drivePower) < 0.02){
-            //     drivePower = Math.copySign(0.02, drivePower);
-            // }
-
-            log.info("Driving with power: " + drivePower);
+            aKitLog.record("Creeper Drive Power", drivePower);
             
             // Create the drive command vector (Only drive power along the Y-axis,
             // side-to-side).
             XYPair pair = new XYPair(0, drivePower);
-            this.drive.move(pair, 0);
+            this.drive.drive(pair, drivePower, true);
 
-            // should we always stop the drive after a move command?
-            // this.drive.stop();
 
         } catch (Exception e) {
             log.error(e);
@@ -291,10 +271,9 @@ public class AlignWithCreeperCommand extends BaseCommand {
         }
         // abs error
         double err = (double) Math.abs(leftErrPX-rightErrPX);
-        // this error function takes advantage of the fact that log is negative when the input is less that 1, 
-        // to add some sort of "slowing down when we get close"
-        // to make this never happen, set the negativity offset to 1
-        double errFunc = Math.log(err/logErrScalar.get()+logNegativityOffset.get())/logScalar.get(); 
+        // log is negative when the input is less that 1, 
+        // to make this never happen, add 1
+        double errFunc = Math.log(err/logErrScalar.get()+1)/logScalar.get(); 
         return Math.max(-maxError.get(), Math.min(errFunc, maxError.get()));
     }
 
