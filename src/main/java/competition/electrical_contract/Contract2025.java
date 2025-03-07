@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.units.measure.Distance;
+import xbot.common.controls.sensors.XGyro;
 import xbot.common.injection.electrical_contract.CANBusId;
 import xbot.common.injection.electrical_contract.CANMotorControllerInfo;
 import xbot.common.injection.electrical_contract.CANMotorControllerOutputConfig;
@@ -285,8 +286,13 @@ public class Contract2025 extends ElectricalContract {
     }
 
     @Override
-    public IMUInfo getGyroInfo() {
-        return new IMUInfo(CANBusId.DefaultCanivore, 10);
+    public IMUInfo getNavXGyroInfo() {
+        return new IMUInfo("IMU", XGyro.ImuType.navX, XGyro.InterfaceType.spi, null, 1);
+    }
+
+    @Override
+    public IMUInfo getPigeon2GyroInfo() {
+        return new IMUInfo("IMU_Pigeon2", XGyro.ImuType.pigeon2, null, CANBusId.DefaultCanivore, 10);
     }
 
     @Override

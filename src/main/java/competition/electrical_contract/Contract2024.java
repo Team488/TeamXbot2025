@@ -4,13 +4,11 @@ import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
-import xbot.common.controls.sensors.XGyro;
 import xbot.common.injection.electrical_contract.CANBusId;
 import xbot.common.injection.electrical_contract.CANMotorControllerInfo;
 import xbot.common.injection.electrical_contract.CANMotorControllerOutputConfig;
 import xbot.common.injection.electrical_contract.CameraInfo;
 import xbot.common.injection.electrical_contract.DeviceInfo;
-import xbot.common.injection.electrical_contract.IMUInfo;
 import xbot.common.injection.electrical_contract.MotorControllerType;
 import xbot.common.injection.swerve.SwerveInstance;
 import xbot.common.math.XYPair;
@@ -23,11 +21,6 @@ public class Contract2024 extends Contract2025 {
 
     @Inject
     public Contract2024() {}
-
-    @Override
-    public IMUInfo getGyroInfo() {
-        return new IMUInfo(XGyro.InterfaceType.spi);
-    }
 
     @Override
     public boolean isDriveReady() {

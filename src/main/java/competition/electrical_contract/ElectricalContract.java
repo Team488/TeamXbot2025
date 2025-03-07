@@ -26,7 +26,9 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
 
     public abstract XYPair getSwerveModuleOffsetsInInches(SwerveInstance swerveInstance);
 
-    public abstract IMUInfo getGyroInfo();
+    public abstract IMUInfo getNavXGyroInfo();
+
+    public abstract IMUInfo getPigeon2GyroInfo();
 
     public abstract boolean isElevatorReady();
 

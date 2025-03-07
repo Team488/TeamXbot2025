@@ -9,7 +9,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import competition.electrical_contract.ElectricalContract;
-import competition.injection.RobotOverride;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
@@ -27,13 +26,13 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import org.kobe.xbot.JClient.XTablesClient;
 import org.kobe.xbot.Utilities.Entities.BatchedPushRequests;
+import xbot.common.controls.sensors.XGyro;
 import xbot.common.controls.sensors.XGyro.XGyroFactory;
 import xbot.common.math.WrappedRotation2d;
 import xbot.common.properties.BooleanProperty;
 import xbot.common.properties.Property;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.pose.BasePoseSubsystem;
-import xbot.common.subsystems.vision.AprilTagVisionSubsystem;
 
 @Singleton
 public class PoseSubsystem extends BasePoseSubsystem {
@@ -47,6 +46,8 @@ public class PoseSubsystem extends BasePoseSubsystem {
     private final BooleanProperty reportCameraPoses;
     private final CoprocessorCommunicationSubsystem coprocessorComms;
 
+    private final XGyro pigeon2Gyro;
+
     public static final Distance fieldXMidpointInMeters = Meters.of(8.7785);
     public static final Distance fieldYMidpointInMeters = Meters.of(4.025);
 
@@ -57,15 +58,16 @@ public class PoseSubsystem extends BasePoseSubsystem {
     protected Optional<SwerveModulePosition[]> simulatedModulePositions = Optional.empty();
 
     @Inject
-    public PoseSubsystem(@RobotOverride XGyroFactory gyroFactory,
+    public PoseSubsystem(XGyroFactory gyroFactory,
                          ElectricalContract electricalContract,
                          PropertyFactory propManager, DriveSubsystem drive,
                          AprilTagVisionSubsystemExtended aprilTagVisionSubsystem,
                          CoprocessorCommunicationSubsystem coprocessorComms) {
-        super(gyroFactory.create(electricalContract.getGyroInfo()), propManager);
+        super(gyroFactory.create(electricalContract.getNavXGyroInfo()), propManager);
         this.drive = drive;
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
         this.coprocessorComms = coprocessorComms;
+        this.pigeon2Gyro = gyroFactory.create(electricalContract.getPigeon2GyroInfo());
 
         onlyWheelsGyroSwerveOdometry = initializeSwerveOdometry();
         fullSwerveOdometry = initializeSwerveOdometry();
@@ -74,6 +76,12 @@ public class PoseSubsystem extends BasePoseSubsystem {
         propManager.setDefaultLevel(Property.PropertyLevel.Important);
         useVisionAssistedPose = propManager.createPersistentProperty("UseVisionAssistedPose", true);
         reportCameraPoses = propManager.createPersistentProperty("ReportCameraPoses", false);
+    }
+
+    @Override
+    public void refreshDataFrame() {
+        super.refreshDataFrame();
+        pigeon2Gyro.refreshDataFrame();
     }
 
     @Override
