@@ -109,8 +109,9 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
             useBackupPointToPoint = true;
             log.warn("No curves returned from vision coprocessor within timeout! "
                     + "Using P2P from now on.");
+            cancel();
+            return;
         } else {
-
             this.setSegmentedBezierCurve(curves, curves.getOptions());
             XTablesClient client = this.coprocessor.getXTablesManager().getOrNull();
             if (client != null) {

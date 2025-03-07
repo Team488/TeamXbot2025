@@ -22,7 +22,7 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SwerveBezierTrajectoryBase extends SwerveSimpleBezierCommand {
+public class SwerveBezierTrajectoryBase extends SwerveSimpleTrajectoryCommand {
     private final CoprocessorCommunicationSubsystem coprocessor;
 
     // --- NEW CONSTANTS ---
@@ -46,7 +46,6 @@ public class SwerveBezierTrajectoryBase extends SwerveSimpleBezierCommand {
     @Override
     public void initialize() {
         this.logic.setPrioritizeRotationIfCloseToGoal(true);
-        this.logic.setDistanceThresholdToPrioritizeRotation(1.5);
         super.initialize();
     }
 
@@ -93,7 +92,7 @@ public class SwerveBezierTrajectoryBase extends SwerveSimpleBezierCommand {
         int globalStep = 0;
 
         // Rotation start threshold (50% of the path)
-        double rotationStartThreshold = 0.5;
+        double rotationStartThreshold = 0.1;
 
         // Process each Bézier segment.
         for (XTableValues.BezierCurve segment : bezierCurves.getCurvesList()) {

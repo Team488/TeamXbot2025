@@ -1,10 +1,13 @@
 package competition.commandgroups.vision_path;
 
+import static competition.subsystems.vision.CoprocessorCommunicationSubsystem.fromAlliance;
+import static edu.wpi.first.units.Units.Meters;
+
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
 import competition.subsystems.coral_scorer.commands.ScoreWhenReadyCommand;
 import competition.subsystems.drive.commands.AlignToTagGlobalMovementWithCalculator;
 import competition.subsystems.drive.commands.MeasureDistanceBeforeScoringCommand;
-import competition.subsystems.drive.commands.vision_path.PathDriveToLocationUntilAprilTagDetectionDynamic;
+import competition.subsystems.drive.commands.vision_path.PathDriveToLocationCommandUntilAprilTagDetectionDynamic;
 import competition.subsystems.pose.Cameras;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
@@ -13,17 +16,13 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import org.kobe.xbot.Utilities.Entities.XTableValues;
-
 import javax.inject.Inject;
 import javax.inject.Provider;
-
-import static competition.subsystems.vision.CoprocessorCommunicationSubsystem.fromAlliance;
-import static edu.wpi.first.units.Units.Meters;
+import org.kobe.xbot.Utilities.Entities.XTableValues;
 
 public class PathToBestReefBranchLevelThenAlignAndPrepCommandGroupFactory {
-
-    Provider<PathDriveToLocationUntilAprilTagDetectionDynamic> driveToReefFaceCommandUntilAprilTagDetection;
+    Provider<PathDriveToLocationCommandUntilAprilTagDetectionDynamic>
+            driveToReefFaceCommandUntilAprilTagDetection;
     AlignToTagGlobalMovementWithCalculator alignToReefWithAprilTagCommand;
     AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
     PrepCoralSystemCommandGroupFactory prepCoralSystemFactory;
@@ -32,60 +31,81 @@ public class PathToBestReefBranchLevelThenAlignAndPrepCommandGroupFactory {
 
     @Inject
     public PathToBestReefBranchLevelThenAlignAndPrepCommandGroupFactory(
-            Provider<PathDriveToLocationUntilAprilTagDetectionDynamic> driveToReefFaceCommandUntilAprilTagDetection,
+            Provider<PathDriveToLocationCommandUntilAprilTagDetectionDynamic>
+                    driveToReefFaceCommandUntilAprilTagDetection,
             AlignToTagGlobalMovementWithCalculator alignToReefWithAprilTagCommand,
             AprilTagVisionSubsystemExtended aprilTagVisionSubsystem,
             PrepCoralSystemCommandGroupFactory prepCoralSystemFactory,
             Provider<ScoreWhenReadyCommand> scoreWhenReadyProvider,
             MeasureDistanceBeforeScoringCommand measureDistanceBeforeScoringCommand) {
-        this.driveToReefFaceCommandUntilAprilTagDetection = driveToReefFaceCommandUntilAprilTagDetection;
+        this.driveToReefFaceCommandUntilAprilTagDetection =
+                driveToReefFaceCommandUntilAprilTagDetection;
         this.alignToReefWithAprilTagCommand = alignToReefWithAprilTagCommand;
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
         this.prepCoralSystemFactory = prepCoralSystemFactory;
         this.scoreWhenReadyProvider = scoreWhenReadyProvider;
-        this.measureDistanceBeforeScoringCommand = measureDistanceBeforeScoringCommand;
+        this.measureDistanceBeforeScoringCommand =
+                measureDistanceBeforeScoringCommand;
     }
 
     public SequentialCommandGroup create() {
-        PathDriveToLocationUntilAprilTagDetectionDynamic pathDriveToLocationUntilAprilTagDetectionDynamic = driveToReefFaceCommandUntilAprilTagDetection.get();
+        PathDriveToLocationCommandUntilAprilTagDetectionDynamic
+                pathDriveToLocationUntilAprilTagDetectionDynamic =
+                driveToReefFaceCommandUntilAprilTagDetection.get();
         return new SequentialCommandGroup(
                 // Step 1: Configure and Run Path Drive
                 new InstantCommand(() -> {
-                    // This will auto get replaced by XTABLES Vision Coprocessor.
-                    pathDriveToLocationUntilAprilTagDetectionDynamic.setTarget(new Pose2d());
-                    pathDriveToLocationUntilAprilTagDetectionDynamic.setAdditionalArguments(XTableValues.AdditionalArguments.newBuilder()
-                                    .setAlliance(fromAlliance(DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue)))
-                                    .setGoalToBestReefBranch(true)
-                            .build());
+                    // This will auto get overwritten by XTABLES Vision Coprocessor
+                    // (ORIN).
+                    pathDriveToLocationUntilAprilTagDetectionDynamic.setTarget(
+                            new Pose2d());
+                    pathDriveToLocationUntilAprilTagDetectionDynamic
+                            .setAdditionalArguments(
+                                    XTableValues.AdditionalArguments.newBuilder()
+                                            .setAlliance(
+                                                    fromAlliance(DriverStation.getAlliance().orElse(
+                                                            DriverStation.Alliance.Blue)))
+                                            .setGoalToBestReefBranch(true)
+                                            .build());
                 }),
                 pathDriveToLocationUntilAprilTagDetectionDynamic,
 
                 // Step 2: Extract data after driving is done
                 new InstantCommand(() -> {
-                    if (pathDriveToLocationUntilAprilTagDetectionDynamic.curves.hasAlignToReefAprilTagOptions()) {
-                        int cameraIndex = pathDriveToLocationUntilAprilTagDetectionDynamic.curves.getAlignToReefAprilTagOptions().getCamera()
-                                .equals(XTableValues.AprilTagCamera.FRONT_LEFT) ? Cameras.FRONT_LEFT_CAMERA.getIndex() :
-                                Cameras.FRONT_RIGHT_CAMERA.getIndex();
+                    if (pathDriveToLocationUntilAprilTagDetectionDynamic.curves
+                            .hasAlignToReefAprilTagOptions()) {
+                        int cameraIndex =
+                                pathDriveToLocationUntilAprilTagDetectionDynamic.curves
+                                        .getAlignToReefAprilTagOptions()
+                                        .getCamera()
+                                        .equals(XTableValues.AprilTagCamera.FRONT_LEFT)
+                                        ? Cameras.FRONT_LEFT_CAMERA.getIndex()
+                                        : Cameras.FRONT_RIGHT_CAMERA.getIndex();
 
                         alignToReefWithAprilTagCommand.setConfigurations(cameraIndex,
-                                pathDriveToLocationUntilAprilTagDetectionDynamic.curves.getAlignToReefAprilTagOptions()
-                                        .getAprilTagID(),false, -2);
-                        measureDistanceBeforeScoringCommand.setDistanceThreshold(Meters.of(1));
+                                pathDriveToLocationUntilAprilTagDetectionDynamic.curves
+                                        .getAlignToReefAprilTagOptions()
+                                        .getAprilTagID(),
+                                false, -2);
+                        measureDistanceBeforeScoringCommand.setDistanceThreshold(
+                                Meters.of(1));
                     } else {
                         alignToReefWithAprilTagCommand.cancel();
                     }
                 }),
                 new ParallelCommandGroup(alignToReefWithAprilTagCommand,
                         new SequentialCommandGroup(measureDistanceBeforeScoringCommand,
-                                prepCoralSystemFactory.create(() ->
-                                        toCoralLevel(pathDriveToLocationUntilAprilTagDetectionDynamic.curves
-                        .getAlignToReefAprilTagOptions().getBranchLevel())),
-                        scoreWhenReadyProvider.get()))
-        );
+                                prepCoralSystemFactory.create(
+                                        ()
+                                                -> toCoralLevel(
+                                                pathDriveToLocationUntilAprilTagDetectionDynamic
+                                                        .curves.getAlignToReefAprilTagOptions()
+                                                        .getBranchLevel())),
+                                scoreWhenReadyProvider.get())));
     }
 
-
-    private Landmarks.CoralLevel toCoralLevel(XTableValues.BranchLevel branchLevel) {
+    private Landmarks.CoralLevel toCoralLevel(
+            XTableValues.BranchLevel branchLevel) {
         return switch (branchLevel) {
             case TROUGH, UNRECOGNIZED -> Landmarks.CoralLevel.ONE;
 
