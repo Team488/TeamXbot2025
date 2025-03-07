@@ -48,7 +48,7 @@ public class MapleSimulator implements BaseSimulator {
     final AlgaeArmSimulator algaeArmSimulator;
     final LightsSimulator lightsSimulator;
 
-    final Distance humanLoadingDistanceThreshold = Meters.of(0.5);
+    final Distance humanLoadingDistanceThreshold = Meters.of(0.2);
     final TimeStableValidator humanLoadValidator = new TimeStableValidator(1);
 
     // maple-sim stuff ----------------------------
