@@ -50,7 +50,7 @@ public class DriveToFaceAndScoreCommandGroupFactory {
         var driveToFaceAndScoreCommandGroup = new SequentialCommandGroup();
 
         // Drive to a branch while prepping the coral system once the robot is close enough
-        var driveToBranchWhilePrepping = new ParallelCommandGroup();
+        var driveToBranchWhilePrepping = new SequentialCommandGroup();
 
         // Terminally approach to branch
         var driveToReefFaceThenAlign = driveToReefFaceThenAlignCommandGroupFactory.create(targetReefFace, targetBranch);
@@ -68,7 +68,7 @@ public class DriveToFaceAndScoreCommandGroupFactory {
         measureDistanceBeforeScoringCommand.setDistanceThreshold(distanceThresholdInMeters);
         measureDistanceBeforeScoringCommand.setBranch(targetBranch);
         var prepCoralSystem = prepCoralSystemFactory.create(() -> targetLevel);
-        measureDistanceThenPrep.addCommands(measureDistanceBeforeScoringCommand, prepCoralSystem);
+        measureDistanceThenPrep.addCommands(prepCoralSystem);
 
         driveToBranchWhilePrepping.addCommands(driveToReefFaceThenAlign, measureDistanceThenPrep);
 
