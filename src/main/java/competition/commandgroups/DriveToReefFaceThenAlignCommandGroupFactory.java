@@ -38,12 +38,12 @@ public class DriveToReefFaceThenAlignCommandGroupFactory {
         if (branch == Landmarks.Branch.A) {
             command.setConfigurations(Cameras.FRONT_RIGHT_CAMERA.getIndex(),
                     aprilTagVisionSubsystem.getTargetAprilTagID(reefFace), false, 1,
-                    AlignCameraToAprilTagCalculator.Activity.ApproachWhileCentering, true);
+                    AlignCameraToAprilTagCalculator.Activity.ApproachWhileCentering, false);
         }
         else {
             command.setConfigurations(Cameras.FRONT_LEFT_CAMERA.getIndex(),
                     aprilTagVisionSubsystem.getTargetAprilTagID(reefFace), false, 1,
-                    AlignCameraToAprilTagCalculator.Activity.ApproachWhileCentering, true);
+                    AlignCameraToAprilTagCalculator.Activity.ApproachWhileCentering, false);
         }
     }
 
