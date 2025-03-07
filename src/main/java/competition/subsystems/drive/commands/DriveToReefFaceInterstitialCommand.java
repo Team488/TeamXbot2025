@@ -19,6 +19,19 @@ public class DriveToReefFaceInterstitialCommand extends SwerveSimpleTrajectoryCo
 
     boolean kinematics = true;
     Landmarks.ReefFace reefFace;
+    double endingThresholdInMeters = 0.8;
+
+    // Interstitial points to avoid rotating into the reef when going for coral station alignment
+    Pose2d cageOneInterstitialPoint = new Pose2d(
+            Landmarks.BlueCageOneStartingLine.getX() - 0.9144, // TODO: Tune for better pathing
+            Landmarks.BlueCageOneStartingLine.getY(),
+            Landmarks.BlueFarLeftAlgae.getRotation());
+
+    Pose2d cageSixInterstitialPoint = new Pose2d(
+            Landmarks.BlueCageSixStartingLine.getX() - 0.9144,
+            Landmarks.BlueCageSixStartingLine.getY(),
+            Landmarks.BlueFarRightAlgae.getRotation());
+
 
     @Inject
     public DriveToReefFaceInterstitialCommand(DriveSubsystem drive, PoseSubsystem pose,
@@ -27,7 +40,7 @@ public class DriveToReefFaceInterstitialCommand extends SwerveSimpleTrajectoryCo
         super(drive, pose, pf, headingModuleFactory, robotAssertionManager);
     }
 
-    public void setTargetReefFaceSection(Landmarks.ReefFace reefFace) {
+    public void setTargetReefFace(Landmarks.ReefFace reefFace) {
         this.reefFace = reefFace;
     }
 
@@ -36,21 +49,11 @@ public class DriveToReefFaceInterstitialCommand extends SwerveSimpleTrajectoryCo
         log.info("Initializing");
         ArrayList<XbotSwervePoint> swervePoints = new ArrayList<>();
 
-        // Interstitial points to avoid rotating into the reef when going for coral station alignment
-        Pose2d cageTwoInterstitialPoint = new Pose2d(
-                Landmarks.BlueCageTwoStartingLine.getX() - 0.9144, // TODO: Tune for better pathing
-                Landmarks.BlueCageTwoStartingLine.getY(),
-                Landmarks.BlueFarLeftAlgae.getRotation());
-        Pose2d cageFiveInterstitialPoint = new Pose2d(
-                Landmarks.BlueCageFiveStartingLine.getX() - 0.9144,
-                Landmarks.BlueCageFiveStartingLine.getY(),
-                Landmarks.BlueFarRightAlgae.getRotation());
-
         if (reefFace == Landmarks.ReefFace.CLOSE_LEFT) {
-            swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(cageTwoInterstitialPoint), 10));
+            swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(cageOneInterstitialPoint), 10));
         }
         else if (reefFace == Landmarks.ReefFace.FAR_RIGHT) {
-            swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(cageFiveInterstitialPoint), 10));
+            swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(cageSixInterstitialPoint), 10));
         }
         this.logic.setKeyPoints(swervePoints);
 
@@ -64,5 +67,11 @@ public class DriveToReefFaceInterstitialCommand extends SwerveSimpleTrajectoryCo
             this.logic.setVelocityMode(SwerveSimpleTrajectoryMode.ConstantVelocity);
         }
         super.initialize();
+    }
+
+    @Override
+    public boolean isFinished() {
+        var point = reefFace == Landmarks.ReefFace.CLOSE_LEFT ? cageOneInterstitialPoint : cageSixInterstitialPoint;
+        return pose.getCurrentPose2d().minus(point).getTranslation().getNorm() < endingThresholdInMeters;
     }
 }

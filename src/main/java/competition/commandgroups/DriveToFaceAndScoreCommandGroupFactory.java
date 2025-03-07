@@ -17,7 +17,7 @@ import static edu.wpi.first.units.Units.Meters;
 public class DriveToFaceAndScoreCommandGroupFactory {
 
     DriveToReefFaceThenAlignCommandGroupFactory driveToReefFaceThenAlignCommandGroupFactory;
-    MeasureDistanceBeforeScoringCommand measureDistanceBeforeScoringCommand;
+    Provider<MeasureDistanceBeforeScoringCommand> measureDistanceBeforeScoringCommandProvider;
     PrepCoralSystemCommandGroupFactory prepCoralSystemFactory;
     Provider<ScoreWhenReadyCommand> scoreWhenReadyProvider;
 
@@ -27,19 +27,19 @@ public class DriveToFaceAndScoreCommandGroupFactory {
 
     @Inject
     public DriveToFaceAndScoreCommandGroupFactory(DriveToReefFaceThenAlignCommandGroupFactory driveToReefFaceThenAlignCommandGroupFactory,
-                                                  MeasureDistanceBeforeScoringCommand measureDistanceBeforeScoringCommand,
+                                                  Provider<MeasureDistanceBeforeScoringCommand> measureDistanceBeforeScoringCommandProvider,
                                                   PrepCoralSystemCommandGroupFactory prepCoralSystemFactory,
                                                   Provider<ScoreWhenReadyCommand> scoreWhenReadyProvider,
                                                   PropertyFactory pf) {
         this.driveToReefFaceThenAlignCommandGroupFactory = driveToReefFaceThenAlignCommandGroupFactory;
-        this.measureDistanceBeforeScoringCommand = measureDistanceBeforeScoringCommand;
+        this.measureDistanceBeforeScoringCommandProvider = measureDistanceBeforeScoringCommandProvider;
         this.prepCoralSystemFactory = prepCoralSystemFactory;
         this.scoreWhenReadyProvider = scoreWhenReadyProvider;
 
         pf.setPrefix("DriveToFaceAndScoreCommandGroupFactory");
-        levelOneDistanceThreshold = pf.createPersistentProperty("LevelOneDistanceThresholdInMeters", Meters.of(1));
-        levelTwoDistanceThreshold = pf.createPersistentProperty("LevelTwoDistanceThresholdInMeters", Meters.of(1));
-        levelFourDistanceThreshold = pf.createPersistentProperty("LevelFourDistanceThresholdInMeters",  Meters.of(1));
+        levelOneDistanceThreshold = pf.createPersistentProperty("LevelOneDistanceThresholdInMeters", Meters.of(2));
+        levelTwoDistanceThreshold = pf.createPersistentProperty("LevelTwoDistanceThresholdInMeters", Meters.of(2));
+        levelFourDistanceThreshold = pf.createPersistentProperty("LevelFourDistanceThresholdInMeters",  Meters.of(1.5));
 
     }
 
@@ -50,7 +50,7 @@ public class DriveToFaceAndScoreCommandGroupFactory {
         var driveToFaceAndScoreCommandGroup = new SequentialCommandGroup();
 
         // Drive to a branch while prepping the coral system once the robot is close enough
-        var driveToBranchWhilePrepping = new ParallelCommandGroup();
+        var driveToBranchWhilePrepping = new SequentialCommandGroup();
 
         // Terminally approach to branch
         var driveToReefFaceThenAlign = driveToReefFaceThenAlignCommandGroupFactory.create(targetReefFace, targetBranch);
@@ -62,10 +62,13 @@ public class DriveToFaceAndScoreCommandGroupFactory {
             case TWO -> levelTwoDistanceThreshold.get();
             default -> levelFourDistanceThreshold.get(); // For safety, the default is the shortest distance which is probably L4
         };
+
+        var measureDistanceBeforeScoringCommand = measureDistanceBeforeScoringCommandProvider.get();
+
         measureDistanceBeforeScoringCommand.setDistanceThreshold(distanceThresholdInMeters);
         measureDistanceBeforeScoringCommand.setBranch(targetBranch);
         var prepCoralSystem = prepCoralSystemFactory.create(() -> targetLevel);
-        measureDistanceThenPrep.addCommands(measureDistanceBeforeScoringCommand, prepCoralSystem);
+        measureDistanceThenPrep.addCommands(prepCoralSystem);
 
         driveToBranchWhilePrepping.addCommands(driveToReefFaceThenAlign, measureDistanceThenPrep);
 
