@@ -47,6 +47,11 @@ public class AlignCameraToAprilTagCalculator {
         Complete
     }
 
+    public enum ApproachMode {
+        Close,
+        Far
+    }
+
     final AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
     final HeadingModule headingModule;
     final DriveSubsystem drive;
@@ -75,10 +80,20 @@ public class AlignCameraToAprilTagCalculator {
     final DoubleProperty maxTagAmbiguity;
     final DoubleProperty maxHorizontalErrorMeters;
 
+    final DoubleProperty closeInterstitialDistance;
+    final DoubleProperty closeApproachSpeedFactor;
+    final DoubleProperty closeInterstitialActivationRange;
+
     double lastKnownHorizontalErrorMeters = 0;
     double shoveStartTime = 0;
     private Activity startingActivity = Activity.Searching;
     private boolean requireExcellentAlignment = true;
+
+    Translation2d aprilTagPositionInGlobalFieldCoordinates;
+    double aprilTagZRotationRadians;
+    double idealFinalHeadingDegrees;
+    Pose2d interstitialPoint;
+    private ApproachMode approachMode;
 
     public static Translation2d generateAlignmentPointOffset(Distance robotCenterToOuterBumperX, CameraInfo cameraInfo,
                                                              Distance offset, boolean isCameraBackwards) {
@@ -120,6 +135,10 @@ public class AlignCameraToAprilTagCalculator {
         maxTagAmbiguity = pf.createPersistentProperty("MaxTagAmbiguity", 0.5);
         maxHorizontalErrorMeters = pf.createPersistentProperty("MaxHorizontalError-m", 0.0508); // 2 inches
 
+        closeInterstitialDistance = pf.createPersistentProperty("CloseInterstitialDistance-m", 1.0);
+        closeApproachSpeedFactor = pf.createPersistentProperty("CloseApproachSpeedFactor", 0.33);
+        closeInterstitialActivationRange = pf.createPersistentProperty("CloseInterstitialActivationRange-m", 1.33);
+
         reset();
     }
 
@@ -142,10 +161,11 @@ public class AlignCameraToAprilTagCalculator {
         this.targetAprilTagID = targetAprilTagID;
         this.targetCameraID = targetCameraID;
         this.isCameraBackwards = isCameraBackwards;
+        var currentPose = pose.getCurrentPose2d();
 
         reset();
 
-        this.initialHeading = pose.getCurrentPose2d().getRotation().getDegrees();
+        this.initialHeading = currentPose.getRotation().getDegrees();
 
         CameraInfo cameraInfo = electricalContract.getCameraInfo()[targetCameraID];
         this.cameraRotation = cameraInfo.position().getRotation();
@@ -175,13 +195,31 @@ public class AlignCameraToAprilTagCalculator {
         var alliance = DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
 
         if (elementType == Landmarks.FieldElementType.REEF_FACE) {
-            interstitialPoint = reefCoordinateGenerator.getPoseRelativeToReefFaceAndBranch(
-                            alliance,
-                            Landmarks.getReefFaceFromTagId(targetAprilTagID),
-                            isLeft ? Landmarks.Branch.B : Landmarks.Branch.A,
-                            Meters.of(interstitialDistance.get()),
-                            Meters.zero()
-                    );
+            var farPoint = reefCoordinateGenerator.getPoseRelativeToReefFaceAndBranch(
+                    alliance,
+                    Landmarks.getReefFaceFromTagId(targetAprilTagID),
+                    isLeft ? Landmarks.Branch.B : Landmarks.Branch.A,
+                    Meters.of(interstitialDistance.get()),
+                    Meters.zero()
+            );
+            var closePoint = reefCoordinateGenerator.getPoseRelativeToReefFaceAndBranch(
+                    alliance,
+                    Landmarks.getReefFaceFromTagId(targetAprilTagID),
+                    isLeft ? Landmarks.Branch.B : Landmarks.Branch.A,
+                    Meters.of(closeInterstitialDistance.get()),
+                    Meters.zero()
+            );
+
+            double farDistance = farPoint.getTranslation().getDistance(currentPose.getTranslation());
+            double closeDistance = closePoint.getTranslation().getDistance(currentPose.getTranslation());
+
+            if (closeDistance < farDistance && closeDistance < closeInterstitialActivationRange.get()) {
+                approachMode = ApproachMode.Close;
+                interstitialPoint = closePoint;
+            } else {
+                approachMode = ApproachMode.Far;
+                interstitialPoint = farPoint;
+            }
         } else if (elementType == Landmarks.FieldElementType.CORAL_STATION) {
             // From the Tag ID, figure out which coral station this is
             var station = Landmarks.getCoralStationFromTagId(targetAprilTagID);
@@ -198,10 +236,6 @@ public class AlignCameraToAprilTagCalculator {
         akitLog.record("InterstitialPoint", interstitialPoint);
     }
 
-    Translation2d aprilTagPositionInGlobalFieldCoordinates;
-    double aprilTagZRotationRadians;
-    double idealFinalHeadingDegrees;
-    Pose2d interstitialPoint;
 
     public AlignCameraToAprilTagAdvice getXYPowersAlignToAprilTag(Pose2d currentPose) {
 
@@ -214,6 +248,9 @@ public class AlignCameraToAprilTagCalculator {
         double headingToPointAtAprilTag = Radians.of(
                 currentTranslation.minus(aprilTagPositionInGlobalFieldCoordinates).getAngle().getRadians() + Math.PI
         ).plus(Radians.of(isCameraBackwards ? Math.PI : 0)).in(Degrees);
+
+        double approachSpeedFactor =
+                this.approachMode == ApproachMode.Close ? closeApproachSpeedFactor.get() : this.approachSpeedFactor.get();
 
         // Eventually we need to return these - they will likely be mutated by later steps.
         XYPair driveIntent = new XYPair(0, 0);
@@ -256,7 +293,7 @@ public class AlignCameraToAprilTagCalculator {
                 // so this will automatically scale with the robot's max speed.
                 var vectorTowardsInterstitial = interstitialPoint.getTranslation().minus(currentPose.getTranslation());
                 var normalizedVector = vectorTowardsInterstitial.div(vectorTowardsInterstitial.getNorm());
-                driveIntent = new XYPair(normalizedVector.getX(), normalizedVector.getY()).scale(approachSpeedFactor.get());
+                driveIntent = new XYPair(normalizedVector.getX(), normalizedVector.getY()).scale(approachSpeedFactor);
                 rotationIntent = headingModule.calculateHeadingPower(headingToPointAtAprilTag);
 
                 // Finally, a check to see if we're quite close and should advance to the next state.
@@ -280,11 +317,11 @@ public class AlignCameraToAprilTagCalculator {
                 var powers = drive.getPowerToAchieveFieldPosition(currentPose.getTranslation(), targetLocationOnField);
 
                 // If we are going too fast, cap the speed.
-                if (powers.getNorm() >  approachSpeedFactor.get()) {
-                    powers = new Translation2d(approachSpeedFactor.get(), powers.getAngle());
+                if (powers.getNorm() >  approachSpeedFactor) {
+                    powers = new Translation2d(approachSpeedFactor, powers.getAngle());
                 }
 
-                driveIntent = new XYPair(powers.getX(), powers.getY()).scale(approachSpeedFactor.get());
+                driveIntent = new XYPair(powers.getX(), powers.getY()).scale(approachSpeedFactor);
                 rotationIntent = headingModule.calculateHeadingPower(idealFinalHeadingDegrees);
 
                 // If we're quite close to the final point, advance to shoving into the reef or coral station.
