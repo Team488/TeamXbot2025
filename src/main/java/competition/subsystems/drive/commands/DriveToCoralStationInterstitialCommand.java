@@ -4,6 +4,7 @@ import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import xbot.common.logging.RobotAssertionManager;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.drive.SwervePointKinematics;
@@ -22,22 +23,22 @@ public class DriveToCoralStationInterstitialCommand extends SwerveBezierTrajecto
 
     // Interstitial points to avoid rotating into the reef when going for coral station alignment
     Pose2d firstLeftStationInterstitialPoint = new Pose2d(
-            Landmarks.BlueFarLeftBranchB.getX() - 0.5, // TODO: Tune for better pathing
-            Landmarks.BlueFarLeftBranchB.getY() + 0.8,
+            Landmarks.BlueFarLeftBranchB.getX() - 0.75, // TODO: Tune for better pathing
+            Landmarks.BlueFarLeftBranchB.getY() + 1.5,
             Landmarks.BlueFarLeftBranchB.getRotation());
     Pose2d secondLeftStationInterstitialPoint = new Pose2d(
-            firstLeftStationInterstitialPoint.getX() - 1.8,
-            firstLeftStationInterstitialPoint.getY() - 1,
+            firstLeftStationInterstitialPoint.getX() - 1.6,
+            firstLeftStationInterstitialPoint.getY() - 1.5,
             Landmarks.BlueLeftCoralStationMid.getRotation()
     );
 
     Pose2d firstRightStationInterstitialPoint = new Pose2d(
-            Landmarks.BlueFarRightBranchA.getX() - 0.5,
-            Landmarks.BlueFarRightBranchA.getY() - 0.8,
+            Landmarks.BlueFarRightBranchA.getX() - 0.75,
+            Landmarks.BlueFarRightBranchA.getY() - 1.5,
             Landmarks.BlueFarRightBranchA.getRotation());
     Pose2d secondRightStationInterstitialPoint = new Pose2d(
-            firstRightStationInterstitialPoint.getX() - 1.8,
-            firstRightStationInterstitialPoint.getY() + 1,
+            firstRightStationInterstitialPoint.getX() - 1.6,
+            firstRightStationInterstitialPoint.getY() + 1.5,
             Landmarks.BlueRightCoralStationMid.getRotation()
     );
 
@@ -55,20 +56,12 @@ public class DriveToCoralStationInterstitialCommand extends SwerveBezierTrajecto
     @Override
     public void initialize() {
         log.info("Initializing");
-        ArrayList<XbotSwervePoint> swervePoints = new ArrayList<>();
 
         if (station == Landmarks.CoralStation.LEFT) {
             setBezierConfiguration(firstLeftStationInterstitialPoint.getTranslation(), secondLeftStationInterstitialPoint, 10);
-
-//            swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(firstLeftStationInterstitialPoint), 10));
-//            swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(secondLeftStationInterstitialPoint), 10));
-        }
-        else {
+        } else {
             setBezierConfiguration(firstRightStationInterstitialPoint.getTranslation(), secondRightStationInterstitialPoint, 10);
-//            swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(firstRightStationInterstitialPoint), 10));
-//            swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(secondRightStationInterstitialPoint), 10));
         }
-        this.logic.setKeyPoints(swervePoints);
 
         if (kinematics) {
             // Make sure goalVelocity is non-zero, or else the robot will wait until it's stopped at the interstitial point before continuing
