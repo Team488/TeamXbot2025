@@ -54,6 +54,7 @@ public class Robot extends BaseRobot {
         getInjectorComponent().oracleSubsystem();
         getInjectorComponent().lightSubsystem();
         oi = getInjectorComponent().operatorInterface();
+        algaeArmSubsystem = getInjectorComponent().algaeArmSubsystem();
 
         if (BaseRobot.isSimulation()) {
             simulator = getInjectorComponent().simulator();
