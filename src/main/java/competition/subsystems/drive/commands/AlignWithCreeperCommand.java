@@ -149,15 +149,15 @@ public class AlignWithCreeperCommand extends BaseCommand {
         }
 
         if(this.isCenteredConfidentlySubscriber == null){
-            this.isCenteredConfidentlySubscriber = new CachedSubscriber(hostname + "." + tableCenteredConfidently, client);
+            this.isCenteredConfidentlySubscriber = new CachedSubscriber(hostname + "." + tableCenteredConfidently, client,5);
         }
 
         if(this.leftOffsetPixelsSubscriber == null){
-            this.leftOffsetPixelsSubscriber = new CachedSubscriber(hostname + "." + tableLeftDistance, client);
+            this.leftOffsetPixelsSubscriber = new CachedSubscriber(hostname + "." + tableLeftDistance, client,5);
         }
 
         if(this.rightOffsetPixelsSubscriber == null){
-            this.rightOffsetPixelsSubscriber = new CachedSubscriber(hostname + "." + tableRightDistance, client);
+            this.rightOffsetPixelsSubscriber = new CachedSubscriber(hostname + "." + tableRightDistance, client,5);
         }
     }
 
@@ -188,18 +188,20 @@ public class AlignWithCreeperCommand extends BaseCommand {
         
 
         try {
-            this.isCenteredConfidently = this.isCenteredConfidentlySubscriber.getAsBoolean(null);
+            Boolean centeredConfidently = this.isCenteredConfidentlySubscriber.getAsBoolean(null);
             Integer leftDistance = this.leftOffsetPixelsSubscriber.getAsInteger(null);
             Integer rightDistance = this.rightOffsetPixelsSubscriber.getAsInteger(null);
             
             
 
-            if (isCenteredConfidently == null || leftDistance == null || rightDistance == null) {
-                // No new vision data received; do nothing.
-                log.warn("Vision coprocessor is returning null results!!");
-                forceStop = true;
+            if (centeredConfidently == null || leftDistance == null || rightDistance == null) {
+                // since subscriber is not updating fast enough, sometimes we get nulls
+                aKitLog.record("Subcriber updated?", false);
                 return;
             }
+
+            this.isCenteredConfidently = centeredConfidently;
+            aKitLog.record("Subcriber updated?", true);
 
             aKitLog.record("Is Centered confidently", this.isCenteredConfidently);
             aKitLog.record("Left Distance Pixels", leftDistance);
@@ -286,7 +288,8 @@ public class AlignWithCreeperCommand extends BaseCommand {
     @Override
     public boolean isFinished() {
         // us being centered is only valuable if we arent currently moving
-        return forceStop && this.isDriveStopped() && this.isCenteredConfidently;
+        System.out.println(this.isCenteredConfidently);
+        return forceStop && this.isDriveStopped() && (this.isCenteredConfidently == null || this.isCenteredConfidently);
     }
 
     /**
