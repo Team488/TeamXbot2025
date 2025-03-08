@@ -64,19 +64,19 @@ package competition.motion;
         }
 
         /**
+         * Sets the starting control vector using a Translation2d.
+         */
+        public void setStartControlVector(Translation2d vector) {
+            this.startControlVector = vector;
+        }
+
+        /**
          * Sets the end control vector using magnitude and direction.
          */
         public void setEndControlVector(double magnitude, double directionRadians) {
             double x = magnitude * Math.cos(directionRadians);
             double y = magnitude * Math.sin(directionRadians);
             this.endControlVector = new Translation2d(x, y);
-        }
-
-        /**
-         * Sets the starting control vector using a Translation2d.
-         */
-        public void setStartControlVector(Translation2d vector) {
-            this.startControlVector = vector;
         }
 
         /**
@@ -103,10 +103,10 @@ package competition.motion;
             double h01 = -2*t*t*t + 3*t*t;
             double h11 = t*t*t - t*t;
 
-            double x = h00 * startPoint.getX() + h10 * startControlVector.getX() +
-                       h01 * endPoint.getX() + h11 * endControlVector.getX();
-            double y = h00 * startPoint.getY() + h10 * startControlVector.getY() +
-                       h01 * endPoint.getY() + h11 * endControlVector.getY();
+            double x = h00 * startPoint.getX() + h10 * startControlVector.getX()
+                       + h01 * endPoint.getX() + h11 * endControlVector.getX();
+            double y = h00 * startPoint.getY() + h10 * startControlVector.getY()
+                       + h01 * endPoint.getY() + h11 * endControlVector.getY();
 
             return new Translation2d(x, y);
         }
@@ -121,8 +121,8 @@ package competition.motion;
             double h01 = -2*t*t*t + 3*t*t;
             double h11 = t*t*t - t*t;
 
-            return h00 * startPoint.getX() + h10 * startControlVector.getX() +
-                   h01 * endPoint.getX() + h11 * endControlVector.getX();
+            return h00 * startPoint.getX() + h10 * startControlVector.getX()
+                   + h01 * endPoint.getX() + h11 * endControlVector.getX();
         }
 
         /**
@@ -135,8 +135,8 @@ package competition.motion;
             double h01 = -2*t*t*t + 3*t*t;
             double h11 = t*t*t - t*t;
 
-            return h00 * startPoint.getY() + h10 * startControlVector.getY() +
-                   h01 * endPoint.getY() + h11 * endControlVector.getY();
+            return h00 * startPoint.getY() + h10 * startControlVector.getY()
+                   + h01 * endPoint.getY() + h11 * endControlVector.getY();
         }
 
         /**
@@ -148,10 +148,10 @@ package competition.motion;
             double dh01 = -6*t*t + 6*t;
             double dh11 = 3*t*t - 2*t;
 
-            double dx = dh00 * startPoint.getX() + dh10 * startControlVector.getX() +
-                       dh01 * endPoint.getX() + dh11 * endControlVector.getX();
-            double dy = dh00 * startPoint.getY() + dh10 * startControlVector.getY() +
-                       dh01 * endPoint.getY() + dh11 * endControlVector.getY();
+            double dx = dh00 * startPoint.getX() + dh10 * startControlVector.getX()
+                    + dh01 * endPoint.getX() + dh11 * endControlVector.getX();
+            double dy = dh00 * startPoint.getY() + dh10 * startControlVector.getY()
+                    + dh01 * endPoint.getY() + dh11 * endControlVector.getY();
 
             return new Translation2d(dx, dy);
         }
@@ -165,8 +165,8 @@ package competition.motion;
             double dh01 = -6*t*t + 6*t;
             double dh11 = 3*t*t - 2*t;
 
-            return dh00 * startPoint.getX() + dh10 * startControlVector.getX() +
-                   dh01 * endPoint.getX() + dh11 * endControlVector.getX();
+            return dh00 * startPoint.getX() + dh10 * startControlVector.getX()
+                   + dh01 * endPoint.getX() + dh11 * endControlVector.getX();
         }
 
         /**
@@ -178,8 +178,8 @@ package competition.motion;
             double dh01 = -6*t*t + 6*t;
             double dh11 = 3*t*t - 2*t;
 
-            return dh00 * startPoint.getY() + dh10 * startControlVector.getY() +
-                   dh01 * endPoint.getY() + dh11 * endControlVector.getY();
+            return dh00 * startPoint.getY() + dh10 * startControlVector.getY()
+                   + dh01 * endPoint.getY() + dh11 * endControlVector.getY();
         }
 
         /**

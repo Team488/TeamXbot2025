@@ -30,7 +30,7 @@ public class DriveHermiteSplineCommand extends BaseCommand {
 
     private Landmarks.CoralStation endingCoralStation;
     private double distanceToStartUsingFinalHeading = 0.33;
-    final private HeadingModule headingModule;
+    final HeadingModule headingModule;
     Rotation2d initialHeading;
     Rotation2d endingHeading;
 

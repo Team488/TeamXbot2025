@@ -2,12 +2,21 @@ package competition.motion;
 
 import edu.wpi.first.math.geometry.Translation2d;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
+import java.awt.BasicStroke;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Line2D;
+
 
 public class CubicHermiteSplineVisualizer extends JFrame {
 
@@ -59,7 +68,9 @@ public class CubicHermiteSplineVisualizer extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 if (currentT < 1.0) {
                     currentT += ANIMATION_SPEED;
-                    if (currentT > 1.0) currentT = 1.0;
+                    if (currentT > 1.0)  {
+                        currentT = 1.0;
+                    }
                     drawPanel.repaint();
                 } else {
                     animationTimer.stop();

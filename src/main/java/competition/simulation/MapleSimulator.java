@@ -242,8 +242,8 @@ public class MapleSimulator implements BaseSimulator {
 
         var speeds = swerveDriveSimulation.getActualSpeedsFieldRelative();
         aKitLog.record("RobotVelocity",speeds);
-        aKitLog.record("RobotVelocityMagnitude", Math.sqrt(Math.pow(speeds.vxMetersPerSecond, 2) +
-                Math.pow(speeds.vyMetersPerSecond, 2)));
+        aKitLog.record("RobotVelocityMagnitude", Math.sqrt(Math.pow(speeds.vxMetersPerSecond, 2)
+                + Math.pow(speeds.vyMetersPerSecond, 2)));
 
         // update gyro reading from sim
         ((MockGyro) pose.imu).setYaw(this.swerveDriveSimulation.getOdometryEstimatedPose().getRotation().getDegrees());
