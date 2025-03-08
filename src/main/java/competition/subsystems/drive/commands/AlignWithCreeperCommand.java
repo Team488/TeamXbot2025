@@ -192,17 +192,19 @@ public class AlignWithCreeperCommand extends BaseCommand {
             Integer leftDistance = this.leftOffsetPixelsSubscriber.getAsInteger(null);
             Integer rightDistance = this.rightOffsetPixelsSubscriber.getAsInteger(null);
             
+            
+
+            if (isCenteredConfidently == null || leftDistance == null || rightDistance == null) {
+                // No new vision data received; do nothing.
+                log.warn("Vision coprocessor is returning null results!!");
+                forceStop = true;
+                return;
+            }
+
             aKitLog.record("Is Centered confidently", this.isCenteredConfidently);
             aKitLog.record("Left Distance Pixels", leftDistance);
             aKitLog.record("Right Distance Pixels", rightDistance);
 
-            if (isCenteredConfidently == null) {
-                // No new vision data received; do nothing.
-                log.warn("Centered confidently is returning null!");
-                forceStop = true;
-                cancel();
-                return;
-            }
             // else if (isCenteredConfidently) {
             //     // Alignment is achieved; stop any drive movement.
             //     FORCESTOP = true;
@@ -216,13 +218,11 @@ public class AlignWithCreeperCommand extends BaseCommand {
                 // should never happen, as the vision code will always send at least a -1
                 log.warn("Vision offsets are returning null! Is alignment up?");
                 forceStop = true;
-                cancel();
                 return;
             }
             if (leftDistance == -1 && rightDistance == -1) {
                 log.warn("No valid left or right distance measurements received from the camera.");
                 forceStop = true;
-                cancel();
                 return;
             } else if (leftDistance == -1) {
                 offToTheLeft = false; // we dont see left edge, means right side is "too" visible eg off to the right
@@ -286,7 +286,7 @@ public class AlignWithCreeperCommand extends BaseCommand {
     @Override
     public boolean isFinished() {
         // us being centered is only valuable if we arent currently moving
-        return this.isDriveStopped() && this.isCenteredConfidently;
+        return forceStop && this.isDriveStopped() && this.isCenteredConfidently;
     }
 
     /**
