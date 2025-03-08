@@ -111,6 +111,6 @@ package competition.motion;
             var velocity = new Translation2d(trapezoidAdvice.velocity, direction.getAngle());
 
             return new HermiteTrajectoryAdvice(position, velocity, timeFrozen,
-                    finalState.position - totalDistance);
+                    finalState.position - totalDistance, trapezoidAdvice.position);
         }
     }

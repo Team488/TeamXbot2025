@@ -29,7 +29,7 @@ public class DriveHermiteSplineCommand extends BaseCommand {
     private Landmarks.Branch endingBranch;
 
     private Landmarks.CoralStation endingCoralStation;
-    private double distanceToStartUsingFinalHeading = 2.5;
+    private double distanceToStartUsingFinalHeading = 0.33;
     final private HeadingModule headingModule;
     Rotation2d initialHeading;
     Rotation2d endingHeading;
@@ -68,8 +68,8 @@ public class DriveHermiteSplineCommand extends BaseCommand {
         endingCoralStation = coralStation;
     }
 
-    private void setDistanceToStartUsingFinalHeading(double seconds) {
-        distanceToStartUsingFinalHeading = seconds;
+    private void setDistanceToStartUsingFinalHeading(double distance) {
+        distanceToStartUsingFinalHeading = distance;
     }
 
     @Override
@@ -152,7 +152,7 @@ public class DriveHermiteSplineCommand extends BaseCommand {
         }
 
         double rotateIntent = 0;
-        if (advice.timeRemaining() < distanceToStartUsingFinalHeading) {
+        if (advice.distanceTravelled() > distanceToStartUsingFinalHeading) {
             rotateIntent = headingModule.calculateHeadingPower(endingHeading);
         }
 

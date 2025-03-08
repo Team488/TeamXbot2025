@@ -35,6 +35,7 @@ import competition.subsystems.drive.commands.DriveToCoralStationWithVisionComman
 import competition.subsystems.drive.commands.DriveToLocationWithPID;
 import competition.subsystems.drive.commands.DriveToNearestReefFaceWithPID;
 import competition.subsystems.drive.commands.RotateToHeadingWithHeadingModule;
+import competition.subsystems.drive.commands.ShoveCoralStationCommand;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import competition.subsystems.elevator.commands.ForceElevatorCalibratedCommand;
@@ -330,13 +331,21 @@ public class OperatorCommandMap {
             OperatorInterface oi,
             Provider<DriveHermiteSplineCommand> splineDriveProvider,
             Provider<AlignToReefWithAprilTagCommand> alignToReefWithAprilTagProvider,
+            Provider<ShoveCoralStationCommand> shoveStationProvider,
             AutonomousCommandSelector selector,
             SmartDashboardCommandPutter commandPutter,
-            DriveToFaceAndScoreCommandGroupFactory driveToFaceAndScoreFactory) {
+            Provider<IntakeCoralCommand> intakeCoralCommandProvider,
+            DriveToFaceAndScoreCommandGroupFactory driveToFaceAndScoreFactory,
+            PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory) {
 
         var collectLeft = splineDriveProvider.get();
         collectLeft.configureForStation(Landmarks.CoralStation.LEFT);
-        collectLeft.includeOnSmartDashboard("Collect Left");
+        var shoveLeft = shoveStationProvider.get();
+        shoveLeft.setShoveAngle(Landmarks.CoralStation.LEFT);
+        var intakeCoralLeft = intakeCoralCommandProvider.get();
+        var lowerSuperstructureForCollection = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
+        var collectLeftAndShove = collectLeft.alongWith(lowerSuperstructureForCollection).andThen(shoveLeft.alongWith(intakeCoralLeft));
+        SmartDashboard.putData("Collect Left", collectLeftAndShove);
 
         var collectRight = splineDriveProvider.get();
         collectRight.configureForStation(Landmarks.CoralStation.RIGHT);
