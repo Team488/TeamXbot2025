@@ -6,6 +6,7 @@ import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import xbot.common.properties.DistanceProperty;
 import xbot.common.properties.PropertyFactory;
 
@@ -73,8 +74,9 @@ public class DriveToFaceAndScoreCommandGroupFactory {
         driveToBranchWhilePrepping.addCommands(driveToReefFaceThenAlign, measureDistanceThenPrep);
 
         var scoreWhenReady = scoreWhenReadyProvider.get();
+        var waitBeforeScoring = new WaitCommand(1); // Wait for the wobble to go away
 
-        driveToFaceAndScoreCommandGroup.addCommands(driveToBranchWhilePrepping, scoreWhenReady);
+        driveToFaceAndScoreCommandGroup.addCommands(driveToBranchWhilePrepping, waitBeforeScoring, scoreWhenReady);
 
         return driveToFaceAndScoreCommandGroup;
     }
