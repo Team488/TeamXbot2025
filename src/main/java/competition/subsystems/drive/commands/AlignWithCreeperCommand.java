@@ -187,7 +187,6 @@ public class AlignWithCreeperCommand extends BaseCommand {
         }
         
 
-        try {
             Boolean centeredConfidently = this.isCenteredConfidentlySubscriber.getAsBoolean(null);
             Integer leftDistance = this.leftOffsetPixelsSubscriber.getAsInteger(null);
             Integer rightDistance = this.rightOffsetPixelsSubscriber.getAsInteger(null);
@@ -259,10 +258,6 @@ public class AlignWithCreeperCommand extends BaseCommand {
             XYPair pair = new XYPair(0, drivePower);
             this.drive.drive(pair, drivePower, true);
 
-
-        } catch (Exception e) {
-            log.error(e);
-        }
     }
 
     // scaled cost function
