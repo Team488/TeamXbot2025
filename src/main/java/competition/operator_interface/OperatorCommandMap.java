@@ -1,8 +1,10 @@
 package competition.operator_interface;
 
+import competition.auto_programs.BaseAutonomousSequentialCommandGroup;
 import competition.auto_programs.FromCageScoreOneCoralAutoFactory;
 import competition.auto_programs.FromLeftCageScoreLeftFacesLevelFours;
 import competition.auto_programs.FromRightCageScoreRightFacesLevelFours;
+import competition.commandgroups.DriveToFaceAndScoreCommandGroupFactory;
 import competition.commandgroups.HeadingAssistedDriveAndScoreCommandGroup;
 import competition.commandgroups.PrepAlgaeSystemCommandGroupFactory;
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
@@ -45,9 +47,12 @@ import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.pose.commands.ResetPoseCommand;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import xbot.common.command.SmartDashboardCommandPutter;
 import xbot.common.controls.sensors.XXboxController;
+import xbot.common.subsystems.autonomous.AutonomousCommandSelector;
 import xbot.common.subsystems.autonomous.SetAutonomousCommand;
 import xbot.common.subsystems.drive.SwervePointKinematics;
 import xbot.common.subsystems.drive.SwerveSimpleTrajectoryCommand;
@@ -113,7 +118,7 @@ public class OperatorCommandMap {
         operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(changeActiveModule);
         operatorInterface.driverGamepad.getPovIfAvailable(180).onTrue(typicalSwerveDrive);
 
-        operatorInterface.driverGamepad.getPovIfAvailable(270).whileTrue(hermite);
+        //operatorInterface.driverGamepad.getPovIfAvailable(270).whileTrue(hermite);
 
         // (BLUE ALLIANCE) Below are different routes to test the SwerveSimpleTrajectoryCommand
         // I don't think createPotentiallyFilppedXbotSwervePoint works under OperatorCommandMap
@@ -318,6 +323,60 @@ public class OperatorCommandMap {
         setFromRightCageScoreRightFacesLevelFours.setAutoCommand(fromRightCageScoreRightFacesLevelFours);
         oi.neoTrellis.getifAvailable(5).onTrue(setFromRightCageScoreRightFacesLevelFours);
         setFromRightCageScoreRightFacesLevelFours.includeOnSmartDashboard("From Right Score Right Face Level Fours auto");
+    }
+
+    @Inject
+    public void setupDirectRouteCommands(
+            OperatorInterface oi,
+            Provider<DriveHermiteSplineCommand> splineDriveProvider,
+            Provider<AlignToReefWithAprilTagCommand> alignToReefWithAprilTagProvider,
+            AutonomousCommandSelector selector,
+            SmartDashboardCommandPutter commandPutter,
+            DriveToFaceAndScoreCommandGroupFactory driveToFaceAndScoreFactory) {
+
+        var collectLeft = splineDriveProvider.get();
+        collectLeft.configureForStation(Landmarks.CoralStation.LEFT);
+        collectLeft.includeOnSmartDashboard("Collect Left");
+
+        var collectRight = splineDriveProvider.get();
+        collectRight.configureForStation(Landmarks.CoralStation.RIGHT);
+        collectRight.includeOnSmartDashboard("Collect Right");
+
+        var scoreClose = splineDriveProvider.get();
+        scoreClose.configureForReef(Landmarks.ReefFace.CLOSE, Landmarks.Branch.A);
+        scoreClose.includeOnSmartDashboard("Score Close");
+
+        var scoreCloseLeft = splineDriveProvider.get();
+        scoreCloseLeft.configureForReef(Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.A);
+        scoreCloseLeft.includeOnSmartDashboard("Score Close Left");
+
+        var scoreCloseRight = splineDriveProvider.get();
+        scoreCloseRight.configureForReef(Landmarks.ReefFace.CLOSE_RIGHT, Landmarks.Branch.A);
+        scoreCloseRight.includeOnSmartDashboard("Score Close Right");
+
+        var scoreFar = splineDriveProvider.get();
+        scoreFar.configureForReef(Landmarks.ReefFace.FAR, Landmarks.Branch.A);
+        scoreFar.includeOnSmartDashboard("Score Far");
+
+        var scoreFarLeft = splineDriveProvider.get();
+        scoreFarLeft.configureForReef(Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.A);
+        scoreFarLeft.includeOnSmartDashboard("Score Far Left");
+
+        var scoreFarRight = splineDriveProvider.get();
+        scoreFarRight.configureForReef(Landmarks.ReefFace.FAR_RIGHT, Landmarks.Branch.A);
+        scoreFarRight.includeOnSmartDashboard("Score Far Right");
+
+        var actuallyScoreClose = new BaseAutonomousSequentialCommandGroup(selector);
+        var splineToClose = splineDriveProvider.get();
+        splineToClose.configureForReef(Landmarks.ReefFace.CLOSE, Landmarks.Branch.A);
+
+
+        var womboCombo = driveToFaceAndScoreFactory.create(
+                Landmarks.ReefFace.CLOSE, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR, true);
+        actuallyScoreClose.addCommands(splineToClose, womboCombo);
+        SmartDashboard.putData("ActuallyScoreClose", actuallyScoreClose);
+
+        oi.driverGamepad.getPovIfAvailable(270).whileTrue(actuallyScoreClose);
     }
 
     @Inject

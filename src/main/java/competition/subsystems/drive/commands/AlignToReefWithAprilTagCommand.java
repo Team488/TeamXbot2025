@@ -21,6 +21,8 @@ public class AlignToReefWithAprilTagCommand extends AlignToTagGlobalMovementWith
     private boolean isDriverRelative = false;
     private boolean hasCameraFlippedDriverRelative = false;
     private boolean hasSetConfiguration = false;
+    private boolean requireExcellentAlignment = true;
+    private AlignCameraToAprilTagCalculator.Activity startingActivity = AlignCameraToAprilTagCalculator.Activity.Searching;
 
     @Inject
     public AlignToReefWithAprilTagCommand(AprilTagVisionSubsystemExtended aprilTagVisionSubsystem, DriveSubsystem drive,

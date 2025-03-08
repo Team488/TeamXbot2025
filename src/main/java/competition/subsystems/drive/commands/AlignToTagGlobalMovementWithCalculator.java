@@ -11,6 +11,8 @@ import xbot.common.subsystems.drive.control_logic.HeadingModule;
 
 import javax.inject.Inject;
 
+import java.util.function.Supplier;
+
 import static edu.wpi.first.units.Units.Inches;
 
 public class AlignToTagGlobalMovementWithCalculator extends BaseCommand {
@@ -20,7 +22,7 @@ public class AlignToTagGlobalMovementWithCalculator extends BaseCommand {
     final ElectricalContract electricalContract;
     final PoseSubsystem pose;
 
-    private int targetAprilTagID;
+    private Supplier<Integer> targetAprilTagIdSupplier;
     private int targetCameraID;
     private boolean isCameraBackwards;
     private Distance offset;
@@ -56,8 +58,20 @@ public class AlignToTagGlobalMovementWithCalculator extends BaseCommand {
 
     public void setConfigurations(int targetCameraID, int targetAprilTagID, boolean isCameraBackwards, double offsetInInches,
     AlignCameraToAprilTagCalculator.Activity startingActivity, boolean requireExcellentAlignment) {
+        setConfigurations(
+                targetCameraID,
+                () -> targetAprilTagID,
+                isCameraBackwards,
+                offsetInInches,
+                startingActivity,
+                requireExcellentAlignment
+        );
+    }
+
+    public void setConfigurations(int targetCameraID, Supplier<Integer> targetAprilTagID, boolean isCameraBackwards, double offsetInInches,
+                                  AlignCameraToAprilTagCalculator.Activity startingActivity, boolean requireExcellentAlignment) {
         this.targetCameraID = targetCameraID;
-        this.targetAprilTagID = targetAprilTagID;
+        this.targetAprilTagIdSupplier = targetAprilTagID;
         this.isCameraBackwards = isCameraBackwards;
         this.offset = Inches.of(offsetInInches);
         this.hasSetConfiguration = true;
@@ -73,7 +87,7 @@ public class AlignToTagGlobalMovementWithCalculator extends BaseCommand {
             return;
         }
 
-        calculator.configureAndReset(targetAprilTagID, targetCameraID, offset,
+        calculator.configureAndReset(targetAprilTagIdSupplier.get(), targetCameraID, offset,
                 isCameraBackwards, startingActivity, requireExcellentAlignment);
         pose.setPreferOdometryToVision(true);
     }

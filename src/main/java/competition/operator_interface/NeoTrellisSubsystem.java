@@ -51,6 +51,31 @@ public class NeoTrellisSubsystem extends BaseSubsystem {
 
     final Latch comboDetectedLatch;
 
+    // Reef face button indices
+    public static final int REEF_CLOSE_A = 27;
+    public static final int REEF_CLOSE_B = 28;
+    public static final int REEF_CLOSE_RIGHT_A = 29;
+    public static final int REEF_CLOSE_RIGHT_B = 22;
+    public static final int REEF_FAR_RIGHT_A = 14;
+    public static final int REEF_FAR_RIGHT_B = 5;
+    public static final int REEF_FAR_A = 4;
+    public static final int REEF_FAR_B = 3;
+    public static final int REEF_FAR_LEFT_A = 2;
+    public static final int REEF_FAR_LEFT_B = 9;
+    public static final int REEF_CLOSE_LEFT_A = 17;
+    public static final int REEF_CLOSE_LEFT_B = 26;
+
+    // Coral level button indices
+    public static final int CORAL_LEVEL_ONE = 32;
+    public static final int CORAL_LEVEL_TWO = 24;
+    public static final int CORAL_LEVEL_THREE = 16;
+    public static final int CORAL_LEVEL_FOUR = 8;
+
+    // Action button indices
+    public static final int REMOVE_ALGAE_BUTTON = 19;
+    public static final int PROCESS_ALGAE_BUTTON = 20;
+    public static final int CLEAR_QUEUE_BUTTON = 11;
+
     @Inject
     public NeoTrellisSubsystem(OperatorInterface oi, ScoringQueue scoringQueue) {
         this.oi = oi;
@@ -64,9 +89,9 @@ public class NeoTrellisSubsystem extends BaseSubsystem {
         levelsToButtonIndices = new HashMap<>();
 
         initializeLocationsAndLevels();
-        removeAlgaeButton = neoTrellis.getifAvailable(19);
-        processAlgaeButton = neoTrellis.getifAvailable(20);
-        resetQueueButton = neoTrellis.getifAvailable(11);
+        removeAlgaeButton = neoTrellis.getifAvailable(REMOVE_ALGAE_BUTTON);
+        processAlgaeButton = neoTrellis.getifAvailable(PROCESS_ALGAE_BUTTON);
+        resetQueueButton = neoTrellis.getifAvailable(CLEAR_QUEUE_BUTTON);
 
         // Resetting doesn't need any other button to be pressed, so we set it up as a typical
         // "press this button and get this command" binding.
@@ -79,17 +104,17 @@ public class NeoTrellisSubsystem extends BaseSubsystem {
     }
 
     protected void initializeLocationsAndLevels() {
-        initializeLocationPair(Landmarks.ReefFace.CLOSE, 27, 28);
-        initializeLocationPair(Landmarks.ReefFace.CLOSE_RIGHT, 29, 22);
-        initializeLocationPair(Landmarks.ReefFace.FAR_RIGHT, 14, 5);
-        initializeLocationPair(Landmarks.ReefFace.FAR, 4, 3);
-        initializeLocationPair(Landmarks.ReefFace.FAR_LEFT, 2, 9);
-        initializeLocationPair(Landmarks.ReefFace.CLOSE_LEFT,17, 26);
+        initializeLocationPair(Landmarks.ReefFace.CLOSE, REEF_CLOSE_A, REEF_CLOSE_B);
+        initializeLocationPair(Landmarks.ReefFace.CLOSE_RIGHT, REEF_CLOSE_RIGHT_A, REEF_CLOSE_RIGHT_B);
+        initializeLocationPair(Landmarks.ReefFace.FAR_RIGHT, REEF_FAR_RIGHT_A, REEF_FAR_RIGHT_B);
+        initializeLocationPair(Landmarks.ReefFace.FAR, REEF_FAR_A, REEF_FAR_B);
+        initializeLocationPair(Landmarks.ReefFace.FAR_LEFT, REEF_FAR_LEFT_A, REEF_FAR_LEFT_B);
+        initializeLocationPair(Landmarks.ReefFace.CLOSE_LEFT,REEF_CLOSE_LEFT_A, REEF_CLOSE_LEFT_B);
 
-        initializeLevel(Landmarks.CoralLevel.ONE, 32);
-        initializeLevel(Landmarks.CoralLevel.TWO, 24);
-        initializeLevel(Landmarks.CoralLevel.THREE, 16);
-        initializeLevel(Landmarks.CoralLevel.FOUR, 8);
+        initializeLevel(Landmarks.CoralLevel.ONE, CORAL_LEVEL_ONE);
+        initializeLevel(Landmarks.CoralLevel.TWO, CORAL_LEVEL_TWO);
+        initializeLevel(Landmarks.CoralLevel.THREE, CORAL_LEVEL_THREE);
+        initializeLevel(Landmarks.CoralLevel.FOUR, CORAL_LEVEL_FOUR);
     }
 
     protected void initializeLevel(Landmarks.CoralLevel level, int buttonNumber) {
@@ -197,15 +222,15 @@ public class NeoTrellisSubsystem extends BaseSubsystem {
     }
 
     public int getNeoTrellisButtonAlgaeRemoval() {
-        return 19;
+        return REMOVE_ALGAE_BUTTON;
     }
 
     public int getNeoTrellisButtonAlgaeProcessing() {
-        return 20;
+        return PROCESS_ALGAE_BUTTON;
     }
 
     public int getNeoTrellisButtonClearQueue() {
-        return 11;
+        return CLEAR_QUEUE_BUTTON;
     }
 
 

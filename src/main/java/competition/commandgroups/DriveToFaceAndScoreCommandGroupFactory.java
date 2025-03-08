@@ -45,7 +45,8 @@ public class DriveToFaceAndScoreCommandGroupFactory {
 
     public SequentialCommandGroup create(Landmarks.ReefFace targetReefFace,
                                          Landmarks.Branch targetBranch,
-                                         Landmarks.CoralLevel targetLevel) {
+                                         Landmarks.CoralLevel targetLevel,
+                                         boolean useSplinesForRouting) {
         // Overarching command group — drives to branch and preps coral system once the robot is close enough to the reef, scores when ready
         var driveToFaceAndScoreCommandGroup = new SequentialCommandGroup();
 
@@ -53,7 +54,7 @@ public class DriveToFaceAndScoreCommandGroupFactory {
         var driveToBranchWhilePrepping = new ParallelCommandGroup();
 
         // Terminally approach to branch
-        var driveToReefFaceThenAlign = driveToReefFaceThenAlignCommandGroupFactory.create(targetReefFace, targetBranch);
+        var driveToReefFaceThenAlign = driveToReefFaceThenAlignCommandGroupFactory.create(targetReefFace, targetBranch, useSplinesForRouting);
 
         // Prep coral system once robot is within a distance threshold
         var measureDistanceThenPrep = new SequentialCommandGroup();
@@ -77,6 +78,12 @@ public class DriveToFaceAndScoreCommandGroupFactory {
         driveToFaceAndScoreCommandGroup.addCommands(driveToBranchWhilePrepping, scoreWhenReady);
 
         return driveToFaceAndScoreCommandGroup;
+    }
+
+    public SequentialCommandGroup create(Landmarks.ReefFace targetReefFace,
+                                         Landmarks.Branch targetBranch,
+                                         Landmarks.CoralLevel targetLevel) {
+        return create(targetReefFace, targetBranch, targetLevel, false);
     }
 
 }
