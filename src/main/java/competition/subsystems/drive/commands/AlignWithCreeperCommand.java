@@ -135,6 +135,7 @@ public class AlignWithCreeperCommand extends BaseCommand {
             cancel();
             return;
         }
+
         // Determine active camera and retrieve its corresponding resolution and hostname.
         if (camera.equals(Cameras.FRONT_LEFT_CAMERA)) {
             this.resolution = (int) photonVisionFrontLeftResX.get();
@@ -256,7 +257,7 @@ public class AlignWithCreeperCommand extends BaseCommand {
             // Create the drive command vector (Only drive power along the Y-axis,
             // side-to-side).
             XYPair pair = new XYPair(0, drivePower);
-            this.drive.drive(pair, drivePower, true);
+            this.drive.drive(pair, 0.0, true);
 
     }
 
