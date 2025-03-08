@@ -45,7 +45,9 @@ public class AlignCameraToAprilTagCalculator {
         ApproachWhileCentering,
         TerminalApproach,
         Shove,
-        Complete
+        Complete,
+        GaveUp,
+        TerminalApproachWithoutVision
     }
 
     public enum ApproachMode {
@@ -74,7 +76,8 @@ public class AlignCameraToAprilTagCalculator {
     Translation2d targetLocationOnField = new Translation2d(0, 0);
 
     final DoubleProperty interstitialDistance;
-    final DoubleProperty distanceFromInterstitialToAdvance;
+    final DoubleProperty distanceFromInterstitialToAdvanceFast;
+    final DoubleProperty distanceFromInterstitialToAdvanceSlow;
     final DoubleProperty approachSpeedFactor;
     final DoubleProperty distanceToStartShoving;
     final DoubleProperty shovePower;
@@ -86,7 +89,7 @@ public class AlignCameraToAprilTagCalculator {
     final DoubleProperty closeApproachSpeedFactor;
     final DoubleProperty closeInterstitialActivationRange;
 
-    double lastKnownHorizontalErrorMeters = 0;
+    double lastKnownHorizontalErrorMeters = 999999;
     double shoveStartTime = 0;
     private Activity startingActivity = Activity.Searching;
     private boolean requireExcellentAlignment = true;
@@ -96,6 +99,10 @@ public class AlignCameraToAprilTagCalculator {
     double idealFinalHeadingDegrees;
     Pose2d interstitialPoint;
     private ApproachMode approachMode;
+
+    private boolean hasEverSeenAprilTag = false;
+    private Translation2d coralStationPreShovePoint;
+    boolean retryActive;
 
     public static Translation2d generateAlignmentPointOffset(Distance robotCenterToOuterBumperX, CameraInfo cameraInfo,
                                                              Distance offset, boolean isCameraBackwards) {
@@ -130,7 +137,8 @@ public class AlignCameraToAprilTagCalculator {
 
         pf.setPrefix(prefix);
         interstitialDistance = pf.createPersistentProperty("InterstitialDistance-m", 2.25);
-        distanceFromInterstitialToAdvance = pf.createPersistentProperty("DistanceFromInterstitialToAdvance-m", 0.2);
+        distanceFromInterstitialToAdvanceFast = pf.createPersistentProperty("DistanceFromInterstitialToAdvanceFast-m", 0.4);
+        distanceFromInterstitialToAdvanceSlow = pf.createPersistentProperty("DistanceFromInterstitialToAdvanceSlow-m", 0.2);
         approachSpeedFactor = pf.createPersistentProperty("ApproachSpeedFactor", 0.65);
         distanceToStartShoving = pf.createPersistentProperty("DistanceToStartShoving-m", 0.0762); // 3 inches
         shovePower = pf.createPersistentProperty("ShovePower", 0.25);
@@ -246,6 +254,7 @@ public class AlignCameraToAprilTagCalculator {
         // Mostly, this is about where we should be pointing - and we generally point at the tag unless we are fairly close.
         Optional<AprilTagVisionIO.TargetObservation> targetObservation = aprilTagVisionSubsystem.getTargetObservation(targetCameraID, targetAprilTagID);
         boolean doWeSeeOurTargetTag = targetObservation.isPresent() && targetObservation.get().ambiguity() < maxTagAmbiguity.get();
+        hasEverSeenAprilTag |= doWeSeeOurTargetTag;
 
         Translation2d currentTranslation = pose.getCurrentPose2d().getTranslation();
         double headingToPointAtAprilTag = Radians.of(
@@ -300,8 +309,21 @@ public class AlignCameraToAprilTagCalculator {
                 rotationIntent = headingModule.calculateHeadingPower(headingToPointAtAprilTag);
 
                 // Finally, a check to see if we're quite close and should advance to the next state.
-                if (currentPose.getTranslation().getDistance(interstitialPoint.getTranslation()) < distanceFromInterstitialToAdvance.get()) {
+
+                var distanceThresholdToAdvance = distanceFromInterstitialToAdvanceFast.get();
+                if (approachMode == ApproachMode.Close) {
+                    distanceThresholdToAdvance = distanceFromInterstitialToAdvanceSlow.get();
+                }
+
+                if (currentPose.getTranslation().getDistance(interstitialPoint.getTranslation()) < distanceThresholdToAdvance) {
                     activity = Activity.TerminalApproach;
+
+                    if (!hasEverSeenAprilTag && isCameraBackwards) {
+                        // We failed to find a tag. Try just using classic global pose
+                        activity = Activity.TerminalApproachWithoutVision;
+                        coralStationPreShovePoint = getCoralStationPreShovePoint();
+                        pose.setPreferOdometryToVision(false);
+                    }
                 }
                 break;
             case TerminalApproach:
@@ -341,6 +363,19 @@ public class AlignCameraToAprilTagCalculator {
                     }
                 }
                 break;
+            case TerminalApproachWithoutVision:
+                var noVisionPower = drive.getPowerToAchieveFieldPosition(currentPose.getTranslation(), coralStationPreShovePoint);
+                // If we are going too fast, cap the speed.
+                if (noVisionPower.getNorm() >  approachSpeedFactor) {
+                    powers = new Translation2d(approachSpeedFactor, noVisionPower.getAngle());
+                }
+                driveIntent = new XYPair(noVisionPower.getX(), noVisionPower.getY()).scale(approachSpeedFactor);
+                rotationIntent = headingModule.calculateHeadingPower(idealFinalHeadingDegrees);
+                if (currentPose.getTranslation().getDistance(coralStationPreShovePoint) < distanceToStartShoving.get()) {
+                    activity = Activity.Shove;
+                    shoveStartTime = XTimer.getFPGATimestamp();
+                }
+                break;
             case Shove:
                 // We are so very close to our destination, but it's very hard to get perfect alignment -- the PID
                 // will bring us close, but error in the dive might mean we are off by a few inches. We are also
@@ -364,6 +399,7 @@ public class AlignCameraToAprilTagCalculator {
                 }
                 break;
             case Complete:
+            case GaveUp:
             default:
                 // We're done! We don't need to do anything.
                 break;
@@ -416,6 +452,15 @@ public class AlignCameraToAprilTagCalculator {
     }
 
     public boolean recommendIsFinished() {
-        return activity == Activity.Complete;
+        return activity == Activity.Complete || activity == Activity.GaveUp;
+    }
+
+    private Translation2d getCoralStationPreShovePoint() {
+        var station = Landmarks.getCoralStationFromTagId(targetAprilTagID);
+        var stationLocation = PoseSubsystem.convertBlueToRedIfNeeded(
+                Landmarks.getCoralStationSectionPose(station, Landmarks.CoralStationSection.MID));
+
+        var projectedDelta = new Translation2d(0.25, stationLocation.getRotation());
+        return stationLocation.getTranslation().plus(projectedDelta);
     }
 }
