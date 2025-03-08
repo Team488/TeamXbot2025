@@ -323,8 +323,8 @@ package competition.motion;
             return new CubicHermiteSpline(new CubicHermiteSplineParameters(
                     new Translation2d(spline.getStartX(),PoseSubsystem.mirrorYCoordinateAcrossMidfield(spline.getStartY())),
                     new Translation2d(spline.getEndX(),PoseSubsystem.mirrorYCoordinateAcrossMidfield(spline.getEndY())),
-                    new Translation2d(spline.getStartControlVectorX(),PoseSubsystem.mirrorYCoordinateAcrossMidfield(spline.getStartControlVectorY())),
-                    new Translation2d(spline.getEndControlVectorX(),PoseSubsystem.mirrorYCoordinateAcrossMidfield(spline.getEndControlVectorY()))
+                    new Translation2d(spline.getStartControlVectorX(), -spline.getStartControlVectorY()),
+                    new Translation2d(spline.getEndControlVectorX(), -spline.getEndControlVectorY())
             ));
         }
 

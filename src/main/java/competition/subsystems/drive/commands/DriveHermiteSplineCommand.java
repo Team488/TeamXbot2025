@@ -75,7 +75,7 @@ public class DriveHermiteSplineCommand extends BaseCommand {
 
         var closestFace = pose.getClosestReefFace();
 
-        var route = routeGenerator.getRouteFromReefToLoadingStation(closestFace, Landmarks.CoralStation.LEFT);
+        var route = routeGenerator.getRouteFromReefToLoadingStation(closestFace, Landmarks.CoralStation.RIGHT);
         trajectory.setSplines(route);
 
         trajectory.initialize(pose.getAbsoluteVelocity(), 1);
