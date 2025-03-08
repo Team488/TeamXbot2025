@@ -306,6 +306,29 @@ public class PoseSubsystem extends BasePoseSubsystem {
         return currentPose.nearest(reefFacePoses);
     }
 
+    public Landmarks.ReefFace getClosestReefFace() {
+        Pose2d currentPose = getCurrentPose2d();
+        var closeReefFace = convertBlueToRedIfNeeded(Landmarks.BlueCloseAlgae);
+        var closeLeftReefFace = convertBlueToRedIfNeeded(Landmarks.BlueCloseLeftAlgae);
+        var closeRightReefFace = convertBlueToRedIfNeeded(Landmarks.BlueCloseRightAlgae);
+        var farReefFace = convertBlueToRedIfNeeded(Landmarks.BlueFarAlgae);
+        var farLeftReefFace = convertBlueToRedIfNeeded(Landmarks.BlueFarLeftAlgae);
+        var farRightReefFace = convertBlueToRedIfNeeded(Landmarks.BlueFarRightAlgae);
+
+        List<Pose2d> reefFacePoses = Arrays.asList(
+                closeReefFace, closeLeftReefFace, closeRightReefFace,
+                farReefFace, farLeftReefFace, farRightReefFace);
+        HashMap<Pose2d, Landmarks.ReefFace> hashMap = new HashMap<>();
+        hashMap.put(closeReefFace, Landmarks.ReefFace.CLOSE);
+        hashMap.put(closeLeftReefFace, Landmarks.ReefFace.CLOSE_LEFT);
+        hashMap.put(closeRightReefFace, Landmarks.ReefFace.CLOSE_RIGHT);
+        hashMap.put(farReefFace, Landmarks.ReefFace.FAR);
+        hashMap.put(farLeftReefFace, Landmarks.ReefFace.FAR_LEFT);
+        hashMap.put(farRightReefFace, Landmarks.ReefFace.FAR_RIGHT);
+
+        return hashMap.get(currentPose.nearest(reefFacePoses));
+    }
+
     public Landmarks.CoralStation getClosestCoralStation() {
         Pose2d currentPose = getCurrentPose2d();
         var leftCoralStation = convertBlueToRedIfNeeded(Landmarks.BlueLeftCoralStationMid);

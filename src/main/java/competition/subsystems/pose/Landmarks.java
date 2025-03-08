@@ -240,4 +240,15 @@ public class Landmarks {
                 return new ArrayList<Integer>();
         }
     }
+
+    public static ReefFace mirrorReefFaceLeftToRight(ReefFace face) {
+        return switch (face) {
+            case CLOSE -> ReefFace.CLOSE;
+            case CLOSE_LEFT -> ReefFace.CLOSE_RIGHT;
+            case CLOSE_RIGHT -> ReefFace.CLOSE_LEFT;
+            case FAR -> ReefFace.FAR;
+            case FAR_LEFT -> ReefFace.FAR_RIGHT;
+            case FAR_RIGHT -> ReefFace.FAR_LEFT;
+        };
+    }
 }

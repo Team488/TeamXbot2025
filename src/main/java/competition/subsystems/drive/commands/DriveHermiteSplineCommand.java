@@ -1,5 +1,6 @@
 package competition.subsystems.drive.commands;
 
+import competition.motion.CommonRouteGenerator;
 import competition.motion.CubicHermiteSpline;
 import competition.motion.CubicHermiteSplineParameters;
 import competition.motion.HermiteTrajectory;
@@ -7,6 +8,7 @@ import competition.motion.HermiteTrajectoryAdvice;
 import competition.operator_interface.OperatorCommandMap;
 import competition.operator_interface.OperatorInterface;
 import competition.subsystems.drive.DriveSubsystem;
+import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -24,16 +26,18 @@ public class DriveHermiteSplineCommand extends BaseCommand {
     final DriveSubsystem drive;
     final PoseSubsystem pose;
     final OperatorInterface oi;
-
+    final CommonRouteGenerator routeGenerator;
 
     HermiteTrajectory trajectory;
     final Translation2d startPoint;
 
     @Inject
-    public DriveHermiteSplineCommand(DriveSubsystem drive, PoseSubsystem pose, OperatorInterface oi) {
+    public DriveHermiteSplineCommand(DriveSubsystem drive, PoseSubsystem pose, OperatorInterface oi,
+                                     CommonRouteGenerator routeGenerator) {
         this.drive = drive;
         this.pose = pose;
         this.oi = oi;
+        this.routeGenerator = routeGenerator;
 
         trajectory = new HermiteTrajectory();
         CubicHermiteSpline spline = new CubicHermiteSpline();
@@ -62,14 +66,19 @@ public class DriveHermiteSplineCommand extends BaseCommand {
         var splineList = new ArrayList<CubicHermiteSpline>();
         splineList.add(splineA);
         splineList.add(splineB);
-        trajectory.setSplines(splineList);
 
         addRequirements(drive);
     }
 
     @Override
     public void initialize() {
-        trajectory.initialize(pose.getAbsoluteVelocity(), 0.2);
+
+        var closestFace = pose.getClosestReefFace();
+
+        var route = routeGenerator.getRouteFromReefToLoadingStation(closestFace, Landmarks.CoralStation.LEFT);
+        trajectory.setSplines(route);
+
+        trajectory.initialize(pose.getAbsoluteVelocity(), 1);
     }
 
     @Override
@@ -85,6 +94,9 @@ public class DriveHermiteSplineCommand extends BaseCommand {
         XYPair velocityIntent = new XYPair(
                 advice.velocity().getX() / drive.getMaxTargetSpeedMetersPerSecond(),
                 advice.velocity().getY() / drive.getMaxTargetSpeedMetersPerSecond());
+
+        aKitLog.record("HermiteVelocityRaw", velocityIntent.getMagnitude());
+
         if (advice.timeFrozen()) {
             // If the timer is frozen, that means we have gone off-track somewhere and need to catch back up. We have to
             // be careful here - if we just set the velocity component to 0, we will use PID to approach, but as soon as we
@@ -100,6 +112,8 @@ public class DriveHermiteSplineCommand extends BaseCommand {
             velocityIntent = velocityIntent.clone().scale(similarity);
         }
 
+        aKitLog.record("HermiteVelocityAdjusted", velocityIntent.getMagnitude());
+
         // Position - spline will be outputting a position that we should be at. We need to PID to that position.
         var positionTranslation = drive.getPowerToAchieveFieldPosition(currentPosition, advice.position());
         XYPair positionIntent = new XYPair(positionTranslation.getX(), positionTranslation.getY());
@@ -113,5 +127,15 @@ public class DriveHermiteSplineCommand extends BaseCommand {
         drive.fieldOrientedDrive(fusedIntent, 0, pose.getCurrentHeading().getDegrees(), true);
 
         aKitLog.record("HermiteGhost", new Pose2d(advice.position(), new Rotation2d()));
+
+        timeLeft = advice.timeRemaining();
+        aKitLog.record("TimeLeft", timeLeft);
+    }
+
+    double timeLeft;
+
+    @Override
+    public boolean isFinished() {
+        return timeLeft < 0.05;
     }
 }

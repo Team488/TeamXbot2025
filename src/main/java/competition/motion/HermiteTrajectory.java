@@ -15,7 +15,7 @@ package competition.motion;
         private double startTimeInSeconds = 0;
         private double elapsedSeconds = 0;
         private double frozenOffsetSeconds = 0;
-        private final double maxGap = 0.25;
+        private final double maxGap = 0.75;
         private TrapezoidProfile.State initialState;
         private TrapezoidProfile.State finalState;
 
@@ -24,7 +24,7 @@ package competition.motion;
 
         @Inject
         public HermiteTrajectory() {
-            trapezoid = new TrapezoidProfile(new TrapezoidProfile.Constraints(4, 3));
+            trapezoid = new TrapezoidProfile(new TrapezoidProfile.Constraints(4.5, 6));
             splines = new ArrayList<>();
         }
 
@@ -110,6 +110,7 @@ package competition.motion;
             var direction = currentSpline.derivative(lerp);
             var velocity = new Translation2d(trapezoidAdvice.velocity, direction.getAngle());
 
-            return new HermiteTrajectoryAdvice(position, velocity, timeFrozen, trapezoid.timeLeftUntil(finalState.position));
+            return new HermiteTrajectoryAdvice(position, velocity, timeFrozen,
+                    finalState.position - totalDistance);
         }
     }

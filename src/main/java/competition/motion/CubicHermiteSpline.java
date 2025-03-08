@@ -1,8 +1,14 @@
 package competition.motion;
 
+    import competition.subsystems.pose.PoseSubsystem;
     import edu.wpi.first.math.geometry.Translation2d;
 
-    /**
+    import java.util.ArrayList;
+    import java.util.List;
+
+    import static edu.wpi.first.units.Units.Meters;
+
+/**
      * Represents a Cubic Hermite spline with methods to set points, control vectors,
      * and estimate arc length using Gauss-Legendre quadrature.
      */
@@ -309,4 +315,21 @@ package competition.motion;
         public double getStartControlVectorY() { return startControlVector.getY(); }
         public double getEndControlVectorX() { return endControlVector.getX(); }
         public double getEndControlVectorY() { return endControlVector.getY(); }
+
+        public static CubicHermiteSpline mirrorSplineLeftToRight(CubicHermiteSpline spline) {
+            // This will mirror the spline across the Y midpoint of the field, leaving the X values unchanged.
+            // The control vectors will also need to mirror in the same way.
+
+            return new CubicHermiteSpline(new CubicHermiteSplineParameters(
+                    new Translation2d(spline.getStartX(),PoseSubsystem.mirrorYCoordinateAcrossMidfield(spline.getStartY())),
+                    new Translation2d(spline.getEndX(),PoseSubsystem.mirrorYCoordinateAcrossMidfield(spline.getEndY())),
+                    new Translation2d(spline.getStartControlVectorX(),PoseSubsystem.mirrorYCoordinateAcrossMidfield(spline.getStartControlVectorY())),
+                    new Translation2d(spline.getEndControlVectorX(),PoseSubsystem.mirrorYCoordinateAcrossMidfield(spline.getEndControlVectorY()))
+            ));
+        }
+
+        public static ArrayList<CubicHermiteSpline> mirrorSplineLeftToRight(ArrayList<CubicHermiteSpline> splines) {
+            splines.replaceAll(CubicHermiteSpline::mirrorSplineLeftToRight);
+            return splines;
+        }
     }
