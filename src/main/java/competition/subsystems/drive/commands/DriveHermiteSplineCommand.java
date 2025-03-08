@@ -15,6 +15,9 @@ import xbot.common.command.BaseCommand;
 import xbot.common.math.XYPair;
 
 import javax.inject.Inject;
+import java.sql.Array;
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class DriveHermiteSplineCommand extends BaseCommand {
 
@@ -40,11 +43,28 @@ public class DriveHermiteSplineCommand extends BaseCommand {
         spline.setStartControlVector(5, Math.toRadians(60));
         spline.setEndControlVector(5, Math.toRadians(160));
         trajectory.setSpline(spline);
-    }
 
-    public void setSplineParameters(CubicHermiteSplineParameters parameters) {
-        var spline = new CubicHermiteSpline(parameters);
-        trajectory.setSpline(spline);
+        var splineAParams = new CubicHermiteSplineParameters(
+                new Translation2d(1, 1),
+                new Translation2d(5, 1),
+                new Translation2d(5, Rotation2d.fromDegrees(0)),
+                new Translation2d(5, Rotation2d.fromDegrees(0))
+        );
+        var splineBParams = new CubicHermiteSplineParameters(
+                new Translation2d(5, 1),
+                new Translation2d(7, 7),
+                new Translation2d(5, Rotation2d.fromDegrees(0)),
+                new Translation2d(5, Rotation2d.fromDegrees(90))
+        );
+
+        var splineA = new CubicHermiteSpline(splineAParams);
+        var splineB = new CubicHermiteSpline(splineBParams);
+        var splineList = new ArrayList<CubicHermiteSpline>();
+        splineList.add(splineA);
+        splineList.add(splineB);
+        trajectory.setSplines(splineList);
+
+        addRequirements(drive);
     }
 
     @Override
