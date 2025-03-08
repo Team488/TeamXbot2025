@@ -74,6 +74,7 @@ public class DriveHermiteSplineCommand extends BaseCommand {
 
     @Override
     public void initialize() {
+        log.info("Initializing");
         // In all cases we need the nearest loading station
         var closestStation = pose.getClosestCoralStation();
         initialHeading = pose.getCurrentHeading();

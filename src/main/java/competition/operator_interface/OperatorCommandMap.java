@@ -373,10 +373,9 @@ public class OperatorCommandMap {
 
         var womboCombo = driveToFaceAndScoreFactory.create(
                 Landmarks.ReefFace.CLOSE, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR, true);
-        actuallyScoreClose.addCommands(splineToClose, womboCombo);
-        SmartDashboard.putData("ActuallyScoreClose", actuallyScoreClose);
+        SmartDashboard.putData("ActuallyScoreClose", womboCombo);
 
-        oi.driverGamepad.getPovIfAvailable(270).whileTrue(actuallyScoreClose);
+        oi.driverGamepad.getPovIfAvailable(270).whileTrue(womboCombo);
     }
 
     @Inject
