@@ -358,8 +358,6 @@ public class AlignCameraToAprilTagCalculator {
                         shoveStartTime = XTimer.getFPGATimestamp();
                     } else {
                         activity = Activity.ApproachWhileCentering;
-                        oi.operatorGamepad.getRumbleManager().rumbleGamepad(1,.75);
-                        oi.driverGamepad.getRumbleManager().rumbleGamepad(1, .75);
                     }
                 }
                 break;
@@ -396,6 +394,8 @@ public class AlignCameraToAprilTagCalculator {
                 // If we've been shoving for a while, we're done.
                 if (XTimer.getFPGATimestamp() - shoveStartTime > shoveDuration.get()) {
                     activity = Activity.Complete;
+                    oi.operatorGamepad.getRumbleManager().rumbleGamepad(1,.75);
+                    oi.driverGamepad.getRumbleManager().rumbleGamepad(1, .75);
                 }
                 break;
             case Complete:
