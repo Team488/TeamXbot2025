@@ -3,6 +3,7 @@ package competition.commandgroups;
 import competition.subsystems.coral_scorer.commands.IntakeUntilCoralCollectedCommand;
 import competition.subsystems.drive.commands.AlignToSpecificHumanLoadingStationCommand;
 import competition.subsystems.drive.commands.DriveToCoralStationInterstitialCommand;
+import competition.subsystems.drive.commands.ShoveCoralStationCommand;
 import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -15,17 +16,20 @@ public class DriveToStationAndIntakeUntilCollectedCommandGroupFactory {
     Provider<DriveToCoralStationInterstitialCommand> driveToCoralStationSectionCommandProv;
     Provider<AlignToSpecificHumanLoadingStationCommand> alignToCoralStationCommandProv;
     Provider<IntakeUntilCoralCollectedCommand> intakeUntilCoralCollectedCommandProv;
+    Provider<ShoveCoralStationCommand> shoveCoralStationCommandProv;
     PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory;
 
     @Inject
     public DriveToStationAndIntakeUntilCollectedCommandGroupFactory(Provider<DriveToCoralStationInterstitialCommand> driveToCoralStationSectionCommandProv,
                                                                     Provider<AlignToSpecificHumanLoadingStationCommand> alignToCoralStationCommandProv,
                                                                     PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
-                                                                    Provider<IntakeUntilCoralCollectedCommand> intakeUntilCoralCollectedCommandProv) {
+                                                                    Provider<IntakeUntilCoralCollectedCommand> intakeUntilCoralCollectedCommandProv,
+                                                                    Provider<ShoveCoralStationCommand> shoveCoralStationCommandProv) {
         this.driveToCoralStationSectionCommandProv = driveToCoralStationSectionCommandProv;
         this.alignToCoralStationCommandProv = alignToCoralStationCommandProv;
         this.prepCoralSystemCommandGroupFactory = prepCoralSystemCommandGroupFactory;
         this.intakeUntilCoralCollectedCommandProv = intakeUntilCoralCollectedCommandProv;
+        this.shoveCoralStationCommandProv = shoveCoralStationCommandProv;
     }
 
     public ParallelDeadlineGroup create(Landmarks.CoralStation station,
@@ -46,9 +50,11 @@ public class DriveToStationAndIntakeUntilCollectedCommandGroupFactory {
             driveToCoralStation.addCommands(driveToCoralStationSectionCommand.withTimeout(2.0));
         }
         var alignToCoralStationCommand = alignToCoralStationCommandProv.get();
+        var shoveCoralStationCommand = shoveCoralStationCommandProv.get();
         alignToCoralStationCommand.setCoralStation(station);
         driveToCoralStation.addCommands(alignToCoralStationCommand);
-        driveUntilIntake.addCommands(driveToCoralStation);
+        shoveCoralStationCommand.setShoveAngle(station);
+        driveUntilIntake.addCommands(driveToCoralStation.andThen(shoveCoralStationCommand));
 
         return driveUntilIntake;
     }
