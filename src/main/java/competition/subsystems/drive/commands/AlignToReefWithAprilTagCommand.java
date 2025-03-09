@@ -6,6 +6,7 @@ import competition.subsystems.drive.logic.AlignCameraToAprilTagCalculator;
 import competition.subsystems.pose.DriverRelativeCameraValues;
 import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
+import edu.wpi.first.networktables.BooleanEntry;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
 
 import javax.inject.Inject;
@@ -21,6 +22,8 @@ public class AlignToReefWithAprilTagCommand extends AlignToTagGlobalMovementWith
     private boolean isDriverRelative = false;
     private boolean hasCameraFlippedDriverRelative = false;
     private boolean hasSetConfiguration = false;
+    private AlignCameraToAprilTagCalculator.Activity startingActivity = AlignCameraToAprilTagCalculator.Activity.Searching;
+    private boolean enableRetries = true;
 
     @Inject
     public AlignToReefWithAprilTagCommand(AprilTagVisionSubsystemExtended aprilTagVisionSubsystem, DriveSubsystem drive,
@@ -33,10 +36,18 @@ public class AlignToReefWithAprilTagCommand extends AlignToTagGlobalMovementWith
     }
 
     public void setConfigurations(int cameraToUse, boolean isCameraBackwards, double offsetInInches, boolean isDriverRelative) {
+        setConfigurations(cameraToUse, isCameraBackwards, offsetInInches, isDriverRelative,
+                AlignCameraToAprilTagCalculator.Activity.Searching, true);
+    }
+
+    public void setConfigurations(int cameraToUse, boolean isCameraBackwards, double offsetInInches, boolean isDriverRelative,
+                                  AlignCameraToAprilTagCalculator.Activity startingActivity, boolean enableRetries) {
         this.cameraToUse = cameraToUse;
         this.isCameraBackwards = isCameraBackwards;
         this.offsetInInches = offsetInInches;
         this.isDriverRelative = isDriverRelative;
+        this.startingActivity = startingActivity;
+        this.enableRetries = enableRetries;
         this.hasSetConfiguration = true;
     }
 
@@ -56,8 +67,11 @@ public class AlignToReefWithAprilTagCommand extends AlignToTagGlobalMovementWith
                 cameraToUse,
                 aprilTagVisionSubsystem.getTargetAprilTagID(pose.getClosestReefFacePose()),
                 isCameraBackwards,
-                offsetInInches
+                offsetInInches,
+                startingActivity,
+                enableRetries
         );
+
         super.initialize();
     }
 
