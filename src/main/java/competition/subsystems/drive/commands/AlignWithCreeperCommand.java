@@ -13,7 +13,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import org.kobe.xbot.JClient.CachedSubscriber;
 import org.kobe.xbot.JClient.XTablesClient;
 
-import xbot.common.advantage.AKitLogger;
 import xbot.common.command.BaseCommand;
 import xbot.common.math.PIDManager;
 import xbot.common.math.XYPair;
@@ -42,22 +41,18 @@ public class AlignWithCreeperCommand extends BaseCommand {
 
     private final String tableLeftDistance = "verticalEdgeLeftDistancePx";
     private final String tableRightDistance = "verticalEdgeRightDistancePx";
-    private final String tableCenteredConfidently = "verticalAlignedConfidently";
 
     private final StringProperty photonVisionFrontLeftHostname;
     private final StringProperty photonVisionFrontRightHostname;
 
     private final DoubleProperty photonVisionFrontLeftResX;
     private final DoubleProperty photonVisionFrontRightResX;
-    private final DoubleProperty itersPerRUn;
     private final DoubleProperty driveGain;
-    private final DoubleProperty logNegativityOffset;
     private final DoubleProperty logScalar;
     private final DoubleProperty logErrScalar;
     private final DoubleProperty maxError;
-    private final DoubleProperty errorThresholdPercentage;
+    private final DoubleProperty errorThresholdPixels;
 
-    private CachedSubscriber isCenteredConfidentlySubscriber;
     private CachedSubscriber leftOffsetPixelsSubscriber;
     private CachedSubscriber rightOffsetPixelsSubscriber;
 
@@ -93,15 +88,13 @@ public class AlignWithCreeperCommand extends BaseCommand {
                                    PIDManagerFactory pidFactory) {
         this.addRequirements(drive);
         this.drive = drive;
-        this.pidManager = pidFactory.create("AlignWithCreeperCommand", 0, 0, 0);
+        this.pidManager = pidFactory.create("AlignWithCreeperCommand", 0.6, 0.0001, 0.9);
         this.coprocessorCommunicationSubsystem = coprocessorCommunications;
         pf.setPrefix("AlignWithCreeperCommand/");
-        this.driveGain = pf.createPersistentProperty("Drive Gain", 0.3);
-        this.itersPerRUn = pf.createPersistentProperty("Iters per run", 5);
-        this.logNegativityOffset = pf.createPersistentProperty("Log Negativity, lower means more negative closer to zero", 0.3);
-        this.logScalar = pf.createPersistentProperty("Log Scalar", 8);
-        this.logErrScalar = pf.createPersistentProperty("Log input Err Scalar", 10);
-        this.maxError = pf.createPersistentProperty("Max Error", 0.3);
+        this.driveGain = pf.createPersistentProperty("Drive Gain", 0.18);
+        this.logScalar = pf.createPersistentProperty("Log Scalar", 15);
+        this.logErrScalar = pf.createPersistentProperty("Log input Err Scalar", 9);
+        this.maxError = pf.createPersistentProperty("Max Error", 0.2);
         this.photonVisionFrontLeftHostname = pf.createPersistentProperty(
                 "Photon Vision Front Left Hostname", "photonvisionfrontleft");
         this.photonVisionFrontRightHostname = pf.createPersistentProperty(
@@ -110,8 +103,8 @@ public class AlignWithCreeperCommand extends BaseCommand {
                 "Photon Vision Front Left Resoulution X", 800);
         this.photonVisionFrontRightResX = pf.createPersistentProperty(
                 "Photon Vision Front Right Resoulution X", 800);
-        this.errorThresholdPercentage = pf.createPersistentProperty(
-                "Pixel error/res Threshold Percentage", 0.01);
+        this.errorThresholdPixels = pf.createPersistentProperty(
+                "Pixel error Threshold", 35);
     }
 
     /**
@@ -149,10 +142,6 @@ public class AlignWithCreeperCommand extends BaseCommand {
             return;
         }
 
-        if(this.isCenteredConfidentlySubscriber == null){
-            this.isCenteredConfidentlySubscriber = new CachedSubscriber(hostname + "." + tableCenteredConfidently, client,5);
-        }
-
         if(this.leftOffsetPixelsSubscriber == null){
             this.leftOffsetPixelsSubscriber = new CachedSubscriber(hostname + "." + tableLeftDistance, client,5);
         }
@@ -188,76 +177,83 @@ public class AlignWithCreeperCommand extends BaseCommand {
         }
         
 
-            Boolean centeredConfidently = this.isCenteredConfidentlySubscriber.getAsBoolean(null);
-            Integer leftDistance = this.leftOffsetPixelsSubscriber.getAsInteger(null);
-            Integer rightDistance = this.rightOffsetPixelsSubscriber.getAsInteger(null);
-            
-            
+        Integer leftDistance = this.leftOffsetPixelsSubscriber.getAsInteger(null);
+        Integer rightDistance = this.rightOffsetPixelsSubscriber.getAsInteger(null);
 
-            if (centeredConfidently == null || leftDistance == null || rightDistance == null) {
-                // since subscriber is not updating fast enough, sometimes we get nulls
-                aKitLog.record("Subcriber updated?", false);
-                return;
-            }
-
-            this.isCenteredConfidently = centeredConfidently;
+        if (leftDistance == null || rightDistance == null) {
+            // since subscriber is not updating fast enough, sometimes we get nulls
+            aKitLog.record("Subcriber updated?", false);
+            log.warn("Vision offsets are returning null! Is alignment up?");
+            return;
+        }
+        else{
             aKitLog.record("Subcriber updated?", true);
+        }
 
-            aKitLog.record("Is Centered confidently", this.isCenteredConfidently);
-            aKitLog.record("Left Distance Pixels", leftDistance);
-            aKitLog.record("Right Distance Pixels", rightDistance);
+        if (leftDistance == -1 && rightDistance == -1) {
+            log.warn("No valid left or right distance measurements received from the camera.");
+            forceStop = true;
+            return;
+        }
 
-            // else if (isCenteredConfidently) {
-            //     // Alignment is achieved; stop any drive movement.
-            //     FORCESTOP = true;
-            //     log.info("Vision is saying we are centered confidently!");
-            //     return;
-            // }
 
+        if(leftDistance == -1 || rightDistance == -1){
+            this.isCenteredConfidently = false;
+        }
+        else{
+            this.isCenteredConfidently = Math.abs(leftDistance-rightDistance) < this.errorThresholdPixels.get();
+        }
+
+
+        aKitLog.record("Is Centered confidently", this.isCenteredConfidently);
+        aKitLog.record("Left Distance Pixels", leftDistance);
+        aKitLog.record("Right Distance Pixels", rightDistance);
+
+        double error;
+        if (isCenteredConfidently) {
+            // Alignment is achieved; stop any drive movement.
+            log.info("Vision is saying we are centered confidently!");
+            // If the error is within the acceptable range, act as a "deadband"
+            error = 0;
+        }
+        else{
             // Determine which side the misalignment error should be taken from.
             boolean offToTheLeft;
-            if (leftDistance == null || rightDistance == null){
-                // should never happen, as the vision code will always send at least a -1
-                log.warn("Vision offsets are returning null! Is alignment up?");
-                forceStop = true;
-                return;
-            }
-            if (leftDistance == -1 && rightDistance == -1) {
-                log.warn("No valid left or right distance measurements received from the camera.");
-                forceStop = true;
-                return;
-            } else if (leftDistance == -1) {
+
+            if (leftDistance == -1) {
                 offToTheLeft = false; // we dont see left edge, means right side is "too" visible eg off to the right
             } else if (rightDistance == -1) {
                 offToTheLeft = true; // we dont see right  edge, means left side is "too" visible eg off to the left
             } else {
+                // Choose the pixel error value from the side indicating misalignment.
                 offToTheLeft = leftDistance < rightDistance; // we see both edges, so the one that is "closer to the center" is the one we are off by
             }
-            // Choose the pixel error value from the side indicating misalignment.
-            
+
+            aKitLog.record("Off to the left?: ",offToTheLeft);
+
             // Calculate the error as a function of the left and right distance from the center.
-            double error = costFunc(leftDistance, rightDistance);
-            aKitLog.record("creeper error from cost function: ",error);
-            
-            // If the error is within the acceptable range, log a message and exit the adjustment routine.
-            
-            // add sign (right is negative)            
-            if (offToTheLeft) {
+            error = costFunc(leftDistance, rightDistance);
+
+            // add sign
+            // if we are off to the right (!offtotheleft) and we want to minimize our error in the right direction,
+            // we need to invert
+            if (!offToTheLeft) {
                 error = -error;
             }
 
-            
 
-            // Scale the normalized error using the drive gain to compute the drive
-            // power.
-            double drivePower = driveGain.get() * pidManager.calculate(0, error);
+        }
 
-            aKitLog.record("Creeper Drive Power", drivePower);
-            
-            // Create the drive command vector (Only drive power along the Y-axis,
-            // side-to-side).
-            XYPair pair = new XYPair(0, drivePower);
-            this.drive.drive(pair, 0.0, true);
+        aKitLog.record("creeper error from cost function: ",error);
+
+        // power.
+        double drivePower = driveGain.get() * pidManager.calculate(0, error);
+        aKitLog.record("Creeper Drive Power", drivePower);
+
+        // Create the drive command vector (Only drive power along the Y-axis,
+        // side-to-side).
+        XYPair pair = new XYPair(0, drivePower);
+        this.drive.drive(pair, 0.0, true);
 
     }
 
@@ -284,7 +280,6 @@ public class AlignWithCreeperCommand extends BaseCommand {
     @Override
     public boolean isFinished() {
         // us being centered is only valuable if we arent currently moving
-        System.out.println(this.isCenteredConfidently);
         return forceStop && this.isDriveStopped() && (this.isCenteredConfidently == null || this.isCenteredConfidently);
     }
 

@@ -107,7 +107,8 @@ public class OperatorCommandMap {
                 .whileTrue(alignWithCreeperCommandFactory.create(Cameras.FRONT_LEFT_CAMERA));
         operatorInterface.neoTrellis.getifAvailable(16)
                 .whileTrue(alignWithCreeperCommandFactory.create(Cameras.FRONT_RIGHT_CAMERA));
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(alignToNearestCoralStationCommand);
+//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(alignToNearestCoralStationCommand);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(alignWithCreeperCommandFactory.create(Cameras.FRONT_RIGHT_CAMERA));
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(driveToNearestReefFaceWithPID);
 
         operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
