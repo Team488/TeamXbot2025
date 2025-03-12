@@ -47,6 +47,10 @@ public class Robot extends BaseRobot {
     protected void initializeSystems() {
         super.initializeSystems();
 
+        if (!Preferences.containsKey(CommandTracer.PREFERENCES_KEY)) {
+            Preferences.setBoolean(CommandTracer.PREFERENCES_KEY, false);
+        }
+
         getInjectorComponent().subsystemDefaultCommandMap();
         getInjectorComponent().operatorCommandMap();
         getInjectorComponent().swerveDefaultCommandMap();

@@ -6,6 +6,7 @@ plugins {
     id 'checkstyle'
     id 'jacoco'
     id 'org.hidetake.ssh' version "2.9.0"
+    id 'io.freefair.aspectj' version '8.13'
 }
 
 sourceCompatibility = JavaVersion.VERSION_17
@@ -94,8 +95,6 @@ repositories {
         }
     }
 
-
-
     mavenLocal()
     
     flatDir {
@@ -125,6 +124,8 @@ dependencies {
     simulationRelease wpi.sim.enableRelease()
 
     testImplementation 'junit:junit:4.12'
+
+    implementation 'org.aspectj:aspectjrt:1.9.22'
 
     implementation project(':SeriouslyCommonLib')
     implementation group: 'org.json', name:'json', version: '20220924'
