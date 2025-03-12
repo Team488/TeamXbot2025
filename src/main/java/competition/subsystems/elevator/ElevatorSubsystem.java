@@ -235,8 +235,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     public void setTargetHeight(Landmarks.CoralLevel value) {
         switch (value) {
             case TWO -> setTargetValue(l2Height.get());
-            case THREE -> setTargetValue(l3Height.get());
-            case FOUR -> setTargetValue(l4Height.get());
+            case THREE -> setTargetValue(l3Height.get().plus(trimValue.get()));
+            case FOUR -> setTargetValue(l4Height.get().plus(trimValue.get()));
             case COLLECTING -> setTargetValue(humanLoadHeight.get());
             default -> setTargetValue(baseHeight.get());
         }
@@ -340,7 +340,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     }
 
     public void trimElevatorDown(){
-        trimValue.set(trimValue.get().plus((Inches.of(1))));
+        trimValue.set(trimValue.get().plus((Inches.of(-1))));
     }
 
 
