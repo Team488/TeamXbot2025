@@ -139,23 +139,7 @@ public class ReefSimulator {
 
     public Pose3d[] getCoralPoses() {
         return reefCoralLocations.stream()
-                .map(coralLocation -> {
-                    Pose3d originalPose = getCoralPose(coralLocation.alliance, coralLocation.face(), coralLocation.level(), coralLocation.post());
-                    Pose2d pose  = originalPose.toPose2d();
-                    Rotation3d desiredRotation = originalPose.getRotation();
-
-                    // Flip stuff if red
-                    if (coralLocation.alliance() == Alliance.RED) {
-                        pose = PoseSubsystem.convertBluetoRed(pose);
-                        desiredRotation = new Rotation3d(
-                                desiredRotation.getX(),
-                                2 * Math.PI - desiredRotation.getY(),
-                                desiredRotation.getZ()
-                        );
-                    }
-
-                    return new Pose3d(pose.getX(), pose.getY(), originalPose.getZ(), desiredRotation);
-                })
+                .map(this::getCoralPose)
                 .toArray(Pose3d[]::new);
     }
 
