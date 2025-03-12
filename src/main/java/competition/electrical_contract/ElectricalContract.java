@@ -4,13 +4,15 @@ import static edu.wpi.first.units.Units.Meters;
 import edu.wpi.first.units.measure.Distance;
 import xbot.common.injection.electrical_contract.CANMotorControllerInfo;
 import xbot.common.injection.electrical_contract.DeviceInfo;
+import xbot.common.injection.electrical_contract.IMUInfo;
 import xbot.common.injection.electrical_contract.XCameraElectricalContract;
 import xbot.common.injection.electrical_contract.XDeadwheelElectricalContract;
 import xbot.common.injection.electrical_contract.XSwerveDriveElectricalContract;
 import xbot.common.injection.swerve.SwerveInstance;
 import xbot.common.math.XYPair;
 
-public abstract class ElectricalContract implements XSwerveDriveElectricalContract, XCameraElectricalContract, XDeadwheelElectricalContract {
+public abstract class ElectricalContract implements XSwerveDriveElectricalContract, XCameraElectricalContract,
+        XDeadwheelElectricalContract {
 
     public abstract boolean isDriveReady();
 
@@ -23,6 +25,10 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
     public abstract DeviceInfo getSteeringEncoder(SwerveInstance swerveInstance);
 
     public abstract XYPair getSwerveModuleOffsetsInInches(SwerveInstance swerveInstance);
+
+    public abstract IMUInfo getNavXGyroInfo();
+
+    public abstract IMUInfo getPigeon2GyroInfo();
 
     public abstract boolean isElevatorReady();
 
@@ -75,6 +81,10 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
     public Distance getRadiusOfRobot() {
         var distanceToOuterBumerInMeters = this.getDistanceFromCenterToOuterBumperX().in(Meters);
         return Meters.of(Math.sqrt(Math.pow(distanceToOuterBumerInMeters, 2.0) * 2.0));
+    }
+
+    public Distance getDiagonalDistanceDifferenceOfRobotRadius() {
+        return getRadiusOfRobot().minus(this.getDistanceFromCenterToOuterBumperX());
     }
 
     public abstract CANMotorControllerInfo getClimberMotor();

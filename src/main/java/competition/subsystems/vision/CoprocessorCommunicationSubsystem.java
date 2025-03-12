@@ -1,8 +1,10 @@
 package competition.subsystems.vision;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import org.kobe.xbot.JClient.XTablesClient;
 import org.kobe.xbot.JClient.XTablesClientManager;
 import org.kobe.xbot.Utilities.Entities.VisionCoprocessor;
+import org.kobe.xbot.Utilities.Entities.XTableValues;
 import org.kobe.xbot.Utilities.Logger.XTablesLogger;
 import org.kobe.xbot.Utilities.VisionCoprocessorCommander;
 import xbot.common.advantage.DataFrameRefreshable;
@@ -32,7 +34,10 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
     // always persisted xtables client manager instance
     private XTablesClientManager xTablesClientManager;
 
-    private VisionCoprocessorCommander visionCoprocessorCommander;
+    private final VisionCoprocessorCommander orinVisionCoprocessorCommander;
+
+    private boolean useBackupPointToPointForPathplanning = false;
+
 
 
     @Inject
@@ -47,7 +52,16 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
         xTablesClientManager = XTablesClient.getDefaultClientAsynchronously();
         XTablesLogger.setLoggingLevel(Level.OFF);
 
-        this.visionCoprocessorCommander = new VisionCoprocessorCommander(VisionCoprocessor.ORIN3);
+        this.orinVisionCoprocessorCommander = new VisionCoprocessorCommander(VisionCoprocessor.ORIN3_STATIC);
+    }
+
+    public boolean isUseBackupPointToPointForPathplanning() {
+        return useBackupPointToPointForPathplanning;
+    }
+
+    public CoprocessorCommunicationSubsystem setUseBackupPointToPointForPathplanning(boolean useBackupPointToPointForPathplanning) {
+        this.useBackupPointToPointForPathplanning = useBackupPointToPointForPathplanning;
+        return this;
     }
 
     public XTablesClientManager getXTablesManager(){
@@ -71,8 +85,12 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
         return xtablesTargetPose.get();
     }
 
-    public VisionCoprocessorCommander getVisionCoprocessorCommander() {
-        return this.visionCoprocessorCommander;
+    public VisionCoprocessorCommander getOrinVisionCoprocessorCommander() {
+        return this.orinVisionCoprocessorCommander;
+    }
+
+    public static XTableValues.Alliance fromAlliance(DriverStation.Alliance alliance) {
+        return alliance.equals(DriverStation.Alliance.Blue) ? XTableValues.Alliance.BLUE : XTableValues.Alliance.RED;
     }
 
 }
