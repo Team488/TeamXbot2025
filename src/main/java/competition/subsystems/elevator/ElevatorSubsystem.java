@@ -61,6 +61,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     public final DoubleProperty powerWhenBottomSensorHit;
 
 
+
     public XCANMotorController masterMotor;
 
     public final DistanceProperty upperHeightLimit;
@@ -72,6 +73,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     public final DistanceProperty l4Height;
     public final DistanceProperty humanLoadHeight;
     public final DistanceProperty baseHeight;
+    public final DistanceProperty trimValue;
 
     public final XDigitalInput bottomSensor;
     public final XLaserCAN distanceSensor;
@@ -97,6 +99,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         humanLoadHeight = pf.createPersistentProperty("humanLoadHeight", Inches.of(1));
         pf.setDefaultLevel(PropertyLevel.Debug);
         baseHeight = pf.createPersistentProperty("baseHeight", Inches.of(0));
+        trimValue = pf.createPersistentProperty("trimValue",Inches.of(0));
 
 
         //to be tuned
@@ -116,6 +119,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         this.powerNearLowerLimitThreshold = pf.createPersistentProperty("powerNearLowerLimit", 0.0);
         this.powerWhenBottomSensorHit = pf.createPersistentProperty("powerWhenBottomSensorHit", 0);
         pf.setDefaultLevel(PropertyLevel.Important);
+
                                 
         this.sysId = new SysIdRoutine(
                 new SysIdRoutine.Config(
@@ -330,6 +334,14 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     public Command sysIdDynamic(SysIdRoutine.Direction direction) {
         return sysId.dynamic(direction);
     }
+
+    public void trimElevatorUp(){
+        if (getCurrentValue().in(Inches) < getTargetValue().in(Inches)){
+            trimValue.equals(getCurrentValue().in(Inches) - getTargetValue().in(Inches));
+
+        }
+    }
+
 
     @Override
     public void periodic() {
