@@ -20,11 +20,7 @@ public class DeadWheelSubsystem extends BaseSubsystem {
     private final XEncoder rightEncoder;
     private final XEncoder frontEncoder;
     private final XEncoder rearEncoder;
-    private final double trackWidth;
-
-    private final double wheelDiameterMeters;
-    private final int pulsesPerRevolution;
-    private final double distancePerPulse;
+    private final DoubleProperty trackWidth;
 
     private final DoubleProperty wheelDiameterMeters;
     private final DoubleProperty pulsesPerRevolution;
@@ -43,20 +39,20 @@ public class DeadWheelSubsystem extends BaseSubsystem {
         propManager.setPrefix(this);
         propManager.setDefaultLevel(Property.PropertyLevel.Important);
         this.wheelDiameterMeters = propManager.createPersistentProperty("wheelDiameterMeters", 0.032);
-        this.pulsesPerRevolution = propManager.createPersistentProperty("pulsesPerRevolution", 2000.0);
+        this.pulsesPerRevolution = propManager.createPersistentProperty("pulsesPerRevolution", 500.0);
 
         this.trackWidth = propManager.createPersistentProperty("TrackWidth", 0.5);
 
         double distancePerPulse = (Math.PI * wheelDiameterMeters.get()) / pulsesPerRevolution.get();
 
         leftEncoder = encoderFactory.create("LeftDeadwheelEncoder",
-                21,20, distancePerPulse);
+                                            21,20, distancePerPulse, "DeadWheelSubsystem");
         rightEncoder = encoderFactory.create("RightDeadwheelEncoder",
-                7,8, distancePerPulse);
+                7,8, distancePerPulse, "DeadWheelSubsystem");
         frontEncoder = encoderFactory.create("FrontDeadwheelEncoder",
-                19,18, distancePerPulse);
+                19,18, distancePerPulse, "DeadWheelSubsystem");
         rearEncoder = encoderFactory.create("RearDeadwheelEncoder",
-                5,6, distancePerPulse);
+                5,6, distancePerPulse, "DeadWheelSubsystem");
 
         leftEncoder.setInverted(true);
         rightEncoder.setInverted(false);
@@ -94,7 +90,7 @@ public class DeadWheelSubsystem extends BaseSubsystem {
     }
 
     public void update() {
-        EncoderValues result = calculateValues();
+        this.calculateValues();
 
         double distancePerPulse = (Math.PI * wheelDiameterMeters.get()) / pulsesPerRevolution.get();
 
@@ -107,21 +103,10 @@ public class DeadWheelSubsystem extends BaseSubsystem {
         this.aKitLog.record("DeadWheelRgithAdjusted", rightEncoder.getAdjustedDistance());
         this.aKitLog.record("DeadWheelFrontAdjusted", frontEncoder.getAdjustedDistance());
         this.aKitLog.record("DeadWheelRearAdjusted", rearEncoder.getAdjustedDistance());
-
-        prevLeftDistance = result.leftDistance();
-        prevRightDistance = result.rightDistance();
-        prevFrontDistance = result.frontDistance();
-        prevRearDistance = result.rearDistance();
-
-        currentPose = new Pose2d(
-                currentPose.getX() + result.d_x(),
-                currentPose.getY() + result.d_y(),
-                currentPose.getRotation().plus(new Rotation2d(result.d_theta()))
-        );
     }
 
 
-    public EncoderValues calculateValues() {
+    public void calculateValues() {
         double leftDistance = leftEncoder.getAdjustedDistance();
         double rightDistance = rightEncoder.getAdjustedDistance();
         double frontDistance = frontEncoder.getAdjustedDistance();
@@ -132,8 +117,8 @@ public class DeadWheelSubsystem extends BaseSubsystem {
         double d_front = frontDistance - prevFrontDistance;
         double d_rear = rearDistance - prevRearDistance;
 
-        double d_theta_x = (d_right - d_left) / trackWidth;
-        double d_theta_y = (d_front - d_rear) / trackWidth;
+        double d_theta_x = (d_right - d_left) / trackWidth.get();
+        double d_theta_y = (d_front - d_rear) / trackWidth.get();
         double d_theta = (d_theta_x + d_theta_y) / 2.0;
 
         double avg_distance_x = (d_left + d_right) / 2.0;

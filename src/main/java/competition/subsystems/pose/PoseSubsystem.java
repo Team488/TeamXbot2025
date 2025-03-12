@@ -9,10 +9,13 @@ import java.util.function.Supplier;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import competition.electrical_contract.ElectricalContract;
+import competition.subsystems.deadwheel.DeadWheelSubsystem;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
+import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -27,7 +30,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import org.kobe.xbot.JClient.XTablesClient;
 import org.kobe.xbot.Utilities.Entities.BatchedPushRequests;
-import competition.subsystems.deadwheel.DeadwheelSubsystem;
 import xbot.common.controls.sensors.XGyro;
 import xbot.common.controls.sensors.XGyro.XGyroFactory;
 import xbot.common.math.WrappedRotation2d;
@@ -42,13 +44,10 @@ import xbot.common.subsystems.vision.AprilTagVisionSubsystem;
 @Singleton
 public class PoseSubsystem extends BasePoseSubsystem {
 
-
-
     final SwerveDrivePoseEstimator onlyWheelsGyroSwerveOdometry;
     final SwerveDrivePoseEstimator fullSwerveOdometry;
-    final SwerveDrivePoseEstimator onlyDeadwheelOdometry;
-    final SwerveDrivePoseEstimator fullVisionDeadwheelOdometry;
-    final SwerveDrivePoseEstimator fullSwerveDeadwheelOdometry;
+    final DeadwheelPoseEstimator onlyDeadwheelOdometry;
+    final DeadwheelPoseEstimator fullDeadwheelOdometry;
 
     private final DriveSubsystem drive;
     private final AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
@@ -69,10 +68,13 @@ public class PoseSubsystem extends BasePoseSubsystem {
     protected Optional<SwerveModulePosition[]> simulatedModulePositions = Optional.empty();
 
     @Inject
-    public PoseSubsystem(XGyroFactory gyroFactory, ElectricalContract electricalContract, PropertyFactory propManager,
-            DriveSubsystem drive,
-            AprilTagVisionSubsystemExtended aprilTagVisionSubsystem, CoprocessorCommunicationSubsystem coprocessorComms,
-            DeadwheelSubsystem deadwheelSubsystem) {
+
+    public PoseSubsystem(XGyroFactory gyroFactory,
+            ElectricalContract electricalContract,
+            PropertyFactory propManager, DriveSubsystem drive,
+            AprilTagVisionSubsystemExtended aprilTagVisionSubsystem,
+            CoprocessorCommunicationSubsystem coprocessorComms,
+            DeadWheelSubsystem deadWheelSubsystem) {
         super(gyroFactory.create(electricalContract.getNavXGyroInfo()), propManager);
         this.drive = drive;
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
@@ -80,14 +82,15 @@ public class PoseSubsystem extends BasePoseSubsystem {
         this.deadwheelSubsystem = deadwheelSubsystem;
         this.pigeon2Gyro = gyroFactory.create(electricalContract.getPigeon2GyroInfo());
 
-        onlyWheelsGyroSwerveOdometry = initializeSwerveOdometry();
-        fullSwerveOdometry = initializeSwerveOdometry();
-        fullDeadwheelOdometry = initializeDeadwheelOdometry();
+        this.onlyWheelsGyroSwerveOdometry = initializeSwerveOdometry();
+        this.fullSwerveOdometry = initializeSwerveOdometry();
+        this.onlyDeadwheelOdometry = initializeDeadwheelOdometry();
+        this.fullDeadwheelOdometry = initializeDeadwheelOdometry();
 
         propManager.setPrefix(this);
         propManager.setDefaultLevel(Property.PropertyLevel.Important);
         useVisionAssistedPose = propManager.createPersistentProperty("UseVisionAssistedPose", true);
-        useDeadwheelAssistedPose = propManager.createPersistentProperty("useDeadwheelAssistedPose", true);
+        useDeadwheelAssistedPose = propManager.createPersistentProperty("useDeadwheelAssistedPose", false);
         addSwerveTelemetry = propManager.createPersistentProperty("addSwerveTelemetry", true);
         reportCameraPoses = propManager.createPersistentProperty("ReportCameraPoses", false);
     }
@@ -96,16 +99,6 @@ public class PoseSubsystem extends BasePoseSubsystem {
     public void refreshDataFrame() {
         super.refreshDataFrame();
         pigeon2Gyro.refreshDataFrame();
-    }
-
-    @Override
-    protected double getLeftDriveDistance() {
-        return drive.getLeftTotalDistance();
-    }
-
-    @Override
-    protected double getRightDriveDistance() {
-        return drive.getRightTotalDistance();
     }
 
     private DeadwheelPoseEstimator initializeDeadwheelOdometry() {
@@ -125,12 +118,36 @@ public class PoseSubsystem extends BasePoseSubsystem {
                 new Pose2d());
     }
 
-    private SwerveDrivePoseEstimator initializeDeadwheelOdometry() {
-        return new SwerveDrivePoseEstimator(
-                drive.getSwerveDriveKinematics(),
-                getCurrentHeading(),
-                getDeadwheelPositions(),
-                new Pose2d());
+    private <T, U extends PoseEstimator<T>> PoseEstimator<T> getPrimaryPoseEstimator() {
+        return (PoseEstimator<T>)(this.useDeadwheelAssistedPose.get() ? this.fullDeadwheelOdometry : this.fullSwerveOdometry);
+    }
+
+    private <T> PoseEstimator<T> getPrimaryOdometryOnlyPoseEstimator() {
+        return (PoseEstimator<T>)(this.useDeadwheelAssistedPose.get() ? this.onlyWheelsGyroSwerveOdometry : this.onlyDeadwheelOdometry);
+    }
+
+    private boolean shouldAlsoUpdateFullSwerve() {
+        return this.useDeadwheelAssistedPose.get() && this.addSwerveTelemetry.get();
+    }
+
+    private void updateOdometryWithVision() {
+        // Also update full swerve if we should add swerve and it's not already being
+        // updated.
+        if (!areVisionUpdatesDisabled) {
+            this.aprilTagVisionSubsystem.getAllPoseObservations().forEach(observation -> {
+                this.getPrimaryPoseEstimator().addVisionMeasurement(
+                        observation.visionRobotPoseMeters(),
+                        observation.timestampSeconds(),
+                        observation.visionMeasurementStdDevs());
+
+                if (this.shouldAlsoUpdateFullSwerve()) {
+                    this.fullSwerveOdometry.addVisionMeasurement(
+                            observation.visionRobotPoseMeters(),
+                            observation.timestampSeconds(),
+                            observation.visionMeasurementStdDevs());
+                }
+            });
+        }
     }
 
     @Override
@@ -162,32 +179,14 @@ public class PoseSubsystem extends BasePoseSubsystem {
 
         }
 
-        if (!this.useDeadwheelAssistedPose.get() || this.addSwerveTelemetry.get()) {
-            fullSwerveOdometry.update(
+        this.updateOdometryWithVision();
+
+        if (this.shouldAlsoUpdateFullSwerve()) {
+            this.fullSwerveOdometry.update(
                     this.getCurrentHeadingGyroOnly(),
                     getSwerveModulePositions());
         }
-
-        var fullOdometry = this.useDeadwheelAssistedPose.get() ? this.fullDeadwheelOdometry : fullSwerveOdometry;
-        if (!areVisionUpdatesDisabled) {
-            this.aprilTagVisionSubsystem.getAllPoseObservations().forEach(observation -> {
-                fullOdometry.addVisionMeasurement(
-                        observation.visionRobotPoseMeters(),
-                        observation.timestampSeconds(),
-                        observation.visionMeasurementStdDevs());
-            });
-
-            if (!this.useDeadwheelAssistedPose.get() || this.addSwerveTelemetry.get()) {
-                this.aprilTagVisionSubsystem.getAllPoseObservations().forEach(observation -> {
-                    fullSwerveOdometry.addVisionMeasurement(
-                            observation.visionRobotPoseMeters(),
-                            observation.timestampSeconds(),
-                            observation.visionMeasurementStdDevs());
-                });
-            }
-        }
-
-        onlyDeadwheelOdometry.update(
+        this.onlyDeadwheelOdometry.update(
                 this.getCurrentHeading(),
                 getDeadwheelPositions());
         aKitLog.record("DeadwheelOnlyEstimate", onlyDeadwheelOdometry.getEstimatedPosition());
@@ -231,8 +230,8 @@ public class PoseSubsystem extends BasePoseSubsystem {
         aKitLog.record("SwerveVisionEnhancedPose", fullSwervePosiiton);
 
         Pose2d visionEnhancedPosition = new Pose2d(
-                fullOdometry.getEstimatedPosition().getTranslation(),
-                fullOdometry.getEstimatedPosition().getRotation());
+                this.getPrimaryPoseEstimator().getEstimatedPosition().getTranslation(),
+                this.getPrimaryPoseEstimator().getEstimatedPosition().getRotation());
         aKitLog.record("VisionEnhancedPose", visionEnhancedPosition);
         batchedPushRequests.putPose2d(xtablesPrefix + ".VisionEnhancedPose", visionEnhancedPosition);
 
@@ -246,7 +245,6 @@ public class PoseSubsystem extends BasePoseSubsystem {
         batchedPushRequests.putDouble(xtablesPrefix + ".DeadWheelPose.Left", values.leftDistance());
         batchedPushRequests.putDouble(xtablesPrefix + ".DeadWheelPose.Front", values.frontDistance());
         batchedPushRequests.putDouble(xtablesPrefix + ".DeadWheelPose.Rear", values.rearDistance());
-        Pose2d robotPose = this.useVisionAssistedPose.get() ? visionEnhancedPosition : estimatedPosition;
         aKitLog.record("RobotPose", robotPose);
         batchedPushRequests.putPose2d(xtablesPrefix + ".RobotPose", robotPose);
 
@@ -330,6 +328,14 @@ public class PoseSubsystem extends BasePoseSubsystem {
                 drive.getRearRightSwerveModuleSubsystem().getCurrentPosition()
 
         };
+    }
+
+    private DeadwheelWheelPositions getDeadwheelPositions() {
+        return new DeadwheelWheelPositions(
+                this.deadWheelSubsystem.getLeftAdjustedDistance(),
+                this.deadWheelSubsystem.getRightAdjustedDistance(),
+                this.deadWheelSubsystem.getFrontAdjustedDistance(),
+                this.deadWheelSubsystem.getRearAdjustedDistance());
     }
 
     // Override methods remain unchanged
@@ -449,7 +455,8 @@ public class PoseSubsystem extends BasePoseSubsystem {
         if (useVisionAssistedPose.get()) {
             var fullOdometry = this.useDeadwheelAssistedPose.get() ? this.fullDeadwheelOdometry
                     : this.fullSwerveOdometry;
-            currentAngleInDegrees = fullOdometry.getEstimatedPosition().getRotation().getDegrees();
+            currentAngleInDegrees = PoseSubsystem
+                    .convertBlueToRedIfNeeded(fullOdometry.getEstimatedPosition().getRotation()).getDegrees();
         } else {
             currentAngleInDegrees = PoseSubsystem
                     .convertBlueToRedIfNeeded(onlyWheelsGyroSwerveOdometry.getEstimatedPosition().getRotation())
