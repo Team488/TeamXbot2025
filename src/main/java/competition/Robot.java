@@ -13,8 +13,10 @@ import competition.injection.components.DaggerSimulationComponent;
 import competition.operator_interface.OperatorInterface;
 import competition.simulation.BaseSimulator;
 import competition.subsystems.algae_arm.AlgaeArmSubsystem;
+import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.wpilibj.Preferences;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import xbot.common.command.BaseRobot;
@@ -169,6 +171,8 @@ public class Robot extends BaseRobot {
 
     @Override
     public void autonomousInit() {
+        var poseSub = getInjectorComponent().poseSubsystem();
+        poseSub.setCurrentPosition(autonomousCommandSelector.getCurrentStartingPosition());
         super.autonomousInit();
         if (!algaeArmSubsystem.isCalibrated()) {
             algaeArmSubsystem.forceCalibratedHere();
