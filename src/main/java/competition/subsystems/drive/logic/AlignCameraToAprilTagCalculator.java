@@ -261,7 +261,9 @@ public class AlignCameraToAprilTagCalculator {
                 currentTranslation.minus(aprilTagPositionInGlobalFieldCoordinates).getAngle().getRadians() + Math.PI
         ).plus(Radians.of(isCameraBackwards ? Math.PI : 0)).in(Degrees);
 
-        double approachSpeedFactor = approachMode == ApproachMode.Close ? closeApproachSpeedFactor.get() : this.approachSpeedFactor.get();
+        double approachSpeedFactor = (approachMode == ApproachMode.Close)
+                ? closeApproachSpeedFactor.get()
+                : this.approachSpeedFactor.get();
 
         // Eventually we need to return these - they will likely be mutated by later steps.
         XYPair driveIntent = new XYPair(0, 0);
