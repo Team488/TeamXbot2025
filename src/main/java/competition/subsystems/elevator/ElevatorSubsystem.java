@@ -120,7 +120,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         this.powerWhenBottomSensorHit = pf.createPersistentProperty("powerWhenBottomSensorHit", 0);
         pf.setDefaultLevel(PropertyLevel.Important);
 
-                                
+
         this.sysId = new SysIdRoutine(
                 new SysIdRoutine.Config(
                         Volts.of(0.2).per(Second),
@@ -336,10 +336,11 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     }
 
     public void trimElevatorUp(){
-        if (getCurrentValue().in(Inches) < getTargetValue().in(Inches)){
-            trimValue.equals(getCurrentValue().in(Inches) - getTargetValue().in(Inches));
+        trimValue.set(trimValue.get().plus(Inches.of(1)));
+    }
 
-        }
+    public void trimElevatorDown(){
+        trimValue.set(trimValue.get().plus((Inches.of(1))));
     }
 
 
