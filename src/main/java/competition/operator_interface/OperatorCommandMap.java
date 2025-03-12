@@ -109,23 +109,12 @@ public class OperatorCommandMap {
 
         var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
 
-
-//        operatorInterface.neoTrellis.getifAvailable(15)
-//                .whileTrue(alignWithCreeperCommandFactory.create(Cameras.FRONT_LEFT_CAMERA));
-//        operatorInterface.neoTrellis.getifAvailable(16)
-//                .whileTrue(alignWithCreeperCommandFactory.create(Cameras.FRONT_RIGHT_CAMERA));
-//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(alignToNearestCoralStationCommand);
-
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(pointAtNearestCoralStation)
-                .onFalse(clearPointAtHeading);
-
-
         operatorInterface.neoTrellis.getifAvailable(15)
                 .whileTrue(alignWithCreeperCommandFactory.create(Cameras.FRONT_LEFT_CAMERA));
         operatorInterface.neoTrellis.getifAvailable(16)
                 .whileTrue(alignWithCreeperCommandFactory.create(Cameras.FRONT_RIGHT_CAMERA));
-//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(alignToNearestCoralStationCommand);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(alignWithCreeperCommandFactory.create(Cameras.FRONT_RIGHT_CAMERA));
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y)
+                .whileTrue(alignWithCreeperCommandFactory.create(Cameras.FRONT_RIGHT_CAMERA));
 
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(driveToNearestReefFaceWithPID);
 
