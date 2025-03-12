@@ -86,7 +86,7 @@ public class OperatorCommandMap {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
 
-        var pointAtNearestCoralStation = drive.createSetStaticHeadingTargetCommand(() ->
+        var pointAtNearestCoralStation = drive.createSetDynamicHeadingTargetCommand(() ->
                 PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.getCoralStationSectionPose(pose.getClosestCoralStation(), Landmarks.CoralStationSection.MID)
                         .getRotation()));
         var clearPointAtHeading = drive.createClearAllHeadingTargetsCommand();
