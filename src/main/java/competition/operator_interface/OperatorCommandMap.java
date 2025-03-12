@@ -3,7 +3,6 @@ package competition.operator_interface;
 import competition.auto_programs.FromCageScoreOneCoralAutoFactory;
 import competition.auto_programs.FromLeftCageScoreLeftFacesLevelFours;
 import competition.auto_programs.FromRightCageScoreRightFacesLevelFours;
-import competition.commandgroups.HeadingAssistedDriveAndScoreCommandGroup;
 import competition.commandgroups.PrepAlgaeSystemCommandGroupFactory;
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
 import competition.simulation.commands.ResetSimulatedPose;
@@ -21,17 +20,10 @@ import competition.subsystems.coral_scorer.commands.IntakeCoralCommand;
 import competition.subsystems.coral_scorer.commands.ScoreCoralCommand;
 import competition.subsystems.coral_scorer.commands.ScoreWhenReadyCommand;
 import competition.subsystems.drive.DriveSubsystem;
-import competition.subsystems.drive.commands.AlignToNearestCoralStationCommand;
 import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
-import competition.subsystems.drive.commands.AlignToSpecificHumanLoadingStationCommand;
 import competition.subsystems.drive.commands.AlignWithCreeperCommandFactory;
 import competition.subsystems.drive.commands.CalibrateDriveCommand;
-import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
-import competition.subsystems.drive.commands.DriveToCoralStationInterstitialCommand;
-import competition.subsystems.drive.commands.DriveToLocationWithPID;
 import competition.subsystems.drive.commands.DriveToNearestReefFaceWithPID;
-import competition.subsystems.drive.commands.RotateToHeadingWithHeadingModule;
-import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.drive.logic.AlignCameraToAprilTagCalculator;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import competition.subsystems.elevator.commands.ForceElevatorCalibratedCommand;
@@ -40,28 +32,14 @@ import competition.subsystems.oracle.commands.DriveAccordingToOracleCommand;
 import competition.subsystems.oracle.commands.SuperstructureAccordingToOracleCommand;
 import competition.subsystems.pose.Cameras;
 import competition.subsystems.pose.Landmarks;
-import competition.subsystems.pose.PoseSubsystem;
-import competition.subsystems.pose.commands.ResetPoseCommand;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import xbot.common.controls.sensors.XXboxController;
 import xbot.common.subsystems.autonomous.SetAutonomousCommand;
-import xbot.common.subsystems.drive.SwervePointKinematics;
-import xbot.common.subsystems.drive.SwerveSimpleTrajectoryCommand;
-import xbot.common.subsystems.drive.SwerveSimpleTrajectoryMode;
-import xbot.common.subsystems.drive.swerve.commands.ChangeActiveSwerveModuleCommand;
 import xbot.common.subsystems.pose.commands.SetRobotHeadingCommand;
-import xbot.common.trajectory.XbotSwervePoint;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
-import java.util.ArrayList;
-import java.util.List;
-
-import static edu.wpi.first.units.Units.Degree;
 
 /**
  * Maps operator interface buttons to commands
