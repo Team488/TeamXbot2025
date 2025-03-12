@@ -70,7 +70,7 @@ public class DriveToCoralStationInterstitialCommand extends SwerveSimpleTrajecto
 
         if (kinematics) {
             // Make sure goalVelocity is non-zero, or else the robot will wait until it's stopped at the interstitial point before continuing
-            this.logic.setGlobalKinematicValues(new SwervePointKinematics(2, 0, 4, 4.5));
+            this.logic.setGlobalKinematicValues(new SwervePointKinematics(3, 0, 4, 4.5));
             this.logic.setVelocityMode(SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
         }
         else {
