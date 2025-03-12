@@ -261,8 +261,7 @@ public class AlignCameraToAprilTagCalculator {
                 currentTranslation.minus(aprilTagPositionInGlobalFieldCoordinates).getAngle().getRadians() + Math.PI
         ).plus(Radians.of(isCameraBackwards ? Math.PI : 0)).in(Degrees);
 
-        double approachSpeedFactor =
-                this.approachMode == ApproachMode.Close ? closeApproachSpeedFactor.get() : this.approachSpeedFactor.get();
+        double approachSpeedFactor = approachMode == ApproachMode.Close ? closeApproachSpeedFactor.get() : this.approachSpeedFactor.get();
 
         // Eventually we need to return these - they will likely be mutated by later steps.
         XYPair driveIntent = new XYPair(0, 0);
@@ -270,7 +269,7 @@ public class AlignCameraToAprilTagCalculator {
 
         // To allow for quick drop-through, we will have the first step of the state machine be an "if" statement
         // so that if we see the tag we can jump right into the meat of the machine.
-        if (activity == Activity.Searching ) {
+        if (activity == Activity.Searching) {
             // We see the tag. Begin the approach.
             if (doWeSeeOurTargetTag) {
                 activity = Activity.ApproachWhileCentering;
@@ -310,16 +309,15 @@ public class AlignCameraToAprilTagCalculator {
 
                 // Finally, a check to see if we're quite close and should advance to the next state.
 
-                var distanceThresholdToAdvance = distanceFromInterstitialToAdvanceFast.get();
-                if (approachMode == ApproachMode.Close) {
-                    distanceThresholdToAdvance = distanceFromInterstitialToAdvanceSlow.get();
-                }
+                var distanceThresholdToAdvance = (approachMode == ApproachMode.Close)
+                        ? distanceFromInterstitialToAdvanceSlow.get()
+                        : distanceFromInterstitialToAdvanceFast.get();
 
-                if (currentPose.getTranslation().getDistance(interstitialPoint.getTranslation()) < distanceThresholdToAdvance) {
+                if (currentTranslation.getDistance(interstitialPoint.getTranslation()) < distanceThresholdToAdvance) {
                     activity = Activity.TerminalApproach;
 
+                    // Trying to approach coral station but found no tag? We'll just use pure pose
                     if (!hasEverSeenAprilTag && isCameraBackwards) {
-                        // We failed to find a tag. Try just using classic global pose
                         activity = Activity.TerminalApproachWithoutVision;
                         coralStationPreShovePoint = getCoralStationPreShovePoint();
                         pose.setPreferOdometryToVision(false);
@@ -339,7 +337,7 @@ public class AlignCameraToAprilTagCalculator {
                 }
 
                 // Now, drive to that final point with locked-on heading.
-                var powers = drive.getPowerToAchieveFieldPosition(currentPose.getTranslation(), targetLocationOnField);
+                var powers = drive.getPowerToAchieveFieldPosition(currentTranslation, targetLocationOnField);
 
                 // If we are going too fast, cap the speed.
                 if (powers.getNorm() >  approachSpeedFactor) {
@@ -350,26 +348,28 @@ public class AlignCameraToAprilTagCalculator {
                 rotationIntent = headingModule.calculateHeadingPower(idealFinalHeadingDegrees);
 
                 // If we're quite close to the final point, advance to shoving into the reef or coral station.
-                if (currentPose.getTranslation().getDistance(targetLocationOnField) < distanceToStartShoving.get()) {
+                if (currentTranslation.getDistance(targetLocationOnField) < distanceToStartShoving.get()) {
                     // We need to make a decision. If our error is small enough, we should advance to shove.
                     // However, if our error is large, we should retreat and try again.
                     if (isLastKnownErrorWithinBounds() || !requireExcellentAlignment) {
                         activity = Activity.Shove;
                         shoveStartTime = XTimer.getFPGATimestamp();
                     } else {
-                        activity = Activity.ApproachWhileCentering;
+                        activity = Activity.ApproachWhileCentering; // Possible start to creeper code
                     }
                 }
                 break;
             case TerminalApproachWithoutVision:
-                var noVisionPower = drive.getPowerToAchieveFieldPosition(currentPose.getTranslation(), coralStationPreShovePoint);
+                var noVisionPower = drive.getPowerToAchieveFieldPosition(currentTranslation, coralStationPreShovePoint);
+
                 // If we are going too fast, cap the speed.
                 if (noVisionPower.getNorm() >  approachSpeedFactor) {
-                    powers = new Translation2d(approachSpeedFactor, noVisionPower.getAngle());
+                    noVisionPower = new Translation2d(approachSpeedFactor, noVisionPower.getAngle());
                 }
+
                 driveIntent = new XYPair(noVisionPower.getX(), noVisionPower.getY()).scale(approachSpeedFactor);
                 rotationIntent = headingModule.calculateHeadingPower(idealFinalHeadingDegrees);
-                if (currentPose.getTranslation().getDistance(coralStationPreShovePoint) < distanceToStartShoving.get()) {
+                if (currentTranslation.getDistance(coralStationPreShovePoint) < distanceToStartShoving.get()) {
                     activity = Activity.Shove;
                     shoveStartTime = XTimer.getFPGATimestamp();
                 }
