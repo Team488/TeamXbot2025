@@ -79,21 +79,10 @@ public class OperatorCommandMap {
             Provider<AlignToReefWithAprilTagCommand> alignToReefWithAprilTagProvider,
             DriveAccordingToOracleCommand driveAccordingToOracle,
             SuperstructureAccordingToOracleCommand superstructureAccordingToOracle,
-            PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
-            DebugSwerveModuleCommand debugModule,
-            ChangeActiveSwerveModuleCommand changeActiveModule,
-            SwerveDriveWithJoysticksCommand typicalSwerveDrive,
             DriveToNearestReefFaceWithPID driveToNearestReefFaceWithPID,
-            AlignToNearestCoralStationCommand alignToNearestCoralStationCommand,
-            AlignWithCreeperCommandFactory alignWithCreeperCommandFactory,
-            DriveSubsystem drive, PoseSubsystem pose) {
+            AlignWithCreeperCommandFactory alignWithCreeperCommandFactory) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
-
-        var pointAtNearestCoralStation = drive.createSetStaticHeadingTargetCommand(() ->
-                PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.getCoralStationSectionPose(pose.getClosestCoralStation(), Landmarks.CoralStationSection.MID)
-                        .getRotation()));
-        var clearPointAtHeading = drive.createClearAllHeadingTargetsCommand();
 
         var alignToReefWithAprilTagWithLeftCamera = alignToReefWithAprilTagProvider.get();
         alignToReefWithAprilTagWithLeftCamera.setConfigurations(
@@ -107,20 +96,11 @@ public class OperatorCommandMap {
                 AlignCameraToAprilTagCalculator.Activity.ApproachWhileCentering, false);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(alignToReefWithAprilTagWithRightCamera);
 
-        var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
-
-        operatorInterface.neoTrellis.getifAvailable(15)
-                .whileTrue(alignWithCreeperCommandFactory.create(Cameras.FRONT_LEFT_CAMERA));
-        operatorInterface.neoTrellis.getifAvailable(16)
-                .whileTrue(alignWithCreeperCommandFactory.create(Cameras.FRONT_RIGHT_CAMERA));
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y)
-                .whileTrue(alignWithCreeperCommandFactory.create(Cameras.FRONT_RIGHT_CAMERA));
-
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(driveToNearestReefFaceWithPID);
 
-//        operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
-//        operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(changeActiveModule);
-//        operatorInterface.driverGamepad.getPovIfAvailable(180).onTrue(typicalSwerveDrive);
+        // IMPORTANT STUFF STARTS HERE
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y)
+                .whileTrue(alignWithCreeperCommandFactory.create(Cameras.FRONT_RIGHT_CAMERA));
     }
 
 
