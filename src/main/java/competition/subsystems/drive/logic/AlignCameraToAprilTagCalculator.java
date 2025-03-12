@@ -286,7 +286,7 @@ public class AlignCameraToAprilTagCalculator {
         }
 
         switch (activity) {
-            case ApproachWhileCentering:
+            case ApproachWhileCentering -> {
                 // First, let's try and update our final position with any camera data, in case we lose it later.
                 if (doWeSeeOurTargetTag) {
                     tagAcquisitionState = TagAcquisitionState.LockedOn;
@@ -325,8 +325,8 @@ public class AlignCameraToAprilTagCalculator {
                         pose.setPreferOdometryToVision(false);
                     }
                 }
-                break;
-            case TerminalApproach:
+            }
+            case TerminalApproach -> {
                 // We are effectively at the interstitial point. We now lock our heading to the final heading and try to approach
                 // the final point with some caution, meaning we will use the Drive PID to decelerate.
 
@@ -342,7 +342,7 @@ public class AlignCameraToAprilTagCalculator {
                 var powers = drive.getPowerToAchieveFieldPosition(currentTranslation, targetLocationOnField);
 
                 // If we are going too fast, cap the speed.
-                if (powers.getNorm() >  approachSpeedFactor) {
+                if (powers.getNorm() > approachSpeedFactor) {
                     powers = new Translation2d(approachSpeedFactor, powers.getAngle());
                 }
 
@@ -360,12 +360,12 @@ public class AlignCameraToAprilTagCalculator {
                         activity = Activity.ApproachWhileCentering; // Possible start to creeper code
                     }
                 }
-                break;
-            case TerminalApproachWithoutVision:
+            }
+            case TerminalApproachWithoutVision -> {
                 var noVisionPower = drive.getPowerToAchieveFieldPosition(currentTranslation, coralStationPreShovePoint);
 
                 // If we are going too fast, cap the speed.
-                if (noVisionPower.getNorm() >  approachSpeedFactor) {
+                if (noVisionPower.getNorm() > approachSpeedFactor) {
                     noVisionPower = new Translation2d(approachSpeedFactor, noVisionPower.getAngle());
                 }
 
@@ -375,8 +375,8 @@ public class AlignCameraToAprilTagCalculator {
                     activity = Activity.Shove;
                     shoveStartTime = XTimer.getFPGATimestamp();
                 }
-                break;
-            case Shove:
+            }
+            case Shove -> {
                 // We are so very close to our destination, but it's very hard to get perfect alignment -- the PID
                 // will bring us close, but error in the dive might mean we are off by a few inches. We are also
                 // so close to the april tag that it's no longer guaranteed to be in view. So, we will just try and
@@ -396,15 +396,13 @@ public class AlignCameraToAprilTagCalculator {
                 // If we've been shoving for a while, we're done.
                 if (XTimer.getFPGATimestamp() - shoveStartTime > shoveDuration.get()) {
                     activity = Activity.Complete;
-                    oi.operatorGamepad.getRumbleManager().rumbleGamepad(1,.75);
+                    oi.operatorGamepad.getRumbleManager().rumbleGamepad(1, .75);
                     oi.driverGamepad.getRumbleManager().rumbleGamepad(1, .75);
                 }
-                break;
-            case Complete:
-            case GaveUp:
-            default:
-                // We're done! We don't need to do anything.
-                break;
+            }
+            case Complete -> {}
+            case GaveUp -> {}
+            default -> {} // We're done! We don't need to do anything.
         }
 
         akitLog.record("Activity", activity);
