@@ -12,12 +12,23 @@ public class LightSubsystemTest extends BaseCompetitionTest {
     @Test
     public void testSendState() {
         var subsystem = getInjectorComponent().lightSubsystem();
+        var autonomous = getInjectorComponent().autonomousCommandSelector();
+        var command = getInjectorComponent().alignToNearestCoralStationCommand();
         assertNotNull(subsystem);
+
+        autonomous.setCurrentAutonomousCommand(getInjectorComponent().emergencyAutonomousCommand());
 
         subsystem.refreshDataFrame();
         subsystem.periodic();
 
-        assertEquals(subsystem.dioInt.getDIOInt(), LightsStateMessage.RobotDisabledDefault.getValue());
+        assertEquals(LightsStateMessage.RobotDisabledDefault.getValue(), subsystem.dioInt.getDIOInt());
+
+        subsystem.refreshDataFrame();
+        subsystem.periodic();
+
+        autonomous.setCurrentAutonomousCommand(command);
+
+        assertEquals(LightsStateMessage.RobotDisabledAuto.getValue(), subsystem.dioInt.getDIOInt());
     }
 
     @Test

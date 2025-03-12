@@ -118,6 +118,7 @@ public class LightSubsystem extends BaseSubsystem {
             if (DriverStation.getMatchTime() > 230 && DriverStation.isTeleop()) {
                 currentState = LightsStateMessage.Victory;
             }
+            System.out.println("Current Auto " + autonomousCommandSelector.getProgramName());
             if (!Objects.equals(autonomousCommandSelector.getProgramName(), "EmergencyAutonomousCommand")) {
                 currentState = LightsStateMessage.RobotDisabledAuto;
             }
