@@ -12,6 +12,7 @@ import competition.injection.components.DaggerRoboxComponent;
 import competition.injection.components.DaggerSimulationComponent;
 import competition.operator_interface.OperatorInterface;
 import competition.simulation.BaseSimulator;
+import competition.subsystems.algae_arm.AlgaeArmSubsystem;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.wpilibj.Preferences;
 import org.apache.logging.log4j.LogManager;
@@ -32,6 +33,7 @@ public class Robot extends BaseRobot {
     BaseSimulator simulator;
     ElectricalContract simulatorContract = new UnitTestContract2025();
     OperatorInterface oi;
+    AlgaeArmSubsystem algaeArmSubsystem;
 
     Robot() {
         // We currently can't keep up with 0.02s loop times, and the error reporting about loop
@@ -52,6 +54,7 @@ public class Robot extends BaseRobot {
         getInjectorComponent().oracleSubsystem();
         getInjectorComponent().lightSubsystem();
         oi = getInjectorComponent().operatorInterface();
+        algaeArmSubsystem = getInjectorComponent().algaeArmSubsystem();
 
         if (BaseRobot.isSimulation()) {
             simulator = getInjectorComponent().simulator();
@@ -162,6 +165,14 @@ public class Robot extends BaseRobot {
     protected void loopFunc() {
         super.loopFunc();
         reachedEndOfLoop.countDown();
+    }
+
+    @Override
+    public void autonomousInit() {
+        super.autonomousInit();
+        if (!algaeArmSubsystem.isCalibrated()) {
+            algaeArmSubsystem.forceCalibratedHere();
+        }
     }
 
     public XScheduler getScheduler() {
