@@ -129,8 +129,8 @@ public class DriveSubsystem extends BaseSwerveDriveSubsystem {
 
     public RunCommand createSetDynamicHeadingTargetCommand(Supplier<Rotation2d> dynamicHeadingTarget) {
         return new RunCommand(() -> {
-           setStaticHeadingTarget(dynamicHeadingTarget.get());
-           setStaticHeadingTargetActive(true);
+            setStaticHeadingTarget(dynamicHeadingTarget.get());
+            setStaticHeadingTargetActive(true);
         });
     }
 
