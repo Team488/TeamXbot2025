@@ -61,7 +61,7 @@ public class OperatorCommandMap {
             AlignWithCreeperCommandFactory alignWithCreeperCommandFactory) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
-
+        
         var alignToReefWithAprilTagWithLeftCamera = alignToReefWithAprilTagProvider.get();
         alignToReefWithAprilTagWithLeftCamera.setConfigurations(
                 Cameras.FRONT_LEFT_CAMERA.getIndex(), false, -2, true,
