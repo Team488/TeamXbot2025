@@ -25,6 +25,8 @@ import competition.subsystems.drive.commands.AlignToNearestCoralStationCommand;
 import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.AlignToSpecificHumanLoadingStationCommand;
 import competition.subsystems.drive.commands.AlignWithCreeperCommandFactory;
+import competition.subsystems.drive.commands.AlignWithCreeperCommandWCalc;
+import competition.subsystems.drive.commands.AlignWithCreeperCommandWCalcFactory;
 import competition.subsystems.drive.commands.CalibrateDriveCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
 import competition.subsystems.drive.commands.DriveToCoralStationInterstitialCommand;
@@ -89,6 +91,7 @@ public class OperatorCommandMap {
             AlignToSpecificHumanLoadingStationCommand alignToLeftStation,
             DriveToNearestReefFaceWithPID driveToNearestReefFaceWithPID,
             AlignToNearestCoralStationCommand alignToNearestCoralStationCommand,
+            AlignWithCreeperCommandWCalcFactory alignWithCreeperWCalcCommandFactory,
             AlignWithCreeperCommandFactory alignWithCreeperCommandFactory) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
@@ -108,8 +111,11 @@ public class OperatorCommandMap {
         operatorInterface.neoTrellis.getifAvailable(16)
                 .whileTrue(alignWithCreeperCommandFactory.create(Cameras.FRONT_RIGHT_CAMERA));
 //        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(alignToNearestCoralStationCommand);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(alignWithCreeperCommandFactory.create(Cameras.FRONT_RIGHT_CAMERA));
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(driveToNearestReefFaceWithPID);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).
+                whileTrue(alignWithCreeperCommandFactory.create(Cameras.FRONT_RIGHT_CAMERA));
+//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(driveToNearestReefFaceWithPID);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).
+                whileTrue(alignWithCreeperWCalcCommandFactory.create(Cameras.FRONT_RIGHT_CAMERA));
 
         operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
         operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(changeActiveModule);

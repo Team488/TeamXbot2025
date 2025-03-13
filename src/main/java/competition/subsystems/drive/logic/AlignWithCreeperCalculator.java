@@ -1,58 +1,45 @@
-package competition.subsystems.drive.commands;
+package competition.subsystems.drive.logic;
 
-import competition.electrical_contract.ElectricalContract;
 import competition.subsystems.drive.DriveSubsystem;
-import competition.subsystems.oracle.ReefCoordinateGenerator;
 import competition.subsystems.pose.Cameras;
 import competition.subsystems.pose.PoseSubsystem;
-import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.kobe.xbot.JClient.CachedSubscriber;
 import org.kobe.xbot.JClient.XTablesClient;
-
-import xbot.common.command.BaseCommand;
+import xbot.common.advantage.AKitLogger;
 import xbot.common.math.PIDManager;
 import xbot.common.math.XYPair;
-import xbot.common.math.PIDManager.PIDManagerFactory;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.properties.StringProperty;
-import xbot.common.subsystems.drive.control_logic.HeadingModule;
 
 import javax.inject.Inject;
 
-/**
- * Command to align the robot with a creeper target using vision-based error
- * measurements. <p> This command retrieves error values (in pixels) from the
- * vision system via the coprocessor, normalizes the error relative to the
- * camera resolution, applies a gain factor to scale the drive power
- * appropriately, and then moves the robot to align with the target.
- * </p>
- */
-public class AlignWithCreeperCommand extends BaseCommand {
-    private boolean forceStop = false;
+
+public class AlignWithCreeperCalculator {
+    private boolean initalized = false;
+    private final Logger log;
+    private final AKitLogger aKitLog;
     private final PIDManager pidManager;
-    
+
     final DriveSubsystem drive;
     final CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem;
 
-    private final int tunedWidth = 960;
-    private final int tunedHeight = 720;
+    private final int tunedWidth = 960; // what resolution the pid tuning was done at
+    private final int tunedHeight = 720; // what resolution the pid tuning was done at
 
     private final String tableLeftDistance = "verticalEdgeLeftDistancePx";
     private final String tableRightDistance = "verticalEdgeRightDistancePx";
     private final String tableHres = "cameraHres";
     private final String tableVres = "cameraVres";
 
-
     private final StringProperty photonVisionFrontLeftHostname;
     private final StringProperty photonVisionFrontRightHostname;
 
-    private final DoubleProperty photonVisionFrontLeftResX;
-    private final DoubleProperty photonVisionFrontRightResX;
     private final DoubleProperty driveGain;
     private final DoubleProperty logScalar;
     private final DoubleProperty logErrScalar;
@@ -67,25 +54,26 @@ public class AlignWithCreeperCommand extends BaseCommand {
 
     private String hostname;
     private Cameras camera;
+
     // set defaults for now
     private int currentCamHres = this.tunedWidth;
     private int currentCamVres = this.tunedHeight;
+    private boolean forceStop = false;
 
-    protected Boolean isCenteredConfidently = false;
+    private Boolean isCenteredConfidently = false;
 
     @Inject
-    public AlignWithCreeperCommand(AprilTagVisionSubsystemExtended vision,
-                                   DriveSubsystem drive,
-                                   CoprocessorCommunicationSubsystem coprocessorCommunications,
-                                   ElectricalContract electricalContract, PoseSubsystem pose,
-                                   HeadingModule.HeadingModuleFactory headingModuleFactory,
-                                   ReefCoordinateGenerator reefCoordinateGenerator,
-                                   PropertyFactory pf,
-                                   PIDManagerFactory pidFactory) {
-        this.addRequirements(drive);
+    public AlignWithCreeperCalculator(DriveSubsystem drive,
+                                      CoprocessorCommunicationSubsystem coprocessorCommunications,
+                                      PoseSubsystem pose,
+                                      PropertyFactory pf,
+                                      PIDManager.PIDManagerFactory pidFactory) {
+        this.log = LogManager.getLogger("AlignWithCreeperCommmand");
+        this.aKitLog = new AKitLogger("AlignWithCreeperCommmand/");
         this.drive = drive;
         this.pidManager = pidFactory.create("AlignWithCreeperCommand", 0.6, 0.0001, 0.9);
         this.coprocessorCommunicationSubsystem = coprocessorCommunications;
+
         pf.setPrefix("AlignWithCreeperCommand/");
         this.driveGain = pf.createPersistentProperty("Drive Gain", 0.18);
         this.logScalar = pf.createPersistentProperty("Log Scalar", 15);
@@ -95,25 +83,25 @@ public class AlignWithCreeperCommand extends BaseCommand {
                 "Photon Vision Front Left Hostname", "photonvisionfrontleft");
         this.photonVisionFrontRightHostname = pf.createPersistentProperty(
                 "Photon Vision Front Right Hostname", "photonvisionfrontright");
-        this.photonVisionFrontLeftResX = pf.createPersistentProperty(
-                "Photon Vision Front Left Resoulution X", 800);
-        this.photonVisionFrontRightResX = pf.createPersistentProperty(
-                "Photon Vision Front Right Resoulution X", 800);
         this.errorThresholdPixels = pf.createPersistentProperty(
                 "Pixel error Threshold", 35);
     }
 
-    @Override
-    public void initialize() {
+
+    public boolean initialize() {
+        this.pidManager.reset();
+        // reset flags
         forceStop = false;
         isCenteredConfidently = false;
+
+        // try get xtables client
         XTablesClient client =
                 this.coprocessorCommunicationSubsystem.tryGetXTablesClient();
+
         if (client == null) {
             log.warn("Failed to obtain a valid XTablesClient from CoprocessorCommunicationSubsystem. "
-                    + "Aborting command initialization.");
-            cancel();
-            return;
+                    + "Aborting initialization!");
+            return false;
         }
 
         // Determine active camera and retrieve its corresponding resolution and hostname.
@@ -122,9 +110,8 @@ public class AlignWithCreeperCommand extends BaseCommand {
         } else if (camera.equals(Cameras.FRONT_RIGHT_CAMERA)) {
             this.hostname = photonVisionFrontRightHostname.get();
         } else {
-            log.warn("Encountered an unrecognized camera value. Aborting command to avoid unintended drive behavior.");
-            cancel();
-            return;
+            log.warn("Encountered an unrecognized camera value. Aborting to avoid unintended drive behavior.");
+            return false;
         }
 
         if(this.leftOffsetPixelsSubscriber == null){
@@ -142,21 +129,27 @@ public class AlignWithCreeperCommand extends BaseCommand {
         if(this.vresSubscriber == null){
             this.vresSubscriber = new CachedSubscriber(hostname + "." + tableVres, client,2);
         }
+        initalized = true;
+        return true;
     }
 
     private boolean isDriveStopped(){
         return drive.getActiveSwerveModuleSubsystem().getCurrentState().equals(new SwerveModuleState(0, Rotation2d.kZero));
     }
 
-    public void execute() {
-        super.execute();
+
+    public boolean executeAlignment() {
+        if(!this.initalized){
+            log.error("AlignWithCreeperCommand initialization failed.");
+            return false;
+        }
 
         if(forceStop){
 //            log.info("FORCE STOP");
             drive.stop();
-            return;
+            return false;
         }
-        
+
 
         Integer leftDistance = this.leftOffsetPixelsSubscriber.getAsInteger(null);
         Integer rightDistance = this.rightOffsetPixelsSubscriber.getAsInteger(null);
@@ -168,7 +161,7 @@ public class AlignWithCreeperCommand extends BaseCommand {
             // since subscriber is not updating fast enough, sometimes we get nulls
             aKitLog.record("Subcriber updated?", false);
             log.warn("Vision offsets are returning null! Is alignment up?");
-            return;
+            return false;
         }
         else{
             aKitLog.record("Subcriber updated?", true);
@@ -177,7 +170,7 @@ public class AlignWithCreeperCommand extends BaseCommand {
         if (leftDistance == -1 && rightDistance == -1) {
             log.warn("No valid left or right distance measurements received from the camera.");
             forceStop = true;
-            return;
+            return false;
         }
 
         if(leftDistance == -1 || rightDistance == -1){
@@ -239,7 +232,10 @@ public class AlignWithCreeperCommand extends BaseCommand {
         XYPair pair = new XYPair(0, drivePower);
         this.drive.drive(pair, 0.0, true);
 
+        return true;
+
     }
+
 
     // scaled cost function
     private double costFunc(int leftErrPX, int rightErrPX){
@@ -251,32 +247,29 @@ public class AlignWithCreeperCommand extends BaseCommand {
         double err = resizeWidth(Math.abs(leftErrPX-rightErrPX));
         // log is negative when the input is less that 1,
         // to make this never happen, add 1
-        double errFunc = Math.log(err/logErrScalar.get()+1)/logScalar.get(); 
+        double errFunc = Math.log(err/logErrScalar.get()+1)/logScalar.get();
         return Math.max(-maxError.get(), Math.min(errFunc, maxError.get()));
     }
 
-    @Override
-    public boolean isFinished() {
-        // us being centered is only valuable if we arent currently moving
-        return this.isDriveStopped() && (this.isCenteredConfidently == null || this.isCenteredConfidently);
+    public boolean isFinished(boolean waitUntilStop) {
+        boolean isRegularFinish = this.isDriveStopped() && this.isCenteredConfidently;
+        if(waitUntilStop){
+            // us being centered is only valuable if we arent currently moving
+            return isRegularFinish;
+        }
+        else{
+            // if we want to immediately stop
+            return forceStop || isRegularFinish;
+        }
     }
 
-    @Override
-    public void end(boolean interrupted) {
-        super.end(interrupted);
-        if (interrupted) {
-            log.warn("Alignment command interrupted before completion.");
-        }
-        drive.stop();
-    }
 
     public Cameras getCamera() {
         return camera;
     }
 
-    public AlignWithCreeperCommand setCamera(Cameras camera) {
+    public void setCamera(Cameras camera) {
         this.camera = camera;
-        return this;
     }
 
     private double resizeWidth(double width){
