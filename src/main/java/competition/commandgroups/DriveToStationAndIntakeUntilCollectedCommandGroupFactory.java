@@ -8,30 +8,30 @@ import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 public class DriveToStationAndIntakeUntilCollectedCommandGroupFactory {
 
-    DriveToCoralStationInterstitialCommand driveToCoralStationSectionCommand;
-    AlignToSpecificHumanLoadingStationCommand alignToCoralStationCommand;
+    Provider<DriveToCoralStationInterstitialCommand> driveToCoralStationSectionCommandProv;
+    Provider<AlignToSpecificHumanLoadingStationCommand> alignToCoralStationCommandProv;
+    Provider<IntakeUntilCoralCollectedCommand> intakeUntilCoralCollectedCommandProv;
     PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory;
-    IntakeUntilCoralCollectedCommand intakeUntilCoralCollectedCommand;
-
 
     @Inject
-    public DriveToStationAndIntakeUntilCollectedCommandGroupFactory(DriveToCoralStationInterstitialCommand driveToCoralStationSectionCommand,
-                                                                    AlignToSpecificHumanLoadingStationCommand alignToCoralStationCommand,
+    public DriveToStationAndIntakeUntilCollectedCommandGroupFactory(Provider<DriveToCoralStationInterstitialCommand> driveToCoralStationSectionCommandProv,
+                                                                    Provider<AlignToSpecificHumanLoadingStationCommand> alignToCoralStationCommandProv,
                                                                     PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
-                                                                    IntakeUntilCoralCollectedCommand intakeUntilCoralCollectedCommand) {
-        this.driveToCoralStationSectionCommand = driveToCoralStationSectionCommand;
-        this.alignToCoralStationCommand = alignToCoralStationCommand;
+                                                                    Provider<IntakeUntilCoralCollectedCommand> intakeUntilCoralCollectedCommandProv) {
+        this.driveToCoralStationSectionCommandProv = driveToCoralStationSectionCommandProv;
+        this.alignToCoralStationCommandProv = alignToCoralStationCommandProv;
         this.prepCoralSystemCommandGroupFactory = prepCoralSystemCommandGroupFactory;
-        this.intakeUntilCoralCollectedCommand = intakeUntilCoralCollectedCommand;
+        this.intakeUntilCoralCollectedCommandProv = intakeUntilCoralCollectedCommandProv;
     }
 
     public ParallelDeadlineGroup create(Landmarks.CoralStation station,
                                          boolean addPoint) {
         // Overarching command group — preps coral system and drives to coral station at the same time, command group stops if a coral is collected
-        var driveUntilIntake = new ParallelDeadlineGroup(intakeUntilCoralCollectedCommand);
+        var driveUntilIntake = new ParallelDeadlineGroup(intakeUntilCoralCollectedCommandProv.get());
 
         // Prep coral system to coral collection
         var prepCoralSystem = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
@@ -41,9 +41,11 @@ public class DriveToStationAndIntakeUntilCollectedCommandGroupFactory {
         var driveToCoralStation = new SequentialCommandGroup();
         // We can add an interstitial point between scoring at the reef and terminally approaching to the coral station to avoid rotating into the reef
         if (addPoint) {
+            var driveToCoralStationSectionCommand = driveToCoralStationSectionCommandProv.get();
             driveToCoralStationSectionCommand.setTargetCoralStationSection(station);
             driveToCoralStation.addCommands(driveToCoralStationSectionCommand.withTimeout(2.0));
         }
+        var alignToCoralStationCommand = alignToCoralStationCommandProv.get();
         alignToCoralStationCommand.setCoralStation(station);
         driveToCoralStation.addCommands(alignToCoralStationCommand);
         driveUntilIntake.addCommands(driveToCoralStation);
