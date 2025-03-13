@@ -24,12 +24,9 @@ import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.AlignToNearestCoralStationCommand;
 import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.AlignToSpecificHumanLoadingStationCommand;
-import competition.subsystems.drive.commands.AlignWithCreeperCommandFactory;
-import competition.subsystems.drive.commands.AlignWithCreeperCommandWCalc;
-import competition.subsystems.drive.commands.AlignWithCreeperCommandWCalcFactory;
+import competition.subsystems.drive.commands.AlignWithCreeperCalculatorCommandFactory;
 import competition.subsystems.drive.commands.CalibrateDriveCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
-import competition.subsystems.drive.commands.DriveToCoralStationInterstitialCommand;
 import competition.subsystems.drive.commands.DriveToLocationWithPID;
 import competition.subsystems.drive.commands.DriveToNearestReefFaceWithPID;
 import competition.subsystems.drive.commands.RotateToHeadingWithHeadingModule;
@@ -45,7 +42,6 @@ import competition.subsystems.pose.commands.ResetPoseCommand;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import xbot.common.controls.sensors.XXboxController;
 import xbot.common.subsystems.autonomous.SetAutonomousCommand;
 import xbot.common.subsystems.drive.SwervePointKinematics;
@@ -91,8 +87,7 @@ public class OperatorCommandMap {
             AlignToSpecificHumanLoadingStationCommand alignToLeftStation,
             DriveToNearestReefFaceWithPID driveToNearestReefFaceWithPID,
             AlignToNearestCoralStationCommand alignToNearestCoralStationCommand,
-            AlignWithCreeperCommandWCalcFactory alignWithCreeperWCalcCommandFactory,
-            AlignWithCreeperCommandFactory alignWithCreeperCommandFactory) {
+            AlignWithCreeperCalculatorCommandFactory alignWithCreeperCalculatorCommandFactory) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
 
@@ -107,13 +102,12 @@ public class OperatorCommandMap {
         var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
 
         operatorInterface.neoTrellis.getifAvailable(15)
-                .whileTrue(alignWithCreeperCommandFactory.create(Cameras.FRONT_LEFT_CAMERA));
+                .whileTrue(alignWithCreeperCalculatorCommandFactory.create(Cameras.FRONT_LEFT_CAMERA));
         operatorInterface.neoTrellis.getifAvailable(16)
-                .whileTrue(alignWithCreeperCommandFactory.create(Cameras.FRONT_RIGHT_CAMERA));
+                .whileTrue(alignWithCreeperCalculatorCommandFactory.create(Cameras.FRONT_RIGHT_CAMERA));
+
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(alignToNearestCoralStationCommand);
-//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(driveToNearestReefFaceWithPID);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).
-                whileTrue(alignWithCreeperWCalcCommandFactory.create(Cameras.FRONT_RIGHT_CAMERA));
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(driveToNearestReefFaceWithPID);
 
         operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
         operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(changeActiveModule);
