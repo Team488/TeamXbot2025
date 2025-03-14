@@ -1,21 +1,18 @@
-package competition;
+package competition.aspects;
 
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.Timer;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.littletonrobotics.junction.LogFileUtil;
-import org.littletonrobotics.junction.Logger;
 import xbot.common.command.BaseRobot;
-import xbot.common.controls.sensors.XTimer;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.logging.FileHandler;
 
+// CHECKSTYLE:OFF
 @Aspect
 public class CommandTracer {
     BufferedWriter writer;
@@ -24,6 +21,10 @@ public class CommandTracer {
     public static final String PREFERENCES_KEY = "TraceFunctionCalls";
 
     public CommandTracer() {
+        if (!Preferences.containsKey(CommandTracer.PREFERENCES_KEY)) {
+            Preferences.setBoolean(CommandTracer.PREFERENCES_KEY, false);
+        }
+
         try {
             String basePath;
             if (BaseRobot.isSimulation()) {
@@ -51,9 +52,9 @@ public class CommandTracer {
         }
     }
 
-    @Before("execution(* edu.wpi.first.wpilibj2.command.Command+.initialize(..))" +
-            "|| execution(* edu.wpi.first.wpilibj2.command.Command+.execute(..))" +
-            "|| execution(* edu.wpi.first.wpilibj2.command.Command+.end(..))")
+    @Before("execution(* edu.wpi.first.wpilibj2.command.Command.initialize(..))" +
+            "|| execution(* edu.wpi.first.wpilibj2.command.Command.execute(..))" +
+            "|| execution(* edu.wpi.first.wpilibj2.command.Command.end(..))")
     public void logCommand(JoinPoint joinPoint) {
         var enableTracing = Preferences.getBoolean(PREFERENCES_KEY, false);
         if (openedFile && enableTracing) {
@@ -63,3 +64,4 @@ public class CommandTracer {
         }
     }
 }
+// CHECKSTYLE:ON

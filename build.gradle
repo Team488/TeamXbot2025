@@ -6,7 +6,7 @@ plugins {
     id 'checkstyle'
     id 'jacoco'
     id 'org.hidetake.ssh' version "2.9.0"
-    id 'io.freefair.aspectj' version '8.13'
+    id 'io.freefair.aspectj.post-compile-weaving' version '8.13'
 }
 
 sourceCompatibility = JavaVersion.VERSION_17
@@ -145,6 +145,8 @@ dependencies {
     def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
     annotationProcessor "org.littletonrobotics.akit:akit-autolog:$akitJson.version"
 }
+
+compileJava.ajc.options.compilerArgs += "-showWeaveInfo"
 
 wpi.sim.addGui().defaultEnabled = true
 wpi.sim.addDriverstation()
