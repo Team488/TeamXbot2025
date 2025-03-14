@@ -1,6 +1,7 @@
 package competition.subsystems.drive.commands;
 
 import competition.electrical_contract.ElectricalContract;
+import competition.operator_interface.OperatorInterface;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.logic.AlignCameraToAprilTagCalculator;
 import competition.subsystems.pose.DriverRelativeCameraValues;
@@ -16,6 +17,7 @@ import java.util.List;
 public class AlignToReefWithAprilTagCommand extends AlignToTagGlobalMovementWithCalculator {
 
     final AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
+    final OperatorInterface oi;
     private int cameraToUse;
     private boolean isCameraBackwards;
     private double offsetInInches;
@@ -29,10 +31,12 @@ public class AlignToReefWithAprilTagCommand extends AlignToTagGlobalMovementWith
     public AlignToReefWithAprilTagCommand(AprilTagVisionSubsystemExtended aprilTagVisionSubsystem, DriveSubsystem drive,
                                           HeadingModule.HeadingModuleFactory headingModuleFactory, PoseSubsystem pose,
                                           ElectricalContract electricalContract,
-                                          AlignCameraToAprilTagCalculator.AlignCameraToAprilTagCalculatorFactory calculatorFactory) {
+                                          AlignCameraToAprilTagCalculator.AlignCameraToAprilTagCalculatorFactory calculatorFactory,
+                                          OperatorInterface oi) {
         super(aprilTagVisionSubsystem, drive, headingModuleFactory, pose, electricalContract, calculatorFactory);
 
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
+        this.oi = oi;
     }
 
     public void setConfigurations(int cameraToUse, boolean isCameraBackwards, double offsetInInches, boolean isDriverRelative) {
@@ -54,6 +58,7 @@ public class AlignToReefWithAprilTagCommand extends AlignToTagGlobalMovementWith
     @Override
     public void initialize() {
         log.info("Initializing");
+
         if (!hasSetConfiguration) {
             cancel();
             return;
@@ -61,6 +66,10 @@ public class AlignToReefWithAprilTagCommand extends AlignToTagGlobalMovementWith
 
         if (isDriverRelative) {
             setDriverRelativeCameraToUse();
+        }
+
+        if (!aprilTagVisionSubsystem.isCameraConnected(cameraToUse)) {
+            oi.driverGamepad.getRumbleManager().rumbleGamepad(1, 1);
         }
 
         super.setConfigurations(
