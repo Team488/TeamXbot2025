@@ -1,0 +1,70 @@
+package competition.commandgroups.vision_path;
+
+import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
+import competition.subsystems.drive.DriveSubsystem;
+import competition.subsystems.drive.commands.AlignToTagGlobalMovementWithCalculator;
+import competition.subsystems.drive.commands.vision_path.PathDriveToReefFaceCommand;
+import competition.subsystems.drive.commands.vision_path.PathDriveToReefFaceUntilAprilTagDetection;
+import competition.subsystems.drive.logic.AlignCameraToAprilTagCalculator;
+import competition.subsystems.pose.Cameras;
+import competition.subsystems.pose.Landmarks;
+import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
+import edu.wpi.first.wpilibj2.command.DeferredCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+
+import javax.inject.Inject;
+import javax.inject.Provider;
+import java.util.Set;
+
+public class PathToReefFaceAndPrepThenAlignCommandGroupFactory {
+    Provider<PathDriveToReefFaceUntilAprilTagDetection> driveToReefFaceCommandProvider;
+    AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
+    Provider<PrepCoralSystemCommandGroupFactory> prepCoralSystemCommandGroupFactory;
+    Provider<AlignToTagGlobalMovementWithCalculator> alignToReefWithAprilTagCommandProvider;
+    DriveSubsystem drive;
+
+    @Inject
+    public PathToReefFaceAndPrepThenAlignCommandGroupFactory(
+            Provider<AlignToTagGlobalMovementWithCalculator> alignToReefWithAprilTagCommandProvider,
+            Provider<PrepCoralSystemCommandGroupFactory> prepCoralSystemFactory,
+            Provider<PathDriveToReefFaceUntilAprilTagDetection> driveToReefFaceCommandProvider,
+            AprilTagVisionSubsystemExtended aprilTagVisionSubsystem,
+            DriveSubsystem drive) {
+        this.driveToReefFaceCommandProvider = driveToReefFaceCommandProvider;
+        this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
+        this.prepCoralSystemCommandGroupFactory = prepCoralSystemFactory;
+        this.alignToReefWithAprilTagCommandProvider = alignToReefWithAprilTagCommandProvider;
+        this.drive = drive;
+    }
+
+    public void setBranch(AlignToTagGlobalMovementWithCalculator command, Landmarks.ReefFace reefFace, Landmarks.Branch branch) {
+        if (branch == Landmarks.Branch.A) {
+            command.setConfigurations(Cameras.FRONT_RIGHT_CAMERA.getIndex(),
+                    aprilTagVisionSubsystem.getTargetAprilTagID(reefFace), false, 1,
+                    AlignCameraToAprilTagCalculator.Activity.ApproachWhileCentering, false);
+        } else {
+            command.setConfigurations(Cameras.FRONT_LEFT_CAMERA.getIndex(),
+                    aprilTagVisionSubsystem.getTargetAprilTagID(reefFace), false, 1,
+                    AlignCameraToAprilTagCalculator.Activity.ApproachWhileCentering, false);
+        }
+    }
+
+    public SequentialCommandGroup create(
+            Landmarks.ReefFace targetReefFace, Landmarks.Branch targetBranch) {
+        PathDriveToReefFaceCommand driveToReefFaceCommand = driveToReefFaceCommandProvider.get();
+        driveToReefFaceCommand.setReefFace(targetReefFace)
+                .setBranch(targetBranch);
+        var alignToReefCommand = new DeferredCommand(
+                () -> {
+                    var alignToReefWithAprilTagCommand = alignToReefWithAprilTagCommandProvider.get();
+                    setBranch(alignToReefWithAprilTagCommand, targetReefFace, targetBranch);
+                    return alignToReefWithAprilTagCommand;
+                }, Set.of(drive)
+        );
+        return new SequentialCommandGroup(
+                driveToReefFaceCommand,
+                alignToReefCommand);
+    }
+
+}

@@ -92,7 +92,7 @@ public class SwerveBezierTrajectoryBase extends SwerveSimpleBezierCommand {
         int globalStep = 0;
 
         // Rotation start threshold (50% of the path)
-        double rotationStartThreshold = 0.1;
+        double rotationStartThreshold = 0.2;
 
         // Process each Bézier segment.
         for (XTableValues.BezierCurve segment : bezierCurves.getCurvesList()) {
