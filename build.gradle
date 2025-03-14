@@ -6,6 +6,7 @@ plugins {
     id 'checkstyle'
     id 'jacoco'
     id 'org.hidetake.ssh' version "2.9.0"
+    id 'io.freefair.aspectj.post-compile-weaving' version '8.13'
 }
 
 sourceCompatibility = JavaVersion.VERSION_17
@@ -94,8 +95,6 @@ repositories {
         }
     }
 
-
-
     mavenLocal()
     
     flatDir {
@@ -126,6 +125,8 @@ dependencies {
 
     testImplementation 'junit:junit:4.12'
 
+    implementation 'org.aspectj:aspectjrt:1.9.22'
+
     implementation project(':SeriouslyCommonLib')
     implementation group: 'org.json', name:'json', version: '20220924'
 
@@ -136,14 +137,16 @@ dependencies {
     annotationProcessor 'com.google.dagger:dagger-compiler:2.44.2'
     testAnnotationProcessor 'com.google.dagger:dagger-compiler:2.44.2'
 
-    testImplementation "org.mockito:mockito-core:3.+"
+    testImplementation "org.mockito:mockito-core:3.12.4"
 
     // xtables
-    implementation "org.kobe.xbot:xtables:5.3.0"
+    implementation "org.kobe.xbot:xtables:5.4.3"
 
     def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
     annotationProcessor "org.littletonrobotics.akit:akit-autolog:$akitJson.version"
 }
+
+compileJava.ajc.options.compilerArgs += "-showWeaveInfo"
 
 wpi.sim.addGui().defaultEnabled = true
 wpi.sim.addDriverstation()

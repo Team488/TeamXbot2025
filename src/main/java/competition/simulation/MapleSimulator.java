@@ -14,13 +14,17 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Distance;
+import org.ironmaple.simulation.drivesims.COTS;
 import xbot.common.advantage.AKitLogger;
 import xbot.common.controls.sensors.mock_adapters.MockGyro;
 import xbot.common.logic.TimeStableValidator;
 
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Seconds;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -79,8 +83,22 @@ public class MapleSimulator implements BaseSimulator {
          */
         arena = SimulatedArena.getInstance();
         arena.resetFieldForAuto();
+
+        var ourConfig = new DriveTrainSimulationConfig(
+                Units.Kilograms.of((double)45.0F),
+                Units.Meters.of(0.76),
+                Units.Meters.of(0.76),
+                Units.Meters.of(0.52),
+                Units.Meters.of(0.52),
+                COTS.ofMark4(
+                        DCMotor.getKrakenX60(1),
+                        DCMotor.getKrakenX60(1),
+                        COTS.WHEELS.SLS_PRINTED_WHEELS.cof,
+                        3),
+                COTS.ofPigeon2());
+
         // TODO: custom things to provide here like motor ratios and what have you
-        config = DriveTrainSimulationConfig.Default().withCustomModuleTranslations(new Translation2d[] {
+        config = ourConfig.withCustomModuleTranslations(new Translation2d[] {
                 drive.getFrontLeftSwerveModuleSubsystem().getModuleTranslation(),
                 drive.getFrontRightSwerveModuleSubsystem().getModuleTranslation(),
                 drive.getRearLeftSwerveModuleSubsystem().getModuleTranslation(),
@@ -97,6 +115,8 @@ public class MapleSimulator implements BaseSimulator {
         pose.setCurrentPoseInMeters(startingPose);
 
         arena.addDriveTrainSimulation(swerveDriveSimulation.getDriveTrainSimulation());
+
+        SimulatedArena.overrideSimulationTimings(Seconds.of(0.04), 5);
     }
 
     public void update() {
@@ -173,7 +193,9 @@ public class MapleSimulator implements BaseSimulator {
         var coralScorerIsIntaking = coralScorerSimulator.isIntaking();
         var elevatorAtCollectionHeight = elevatorSimulator.isAtCollectionHeight();
         var armAtCollectionAngle = coralArmSimulator.isAtCollectionAngle();
-        Pose2d[] coralStations = {Landmarks.BlueLeftCoralStationMid, Landmarks.BlueRightCoralStationMid};
+        Pose2d[] coralStations = { Landmarks.BlueLeftCoralStationMid, Landmarks.BlueRightCoralStationMid,
+                PoseSubsystem.convertBluetoRed(Landmarks.BlueLeftCoralStationMid),
+                PoseSubsystem.convertBluetoRed(Landmarks.BlueRightCoralStationMid) };
         var currentPose = this.getGroundTruthPose();
         var robotNearHumanLoading = false; 
         for (Pose2d station : coralStations) {
@@ -217,6 +239,8 @@ public class MapleSimulator implements BaseSimulator {
 
         // tell the pose subystem about where the robot has moved based on odometry
         pose.ingestSimulatedSwerveModulePositions(swerveDriveSimulation.getLatestModulePositions());
+
+        aKitLog.record("RobotVelocity", swerveDriveSimulation.getActualSpeedsFieldRelative());
 
         // update gyro reading from sim
         ((MockGyro) pose.imu).setYaw(this.swerveDriveSimulation.getOdometryEstimatedPose().getRotation().getDegrees());
