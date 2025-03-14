@@ -111,8 +111,11 @@ public class OperatorCommandMap {
 //        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(pointAtNearestCoralStation)
 //                .onFalse(clearPointAtHeading);
 
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(alignWithCreeperCalculatorCommandFactory.create(Cameras.FRONT_RIGHT_CAMERA));
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(driveToNearestReefFaceWithPID);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y)
+                .whileTrue(alignWithCreeperCalculatorCommandFactory.create(
+                        Cameras.FRONT_RIGHT_CAMERA));
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X)
+                .whileTrue(driveToNearestReefFaceWithPID);
 
 //        operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
 //        operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(changeActiveModule);
