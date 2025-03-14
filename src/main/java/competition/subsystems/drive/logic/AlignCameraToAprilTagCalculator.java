@@ -372,7 +372,7 @@ public class AlignCameraToAprilTagCalculator {
                         shoveStartTime = XTimer.getFPGATimestamp();
                         activity = canUseVisionCreeperAlignment ? Activity.ShoveWithVision : Activity.Shove;
                     } else {
-                        //activity = Activity.ApproachWhileCentering; // Possible start to creeper code?
+                        //activity = Activity.ApproachWhileCentering; // No retries
                     }
                 }
             }
@@ -466,6 +466,7 @@ public class AlignCameraToAprilTagCalculator {
                 // If we've been shoving for a while, we're done, but at the same time
                 // We must be either just not using creeper
                 // Or (that we are confidently centered or that we have failed too many times with creeper output)
+                // HACKY, but this !useCreeper ensures that isConfidentlyCentered resets each time...
                 if (XTimer.getFPGATimestamp() - shoveStartTime > shoveDuration.get()
                         && (!useCreeper || (creeperCalculator.getIsConfidentlyCentered() || creeperFailCount >= 3))
                 ) {
