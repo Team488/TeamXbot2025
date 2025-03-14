@@ -6,12 +6,16 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import competition.electrical_contract.ElectricalContract;
+import competition.subsystems.coral_arm.CoralArmSubsystem;
 import competition.subsystems.coral_scorer.CoralScorerSubsystem;
+import competition.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.wpilibj.DriverStation;
 import xbot.common.command.BaseSubsystem;
 import xbot.common.controls.actuators.XDigitalOutput;
 import xbot.common.controls.actuators.XDigitalOutput.XDigitalOutputFactory;
 import xbot.common.subsystems.autonomous.AutonomousCommandSelector;
+
+import java.util.Objects;
 
 
 @Singleton
@@ -22,6 +26,8 @@ public class LightSubsystem extends BaseSubsystem {
 
     final AutonomousCommandSelector autonomousCommandSelector;
     final CoralScorerSubsystem coralScorerSubsystem;
+    final CoralArmSubsystem coralArmSubsystem;
+    final ElevatorSubsystem elevatorSubsystem;
 
     LightsStateMessage state = LightsStateMessage.NoCode;
     DIOInt dioInt;
@@ -29,7 +35,7 @@ public class LightSubsystem extends BaseSubsystem {
     public enum LightsStateMessage{
         // we never send NoCode, it's implicit when the robot is off
         // and all of the DIOs float high
-        NoCode(0),
+        NoCode(15),
         RobotDisabledDefault(1),
         RobotDisabledAuto(2),
         RobotEnabled(3),
@@ -86,9 +92,13 @@ public class LightSubsystem extends BaseSubsystem {
     public LightSubsystem(XDigitalOutputFactory digitalOutputFactory,
                           ElectricalContract contract,
                           AutonomousCommandSelector autonomousCommandSelector,
-                          CoralScorerSubsystem coralScorerSubsystem) {
+                          CoralScorerSubsystem coralScorerSubsystem,
+                          CoralArmSubsystem coralArmSubsystem,
+                          ElevatorSubsystem elevatorSubsystem) {
         this.autonomousCommandSelector = autonomousCommandSelector;
         this.coralScorerSubsystem = coralScorerSubsystem;
+        this.coralArmSubsystem = coralArmSubsystem;
+        this.elevatorSubsystem = elevatorSubsystem;
         XDigitalOutput[] dios = {
             digitalOutputFactory.create(contract.getLightsDio0().channel), 
             digitalOutputFactory.create(contract.getLightsDio1().channel), 
@@ -105,16 +115,26 @@ public class LightSubsystem extends BaseSubsystem {
         // Not sure about if the way we are checking the shooter is correct (and collector)
         if (!dsEnabled) {
             currentState = LightsStateMessage.RobotDisabledDefault;
-        } else if (coralScorerSubsystem.confidentlyHasCoral()) {
-            currentState = LightsStateMessage.CoralPresent;
-        } else if (coralScorerSubsystem.getCoralScorerState() == CoralScorerSubsystem.CoralScorerState.INTAKING) {
-            currentState = LightsStateMessage.RequestCoralFromHuman;
+            if (DriverStation.getMatchTime() > 230 && DriverStation.isTeleop()) {
+                currentState = LightsStateMessage.Victory;
+            }
+            if (!Objects.equals(autonomousCommandSelector.getProgramName(), "EmergencyAutonomousCommand")) {
+                currentState = LightsStateMessage.RobotDisabledAuto;
+            }
         } else {
-            currentState = LightsStateMessage.RobotEnabled;
+            if (coralScorerSubsystem.confidentlyHasCoral() && coralArmSubsystem.getIsTargetAngleScoring()
+                    && coralArmSubsystem.isMaintainerAtGoal() && elevatorSubsystem.isMaintainerAtGoal()) {
+                currentState = LightsStateMessage.ReadyToScore;
+            } else if (coralScorerSubsystem.confidentlyHasCoral()) {
+                currentState = LightsStateMessage.CoralPresent;
+            } else if (coralScorerSubsystem.getCoralScorerState() == CoralScorerSubsystem.CoralScorerState.INTAKING) {
+                currentState = LightsStateMessage.RequestCoralFromHuman;
+            } else {
+                currentState = LightsStateMessage.RobotEnabled;
+            }
         }
         return currentState;
     }
-
     public void sendState(LightsStateMessage state) {
         dioInt.setDIOInt(state.getValue());
     }
