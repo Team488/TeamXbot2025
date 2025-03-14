@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -124,6 +125,13 @@ import static edu.wpi.first.units.Units.Volts;
                 setStaticHeadingTarget(staticHeadingTarget.get());
                 setStaticHeadingTargetActive(true);}
             );
+        }
+
+        public RunCommand createSetDynamicHeadingTargetCommand(Supplier<Rotation2d> dynamicHeadingTarget) {
+            return new RunCommand(() -> {
+               setStaticHeadingTarget(dynamicHeadingTarget.get());
+               setStaticHeadingTargetActive(true);
+            });
         }
 
         public InstantCommand createSetLookAtPointTargetCommand(Supplier<Translation2d> lookAtPointTarget) {
