@@ -35,6 +35,8 @@ import competition.subsystems.drive.logic.AlignCameraToAprilTagCalculator;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import competition.subsystems.elevator.commands.ForceElevatorCalibratedCommand;
 import competition.subsystems.elevator.commands.SetElevatorTargetHeightCommand;
+import competition.subsystems.elevator.commands.TrimElevatorDown;
+import competition.subsystems.elevator.commands.TrimElevatorUp;
 import competition.subsystems.oracle.commands.DriveAccordingToOracleCommand;
 import competition.subsystems.oracle.commands.SuperstructureAccordingToOracleCommand;
 import competition.subsystems.pose.Cameras;
@@ -129,6 +131,8 @@ public class OperatorCommandMap {
                                       AlgaeCollectionOutputCommand ejectAlgae,
                                       CoralArmSubsystem coralArmSubsystem,
                                       IntakeCoralCommand intakeCoralCommand,
+                                      TrimElevatorUp trimElevatorUp,
+                                      TrimElevatorDown trimElevatorDown,
                                       PrepAlgaeSystemCommandGroupFactory prepAlgaeSystemCommandGroupFactory) {
         // Coral system buttons
         var prepL4 = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.FOUR);
@@ -154,6 +158,8 @@ public class OperatorCommandMap {
 
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(calibrateAlgae);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightStick).onTrue(calibrateSuperstructure);
+        //oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftStick).onTrue(trimElevatorUp);
+        //oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightStick).onTrue(trimElevatorDown);
 
         // Algae system buttons
         var removeLowAlgae = prepAlgaeSystemCommandGroupFactory.create(AlgaeArmSubsystem.AlgaeArmPositions.ReefAlgaeLow);
