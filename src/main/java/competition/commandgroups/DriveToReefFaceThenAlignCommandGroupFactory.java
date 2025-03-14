@@ -18,17 +18,14 @@ import java.util.Set;
 
 public class DriveToReefFaceThenAlignCommandGroupFactory {
 
-    Provider<DriveToReefFaceUntilDetectionCommand> driveToReefFaceCommandProvider;
     Provider<AlignToTagGlobalMovementWithCalculator> alignToReefWithAprilTagCommandProvider;
     AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
     DriveSubsystem drive;
 
     @Inject
-    public DriveToReefFaceThenAlignCommandGroupFactory(Provider<DriveToReefFaceUntilDetectionCommand> driveToReefFaceCommandProvider,
-                                                       Provider<AlignToTagGlobalMovementWithCalculator> alignToReefWithAprilTagCommandProvider,
+    public DriveToReefFaceThenAlignCommandGroupFactory(Provider<AlignToTagGlobalMovementWithCalculator> alignToReefWithAprilTagCommandProvider,
                                                        AprilTagVisionSubsystemExtended aprilTagVisionSubsystem,
                                                        DriveSubsystem drive) {
-        this.driveToReefFaceCommandProvider = driveToReefFaceCommandProvider;
         this.alignToReefWithAprilTagCommandProvider = alignToReefWithAprilTagCommandProvider;
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
         this.drive = drive;
@@ -38,24 +35,21 @@ public class DriveToReefFaceThenAlignCommandGroupFactory {
         if (branch == Landmarks.Branch.A) {
             command.setConfigurations(Cameras.FRONT_RIGHT_CAMERA.getIndex(),
                     aprilTagVisionSubsystem.getTargetAprilTagID(reefFace), false, 1,
-                    AlignCameraToAprilTagCalculator.Activity.ApproachWhileCentering, true);
+                    AlignCameraToAprilTagCalculator.Activity.ApproachWhileCentering, false);
         }
         else {
             command.setConfigurations(Cameras.FRONT_LEFT_CAMERA.getIndex(),
                     aprilTagVisionSubsystem.getTargetAprilTagID(reefFace), false, 1,
-                    AlignCameraToAprilTagCalculator.Activity.ApproachWhileCentering, true);
+                    AlignCameraToAprilTagCalculator.Activity.ApproachWhileCentering, false);
         }
     }
 
     public SequentialCommandGroup create(Landmarks.ReefFace targetReefFace, Landmarks.Branch targetBranch) {
         var group = new SequentialCommandGroup();
 
-        var driveToReefFaceCommand = driveToReefFaceCommandProvider.get();
-        var alignToReefWithAprilTagCommand = alignToReefWithAprilTagCommandProvider.get();
-
-        driveToReefFaceCommand.setTargetReefFacePose(targetReefFace);
         var alignToReefCommand = new DeferredCommand(
                 () -> {
+                    var alignToReefWithAprilTagCommand = alignToReefWithAprilTagCommandProvider.get();
                     setBranch(alignToReefWithAprilTagCommand, targetReefFace, targetBranch);
                     return alignToReefWithAprilTagCommand;
                 }, Set.of(drive)

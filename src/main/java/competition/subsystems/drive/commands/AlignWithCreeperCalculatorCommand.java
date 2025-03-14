@@ -1,36 +1,20 @@
 package competition.subsystems.drive.commands;
 
-import competition.electrical_contract.ElectricalContract;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.logic.AlignWithCreeperCalculator;
-import competition.subsystems.oracle.ReefCoordinateGenerator;
 import competition.subsystems.pose.Cameras;
-import competition.subsystems.pose.PoseSubsystem;
-import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
-import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
-import org.kobe.xbot.JClient.CachedSubscriber;
-import org.kobe.xbot.JClient.XTablesClient;
 import xbot.common.command.BaseCommand;
-import xbot.common.math.PIDManager;
-import xbot.common.math.PIDManager.PIDManagerFactory;
-import xbot.common.math.XYPair;
-import xbot.common.properties.DoubleProperty;
-import xbot.common.properties.PropertyFactory;
-import xbot.common.properties.StringProperty;
-import xbot.common.subsystems.drive.control_logic.HeadingModule;
-import competition.subsystems.drive.logic.AlignWithCreeperCalculator;
+
 import javax.inject.Inject;
 
 
-public class AlignWithCreeperCommandWCalc extends BaseCommand {
+public class AlignWithCreeperCalculatorCommand extends BaseCommand {
     private DriveSubsystem drive;
     private AlignWithCreeperCalculator calculator;
     private Cameras camera;
 
     @Inject
-    public AlignWithCreeperCommandWCalc(DriveSubsystem drive, AlignWithCreeperCalculator calculator) {
+    public AlignWithCreeperCalculatorCommand(DriveSubsystem drive, AlignWithCreeperCalculator calculator) {
         this.drive = drive;
         this.addRequirements(drive);
         this.calculator = calculator;
@@ -72,7 +56,7 @@ public class AlignWithCreeperCommandWCalc extends BaseCommand {
         return camera;
     }
 
-    public AlignWithCreeperCommandWCalc setCamera(Cameras camera) {
+    public AlignWithCreeperCalculatorCommand setCamera(Cameras camera) {
         this.camera = camera;
         return this;
     }

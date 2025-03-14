@@ -12,6 +12,7 @@ import dagger.Provides;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import xbot.common.injection.electrical_contract.XCameraElectricalContract;
+import xbot.common.injection.electrical_contract.XDeadwheelElectricalContract;
 import xbot.common.injection.electrical_contract.XSwerveDriveElectricalContract;
 import xbot.common.injection.swerve.FrontLeftDrive;
 import xbot.common.injection.swerve.FrontRightDrive;
@@ -83,6 +84,10 @@ public abstract class CommonModule {
     @Binds
     @Singleton
     public abstract XCameraElectricalContract getCameraContract(ElectricalContract impl);
+
+    @Binds
+    @Singleton
+    public abstract XDeadwheelElectricalContract getDeadwheelContract(ElectricalContract impl);
 
     @Binds
     @Singleton

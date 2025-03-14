@@ -14,16 +14,16 @@ import javax.inject.Provider;
  * appropriately, and then moves the robot to align with the target.
  * </p>
  */
-public class AlignWithCreeperCommandWCalcFactory {
-    Provider<AlignWithCreeperCommandWCalc> alignWithCreeperWCalcCommandProvider;
+public class AlignWithCreeperCalculatorCommandFactory {
+    Provider<AlignWithCreeperCalculatorCommand> alignWithCreeperWCalcCommandProvider;
 
     @Inject
-    public AlignWithCreeperCommandWCalcFactory(Provider<AlignWithCreeperCommandWCalc> alignWithCreeperWCalcCommandProvider) {
+    public AlignWithCreeperCalculatorCommandFactory(Provider<AlignWithCreeperCalculatorCommand> alignWithCreeperWCalcCommandProvider) {
         this.alignWithCreeperWCalcCommandProvider = alignWithCreeperWCalcCommandProvider;
     }
 
     public Command create(Cameras camera) {
-        AlignWithCreeperCommandWCalc alignWithCreeperCommand = alignWithCreeperWCalcCommandProvider.get();
+        AlignWithCreeperCalculatorCommand alignWithCreeperCommand = alignWithCreeperWCalcCommandProvider.get();
         alignWithCreeperCommand.setCamera(camera);
         return alignWithCreeperCommand;
     }

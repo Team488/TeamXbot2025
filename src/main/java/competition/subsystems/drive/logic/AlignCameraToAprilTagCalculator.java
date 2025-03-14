@@ -1,6 +1,7 @@
 package competition.subsystems.drive.logic;
 
 import competition.electrical_contract.ElectricalContract;
+import competition.operator_interface.OperatorInterface;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.oracle.ReefCoordinateGenerator;
 import competition.subsystems.pose.Landmarks;
@@ -44,7 +45,14 @@ public class AlignCameraToAprilTagCalculator {
         ApproachWhileCentering,
         TerminalApproach,
         Shove,
-        Complete
+        Complete,
+        GaveUp,
+        TerminalApproachWithoutVision
+    }
+
+    public enum ApproachMode {
+        Close,
+        Far
     }
 
     final AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
@@ -54,6 +62,7 @@ public class AlignCameraToAprilTagCalculator {
     final AKitLogger akitLog;
     final ElectricalContract electricalContract;
     final ReefCoordinateGenerator reefCoordinateGenerator;
+    final OperatorInterface oi;
 
     int targetAprilTagID;
     int targetCameraID;
@@ -67,7 +76,8 @@ public class AlignCameraToAprilTagCalculator {
     Translation2d targetLocationOnField = new Translation2d(0, 0);
 
     final DoubleProperty interstitialDistance;
-    final DoubleProperty distanceFromInterstitialToAdvance;
+    final DoubleProperty distanceFromInterstitialToAdvanceFast;
+    final DoubleProperty distanceFromInterstitialToAdvanceSlow;
     final DoubleProperty approachSpeedFactor;
     final DoubleProperty distanceToStartShoving;
     final DoubleProperty shovePower;
@@ -75,10 +85,24 @@ public class AlignCameraToAprilTagCalculator {
     final DoubleProperty maxTagAmbiguity;
     final DoubleProperty maxHorizontalErrorMeters;
 
-    double lastKnownHorizontalErrorMeters = 0;
+    final DoubleProperty closeInterstitialDistance;
+    final DoubleProperty closeApproachSpeedFactor;
+    final DoubleProperty closeInterstitialActivationRange;
+
+    double lastKnownHorizontalErrorMeters = 999999;
     double shoveStartTime = 0;
     private Activity startingActivity = Activity.Searching;
     private boolean requireExcellentAlignment = true;
+
+    Translation2d aprilTagPositionInGlobalFieldCoordinates;
+    double aprilTagZRotationRadians;
+    double idealFinalHeadingDegrees;
+    Pose2d interstitialPoint;
+    private ApproachMode approachMode;
+
+    private boolean hasEverSeenAprilTag = false;
+    private Translation2d coralStationPreShovePoint;
+    boolean retryActive;
 
     public static Translation2d generateAlignmentPointOffset(Distance robotCenterToOuterBumperX, CameraInfo cameraInfo,
                                                              Distance offset, boolean isCameraBackwards) {
@@ -101,7 +125,7 @@ public class AlignCameraToAprilTagCalculator {
     public AlignCameraToAprilTagCalculator(AprilTagVisionSubsystemExtended vision, DriveSubsystem drive,
                                            ElectricalContract electricalContract, PoseSubsystem pose,
                                            HeadingModule.HeadingModuleFactory headingModuleFactory, ReefCoordinateGenerator reefCoordinateGenerator,
-                                           PropertyFactory pf) {
+                                           PropertyFactory pf, OperatorInterface oi) {
         this.aprilTagVisionSubsystem = vision;
         this.headingModule = headingModuleFactory.create(drive.getRotateToHeadingPid());
         this.drive = drive;
@@ -109,16 +133,22 @@ public class AlignCameraToAprilTagCalculator {
         this.electricalContract = electricalContract;
         this.reefCoordinateGenerator = reefCoordinateGenerator;
         this.akitLog = new AKitLogger(prefix);
+        this.oi = oi;
 
         pf.setPrefix(prefix);
         interstitialDistance = pf.createPersistentProperty("InterstitialDistance-m", 2.25);
-        distanceFromInterstitialToAdvance = pf.createPersistentProperty("DistanceFromInterstitialToAdvance-m", 0.2);
+        distanceFromInterstitialToAdvanceFast = pf.createPersistentProperty("DistanceFromInterstitialToAdvanceFast-m", 0.4);
+        distanceFromInterstitialToAdvanceSlow = pf.createPersistentProperty("DistanceFromInterstitialToAdvanceSlow-m", 0.2);
         approachSpeedFactor = pf.createPersistentProperty("ApproachSpeedFactor", 0.65);
         distanceToStartShoving = pf.createPersistentProperty("DistanceToStartShoving-m", 0.0762); // 3 inches
         shovePower = pf.createPersistentProperty("ShovePower", 0.25);
         shoveDuration = pf.createPersistentProperty("ShoveDuration-s", 0.25);
         maxTagAmbiguity = pf.createPersistentProperty("MaxTagAmbiguity", 0.5);
         maxHorizontalErrorMeters = pf.createPersistentProperty("MaxHorizontalError-m", 0.0508); // 2 inches
+
+        closeInterstitialDistance = pf.createPersistentProperty("CloseInterstitialDistance-m", 1.0);
+        closeApproachSpeedFactor = pf.createPersistentProperty("CloseApproachSpeedFactor", 0.33);
+        closeInterstitialActivationRange = pf.createPersistentProperty("CloseInterstitialActivationRange-m", 1.33);
 
         reset();
     }
@@ -142,10 +172,11 @@ public class AlignCameraToAprilTagCalculator {
         this.targetAprilTagID = targetAprilTagID;
         this.targetCameraID = targetCameraID;
         this.isCameraBackwards = isCameraBackwards;
+        var currentPose = pose.getCurrentPose2d();
 
         reset();
 
-        this.initialHeading = pose.getCurrentPose2d().getRotation().getDegrees();
+        this.initialHeading = currentPose.getRotation().getDegrees();
 
         CameraInfo cameraInfo = electricalContract.getCameraInfo()[targetCameraID];
         this.cameraRotation = cameraInfo.position().getRotation();
@@ -175,13 +206,31 @@ public class AlignCameraToAprilTagCalculator {
         var alliance = DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
 
         if (elementType == Landmarks.FieldElementType.REEF_FACE) {
-            interstitialPoint = reefCoordinateGenerator.getPoseRelativeToReefFaceAndBranch(
-                            alliance,
-                            Landmarks.getReefFaceFromTagId(targetAprilTagID),
-                            isLeft ? Landmarks.Branch.B : Landmarks.Branch.A,
-                            Meters.of(interstitialDistance.get()),
-                            Meters.zero()
-                    );
+            var farPoint = reefCoordinateGenerator.getPoseRelativeToReefFaceAndBranch(
+                    alliance,
+                    Landmarks.getReefFaceFromTagId(targetAprilTagID),
+                    isLeft ? Landmarks.Branch.B : Landmarks.Branch.A,
+                    Meters.of(interstitialDistance.get()),
+                    Meters.zero()
+            );
+            var closePoint = reefCoordinateGenerator.getPoseRelativeToReefFaceAndBranch(
+                    alliance,
+                    Landmarks.getReefFaceFromTagId(targetAprilTagID),
+                    isLeft ? Landmarks.Branch.B : Landmarks.Branch.A,
+                    Meters.of(closeInterstitialDistance.get()),
+                    Meters.zero()
+            );
+
+            double farDistance = farPoint.getTranslation().getDistance(currentPose.getTranslation());
+            double closeDistance = closePoint.getTranslation().getDistance(currentPose.getTranslation());
+
+            if (closeDistance < farDistance && closeDistance < closeInterstitialActivationRange.get()) {
+                approachMode = ApproachMode.Close;
+                interstitialPoint = closePoint;
+            } else {
+                approachMode = ApproachMode.Far;
+                interstitialPoint = farPoint;
+            }
         } else if (elementType == Landmarks.FieldElementType.CORAL_STATION) {
             // From the Tag ID, figure out which coral station this is
             var station = Landmarks.getCoralStationFromTagId(targetAprilTagID);
@@ -198,10 +247,6 @@ public class AlignCameraToAprilTagCalculator {
         akitLog.record("InterstitialPoint", interstitialPoint);
     }
 
-    Translation2d aprilTagPositionInGlobalFieldCoordinates;
-    double aprilTagZRotationRadians;
-    double idealFinalHeadingDegrees;
-    Pose2d interstitialPoint;
 
     public AlignCameraToAprilTagAdvice getXYPowersAlignToAprilTag(Pose2d currentPose) {
 
@@ -209,11 +254,16 @@ public class AlignCameraToAprilTagCalculator {
         // Mostly, this is about where we should be pointing - and we generally point at the tag unless we are fairly close.
         Optional<AprilTagVisionIO.TargetObservation> targetObservation = aprilTagVisionSubsystem.getTargetObservation(targetCameraID, targetAprilTagID);
         boolean doWeSeeOurTargetTag = targetObservation.isPresent() && targetObservation.get().ambiguity() < maxTagAmbiguity.get();
+        hasEverSeenAprilTag |= doWeSeeOurTargetTag;
 
         Translation2d currentTranslation = pose.getCurrentPose2d().getTranslation();
         double headingToPointAtAprilTag = Radians.of(
                 currentTranslation.minus(aprilTagPositionInGlobalFieldCoordinates).getAngle().getRadians() + Math.PI
         ).plus(Radians.of(isCameraBackwards ? Math.PI : 0)).in(Degrees);
+
+        double approachSpeedFactor = (approachMode == ApproachMode.Close)
+                ? closeApproachSpeedFactor.get()
+                : this.approachSpeedFactor.get();
 
         // Eventually we need to return these - they will likely be mutated by later steps.
         XYPair driveIntent = new XYPair(0, 0);
@@ -221,7 +271,7 @@ public class AlignCameraToAprilTagCalculator {
 
         // To allow for quick drop-through, we will have the first step of the state machine be an "if" statement
         // so that if we see the tag we can jump right into the meat of the machine.
-        if (activity == Activity.Searching ) {
+        if (activity == Activity.Searching) {
             // We see the tag. Begin the approach.
             if (doWeSeeOurTargetTag) {
                 activity = Activity.ApproachWhileCentering;
@@ -236,7 +286,7 @@ public class AlignCameraToAprilTagCalculator {
         }
 
         switch (activity) {
-            case ApproachWhileCentering:
+            case ApproachWhileCentering -> {
                 // First, let's try and update our final position with any camera data, in case we lose it later.
                 if (doWeSeeOurTargetTag) {
                     tagAcquisitionState = TagAcquisitionState.LockedOn;
@@ -256,15 +306,27 @@ public class AlignCameraToAprilTagCalculator {
                 // so this will automatically scale with the robot's max speed.
                 var vectorTowardsInterstitial = interstitialPoint.getTranslation().minus(currentPose.getTranslation());
                 var normalizedVector = vectorTowardsInterstitial.div(vectorTowardsInterstitial.getNorm());
-                driveIntent = new XYPair(normalizedVector.getX(), normalizedVector.getY()).scale(approachSpeedFactor.get());
+                driveIntent = new XYPair(normalizedVector.getX(), normalizedVector.getY()).scale(approachSpeedFactor);
                 rotationIntent = headingModule.calculateHeadingPower(headingToPointAtAprilTag);
 
                 // Finally, a check to see if we're quite close and should advance to the next state.
-                if (currentPose.getTranslation().getDistance(interstitialPoint.getTranslation()) < distanceFromInterstitialToAdvance.get()) {
+
+                var distanceThresholdToAdvance = (approachMode == ApproachMode.Close)
+                        ? distanceFromInterstitialToAdvanceSlow.get()
+                        : distanceFromInterstitialToAdvanceFast.get();
+
+                if (currentTranslation.getDistance(interstitialPoint.getTranslation()) < distanceThresholdToAdvance) {
                     activity = Activity.TerminalApproach;
+
+                    // Trying to approach coral station but found no tag? We'll just use pure pose
+                    if (!hasEverSeenAprilTag && isCameraBackwards) {
+                        activity = Activity.TerminalApproachWithoutVision;
+                        coralStationPreShovePoint = getCoralStationPreShovePoint();
+                        pose.setPreferOdometryToVision(false);
+                    }
                 }
-                break;
-            case TerminalApproach:
+            }
+            case TerminalApproach -> {
                 // We are effectively at the interstitial point. We now lock our heading to the final heading and try to approach
                 // the final point with some caution, meaning we will use the Drive PID to decelerate.
 
@@ -277,29 +339,44 @@ public class AlignCameraToAprilTagCalculator {
                 }
 
                 // Now, drive to that final point with locked-on heading.
-                var powers = drive.getPowerToAchieveFieldPosition(currentPose.getTranslation(), targetLocationOnField);
+                var powers = drive.getPowerToAchieveFieldPosition(currentTranslation, targetLocationOnField);
 
                 // If we are going too fast, cap the speed.
-                if (powers.getNorm() >  approachSpeedFactor.get()) {
-                    powers = new Translation2d(approachSpeedFactor.get(), powers.getAngle());
+                if (powers.getNorm() > approachSpeedFactor) {
+                    powers = new Translation2d(approachSpeedFactor, powers.getAngle());
                 }
 
-                driveIntent = new XYPair(powers.getX(), powers.getY()).scale(approachSpeedFactor.get());
+                driveIntent = new XYPair(powers.getX(), powers.getY()).scale(approachSpeedFactor);
                 rotationIntent = headingModule.calculateHeadingPower(idealFinalHeadingDegrees);
 
                 // If we're quite close to the final point, advance to shoving into the reef or coral station.
-                if (currentPose.getTranslation().getDistance(targetLocationOnField) < distanceToStartShoving.get()) {
+                if (currentTranslation.getDistance(targetLocationOnField) < distanceToStartShoving.get()) {
                     // We need to make a decision. If our error is small enough, we should advance to shove.
                     // However, if our error is large, we should retreat and try again.
                     if (isLastKnownErrorWithinBounds() || !requireExcellentAlignment) {
                         activity = Activity.Shove;
                         shoveStartTime = XTimer.getFPGATimestamp();
                     } else {
-                        activity = Activity.ApproachWhileCentering;
+                        activity = Activity.ApproachWhileCentering; // Possible start to creeper code
                     }
                 }
-                break;
-            case Shove:
+            }
+            case TerminalApproachWithoutVision -> {
+                var noVisionPower = drive.getPowerToAchieveFieldPosition(currentTranslation, coralStationPreShovePoint);
+
+                // If we are going too fast, cap the speed.
+                if (noVisionPower.getNorm() > approachSpeedFactor) {
+                    noVisionPower = new Translation2d(approachSpeedFactor, noVisionPower.getAngle());
+                }
+
+                driveIntent = new XYPair(noVisionPower.getX(), noVisionPower.getY()).scale(approachSpeedFactor);
+                rotationIntent = headingModule.calculateHeadingPower(idealFinalHeadingDegrees);
+                if (currentTranslation.getDistance(coralStationPreShovePoint) < distanceToStartShoving.get()) {
+                    activity = Activity.Shove;
+                    shoveStartTime = XTimer.getFPGATimestamp();
+                }
+            }
+            case Shove -> {
                 // We are so very close to our destination, but it's very hard to get perfect alignment -- the PID
                 // will bring us close, but error in the dive might mean we are off by a few inches. We are also
                 // so close to the april tag that it's no longer guaranteed to be in view. So, we will just try and
@@ -319,12 +396,13 @@ public class AlignCameraToAprilTagCalculator {
                 // If we've been shoving for a while, we're done.
                 if (XTimer.getFPGATimestamp() - shoveStartTime > shoveDuration.get()) {
                     activity = Activity.Complete;
+                    oi.operatorGamepad.getRumbleManager().rumbleGamepad(1, .75);
+                    oi.driverGamepad.getRumbleManager().rumbleGamepad(1, .75);
                 }
-                break;
-            case Complete:
-            default:
-                // We're done! We don't need to do anything.
-                break;
+            }
+            case Complete -> {}
+            case GaveUp -> {}
+            default -> {} // We're done! We don't need to do anything.
         }
 
         akitLog.record("Activity", activity);
@@ -374,6 +452,15 @@ public class AlignCameraToAprilTagCalculator {
     }
 
     public boolean recommendIsFinished() {
-        return activity == Activity.Complete;
+        return activity == Activity.Complete || activity == Activity.GaveUp;
+    }
+
+    private Translation2d getCoralStationPreShovePoint() {
+        var station = Landmarks.getCoralStationFromTagId(targetAprilTagID);
+        var stationLocation = PoseSubsystem.convertBlueToRedIfNeeded(
+                Landmarks.getCoralStationSectionPose(station, Landmarks.CoralStationSection.MID));
+
+        var projectedDelta = new Translation2d(0.25, stationLocation.getRotation());
+        return stationLocation.getTranslation().plus(projectedDelta);
     }
 }

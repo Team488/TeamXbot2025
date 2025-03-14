@@ -45,6 +45,7 @@ public class AlignWithCreeperCalculator {
     private final DoubleProperty logErrScalar;
     private final DoubleProperty maxError;
     private final DoubleProperty errorThresholdPixels;
+    private final DoubleProperty pushForce;
 
     private CachedSubscriber leftOffsetPixelsSubscriber;
     private CachedSubscriber rightOffsetPixelsSubscriber;
@@ -85,6 +86,7 @@ public class AlignWithCreeperCalculator {
                 "Photon Vision Front Right Hostname", "photonvisionfrontright");
         this.errorThresholdPixels = pf.createPersistentProperty(
                 "Pixel error Threshold", 35);
+        this.pushForce = pf.createPersistentProperty("Creeper push force", 0.05);
     }
 
 
@@ -227,9 +229,11 @@ public class AlignWithCreeperCalculator {
         double drivePower = driveGain.get() * pidManager.calculate(0, error);
         aKitLog.record("Creeper Drive Power", drivePower);
 
-        // Create the drive command vector (Only drive power along the Y-axis,
-        // side-to-side).
-        XYPair pair = new XYPair(0, drivePower);
+
+        double push = Math.max(Math.min(this.pushForce.get(),1),0);  // clip to range 0-1
+
+        XYPair pair = new XYPair(push, drivePower);
+
         this.drive.drive(pair, 0.0, true);
 
         return true;
