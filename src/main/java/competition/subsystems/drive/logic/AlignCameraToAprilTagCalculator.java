@@ -44,10 +44,11 @@ public class AlignCameraToAprilTagCalculator {
         Searching,
         ApproachWhileCentering,
         TerminalApproach,
+        TerminalApproachWithoutVision,
         Shove,
+        ShoveWithVision,
         Complete,
-        GaveUp,
-        TerminalApproachWithoutVision
+        GaveUp
     }
 
     public enum ApproachMode {
@@ -63,6 +64,7 @@ public class AlignCameraToAprilTagCalculator {
     final ElectricalContract electricalContract;
     final ReefCoordinateGenerator reefCoordinateGenerator;
     final OperatorInterface oi;
+    final AlignWithCreeperCalculator creeperCalculator;
 
     int targetAprilTagID;
     int targetCameraID;
@@ -93,6 +95,10 @@ public class AlignCameraToAprilTagCalculator {
     double shoveStartTime = 0;
     private Activity startingActivity = Activity.Searching;
     private boolean requireExcellentAlignment = true;
+    private boolean useVisionCreeperAlignment = true;
+    private boolean canUseVisionCreeperAlignment = false;
+    private int creeperFailCount = 0;
+    private double previousSidewaysPower = 0;
 
     Translation2d aprilTagPositionInGlobalFieldCoordinates;
     double aprilTagZRotationRadians;
@@ -125,7 +131,8 @@ public class AlignCameraToAprilTagCalculator {
     public AlignCameraToAprilTagCalculator(AprilTagVisionSubsystemExtended vision, DriveSubsystem drive,
                                            ElectricalContract electricalContract, PoseSubsystem pose,
                                            HeadingModule.HeadingModuleFactory headingModuleFactory, ReefCoordinateGenerator reefCoordinateGenerator,
-                                           PropertyFactory pf, OperatorInterface oi) {
+                                           PropertyFactory pf, OperatorInterface oi,
+                                           AlignWithCreeperCalculator creeperCalculator) {
         this.aprilTagVisionSubsystem = vision;
         this.headingModule = headingModuleFactory.create(drive.getRotateToHeadingPid());
         this.drive = drive;
@@ -134,6 +141,7 @@ public class AlignCameraToAprilTagCalculator {
         this.reefCoordinateGenerator = reefCoordinateGenerator;
         this.akitLog = new AKitLogger(prefix);
         this.oi = oi;
+        this.creeperCalculator = creeperCalculator;
 
         pf.setPrefix(prefix);
         interstitialDistance = pf.createPersistentProperty("InterstitialDistance-m", 2.25);
@@ -242,6 +250,11 @@ public class AlignCameraToAprilTagCalculator {
                     coralStationPose.getTranslation().plus(vectorToInterstitialPoint),
                     coralStationPose.getRotation()
             );
+        }
+
+        if (useVisionCreeperAlignment) {
+            // Consider try to initialize this multiple times in this future
+            canUseVisionCreeperAlignment = creeperCalculator.initialize();
         }
 
         akitLog.record("InterstitialPoint", interstitialPoint);
@@ -353,11 +366,13 @@ public class AlignCameraToAprilTagCalculator {
                 if (currentTranslation.getDistance(targetLocationOnField) < distanceToStartShoving.get()) {
                     // We need to make a decision. If our error is small enough, we should advance to shove.
                     // However, if our error is large, we should retreat and try again.
+
+                    // isLastKnownErrorWithinBounds value change to fit shovewithvision?
                     if (isLastKnownErrorWithinBounds() || !requireExcellentAlignment) {
-                        activity = Activity.Shove;
                         shoveStartTime = XTimer.getFPGATimestamp();
+                        activity = canUseVisionCreeperAlignment ? Activity.ShoveWithVision : Activity.Shove;
                     } else {
-                        activity = Activity.ApproachWhileCentering; // Possible start to creeper code
+                        //activity = Activity.ApproachWhileCentering; // Possible start to creeper code?
                     }
                 }
             }
@@ -382,6 +397,8 @@ public class AlignCameraToAprilTagCalculator {
                 // so close to the april tag that it's no longer guaranteed to be in view. So, we will just try and
                 // drive straight into the reef.
 
+                // Additionally, we can also use some creeping logic to help us resolve any offsets.
+
                 // We know the ideal angle the robot will be pointing at, so we can quickly construct a shove vector
                 // in that direction.
 
@@ -395,6 +412,60 @@ public class AlignCameraToAprilTagCalculator {
 
                 // If we've been shoving for a while, we're done.
                 if (XTimer.getFPGATimestamp() - shoveStartTime > shoveDuration.get()) {
+                    activity = Activity.Complete;
+                    oi.operatorGamepad.getRumbleManager().rumbleGamepad(1, .75);
+                    oi.driverGamepad.getRumbleManager().rumbleGamepad(1, .75);
+                }
+            }
+            case ShoveWithVision -> {
+                // Need to add condition to enter this state
+                // Should I creeper? (4 inches is the magic #)
+                // EVERYTHING IS HARDCODED RN
+                boolean useCreeper = true;
+
+                // Calculate magnitude (only wanna activate creeper when within 4 inches)
+                if (currentTranslation.getDistance(targetLocationOnField) > 0.1016) {
+                    useCreeper = false;
+                } else if (lastKnownHorizontalErrorMeters > 0.1016) { // consider isLastKnownErrorWithinBounds()
+                    // Only want to creeper when we can see the tag
+                    useCreeper = false;
+                }
+
+                // Get our standard shove forward stuff
+                double shoveDirection = idealFinalHeadingDegrees;
+                if (isCameraBackwards) {
+                    shoveDirection += 180;
+                }
+                var forwardShove = XYPair.fromPolar(shoveDirection, shovePower.get());
+
+                // Get our creeper suggestedPower
+                var sidewaysShove = new XYPair(0, 0);
+                if (useCreeper) {
+                    var creeperSuggestion = creeperCalculator.getSuggestedSidewaysAlignmentPower();
+                    // If we are valid 3 times in a row or more then 0!
+                    // Otherwise let's just continue with the suggestedPower and assumed that
+                    // We "Skipped a heartbeat"
+                    if (creeperSuggestion.isSuggestionValid()) {
+                        previousSidewaysPower = creeperSuggestion.suggestedPower();
+                        creeperFailCount = 0;
+                        sidewaysShove = new XYPair(0, previousSidewaysPower);
+                    } else if (creeperFailCount < 3) {
+                        creeperFailCount++;
+                        sidewaysShove = new XYPair(0, previousSidewaysPower);
+                    } else {
+                        previousSidewaysPower = 0;
+                        sidewaysShove = new XYPair(0, previousSidewaysPower); // Give up shoving sideways if fail more than 3 times...
+                    }
+                }
+
+                // Combine creeper suggestedPower + forward magnitude
+                driveIntent = forwardShove.add(sidewaysShove);
+                rotationIntent = headingModule.calculateHeadingPower(idealFinalHeadingDegrees);
+
+                // If we've been shoving for a while, we're done.
+                if (XTimer.getFPGATimestamp() - shoveStartTime > shoveDuration.get()
+                        && (creeperCalculator.getIsConfidentlyCentered() || creeperFailCount >= 3)
+                ) {
                     activity = Activity.Complete;
                     oi.operatorGamepad.getRumbleManager().rumbleGamepad(1, .75);
                     oi.driverGamepad.getRumbleManager().rumbleGamepad(1, .75);
