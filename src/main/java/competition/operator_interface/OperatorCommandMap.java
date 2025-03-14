@@ -24,6 +24,8 @@ import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.AlignToNearestCoralStationCommand;
 import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.AlignToSpecificHumanLoadingStationCommand;
+import competition.subsystems.drive.commands.AlignWithCreeperCalculatorCommand;
+import competition.subsystems.drive.commands.AlignWithCreeperCalculatorCommandFactory;
 import competition.subsystems.drive.commands.CalibrateDriveCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
 import competition.subsystems.drive.commands.DriveToCoralStationInterstitialCommand;
@@ -81,7 +83,8 @@ public class OperatorCommandMap {
             ChangeActiveSwerveModuleCommand changeActiveModule,
             SwerveDriveWithJoysticksCommand typicalSwerveDrive,
             DriveToNearestReefFaceWithPID driveToNearestReefFaceWithPID,
-            DriveSubsystem drive, PoseSubsystem pose) {
+            DriveSubsystem drive, PoseSubsystem pose,
+            AlignWithCreeperCalculatorCommandFactory alignWithCreeperCalculatorCommandFactory) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
 
@@ -100,8 +103,10 @@ public class OperatorCommandMap {
 
         var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
 
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(pointAtNearestCoralStation)
-                .onFalse(clearPointAtHeading);
+//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(pointAtNearestCoralStation)
+//                .onFalse(clearPointAtHeading);
+
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(alignWithCreeperCalculatorCommandFactory.create(Cameras.FRONT_RIGHT_CAMERA));
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(driveToNearestReefFaceWithPID);
 
 //        operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
