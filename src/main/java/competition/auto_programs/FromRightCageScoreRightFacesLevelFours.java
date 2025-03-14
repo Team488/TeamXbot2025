@@ -4,8 +4,13 @@ import competition.commandgroups.DriveToFaceAndScoreCommandGroupFactory;
 import competition.commandgroups.DriveToStationAndIntakeUntilCollectedCommandGroupFactory;
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
 import competition.simulation.BaseSimulator;
+import competition.subsystems.coral_scorer.commands.IntakeUntilCoralCollectedCommand;
+import competition.subsystems.drive.commands.vision_path.PathToNearestCoralStationSectionCommand;
+import competition.subsystems.drive.commands.vision_path.PathToStationAndIntakeUntilCollectedCommandGroup;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
+import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import xbot.common.subsystems.autonomous.AutonomousCommandSelector;
 
@@ -13,15 +18,22 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 
 public class FromRightCageScoreRightFacesLevelFours extends BaseAutonomousSequentialCommandGroup {
-
+    CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem;
     @Inject
     public FromRightCageScoreRightFacesLevelFours(AutonomousCommandSelector autoSelector,
                                                   PoseSubsystem pose,
                                                   Provider<DriveToFaceAndScoreCommandGroupFactory> driveToFaceAndScoreFactProv,
                                                   Provider<DriveToStationAndIntakeUntilCollectedCommandGroupFactory> driveToStationAndIntakeFactProv,
                                                   PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFact,
-                                                  BaseSimulator simulator) {
+                                                  BaseSimulator simulator,
+                                                  IntakeUntilCoralCollectedCommand intakeUntilCoralCollectedCommand,
+                                                  Provider<PathToNearestCoralStationSectionCommand>
+                                                  pathToNearestCoralStationSectionCommandProvider,
+                                                  Provider<PathToStationAndIntakeUntilCollectedCommandGroup>
+                                                  pathToStationAndIntakeUntilCollectedCommandGroupProvider,
+                                                  CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem) {
         super(autoSelector);
+        this.coprocessorCommunicationSubsystem = coprocessorCommunicationSubsystem;
 
         // Force our location to start in front of cage six
         var initializeStateCommand = pose.createSetPositionCommand(
@@ -41,9 +53,16 @@ public class FromRightCageScoreRightFacesLevelFours extends BaseAutonomousSequen
                         Landmarks.CoralStation.RIGHT, true)
                 .alongWith(
                         getDriveAndIntakeStatusMessageCommand(Landmarks.CoralStation.RIGHT, Landmarks.CoralStationSection.MID));
-        this.addCommands(driveToRightStationAndIntakeFirst);
 
-        // Drive to close right, branch B and score level four
+        var pathToRightStationAndIntakeFirst = pathToStationAndIntakeUntilCollectedCommandGroupProvider.get();
+        pathToRightStationAndIntakeFirst.setStation(Landmarks.CoralStation.RIGHT);
+
+        var pathOrDriveToStationFirst = new ConditionalCommand(pathToRightStationAndIntakeFirst, driveToRightStationAndIntakeFirst,
+                () -> pathToRightStationAndIntakeFirst.getCurves() != null);
+
+        this.addCommands(pathOrDriveToStationFirst);
+
+                // Drive to close right, branch B and score level four
         var driveAndScoreCloseRightBranchBLevelFour = driveToFaceAndScoreFactProv.get().create(
                         Landmarks.ReefFace.CLOSE_RIGHT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR)
                 .alongWith(

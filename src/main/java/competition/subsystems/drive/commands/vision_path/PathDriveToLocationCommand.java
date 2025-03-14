@@ -102,7 +102,8 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
 
             if (curves == null) {
                 log.warn("There was not any curves responded from the coprocessor ORIN!");
-                cancel();
+//                cancel();
+
                 return;
             } else {
                 this.setSegmentedBezierCurve(curves, curves.getOptions());
