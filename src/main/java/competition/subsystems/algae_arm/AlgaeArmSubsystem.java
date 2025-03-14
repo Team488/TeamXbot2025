@@ -169,6 +169,7 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
     public void setPower(double power) {
         if (electricalContract.isAlgaeArmPivotMotorReady()) {
 
+            /*
             if (isCalibrated) {
                 double currentAngle = getCurrentValue().in(Degrees);
                 if (currentAngle < 0) {
@@ -181,7 +182,7 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
             if (isTouchingBottom()) {
                 power = MathUtils.constrainDouble(power, 0, 1);
-            }
+            }*/
 
             this.armMotor.setPower(power);
         }
