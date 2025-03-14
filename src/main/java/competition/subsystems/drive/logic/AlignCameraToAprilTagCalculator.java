@@ -462,9 +462,12 @@ public class AlignCameraToAprilTagCalculator {
                 driveIntent = forwardShove.add(sidewaysShove);
                 rotationIntent = headingModule.calculateHeadingPower(idealFinalHeadingDegrees);
 
-                // If we've been shoving for a while, we're done.
+                // This ending condition is still pretty shakey
+                // If we've been shoving for a while, we're done, but at the same time
+                // We must be either just not using creeper
+                // Or (that we are confidently centered or that we have failed too many times with creeper output)
                 if (XTimer.getFPGATimestamp() - shoveStartTime > shoveDuration.get()
-                        && (creeperCalculator.getIsConfidentlyCentered() || creeperFailCount >= 3)
+                        && (!useCreeper || (creeperCalculator.getIsConfidentlyCentered() || creeperFailCount >= 3))
                 ) {
                     activity = Activity.Complete;
                     oi.operatorGamepad.getRumbleManager().rumbleGamepad(1, .75);
