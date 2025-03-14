@@ -3,6 +3,7 @@ package competition.subsystems.drive.commands.vision_path;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Time;
 import xbot.common.command.BaseCommand;
 import xbot.common.controls.sensors.XTimer;
@@ -12,20 +13,21 @@ import xbot.common.properties.PropertyFactory;
 
 import javax.inject.Inject;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Seconds;
 
 public class DriveVectorSmallCommand extends BaseCommand {
     private double start;
     private Time duration = Seconds.of(0.25);
 
-    private Pose2d targetPose;
+    private Angle targetAngle;
 
-    private DriveSubsystem drive;
-    private PoseSubsystem poseSubsystem;
+    private final DriveSubsystem drive;
+    private final PoseSubsystem poseSubsystem;
 
     private boolean backwards = false;
 
-    private DoubleProperty drivePower;
+    private final DoubleProperty drivePower;
 
     @Inject
     public DriveVectorSmallCommand(DriveSubsystem driveSubsystem,
@@ -42,6 +44,9 @@ public class DriveVectorSmallCommand extends BaseCommand {
     public void initialize() {
         log.info("Initializing DriveVectorSmallCommand");
         this.start = XTimer.getFPGATimestamp();
+        if(backwards) {
+            targetAngle = targetAngle.times(-1);
+        }
     }
 
     /**
@@ -53,17 +58,17 @@ public class DriveVectorSmallCommand extends BaseCommand {
             drive.stop(); // Drive.stop doesnt stop unless called continuously
             return;
         }
-        XYPair pair = new XYPair(drivePower.get(), 0);
-        if (backwards) {
-            pair = pair.scale(-1);
-
-        }
-        drive.move(pair, 0);
+        drive.fieldOrientedDrive(
+                XYPair.fromPolar(targetAngle.in(Degrees), drivePower.get()),
+                0,
+                poseSubsystem.getCurrentHeading().getDegrees(),
+                true
+        );
     }
 
 
-    public DriveVectorSmallCommand setTargetPose(Pose2d targetPose) {
-        this.targetPose = targetPose;
+    public DriveVectorSmallCommand setTargetAngle(Angle targetAngle) {
+        this.targetAngle = targetAngle;
         return this;
     }
 
@@ -81,8 +86,8 @@ public class DriveVectorSmallCommand extends BaseCommand {
         return this;
     }
 
-    public Pose2d getTargetPose() {
-        return targetPose;
+    public Angle getTargetAngle() {
+        return targetAngle;
     }
 
     /**

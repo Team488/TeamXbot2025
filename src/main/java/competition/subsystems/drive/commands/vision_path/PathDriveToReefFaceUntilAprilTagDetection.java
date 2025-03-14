@@ -11,6 +11,7 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import xbot.common.logging.RobotAssertionManager;
+import xbot.common.properties.DistanceProperty;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
 import xbot.common.subsystems.vision.AprilTagVisionIO;
@@ -18,12 +19,16 @@ import xbot.common.subsystems.vision.AprilTagVisionIO;
 import javax.inject.Inject;
 import java.util.Optional;
 
+import static edu.wpi.first.units.Units.Meters;
+
 public class PathDriveToReefFaceUntilAprilTagDetection
         extends PathDriveToReefFaceCommand {
     int aprilTagID;
 
     AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
     private Cameras camera = Cameras.FRONT_LEFT_CAMERA;
+
+    private final DistanceProperty distanceProperty;
     @Inject
     PathDriveToReefFaceUntilAprilTagDetection(PoseSubsystem pose,
                                               DriveSubsystem drive, CoprocessorCommunicationSubsystem coprocessorComms,
@@ -37,6 +42,9 @@ public class PathDriveToReefFaceUntilAprilTagDetection
                 assertionManager, electricalContract, aprilTagFieldLayout,
                 aprilTagVisionSubsystem);
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
+        pf.setPrefix("PathDriveToReefFaceUntilAprilTagDetection/");
+        this.distanceProperty = pf.createPersistentProperty("AprilTagDistanceThreshold", Meters.of(1.2));
+
     }
 
     @Override
@@ -65,11 +73,10 @@ public class PathDriveToReefFaceUntilAprilTagDetection
                 aprilTagVisionSubsystem.getLatestTargetObservation(camera.getIndex());
 
         boolean closeEnough = false;
-
         if (targetObservation.fiducialId() == aprilTagID) {
             Transform3d transform3d = targetObservation.cameraToTarget();
             double distance = transform3d.getTranslation().getNorm();
-            closeEnough = distance <= 1.2; // Less than 1 meter
+            closeEnough = distance <= distanceProperty.get().in(Meters);
         }
 
         return super.isFinished() || closeEnough;

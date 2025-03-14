@@ -5,6 +5,7 @@ import competition.subsystems.coral_scorer.commands.IntakeUntilCoralCollectedCom
 import competition.subsystems.drive.commands.vision_path.DriveVectorSmallCommand;
 import competition.subsystems.drive.commands.vision_path.PathDriveToNearestCoralStationSectionCommand;
 import competition.subsystems.pose.Landmarks;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
@@ -12,6 +13,8 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+
+import static edu.wpi.first.units.Units.Degrees;
 
 public class PathDriveToCoralStationAndIntakeUntilCollected {
     Provider<PathDriveToNearestCoralStationSectionCommand> driveToCoralStationSectionCommandProvider;
@@ -40,10 +43,14 @@ public class PathDriveToCoralStationAndIntakeUntilCollected {
         var driveToCoralStationThenDriveForward = new SequentialCommandGroup(
                 pathDriveToNearestCoralStationSectionCommand,
                 new InstantCommand(() -> {
-                    driveVectorSmallCommand.setBackwards(true);
-                    driveVectorSmallCommand.setTargetPose(pathDriveToNearestCoralStationSectionCommand.getTargetCoralStationSection());
+                    Angle angle = pathDriveToNearestCoralStationSectionCommand
+                            .getTargetCoralStationSection().getRotation()
+                            .getMeasure();
+                    Angle targetAngle = angle.plus(Degrees.of(180));
+
+                    driveVectorSmallCommand.setTargetAngle(targetAngle);
                 }),
-                driveVectorSmallCommand
+                driveVectorSmallCommand.withTimeout(1)
         );
         var prepCoralSystem = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
         driveToCoralStationSectionWhilePrepping.addCommands(driveToCoralStationThenDriveForward, prepCoralSystem);

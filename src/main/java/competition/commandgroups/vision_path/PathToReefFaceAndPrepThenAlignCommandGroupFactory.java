@@ -10,6 +10,7 @@ import competition.subsystems.pose.Cameras;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
@@ -53,8 +54,6 @@ public class PathToReefFaceAndPrepThenAlignCommandGroupFactory {
     public SequentialCommandGroup create(
             Landmarks.ReefFace targetReefFace, Landmarks.Branch targetBranch) {
         PathDriveToReefFaceCommand driveToReefFaceCommand = driveToReefFaceCommandProvider.get();
-        driveToReefFaceCommand.setReefFace(targetReefFace)
-                .setBranch(targetBranch);
         var alignToReefCommand = new DeferredCommand(
                 () -> {
                     var alignToReefWithAprilTagCommand = alignToReefWithAprilTagCommandProvider.get();
@@ -63,6 +62,8 @@ public class PathToReefFaceAndPrepThenAlignCommandGroupFactory {
                 }, Set.of(drive)
         );
         return new SequentialCommandGroup(
+                new InstantCommand(() -> driveToReefFaceCommand.setReefFace(targetReefFace)
+                        .setBranch(targetBranch)),
                 driveToReefFaceCommand,
                 alignToReefCommand);
     }
