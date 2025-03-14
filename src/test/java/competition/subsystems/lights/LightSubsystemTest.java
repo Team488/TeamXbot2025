@@ -23,10 +23,10 @@ public class LightSubsystemTest extends BaseCompetitionTest {
 
         assertEquals(LightsStateMessage.RobotDisabledDefault.getValue(), subsystem.dioInt.getDIOInt());
 
+        autonomous.setCurrentAutonomousCommand(command);
+        
         subsystem.refreshDataFrame();
         subsystem.periodic();
-
-        autonomous.setCurrentAutonomousCommand(command);
 
         assertEquals(LightsStateMessage.RobotDisabledAuto.getValue(), subsystem.dioInt.getDIOInt());
     }
