@@ -147,6 +147,7 @@ public class OperatorCommandMap {
                 forceAlgaeArmCalibrated).ignoringDisable(true);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(calibrateAll);
 
+
         // Algae system buttons
         var removeLowAlgae = prepAlgaeSystemCommandGroupFactory.create(AlgaeArmSubsystem.AlgaeArmPositions.ReefAlgaeLow);
         oi.operatorGamepad.getPovIfAvailable(180).onTrue(removeLowAlgae);
