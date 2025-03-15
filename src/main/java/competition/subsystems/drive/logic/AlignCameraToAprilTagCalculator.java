@@ -90,6 +90,7 @@ public class AlignCameraToAprilTagCalculator {
     final DoubleProperty shoveDuration;
     final DoubleProperty maxTagAmbiguity;
     final DoubleProperty maxHorizontalErrorMeters;
+    final DoubleProperty maxCreeperDistanceInMeters;
 
     final DoubleProperty closeInterstitialDistance;
     final DoubleProperty closeApproachSpeedFactor;
@@ -102,6 +103,7 @@ public class AlignCameraToAprilTagCalculator {
     private boolean useVisionCreeperAlignment = true;
     private boolean canUseVisionCreeperAlignment = false;
     private int creeperFailCount = 0;
+    private final int creeperFailTolerance = 3;
     private double previousSidewaysPower = 0;
 
     Translation2d aprilTagPositionInGlobalFieldCoordinates;
@@ -157,6 +159,7 @@ public class AlignCameraToAprilTagCalculator {
         shoveDuration = pf.createPersistentProperty("ShoveDuration-s", 0.25);
         maxTagAmbiguity = pf.createPersistentProperty("MaxTagAmbiguity", 0.5);
         maxHorizontalErrorMeters = pf.createPersistentProperty("MaxHorizontalError-m", 0.0508); // 2 inches
+        maxCreeperDistanceInMeters = pf.createPersistentProperty("MaxCreeperDistance-m", 0.1016); // 4 inches
 
         closeInterstitialDistance = pf.createPersistentProperty("CloseInterstitialDistance-m", 1.0);
         closeApproachSpeedFactor = pf.createPersistentProperty("CloseApproachSpeedFactor", 0.33);
@@ -267,7 +270,6 @@ public class AlignCameraToAprilTagCalculator {
 
 
     public AlignCameraToAprilTagAdvice getXYPowersAlignToAprilTag(Pose2d currentPose) {
-        akitLog.record("ActivityAtStart", activity);
         // First, let's get any evergreen information we will need in almost all state machines.
         // Mostly, this is about where we should be pointing - and we generally point at the tag unless we are fairly close.
         Optional<AprilTagVisionIO.TargetObservation> targetObservation = aprilTagVisionSubsystem.getTargetObservation(targetCameraID, targetAprilTagID);
@@ -289,7 +291,6 @@ public class AlignCameraToAprilTagCalculator {
 
         // To allow for quick drop-through, we will have the first step of the state machine be an "if" statement
         // so that if we see the tag we can jump right into the meat of the machine.
-        akitLog.record("SeeTag", doWeSeeOurTargetTag);
         if (activity == Activity.Searching) {
             if (doWeSeeOurTargetTag) {
                 // We see the tag, we can begin approaching
@@ -422,7 +423,8 @@ public class AlignCameraToAprilTagCalculator {
             }
             case ShoveWithVision -> {
                 // Use creeper when we are close enough to tag and horizontal error is small enough
-                boolean useCreeper = (currentTranslation.getDistance(targetLocationOnField) < 0.1016)
+                boolean useCreeper =
+                        (currentTranslation.getDistance(targetLocationOnField) < maxCreeperDistanceInMeters.get())
                         && (lastKnownHorizontalErrorMeters < maxHorizontalErrorMeters.get());
                 akitLog.record("UseCreeper", useCreeper); // Debugging
 
@@ -445,7 +447,7 @@ public class AlignCameraToAprilTagCalculator {
                         previousSidewaysPower = creeperSuggestion.suggestedPower();
                         creeperFailCount = 0;
                         sidewaysShove = new XYPair(0, previousSidewaysPower);
-                    } else if (creeperFailCount < 3) {
+                    } else if (creeperFailCount < creeperFailTolerance) {
                         creeperFailCount++;
                         sidewaysShove = new XYPair(0, previousSidewaysPower);
                     } else {
