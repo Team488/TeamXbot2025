@@ -69,8 +69,9 @@ public class PathToFaceAndScoreCommandGroupFactory {
 
         measureDistanceBeforeScoringCommand.setDistanceThreshold(distanceThresholdInMeters);
         measureDistanceBeforeScoringCommand.setBranch(targetBranch);
+        var l2CoralSystem = prepCoralSystemFactory.create(() -> Landmarks.CoralLevel.TWO);
         var prepCoralSystem = prepCoralSystemFactory.create(() -> targetLevel);
-        measureDistanceThenPrep.addCommands(measureDistanceBeforeScoringCommand, prepCoralSystem);
+        measureDistanceThenPrep.addCommands(l2CoralSystem, measureDistanceBeforeScoringCommand, prepCoralSystem);
 
         driveToBranchWhilePrepping.addCommands(driveToReefFaceThenAlign, measureDistanceThenPrep);
 
