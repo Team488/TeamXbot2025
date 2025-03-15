@@ -2,8 +2,8 @@ package competition.simulation.coral_arm;
 
 import javax.inject.Inject;
 
+import competition.Robot;
 import competition.simulation.MotorInternalPIDHelper;
-import competition.simulation.SimulationConstants;
 import competition.subsystems.coral_arm.CoralArmSubsystem;
 
 import static edu.wpi.first.units.Units.Meters;
@@ -68,7 +68,7 @@ public class CoralArmSimulator {
             armSim.setInput(0.0);
         }
         // invert power because the simulated arm is going "backwards"
-        armSim.update(SimulationConstants.loopPeriodSec); // 20ms
+        armSim.update(Robot.LOOP_INTERVAL);
 
         // Read out the new arm position for rendering
         var armRelativeAngle = getArmAngle();
