@@ -158,22 +158,6 @@ public class Contract2024 extends Contract2025 {
         return 6.12; // Documented value for Swerve Specialties MK4 with L3 ratio.
     }
 
-    public DeviceInfo getLightsDio0() {
-        return new DeviceInfo("Lights0", 0);
-    }
-
-    public DeviceInfo getLightsDio1() {
-        return new DeviceInfo("Lights1", 1);
-    }
-
-    public DeviceInfo getLightsDio2() {
-        return new DeviceInfo("Lights2", 2);
-    }
-
-    public DeviceInfo getLightsDio3() {
-        return new DeviceInfo("Lights3", 3);
-    }
-
     private static double aprilCameraXDisplacement = 13.153 / PoseSubsystem.INCHES_IN_A_METER;
     private static double aprilCameraYDisplacement = 12.972 / PoseSubsystem.INCHES_IN_A_METER;
     private static double aprilCameraZDisplacement = 9.014 / PoseSubsystem.INCHES_IN_A_METER;
