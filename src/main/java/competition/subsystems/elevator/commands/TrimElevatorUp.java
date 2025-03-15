@@ -6,6 +6,8 @@ import xbot.common.command.BaseCommand;
 
 import javax.inject.Inject;
 
+import static edu.wpi.first.units.Units.Inches;
+
 public class TrimElevatorUp extends BaseCommand {
     final ElevatorSubsystem elevator;
     final OperatorInterface oi;
@@ -18,7 +20,9 @@ public class TrimElevatorUp extends BaseCommand {
     }
 
     public void initialize(){
+        var oldTrim = elevator.trimValue.get().in(Inches);
         elevator.trimElevatorUp();
+        log.info("Updating trim value from " + oldTrim + "into" + elevator.trimValue.get().in(Inches));
     }
 
     @Override

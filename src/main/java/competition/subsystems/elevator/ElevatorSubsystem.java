@@ -357,7 +357,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
             setTargetValue(getCurrentValue());
         }
 
-        aKitLog.record("ElevatorTrimAmount", trimValue.get().in(Inches));
+        aKitLog.record("ElevatorTrimValue", trimValue.get().in(Inches));
         aKitLog.record("ElevatorTargetHeight-m", elevatorTargetHeight.in(Inches));
         aKitLog.record("ElevatorCurrentHeight-m", getCurrentValue().in(Inches));
         aKitLog.record("ElevatorBottomSensor", this.isTouchingBottom());
