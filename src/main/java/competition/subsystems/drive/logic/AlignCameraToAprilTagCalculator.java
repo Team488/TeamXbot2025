@@ -100,11 +100,6 @@ public class AlignCameraToAprilTagCalculator {
     double shoveStartTime = 0;
     private Activity startingActivity = Activity.Searching;
     private boolean requireExcellentAlignment = true;
-    private boolean useVisionCreeperAlignment = true;
-    private boolean canUseVisionCreeperAlignment = false;
-    private int creeperFailCount = 0;
-    private final int creeperFailTolerance = 3;
-    private double previousSidewaysPower = 0;
 
     Translation2d aprilTagPositionInGlobalFieldCoordinates;
     double aprilTagZRotationRadians;
@@ -114,7 +109,13 @@ public class AlignCameraToAprilTagCalculator {
 
     private boolean hasEverSeenAprilTag = false;
     private Translation2d coralStationPreShovePoint;
-    boolean retryActive;
+
+    // Creeper stuff
+    private boolean useVisionCreeperAlignment = true;
+    private boolean canUseVisionCreeperAlignment = false;
+    private int creeperFailCount = 0;
+    private final int creeperFailTolerance = 3;
+    private double previousSidewaysPower = 0;
 
     public static Translation2d generateAlignmentPointOffset(Distance robotCenterToOuterBumperX, CameraInfo cameraInfo,
                                                              Distance offset, boolean isCameraBackwards) {
