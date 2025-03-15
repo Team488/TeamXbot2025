@@ -23,13 +23,6 @@ public class FromRightCageScoreRightFacesLevelFours extends BaseAutonomousSequen
                                                   BaseSimulator simulator) {
         super(autoSelector);
 
-        // Force our location to start in front of cage six
-//        var initializeStateCommand = pose.createSetPositionCommand(
-//                        () -> PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueCageSixStartingLine)
-//                )
-//                .alongWith(new InstantCommand(() -> simulator.resetPosition(PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueCageSixStartingLine))));
-//        this.addCommands(initializeStateCommand);
-
         // Drive to far Right, branch B and score level four
         var driveAndScoreFarRightBranchBLevelFour = driveToFaceAndScoreFactProv.get().create(
                         Landmarks.ReefFace.FAR_RIGHT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR)

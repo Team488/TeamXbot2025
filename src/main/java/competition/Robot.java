@@ -172,7 +172,11 @@ public class Robot extends BaseRobot {
     @Override
     public void autonomousInit() {
         var poseSub = getInjectorComponent().poseSubsystem();
-        poseSub.setCurrentPosition(autonomousCommandSelector.getCurrentStartingPosition());
+        if (autonomousCommandSelector.getCurrentAutonomousStartingPosition() != null){
+            simulator.resetPosition(autonomousCommandSelector.getCurrentAutonomousStartingPosition());
+            poseSub.setCurrentPosition(autonomousCommandSelector.getCurrentAutonomousStartingPosition());
+        }
+
         super.autonomousInit();
         if (!algaeArmSubsystem.isCalibrated()) {
             algaeArmSubsystem.forceCalibratedHere();

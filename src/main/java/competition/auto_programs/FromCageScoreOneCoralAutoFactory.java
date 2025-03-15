@@ -32,16 +32,9 @@ public class FromCageScoreOneCoralAutoFactory {
         this.prepCoralSystemCommandGroupFact = prepCoralSystemCommandGroupFact;
     }
 
-    public BaseAutonomousSequentialCommandGroup create(Pose2d startingLocation,
-                                                       Landmarks.ReefFace targetReefFace, Landmarks.Branch targetBranch,
+    public BaseAutonomousSequentialCommandGroup create(Landmarks.ReefFace targetReefFace, Landmarks.Branch targetBranch,
                                                        Landmarks.CoralLevel targetLevel) {
         var auto = new BaseAutonomousSequentialCommandGroup(autoSelector);
-
-        var initializeStateCommand = pose.createSetPositionCommand(
-                        () -> PoseSubsystem.convertBlueToRedIfNeeded(startingLocation)
-                )
-                .alongWith(new InstantCommand(() -> simulator.resetPosition(PoseSubsystem.convertBlueToRedIfNeeded(startingLocation))));
-        auto.addCommands(initializeStateCommand);
 
         var driveAndScore = driveToFaceAndScoreCommandGroupFact.create(targetReefFace, targetBranch, targetLevel)
                 .alongWith(
