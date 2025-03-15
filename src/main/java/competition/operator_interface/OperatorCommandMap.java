@@ -24,6 +24,7 @@ import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.AlignToNearestCoralStationCommand;
 import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.AlignToSpecificHumanLoadingStationCommand;
+import competition.subsystems.drive.commands.AlignWithCreeperCalculatorCommandFactory;
 import competition.subsystems.drive.commands.CalibrateDriveCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
 import competition.subsystems.drive.commands.DriveToCoralStationInterstitialCommand;
@@ -81,6 +82,7 @@ public class OperatorCommandMap {
             ChangeActiveSwerveModuleCommand changeActiveModule,
             SwerveDriveWithJoysticksCommand typicalSwerveDrive,
             DriveToNearestReefFaceWithPID driveToNearestReefFaceWithPID,
+            AlignWithCreeperCalculatorCommandFactory creeperFactory,
             DriveSubsystem drive, PoseSubsystem pose) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
@@ -92,11 +94,11 @@ public class OperatorCommandMap {
 
         var alignToReefWithAprilTagWithLeftCamera = alignToReefWithAprilTagProvider.get();
         alignToReefWithAprilTagWithLeftCamera.setConfigurations(Cameras.FRONT_LEFT_CAMERA.getIndex(), false, -2, true);
-        operatorInterface.driverGamepad.getifAvailable(1).whileTrue(alignToReefWithAprilTagWithLeftCamera);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(alignToReefWithAprilTagWithLeftCamera);
 
         var alignToReefWithAprilTagWithRightCamera = alignToReefWithAprilTagProvider.get();
         alignToReefWithAprilTagWithRightCamera.setConfigurations(Cameras.FRONT_RIGHT_CAMERA.getIndex(), false, -2, true);
-        operatorInterface.driverGamepad.getifAvailable(2).whileTrue(alignToReefWithAprilTagWithRightCamera);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(alignToReefWithAprilTagWithRightCamera);
 
         var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
 
@@ -107,6 +109,11 @@ public class OperatorCommandMap {
 //        operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
 //        operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(changeActiveModule);
 //        operatorInterface.driverGamepad.getPovIfAvailable(180).onTrue(typicalSwerveDrive);
+        var simpleCreeperL = creeperFactory.create(Cameras.FRONT_LEFT_CAMERA);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(simpleCreeperL);
+
+        var simpleCreeperR = creeperFactory.create(Cameras.FRONT_RIGHT_CAMERA);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(simpleCreeperR);
     }
 
 
