@@ -459,6 +459,8 @@ public class AlignCameraToAprilTagCalculator {
                         sidewaysShove = new XYPair(0, previousSidewaysPower); // Give up shoving sideways if fail more than 3 times...
                     }
                 }
+                
+                akitLog.record("UsingCreeper", useCreeper);
 
                 // Combine creeper suggestedPower + forward magnitude
                 driveIntent = forwardShove.add(sidewaysShove);
