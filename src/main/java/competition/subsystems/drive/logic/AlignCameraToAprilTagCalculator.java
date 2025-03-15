@@ -50,7 +50,6 @@ public class AlignCameraToAprilTagCalculator {
         TerminalApproach,
         TerminalApproachWithoutVision,
         Shove,
-        ShoveWithVision,
         Complete,
         GaveUp
     }
@@ -379,7 +378,7 @@ public class AlignCameraToAprilTagCalculator {
                     // However, if our error is large, we should retreat and try again? (Removed for now)
                     if (isLastKnownErrorWithinBounds() || !requireExcellentAlignment) {
                         shoveStartTime = XTimer.getFPGATimestamp();
-                        activity = canUseVisionCreeperAlignment ? Activity.ShoveWithVision : Activity.Shove;
+                        activity = Activity.Shove;
                     }
                 }
             }
@@ -394,41 +393,14 @@ public class AlignCameraToAprilTagCalculator {
                 driveIntent = new XYPair(noVisionPower.getX(), noVisionPower.getY()).scale(approachSpeedFactor);
                 rotationIntent = headingModule.calculateHeadingPower(idealFinalHeadingDegrees);
                 if (currentTranslation.getDistance(coralStationPreShovePoint) < distanceToStartShoving.get()) {
-                    activity = Activity.Shove;
                     shoveStartTime = XTimer.getFPGATimestamp();
+                    activity = Activity.Shove;
                 }
             }
             case Shove -> {
-                // TODO: Maybe shove can go... or combine with ShoveWithVision... or extract logic into function
-                // We are so very close to our destination, but it's very hard to get perfect alignment -- the PID
-                // will bring us close, but error in the dive might mean we are off by a few inches. We are also
-                // so close to the april tag that it's no longer guaranteed to be in view. So, we will just try and
-                // drive straight into the reef.
-
-                // Additionally, we can also use some creeping logic to help us resolve any offsets.
-
-                // We know the ideal angle the robot will be pointing at, so we can quickly construct a shove vector
-                // in that direction.
-
-                double shoveDirection = idealFinalHeadingDegrees;
-                if (isCameraBackwards) {
-                    shoveDirection += 180;
-                }
-
-                driveIntent = XYPair.fromPolar(shoveDirection, shovePower.get());
-                rotationIntent = headingModule.calculateHeadingPower(idealFinalHeadingDegrees);
-
-                // If we've been shoving for a while, we're done.
-                if (XTimer.getFPGATimestamp() - shoveStartTime > shoveDuration.get()) {
-                    activity = Activity.Complete;
-                    oi.operatorGamepad.getRumbleManager().rumbleGamepad(1, .75);
-                    oi.driverGamepad.getRumbleManager().rumbleGamepad(1, .75);
-                }
-            }
-            case ShoveWithVision -> {
                 // Use creeper when we are close enough to tag and horizontal error is small enough
-                boolean useCreeper =
-                        (currentTranslation.getDistance(targetLocationOnField) < maxCreeperDistanceInMeters.get())
+                boolean useCreeper = canUseVisionCreeperAlignment
+                        && (currentTranslation.getDistance(targetLocationOnField) < maxCreeperDistanceInMeters.get())
                         && (lastKnownHorizontalErrorMeters < maxHorizontalErrorWithVisionMeters.get());
                 akitLog.record("UseCreeper", useCreeper); // Debugging
 

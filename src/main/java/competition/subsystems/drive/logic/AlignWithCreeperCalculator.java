@@ -284,20 +284,6 @@ public class AlignWithCreeperCalculator {
         return isConfidentlyCentered;
     }
 
-    private static boolean isOffToTheLeft(int leftDistance, int rightDistance) {
-        boolean offToTheLeft;
-
-        if (leftDistance == -1) {
-            offToTheLeft = false; // we don't see left edge, means right side is "too" visible e.g. off to the right
-        } else if (rightDistance == -1) {
-            offToTheLeft = true; // we don't see right edge, means left side is "too" visible e.g. off to the left
-        } else {
-            // Choose the pixel error value from the side indicating misalignment.
-            offToTheLeft = leftDistance < rightDistance; // we see both edges, so the one that is "closer to the center" is the one we are off by
-        }
-        return offToTheLeft;
-    }
-
     /**
      * NOTES: this could return 0 if leftdist or rightdist == null
      * that will make movement clunky with occasional 0s
