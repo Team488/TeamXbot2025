@@ -130,4 +130,9 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
                 routingCircle.generateSwervePoints(pose.getCurrentPose2d(), target);
         super.logic.setKeyPoints(swervePoints);
     }
+
+    @Override
+    public boolean isFinished() {
+        return !coprocessor.getIsCoprocessorHealthy() || super.isFinished();
+    }
 }
