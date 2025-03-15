@@ -45,6 +45,7 @@ public class AlignWithCreeperCalculator {
     private final DoubleProperty maxError;
     private final DoubleProperty errorThresholdPixels;
     private final DoubleProperty pushForce;
+    private final DoubleProperty perfectOffsetDistancePixels;
 
     private CachedSubscriber leftOffsetPixelsSubscriber;
     private CachedSubscriber rightOffsetPixelsSubscriber;
@@ -85,6 +86,7 @@ public class AlignWithCreeperCalculator {
         this.errorThresholdPixels = pf.createPersistentProperty(
                 "Pixel error Threshold", 35);
         this.pushForce = pf.createPersistentProperty("Creeper push force", 0.05);
+        this.perfectOffsetDistancePixels = pf.createPersistentProperty("Perfect Offset Pixels", 60);
     }
 
 
@@ -241,12 +243,16 @@ public class AlignWithCreeperCalculator {
 
     // scaled cost function
     private double costFunc(int leftErrPX, int rightErrPX){
+        double err;
         if(leftErrPX == -1 || rightErrPX == -1){
-            // much too off aligned
-            return maxError.get();
+            // abs error compared to what we expect
+            int errPix = leftErrPX == -1 ? rightErrPX : leftErrPX;
+            err = Math.abs(errPix-perfectOffsetDistancePixels.get());
         }
-        // abs error
-        double err = normalizeWidth(Math.abs(leftErrPX-rightErrPX));
+        else{
+            // abs error
+            err = normalizeWidth(Math.abs(leftErrPX-rightErrPX));
+        }
 
 //       /**Linear Error**/
         double errFunc = err*errorSlope.get();
