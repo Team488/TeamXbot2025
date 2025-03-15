@@ -2,6 +2,7 @@ package competition.commandgroups.vision_path;
 
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
 import competition.subsystems.coral_scorer.commands.IntakeUntilCoralCollectedCommand;
+import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.AlignToSpecificHumanLoadingStationCommand;
 import competition.subsystems.drive.commands.DriveToCoralStationInterstitialCommand;
 import competition.subsystems.drive.commands.ShoveCoralStationCommand;
@@ -15,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.kobe.xbot.Utilities.Entities.XTableValues;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -31,6 +33,7 @@ public class PathToNearestStationAndIntakeUntilCollectedCommandGroupFactory {
     PoseSubsystem pose;
     CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem;
     Logger log;
+    DriveSubsystem driveSubsystem;
 
 
     @Inject
@@ -40,7 +43,8 @@ public class PathToNearestStationAndIntakeUntilCollectedCommandGroupFactory {
                                                                           Provider<IntakeUntilCoralCollectedCommand> intakeUntilCoralCollectedCommandProv,
                                                                           Provider<ShoveCoralStationCommand> shoveCoralStationCommandProv,
                                                                           Provider<PathToNearestCoralStationSectionCommand> pathToNearestCoralStationSectionCommandProv,
-                                                                          PoseSubsystem pose, CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem) {
+                                                                          PoseSubsystem pose, CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem,
+                                                                          DriveSubsystem driveSubsystem) {
         this.driveToCoralStationSectionCommandProv = driveToCoralStationSectionCommandProv;
         this.alignToCoralStationCommandProv = alignToCoralStationCommandProv;
         this.prepCoralSystemCommandGroupFactory = prepCoralSystemCommandGroupFactory;
@@ -50,6 +54,7 @@ public class PathToNearestStationAndIntakeUntilCollectedCommandGroupFactory {
         this.pose = pose;
         this.coprocessorCommunicationSubsystem = coprocessorCommunicationSubsystem;
         this.log = LogManager.getLogger("PATHINGLOG");
+        this.driveSubsystem = driveSubsystem;
     }
 
     public ParallelDeadlineGroup create(boolean addPoint) {
@@ -83,6 +88,10 @@ public class PathToNearestStationAndIntakeUntilCollectedCommandGroupFactory {
 
         var pathOrDriveToStation = new SequentialCommandGroup();
         var pathToNearestStation = pathToNearestCoralStationSectionCommandProv.get();
+        pathToNearestStation.setOptions(XTableValues.TraversalOptions.newBuilder()
+                        .setMetersPerSecond(driveSubsystem.getMaxTargetSpeedMetersPerSecond())
+                        .setAccelerationMetersPerSecond(driveSubsystem.getMaxAccelerationMetersPerSecondSquared())
+                .build());
         var driveToStationAndShove = driveToCoralStation.andThen(shoveCoralStationCommand.withTimeout(4));
         pathOrDriveToStation.addCommands(pathToNearestStation);
         var fallBack = new ConditionalCommand(
