@@ -21,7 +21,7 @@ import javax.inject.Inject;
 
 
 public class AlignWithCreeperCalculator {
-    private boolean initialized = false;
+    private boolean initalized = false;
     private final Logger log;
     private final AKitLogger aKitLog;
     private final PIDManager pidManager;
@@ -41,10 +41,10 @@ public class AlignWithCreeperCalculator {
     private final StringProperty photonVisionFrontRightHostname;
 
     private final DoubleProperty driveGain;
-    private final DoubleProperty logScalar;
-    private final DoubleProperty logErrScalar;
+    private final DoubleProperty errorSlope;
     private final DoubleProperty maxError;
     private final DoubleProperty errorThresholdPixels;
+    private final DoubleProperty pushForce;
 
     private CachedSubscriber leftOffsetPixelsSubscriber;
     private CachedSubscriber rightOffsetPixelsSubscriber;
@@ -60,7 +60,7 @@ public class AlignWithCreeperCalculator {
     private int currentCamVres = this.tunedHeight;
     private boolean forceStop = false;
 
-    private Boolean isConfidentlyCentered = false;
+    private Boolean isCenteredConfidently = false;
 
     @Inject
     public AlignWithCreeperCalculator(DriveSubsystem drive,
@@ -76,8 +76,7 @@ public class AlignWithCreeperCalculator {
 
         pf.setPrefix("AlignWithCreeperCommand/");
         this.driveGain = pf.createPersistentProperty("Drive Gain", 0.18);
-        this.logScalar = pf.createPersistentProperty("Log Scalar", 15);
-        this.logErrScalar = pf.createPersistentProperty("Log input Err Scalar", 9);
+        this.errorSlope = pf.createPersistentProperty("Cost Function Error slope", 1);
         this.maxError = pf.createPersistentProperty("Max Error", 0.2);
         this.photonVisionFrontLeftHostname = pf.createPersistentProperty(
                 "Photon Vision Front Left Hostname", "photonvisionfrontleft");
@@ -85,6 +84,7 @@ public class AlignWithCreeperCalculator {
                 "Photon Vision Front Right Hostname", "photonvisionfrontright");
         this.errorThresholdPixels = pf.createPersistentProperty(
                 "Pixel error Threshold", 35);
+        this.pushForce = pf.createPersistentProperty("Creeper push force", 0.05);
     }
 
 
@@ -92,7 +92,7 @@ public class AlignWithCreeperCalculator {
         this.pidManager.reset();
         // reset flags
         forceStop = false;
-        isConfidentlyCentered = false;
+        isCenteredConfidently = false;
 
         // try get xtables client
         XTablesClient client =
@@ -114,32 +114,32 @@ public class AlignWithCreeperCalculator {
             return false;
         }
 
-        if (this.leftOffsetPixelsSubscriber == null) {
+        if(this.leftOffsetPixelsSubscriber == null){
             this.leftOffsetPixelsSubscriber = new CachedSubscriber(hostname + "." + tableLeftDistance, client,5);
         }
 
-        if (this.rightOffsetPixelsSubscriber == null) {
+        if(this.rightOffsetPixelsSubscriber == null){
             this.rightOffsetPixelsSubscriber = new CachedSubscriber(hostname + "." + tableRightDistance, client,5);
         }
 
-        if (this.hresSubscriber == null) {
+        if(this.hresSubscriber == null){
             this.hresSubscriber = new CachedSubscriber(hostname + "." + tableHres, client,2);
         }
 
-        if (this.vresSubscriber == null) {
+        if(this.vresSubscriber == null){
             this.vresSubscriber = new CachedSubscriber(hostname + "." + tableVres, client,2);
         }
-        initialized = true;
+        initalized = true;
         return true;
     }
 
-    private boolean isDriveStopped() {
+    private boolean isDriveStopped(){
         return drive.getActiveSwerveModuleSubsystem().getCurrentState().equals(new SwerveModuleState(0, Rotation2d.kZero));
     }
 
 
     public boolean executeAlignment() {
-        if (!initialized) {
+        if(!this.initalized){
             log.error("AlignWithCreeperCommand initialization failed.");
             return false;
         }
@@ -148,6 +148,7 @@ public class AlignWithCreeperCalculator {
             drive.stop();
             return false;
         }
+
 
         Integer leftDistance = this.leftOffsetPixelsSubscriber.getAsInteger(null);
         Integer rightDistance = this.rightOffsetPixelsSubscriber.getAsInteger(null);
@@ -171,20 +172,20 @@ public class AlignWithCreeperCalculator {
             return false;
         }
 
-        if (leftDistance == -1 || rightDistance == -1) {
-            this.isConfidentlyCentered = false;
+        if(leftDistance == -1 || rightDistance == -1){
+            this.isCenteredConfidently = false;
         }
-        else {
-            double resAdjustedDiff = resizeWidth(Math.abs(leftDistance - rightDistance));
-            this.isConfidentlyCentered = resAdjustedDiff < this.errorThresholdPixels.get();
+        else{
+            double resAdjustedDiff = normalizeWidth(Math.abs(leftDistance - rightDistance));
+            this.isCenteredConfidently = resAdjustedDiff < this.errorThresholdPixels.get();
         }
 
-        aKitLog.record("ConfidentlyCentered", this.isConfidentlyCentered);
+        aKitLog.record("ConfidentlyCentered", this.isCenteredConfidently);
         aKitLog.record("LeftDistancePixelsAdjusted", leftDistance);
         aKitLog.record("RightDistancePixelsAdjusted", rightDistance);
 
         double error;
-        if (isConfidentlyCentered) {
+        if (isCenteredConfidently) {
             // Alignment is achieved; stop any drive movement.
             log.info("Vision is saying we are centered confidently!");
             // If the error is within the acceptable range, act as a "deadband"
@@ -221,9 +222,11 @@ public class AlignWithCreeperCalculator {
         double drivePower = driveGain.get() * pidManager.calculate(0, error);
         aKitLog.record("Creeper Drive Power", drivePower);
 
-        // Create the drive command vector (Only drive power along the Y-axis,
-        // side-to-side).
-        XYPair pair = new XYPair(0, drivePower);
+
+        double push = Math.max(Math.min(this.pushForce.get(),1),0);  // clip to range 0-1
+
+        XYPair pair = new XYPair(push, drivePower);
+
         this.drive.drive(pair, 0.0, true);
 
         return true;
@@ -236,15 +239,17 @@ public class AlignWithCreeperCalculator {
             return maxError.get();
         }
         // abs error
-        double err = resizeWidth(Math.abs(leftErrPX-rightErrPX));
-        // log is negative when the input is less that 1,
-        // to make this never happen, add 1
-        double errFunc = Math.log(err/logErrScalar.get()+1)/logScalar.get();
-        return Math.max(-maxError.get(), Math.min(errFunc, maxError.get()));
+        double err = normalizeWidth(Math.abs(leftErrPX-rightErrPX));
+
+//       /**Linear Error**/
+        double errFunc = err*errorSlope.get();
+
+
+        return Math.max(-maxError.get(), Math.min(errFunc, maxError.get())); // clip
     }
 
     public boolean isFinished(boolean waitUntilStop) {
-        boolean isRegularFinish = this.isDriveStopped() && this.isConfidentlyCentered;
+        boolean isRegularFinish = this.isDriveStopped() && this.isCenteredConfidently;
         if (waitUntilStop) {
             // us being centered is only valuable if we arent currently moving
             return isRegularFinish;
@@ -264,17 +269,17 @@ public class AlignWithCreeperCalculator {
         this.camera = camera;
     }
 
-    private double resizeWidth(double width){
+    private double normalizeWidth(double width){
         return width * this.currentCamHres / this.tunedWidth;
     }
 
-    private double resizeHeight(double height){
+    private double normalizeHeight(double height){
         return height * this.currentCamVres / this.tunedHeight;
     }
 
     // This will probably be enough for generally aligning with the other calculator
     public boolean getIsConfidentlyCentered() {
-        return isConfidentlyCentered;
+        return  isCenteredConfidently;
     }
 
     private static boolean isOffToTheLeft(int leftDistance, int rightDistance) {
@@ -297,7 +302,7 @@ public class AlignWithCreeperCalculator {
      * @return a suggested power 0-1 relative to robot
      */
     public CreeperAlignmentSuggestion getSuggestedSidewaysAlignmentPower() {
-        if (!initialized || forceStop) {
+        if (!initalized || forceStop) {
             return new CreeperAlignmentSuggestion(0);
         }
 
@@ -324,16 +329,17 @@ public class AlignWithCreeperCalculator {
         }
 
         if (leftDistance == -1 || rightDistance == -1) {
-            isConfidentlyCentered = false;
+            isCenteredConfidently = false;
         } else {
-            double resAdjustedDiff = resizeWidth(Math.abs(leftDistance - rightDistance));
-            isConfidentlyCentered = resAdjustedDiff < this.errorThresholdPixels.get();
+            double resAdjustedDiff = normalizeWidth(Math.abs(leftDistance - rightDistance));
+            isCenteredConfidently = resAdjustedDiff < this.errorThresholdPixels.get();
         }
 
-        aKitLog.record("ConfidentlyCentered", isConfidentlyCentered);
+
+        aKitLog.record("ConfidentlyCentered", isCenteredConfidently);
 
         double error = 0;
-        if (!isConfidentlyCentered) {
+        if (!isCenteredConfidently) {
             // Determine which side the misalignment error should be taken from.
             boolean offToTheLeft = isOffToTheLeft(leftDistance, rightDistance);
 
