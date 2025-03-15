@@ -2,8 +2,8 @@ package competition.simulation.algae_arm;
 
 import javax.inject.Inject;
 
+import competition.Robot;
 import competition.simulation.MotorInternalPIDHelper;
-import competition.simulation.SimulationConstants;
 import competition.subsystems.algae_arm.AlgaeArmSubsystem;
 
 import static edu.wpi.first.units.Units.Meters;
@@ -61,7 +61,7 @@ public class AlgaeArmSimulator {
             armSim.setInput(0.0);
         }
         
-        armSim.update(SimulationConstants.loopPeriodSec); // 20ms
+        armSim.update(Robot.LOOP_INTERVAL);
 
         // Read out the new arm position for rendering
         var armRelativeAngle = getArmAngle();
