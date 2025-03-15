@@ -29,9 +29,9 @@ public class AprilTagVisionSubsystemExtended extends AprilTagVisionSubsystem {
     @Inject
     public AprilTagVisionSubsystemExtended(PropertyFactory pf,
                                            AprilTagFieldLayout fieldLayout, XCameraElectricalContract contract,
-                                           AprilTagVisionIOFactory visionIOFactory, CameraInfo[] cameras) {
+                                           AprilTagVisionIOFactory visionIOFactory) {
         super(pf, fieldLayout, contract, visionIOFactory);
-
+        this.cameras = contract.getCameraInfo();
         // Note: flipped april tag IDs across the y-midpoint of the field for blue alliance
         // map both blue and red alliance poses
         aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueCloseLeftAlgae), 6);
@@ -48,7 +48,6 @@ public class AprilTagVisionSubsystemExtended extends AprilTagVisionSubsystem {
         aprilTagIDHashMap.put(Landmarks.BlueFarRightAlgae, 22);
 
         aprilTagFieldLayout = fieldLayout;
-        this.cameras = cameras;
     }
 
     public Translation2d getRobotRelativeLocationOfBestDetectedAprilTag(int cameraToUse) {
