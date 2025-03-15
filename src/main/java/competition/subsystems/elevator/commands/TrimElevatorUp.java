@@ -14,7 +14,6 @@ public class TrimElevatorUp extends BaseCommand {
     public TrimElevatorUp(ElevatorSubsystem elevatorSubsystem, OperatorInterface operatorInterface){
         this.elevator = elevatorSubsystem;
         this.oi= operatorInterface;
-        this.addRequirements(elevator);
 
     }
 

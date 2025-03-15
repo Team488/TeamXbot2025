@@ -6,6 +6,8 @@ import xbot.common.command.BaseCommand;
 
 import javax.inject.Inject;
 
+import static edu.wpi.first.units.Units.Inches;
+
 public class TrimElevatorDown extends BaseCommand {
     final ElevatorSubsystem elevator;
     final OperatorInterface oi;
@@ -14,12 +16,13 @@ public class TrimElevatorDown extends BaseCommand {
     public TrimElevatorDown(ElevatorSubsystem elevatorSubsystem, OperatorInterface operatorInterface){
         this.elevator = elevatorSubsystem;
         this.oi = operatorInterface;
-        this.addRequirements(elevator);
 
     }
 
     public void initialize(){
+        aKitLog.record("OldTrimValue", elevator.trimValue.get().in(Inches));
         elevator.trimElevatorDown();
+        aKitLog.record("NewTrimValue", elevator.trimValue.get().in(Inches));
     }
 
     @Override

@@ -28,7 +28,6 @@ import javax.inject.Singleton;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Hertz;
-import static edu.wpi.first.units.Units.Inch;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Meters;
@@ -75,8 +74,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     public final DistanceProperty humanLoadHeight;
     public final DistanceProperty baseHeight;
     public final DistanceProperty trimValue;
-    public final DistanceProperty trimUpAmount;
-    public final DistanceProperty trimDownAmount;
+    public final DistanceProperty trimChangeAmount;
 
     public final XDigitalInput bottomSensor;
     public final XLaserCAN distanceSensor;
@@ -103,8 +101,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         pf.setDefaultLevel(PropertyLevel.Debug);
         baseHeight = pf.createPersistentProperty("baseHeight", Inches.of(0));
         trimValue = pf.createPersistentProperty("trimValue",Inches.of(0));
-        trimUpAmount = pf.createPersistentProperty("TrimUpAmount", Inches.of(1));
-        trimDownAmount = pf.createPersistentProperty("TrimDownAmount", Inches.of(-1));
+        trimChangeAmount = pf.createPersistentProperty("TrimUpAmount", Inches.of(1));
+
 
 
         //to be tuned
@@ -240,7 +238,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     public void setTargetHeight(Landmarks.CoralLevel value) {
         switch (value) {
             case TWO -> setTargetValue(l2Height.get());
-            case THREE -> setTargetValue(l3Height.get());
+            case THREE -> setTargetValue(l3Height.get().plus(trimValue.get()));
             case FOUR -> setTargetValue(l4Height.get().plus(trimValue.get()));
             case COLLECTING -> setTargetValue(humanLoadHeight.get());
             default -> setTargetValue(baseHeight.get());
@@ -341,11 +339,11 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     }
 
     public void trimElevatorUp(){
-        trimValue.set(trimValue.get().plus(Inches.of(trimUpAmount.get().in(Inches))));
+        trimValue.set(trimValue.get().plus(Inches.of(trimChangeAmount.get().in(Inches))));
     }
 
     public void trimElevatorDown(){
-        trimValue.set(trimValue.get().plus((Inches.of(trimDownAmount.get().in(Inches)))));
+        trimValue.set(trimValue.get().minus((Inches.of(trimChangeAmount.get().in(Inches)))));
     }
 
     @Override
