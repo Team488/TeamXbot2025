@@ -22,7 +22,7 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SwerveBezierTrajectoryBase extends SwerveSimpleTrajectoryCommand {
+public class SwerveBezierTrajectoryBase extends SwerveSimpleBezierCommand {
     private final CoprocessorCommunicationSubsystem coprocessor;
 
     // --- NEW CONSTANTS ---

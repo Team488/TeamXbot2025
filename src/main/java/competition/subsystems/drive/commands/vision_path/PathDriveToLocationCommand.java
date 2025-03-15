@@ -11,6 +11,7 @@ import edu.wpi.first.units.measure.Distance;
 import org.kobe.xbot.JClient.XTablesClient;
 import org.kobe.xbot.Utilities.Entities.XTableValues;
 import org.kobe.xbot.Utilities.VisionCoprocessorCommander;
+import xbot.common.controls.sensors.XTimer;
 import xbot.common.logging.RobotAssertionManager;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.drive.BaseSwerveDriveSubsystem;
@@ -94,10 +95,14 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
             if (additionalArguments != null) {
                 message.setArguments(additionalArguments);
             }
+            aKitLog.record("Start time: ", XTimer.getFPGATimestamp());
+            log.info("Start time", XTimer.getFPGATimestamp());
             curves = commander.requestBezierPathWithOptions(
                     message
                             .build(),
-                    3000, TimeUnit.MILLISECONDS); // When should it give up and return
+                    500, TimeUnit.MILLISECONDS); // When should it give up and return
+            aKitLog.record("End Time: ", XTimer.getFPGATimestamp());
+            log.info("End time", XTimer.getFPGATimestamp());
             // null for any reason?
 
             if (curves == null) {
