@@ -41,7 +41,7 @@ public class PathToFaceAndScoreCommandGroupFactory {
         pf.setPrefix("PathDriveToFaceAndScoreCommandGroupFactory");
         levelOneDistanceThreshold = pf.createPersistentProperty("LevelOneDistanceThresholdInMeters", Meters.of(2));
         levelTwoDistanceThreshold = pf.createPersistentProperty("LevelTwoDistanceThresholdInMeters", Meters.of(2));
-        levelFourDistanceThreshold = pf.createPersistentProperty("LevelFourDistanceThresholdInMeters",  Meters.of(2.5));
+        levelFourDistanceThreshold = pf.createPersistentProperty("LevelFourDistanceThresholdInMeters",  Meters.of(1.5));
 
     }
 
