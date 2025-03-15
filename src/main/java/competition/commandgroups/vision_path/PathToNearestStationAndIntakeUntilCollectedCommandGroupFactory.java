@@ -37,13 +37,21 @@ public class PathToNearestStationAndIntakeUntilCollectedCommandGroupFactory {
 
 
     @Inject
-    public PathToNearestStationAndIntakeUntilCollectedCommandGroupFactory(Provider<DriveToCoralStationInterstitialCommand> driveToCoralStationSectionCommandProv,
-                                                                          Provider<AlignToSpecificHumanLoadingStationCommand> alignToCoralStationCommandProv,
-                                                                          PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
-                                                                          Provider<IntakeUntilCoralCollectedCommand> intakeUntilCoralCollectedCommandProv,
-                                                                          Provider<ShoveCoralStationCommand> shoveCoralStationCommandProv,
-                                                                          Provider<PathToNearestCoralStationSectionCommand> pathToNearestCoralStationSectionCommandProv,
-                                                                          PoseSubsystem pose, CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem,
+    public PathToNearestStationAndIntakeUntilCollectedCommandGroupFactory(Provider<DriveToCoralStationInterstitialCommand>
+                                                                                      driveToCoralStationSectionCommandProv,
+                                                                          Provider<AlignToSpecificHumanLoadingStationCommand>
+                                                                                  alignToCoralStationCommandProv,
+                                                                          PrepCoralSystemCommandGroupFactory
+                                                                                      prepCoralSystemCommandGroupFactory,
+                                                                          Provider<IntakeUntilCoralCollectedCommand>
+                                                                                      intakeUntilCoralCollectedCommandProv,
+                                                                          Provider<ShoveCoralStationCommand>
+                                                                                      shoveCoralStationCommandProv,
+                                                                          Provider<PathToNearestCoralStationSectionCommand>
+                                                                                      pathToNearestCoralStationSectionCommandProv,
+                                                                          PoseSubsystem pose,
+                                                                          CoprocessorCommunicationSubsystem
+                                                                                      coprocessorCommunicationSubsystem,
                                                                           DriveSubsystem driveSubsystem) {
         this.driveToCoralStationSectionCommandProv = driveToCoralStationSectionCommandProv;
         this.alignToCoralStationCommandProv = alignToCoralStationCommandProv;
