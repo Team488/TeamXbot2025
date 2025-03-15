@@ -90,6 +90,7 @@ public class AlignCameraToAprilTagCalculator {
     final DoubleProperty shoveDuration;
     final DoubleProperty maxTagAmbiguity;
     final DoubleProperty maxHorizontalErrorMeters;
+    final DoubleProperty maxHorizontalErrorWithVisionMeters;
     final DoubleProperty maxCreeperDistanceInMeters;
 
     final DoubleProperty closeInterstitialDistance;
@@ -160,6 +161,10 @@ public class AlignCameraToAprilTagCalculator {
         shoveDuration = pf.createPersistentProperty("ShoveDuration-s", 0.25);
         maxTagAmbiguity = pf.createPersistentProperty("MaxTagAmbiguity", 0.5);
         maxHorizontalErrorMeters = pf.createPersistentProperty("MaxHorizontalError-m", 0.0508); // 2 inches
+
+        // Vision
+        maxHorizontalErrorWithVisionMeters = pf.createPersistentProperty(
+                "MaxHorizontalErrorWithVision-m", 0.1016); // 4 inches
         maxCreeperDistanceInMeters = pf.createPersistentProperty("MaxCreeperDistance-m", 0.1016); // 4 inches
 
         closeInterstitialDistance = pf.createPersistentProperty("CloseInterstitialDistance-m", 1.0);
@@ -371,13 +376,10 @@ public class AlignCameraToAprilTagCalculator {
                 // If we're quite close to the final point, advance to shoving into the reef or coral station.
                 if (currentTranslation.getDistance(targetLocationOnField) < distanceToStartShoving.get()) {
                     // We need to make a decision. If our error is small enough, we should advance to shove.
-                    // However, if our error is large, we should retreat and try again?
-
+                    // However, if our error is large, we should retreat and try again? (Removed for now)
                     if (isLastKnownErrorWithinBounds() || !requireExcellentAlignment) {
                         shoveStartTime = XTimer.getFPGATimestamp();
                         activity = canUseVisionCreeperAlignment ? Activity.ShoveWithVision : Activity.Shove;
-                    } else {
-                        //activity = Activity.ApproachWhileCentering; // TODO: Retries ONLY if elevator not up high?
                     }
                 }
             }
@@ -397,6 +399,7 @@ public class AlignCameraToAprilTagCalculator {
                 }
             }
             case Shove -> {
+                // TODO: Maybe shove can go... or combine with ShoveWithVision... or extract logic into function
                 // We are so very close to our destination, but it's very hard to get perfect alignment -- the PID
                 // will bring us close, but error in the dive might mean we are off by a few inches. We are also
                 // so close to the april tag that it's no longer guaranteed to be in view. So, we will just try and
@@ -426,7 +429,7 @@ public class AlignCameraToAprilTagCalculator {
                 // Use creeper when we are close enough to tag and horizontal error is small enough
                 boolean useCreeper =
                         (currentTranslation.getDistance(targetLocationOnField) < maxCreeperDistanceInMeters.get())
-                        && (lastKnownHorizontalErrorMeters < maxHorizontalErrorMeters.get());
+                        && (lastKnownHorizontalErrorMeters < maxHorizontalErrorWithVisionMeters.get());
                 akitLog.record("UseCreeper", useCreeper); // Debugging
 
                 // Generate standard forward shove power
@@ -489,8 +492,13 @@ public class AlignCameraToAprilTagCalculator {
         // We have to at least be in an Approach/Shove phase for this to be possibly true.
         // If we're in the searching phase, error isn't relevant, so we return false.
         return switch (activity) {
-            case ApproachWhileCentering, TerminalApproach, Shove ->
-                    Math.abs(lastKnownHorizontalErrorMeters) < maxHorizontalErrorMeters.get();
+            case ApproachWhileCentering, TerminalApproach, Shove -> {
+                if (canUseVisionCreeperAlignment) {
+                    yield Math.abs(lastKnownHorizontalErrorMeters) < maxHorizontalErrorMeters.get();
+                } else {
+                    yield Math.abs(lastKnownHorizontalErrorMeters) < maxHorizontalErrorMeters.get();
+                }
+            }
             default -> false;
         };
     }
