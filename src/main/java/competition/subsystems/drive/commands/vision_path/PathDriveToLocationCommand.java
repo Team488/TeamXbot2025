@@ -36,8 +36,8 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
     private XTableValues.AdditionalArguments additionalArguments;
 
     private CoprocessorCommunicationSubsystem coprocessor;
-    protected AtomicBoolean failed = new AtomicBoolean(false);
-    protected AtomicReference<XTableValues.BezierCurves> curves = new AtomicReference<>(null);
+    public AtomicBoolean failed = new AtomicBoolean(false);
+    public AtomicReference<XTableValues.BezierCurves> curves = new AtomicReference<>(null);
     private boolean lock = false;
 
     @Inject

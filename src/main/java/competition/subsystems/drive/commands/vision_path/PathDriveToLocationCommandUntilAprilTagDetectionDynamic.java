@@ -36,16 +36,17 @@ public class PathDriveToLocationCommandUntilAprilTagDetectionDynamic
 
     @Override
     public boolean isFinished() {
-        return (curves != null && curves.hasAlignToReefAprilTagOptions()
+        XTableValues.BezierCurves bezierCurves = curves.get();
+        return (curves != null && bezierCurves.hasAlignToReefAprilTagOptions()
                 ? aprilTagVisionSubsystem
                 .doesCameraBestObservationHaveAprilTagId(
-                        curves.getAlignToReefAprilTagOptions()
+                        bezierCurves.getAlignToReefAprilTagOptions()
                                 .getCamera()
                                 .equals(
                                         XTableValues.AprilTagCamera.FRONT_LEFT)
                                 ? Cameras.FRONT_LEFT_CAMERA.getIndex()
                                 : Cameras.FRONT_RIGHT_CAMERA.getIndex(),
-                        curves.getAlignToReefAprilTagOptions()
+                        bezierCurves.getAlignToReefAprilTagOptions()
                                 .getAprilTagID())
                 : curves != null)
                 || logic.recommendIsFinished(

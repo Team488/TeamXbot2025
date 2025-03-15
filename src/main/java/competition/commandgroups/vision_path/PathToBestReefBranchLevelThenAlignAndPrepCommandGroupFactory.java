@@ -72,10 +72,10 @@ public class PathToBestReefBranchLevelThenAlignAndPrepCommandGroupFactory {
 
                 // Step 2: Extract data after driving is done
                 new InstantCommand(() -> {
-                    if (pathDriveToLocationUntilAprilTagDetectionDynamic.curves
-                            .hasAlignToReefAprilTagOptions()) {
+                    XTableValues.BezierCurves curves = pathDriveToLocationUntilAprilTagDetectionDynamic.curves.get();
+                    if (curves != null && curves.hasAlignToReefAprilTagOptions()) {
                         int cameraIndex =
-                                pathDriveToLocationUntilAprilTagDetectionDynamic.curves
+                                curves
                                         .getAlignToReefAprilTagOptions()
                                         .getCamera()
                                         .equals(XTableValues.AprilTagCamera.FRONT_LEFT)
@@ -83,7 +83,7 @@ public class PathToBestReefBranchLevelThenAlignAndPrepCommandGroupFactory {
                                         : Cameras.FRONT_RIGHT_CAMERA.getIndex();
 
                         alignToReefWithAprilTagCommand.setConfigurations(cameraIndex,
-                                pathDriveToLocationUntilAprilTagDetectionDynamic.curves
+                                curves
                                         .getAlignToReefAprilTagOptions()
                                         .getAprilTagID(),
                                 false, -2);
@@ -99,7 +99,7 @@ public class PathToBestReefBranchLevelThenAlignAndPrepCommandGroupFactory {
                                         ()
                                                 -> toCoralLevel(
                                                 pathDriveToLocationUntilAprilTagDetectionDynamic
-                                                        .curves.getAlignToReefAprilTagOptions()
+                                                        .curves.get().getAlignToReefAprilTagOptions()
                                                         .getBranchLevel())),
                                 scoreWhenReadyProvider.get())));
     }
