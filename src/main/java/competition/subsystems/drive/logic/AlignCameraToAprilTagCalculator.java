@@ -295,26 +295,10 @@ public class AlignCameraToAprilTagCalculator {
                 // We see the tag, we can begin approaching
                 activity = Activity.ApproachWhileCentering;
             } else {
-                // We don't see the tag, but it could be next to us... let's creep if so
-                // Compare our field relative pose with the tag pose...
-                // TODO: Add a check to see if we are within horizontal bounds?
-                akitLog.record("RobotTagFieldDist", currentTranslation.getDistance(aprilTagPositionInGlobalFieldCoordinates));
-                if (currentTranslation.getDistance(aprilTagPositionInGlobalFieldCoordinates) < 0.8 //UNSAFE
-                        && canUseVisionCreeperAlignment) {
-                    var suggestion = creeperCalculator.getSuggestedSidewaysAlignmentPower();
-                    akitLog.record("SkipToShoveSuggestionValid", suggestion.isSuggestionValid());
-                    if (suggestion.isSuggestionValid()) {
-                        activity = Activity.ShoveWithVision;
-                        log.info("Entering shove with vision");
-                    }
-                } else {
-                    // We don't see the tag, so point at where it might be. Nothing else can be done,
-                    // so tell the caller to point at the april tag. Maybe we will see it in future loops.
-                    return new AlignCameraToAprilTagAdvice(
+                return new AlignCameraToAprilTagAdvice(
                             driveIntent,
                             headingModule.calculateHeadingPower(headingToPointAtAprilTag),
                             tagAcquisitionState, activity);
-                }
             }
         }
 
@@ -384,16 +368,14 @@ public class AlignCameraToAprilTagCalculator {
 
                 // If we're quite close to the final point, advance to shoving into the reef or coral station.
                 if (currentTranslation.getDistance(targetLocationOnField) < distanceToStartShoving.get()) {
-                    log.info("Close enough for shove");
                     // We need to make a decision. If our error is small enough, we should advance to shove.
-                    // However, if our error is large, we should retreat and try again.
+                    // However, if our error is large, we should retreat and try again?
 
-                    // isLastKnownErrorWithinBounds value change to fit shovewithvision?
                     if (isLastKnownErrorWithinBounds() || !requireExcellentAlignment) {
                         shoveStartTime = XTimer.getFPGATimestamp();
                         activity = canUseVisionCreeperAlignment ? Activity.ShoveWithVision : Activity.Shove;
                     } else {
-                        //activity = Activity.ApproachWhileCentering; // No retries
+                        //activity = Activity.ApproachWhileCentering; // TODO: Retries ONLY if elevator not up high?
                     }
                 }
             }
@@ -439,34 +421,26 @@ public class AlignCameraToAprilTagCalculator {
                 }
             }
             case ShoveWithVision -> {
-                // Need to add condition to enter this state
-                // Should I creeper? (4 inches is the magic #)
-                // EVERYTHING IS HARDCODED RN
-                boolean useCreeper = true;
+                // Use creeper when we are close enough to tag and horizontal error is small enough
+                boolean useCreeper = (currentTranslation.getDistance(targetLocationOnField) < 0.1016)
+                        && (lastKnownHorizontalErrorMeters < maxHorizontalErrorMeters.get());
+                akitLog.record("UseCreeper", useCreeper); // Debugging
 
-                // Calculate magnitude (only wanna activate creeper when within 4 inches)
-                if (currentTranslation.getDistance(targetLocationOnField) > 0.1016) {
-                    useCreeper = false;
-                } else if (lastKnownHorizontalErrorMeters > maxHorizontalErrorMeters.get()) { // consider isLastKnownErrorWithinBounds()
-                    // Only want to creeper when we can see the tag
-                    useCreeper = false;
-                }
-
-                // Get our standard shove forward stuff
+                // Generate standard forward shove power
                 double shoveDirection = idealFinalHeadingDegrees;
                 if (isCameraBackwards) {
                     shoveDirection += 180;
                 }
                 var forwardShove = XYPair.fromPolar(shoveDirection, shovePower.get());
 
-                // Get our creeper suggestedPower
+                // Generate suggested creeping power
                 var sidewaysShove = new XYPair(0, 0);
                 if (useCreeper) {
                     var creeperSuggestion = creeperCalculator.getSuggestedSidewaysAlignmentPower();
-                    akitLog.record("validCreeperSuggestion", creeperSuggestion.isSuggestionValid());
-                    // If we are valid 3 times in a row or more then 0!
-                    // Otherwise let's just continue with the suggestedPower and assumed that
-                    // We "Skipped a heartbeat"
+                    akitLog.record("validCreeperSuggestion", creeperSuggestion.isSuggestionValid()); // Debugging
+
+                    // We'll assume that we "skipped a heartbeat" and continue moving with previous power
+                    // For situations where creeper subscriber isn't updating enough.
                     if (creeperSuggestion.isSuggestionValid()) {
                         previousSidewaysPower = creeperSuggestion.suggestedPower();
                         creeperFailCount = 0;
@@ -475,25 +449,19 @@ public class AlignCameraToAprilTagCalculator {
                         creeperFailCount++;
                         sidewaysShove = new XYPair(0, previousSidewaysPower);
                     } else {
+                        // Give up shoving sideways if fail more than 3 times && invalid suggestion
                         previousSidewaysPower = 0;
-                        sidewaysShove = new XYPair(0, previousSidewaysPower); // Give up shoving sideways if fail more than 3 times...
+                        sidewaysShove = new XYPair(0, previousSidewaysPower);
                     }
                 }
 
-                // Combine creeper suggestedPower + forward magnitude
                 driveIntent = forwardShove.add(sidewaysShove);
                 rotationIntent = headingModule.calculateHeadingPower(idealFinalHeadingDegrees);
 
-                akitLog.record("UseCreeper", useCreeper);
-
-                // This ending condition is still pretty shakey
-                // If we've been shoving for a while, we're done, but at the same time
-                // We must be either just not using creeper
-                // Or (that we are confidently centered or that we have failed too many times with creeper output)
-                // HACKY, but this !useCreeper ensures that isConfidentlyCentered resets each time...
+                // Very shaky ending condition...
+                boolean creeperFinished = creeperCalculator.getIsConfidentlyCentered() || creeperFailCount >= 3;
                 if (XTimer.getFPGATimestamp() - shoveStartTime > shoveDuration.get()
-                        && (!useCreeper || (creeperCalculator.getIsConfidentlyCentered() || creeperFailCount >= 3))
-                ) {
+                        && (!useCreeper || creeperFinished)) {
                     activity = Activity.Complete;
                     oi.operatorGamepad.getRumbleManager().rumbleGamepad(1, .75);
                     oi.driverGamepad.getRumbleManager().rumbleGamepad(1, .75);
@@ -517,7 +485,7 @@ public class AlignCameraToAprilTagCalculator {
         // If we're in the searching phase, error isn't relevant, so we return false.
         return switch (activity) {
             case ApproachWhileCentering, TerminalApproach, Shove ->
-                Math.abs(lastKnownHorizontalErrorMeters) < maxHorizontalErrorMeters.get();
+                    Math.abs(lastKnownHorizontalErrorMeters) < maxHorizontalErrorMeters.get();
             default -> false;
         };
     }
