@@ -15,9 +15,9 @@ public class CoralArmSimConstants {
     public static final Distance armLength = Meters.of(0.5);
     // the frame of reference for these angles is 0' right, 90' up, 180' left, 270' down
     // so we have 225 as the starting angle which is 0' in arm relative terms
-    public static final Angle minAngleRads = Degrees.of(225 - 180);
+    public static final Angle minAngleRads = Degrees.of(237 - 180);
     public static final Angle armEncoderAnglePerRotation = Degrees.of(6.94444);
     public static final Angle angleAtRobotZero = Degrees.of(225);
-    public static final Angle maxAngleRads = Degrees.of(225);
+    public static final Angle maxAngleRads = Degrees.of(237);
     public static final Angle startingAngle = maxAngleRads;
 }
