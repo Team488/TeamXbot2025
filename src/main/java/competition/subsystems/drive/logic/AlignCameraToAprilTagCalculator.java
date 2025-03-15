@@ -4,6 +4,7 @@ import competition.electrical_contract.ElectricalContract;
 import competition.operator_interface.OperatorInterface;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.oracle.ReefCoordinateGenerator;
+import competition.subsystems.pose.Cameras;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
@@ -254,6 +255,7 @@ public class AlignCameraToAprilTagCalculator {
 
         if (useVisionCreeperAlignment) {
             // Consider try to initialize this multiple times in this future
+            creeperCalculator.setCamera(targetCameraID);
             canUseVisionCreeperAlignment = creeperCalculator.initialize();
         }
 

@@ -53,7 +53,7 @@ public class AlignWithCreeperCalculator {
 
 
     private String hostname;
-    private Cameras camera;
+    private int camera;
 
     // set defaults for now
     private int currentCamHres = this.tunedWidth;
@@ -105,9 +105,9 @@ public class AlignWithCreeperCalculator {
         }
 
         // Determine active camera and retrieve its corresponding resolution and hostname.
-        if (camera.equals(Cameras.FRONT_LEFT_CAMERA)) {
+        if (camera == Cameras.FRONT_LEFT_CAMERA.getIndex()) {
             this.hostname = photonVisionFrontLeftHostname.get();
-        } else if (camera.equals(Cameras.FRONT_RIGHT_CAMERA)) {
+        } else if (camera == Cameras.FRONT_RIGHT_CAMERA.getIndex()) {
             this.hostname = photonVisionFrontRightHostname.get();
         } else {
             log.warn("Encountered an unrecognized camera value. Aborting to avoid unintended drive behavior.");
@@ -262,10 +262,15 @@ public class AlignWithCreeperCalculator {
 
 
     public Cameras getCamera() {
-        return camera;
+        //return camera;
+        return null;
     }
 
     public void setCamera(Cameras camera) {
+        //this.camera = camera;
+    }
+
+    public void setCamera(int camera) {
         this.camera = camera;
     }
 

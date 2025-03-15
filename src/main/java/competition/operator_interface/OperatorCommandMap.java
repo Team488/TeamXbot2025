@@ -98,13 +98,13 @@ public class OperatorCommandMap {
         alignToReefWithAprilTagWithLeftCamera.setConfigurations(
                 Cameras.FRONT_LEFT_CAMERA.getIndex(), false, -2, true,
                 AlignCameraToAprilTagCalculator.Activity.ApproachWhileCentering, false);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(alignToReefWithAprilTagWithLeftCamera);
+        operatorInterface.driverGamepad.getifAvailable(1).whileTrue(alignToReefWithAprilTagWithLeftCamera);
 
         var alignToReefWithAprilTagWithRightCamera = alignToReefWithAprilTagProvider.get();
         alignToReefWithAprilTagWithRightCamera.setConfigurations(
                 Cameras.FRONT_RIGHT_CAMERA.getIndex(), false, -2, true,
                 AlignCameraToAprilTagCalculator.Activity.ApproachWhileCentering, false);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(alignToReefWithAprilTagWithRightCamera);
+        operatorInterface.driverGamepad.getifAvailable(2).whileTrue(alignToReefWithAprilTagWithRightCamera);
 
         var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
 
