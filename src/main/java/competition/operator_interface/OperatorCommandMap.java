@@ -83,10 +83,7 @@ public class OperatorCommandMap {
             ChangeActiveSwerveModuleCommand changeActiveModule,
             SwerveDriveWithJoysticksCommand typicalSwerveDrive,
             DriveToNearestReefFaceWithPID driveToNearestReefFaceWithPID,
-            DriveSubsystem drive, PoseSubsystem pose,
-            FromLeftCageScoreLeftFacesLevelFours fromLeftCageScoreLeftFacesLevelFours,
-            Provider<PathToNearestStationAndIntakeUntilCollectedCommandGroupFactory>
-            pathToNearestStationAndIntakeUntilCollectedCommandGroupFactory) {
+            DriveSubsystem drive, PoseSubsystem pose) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
 
@@ -113,9 +110,6 @@ public class OperatorCommandMap {
                 .onFalse(clearPointAtHeading);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(driveToNearestReefFaceWithPID);
 
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(fromLeftCageScoreLeftFacesLevelFours);
-        var pathTo = pathToNearestStationAndIntakeUntilCollectedCommandGroupFactory.get().create(true);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(pathTo);
 
 
 //        operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
