@@ -17,6 +17,8 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import xbot.common.advantage.AKitLogger;
 import xbot.common.controls.sensors.XTimer;
 import xbot.common.injection.electrical_contract.CameraInfo;
@@ -33,6 +35,8 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 
 public class AlignCameraToAprilTagCalculator {
+
+    private static final Logger log = LoggerFactory.getLogger(AlignCameraToAprilTagCalculator.class);
 
     public enum TagAcquisitionState {
         NeverSeen,
@@ -254,6 +258,7 @@ public class AlignCameraToAprilTagCalculator {
 
         if (useVisionCreeperAlignment) {
             // Consider try to initialize this multiple times in this future
+            creeperCalculator.setCamera(targetCameraID);
             canUseVisionCreeperAlignment = creeperCalculator.initialize();
         }
 
@@ -262,7 +267,7 @@ public class AlignCameraToAprilTagCalculator {
 
 
     public AlignCameraToAprilTagAdvice getXYPowersAlignToAprilTag(Pose2d currentPose) {
-
+        akitLog.record("ActivityAtStart", activity);
         // First, let's get any evergreen information we will need in almost all state machines.
         // Mostly, this is about where we should be pointing - and we generally point at the tag unless we are fairly close.
         Optional<AprilTagVisionIO.TargetObservation> targetObservation = aprilTagVisionSubsystem.getTargetObservation(targetCameraID, targetAprilTagID);
@@ -284,17 +289,32 @@ public class AlignCameraToAprilTagCalculator {
 
         // To allow for quick drop-through, we will have the first step of the state machine be an "if" statement
         // so that if we see the tag we can jump right into the meat of the machine.
+        akitLog.record("SeeTag", doWeSeeOurTargetTag);
         if (activity == Activity.Searching) {
-            // We see the tag. Begin the approach.
             if (doWeSeeOurTargetTag) {
+                // We see the tag, we can begin approaching
                 activity = Activity.ApproachWhileCentering;
             } else {
-                // We don't see the tag, so point at where it might be. Nothing else can be done,
-                // so tell the caller to point at the april tag. Maybe we will see it in future loops.
-                return new AlignCameraToAprilTagAdvice(
-                        driveIntent,
-                        headingModule.calculateHeadingPower(headingToPointAtAprilTag),
-                        tagAcquisitionState, activity);
+                // We don't see the tag, but it could be next to us... let's creep if so
+                // Compare our field relative pose with the tag pose...
+                // TODO: Add a check to see if we are within horizontal bounds?
+                akitLog.record("RobotTagFieldDist", currentTranslation.getDistance(aprilTagPositionInGlobalFieldCoordinates));
+                if (currentTranslation.getDistance(aprilTagPositionInGlobalFieldCoordinates) < 0.8 //UNSAFE
+                        && canUseVisionCreeperAlignment) {
+                    var suggestion = creeperCalculator.getSuggestedSidewaysAlignmentPower();
+                    akitLog.record("SkipToShoveSuggestionValid", suggestion.isSuggestionValid());
+                    if (suggestion.isSuggestionValid()) {
+                        activity = Activity.ShoveWithVision;
+                        log.info("Entering shove with vision");
+                    }
+                } else {
+                    // We don't see the tag, so point at where it might be. Nothing else can be done,
+                    // so tell the caller to point at the april tag. Maybe we will see it in future loops.
+                    return new AlignCameraToAprilTagAdvice(
+                            driveIntent,
+                            headingModule.calculateHeadingPower(headingToPointAtAprilTag),
+                            tagAcquisitionState, activity);
+                }
             }
         }
 
@@ -364,6 +384,7 @@ public class AlignCameraToAprilTagCalculator {
 
                 // If we're quite close to the final point, advance to shoving into the reef or coral station.
                 if (currentTranslation.getDistance(targetLocationOnField) < distanceToStartShoving.get()) {
+                    log.info("Close enough for shove");
                     // We need to make a decision. If our error is small enough, we should advance to shove.
                     // However, if our error is large, we should retreat and try again.
 
@@ -442,6 +463,7 @@ public class AlignCameraToAprilTagCalculator {
                 var sidewaysShove = new XYPair(0, 0);
                 if (useCreeper) {
                     var creeperSuggestion = creeperCalculator.getSuggestedSidewaysAlignmentPower();
+                    akitLog.record("validCreeperSuggestion", creeperSuggestion.isSuggestionValid());
                     // If we are valid 3 times in a row or more then 0!
                     // Otherwise let's just continue with the suggestedPower and assumed that
                     // We "Skipped a heartbeat"
@@ -461,6 +483,8 @@ public class AlignCameraToAprilTagCalculator {
                 // Combine creeper suggestedPower + forward magnitude
                 driveIntent = forwardShove.add(sidewaysShove);
                 rotationIntent = headingModule.calculateHeadingPower(idealFinalHeadingDegrees);
+
+                akitLog.record("UseCreeper", useCreeper);
 
                 // This ending condition is still pretty shakey
                 // If we've been shoving for a while, we're done, but at the same time

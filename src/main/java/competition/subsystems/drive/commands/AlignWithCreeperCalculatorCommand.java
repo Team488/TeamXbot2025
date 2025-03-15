@@ -22,7 +22,7 @@ public class AlignWithCreeperCalculatorCommand extends BaseCommand {
 
     @Override
     public void initialize() {
-        this.calculator.setCamera(this.camera);
+        this.calculator.setCamera(this.camera.getIndex());
         if(!this.calculator.initialize()){
             log.warn("Failed to initialize Calculator.");
             cancel();
