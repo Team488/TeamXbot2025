@@ -69,7 +69,7 @@ public class SubsystemTracer {
                 periodicCalledMultipleTimes.stream().map(BaseSubsystem::getName).toArray(String[]::new));
     }
 
-    @Around("execution(* xbot.common.command.BaseSubsystem.refreshDataFrame())")
+    @Around("execution(* xbot.common.command.BaseSubsystem+.refreshDataFrame())")
     public void measureSubsystemRefreshDataFrame(ProceedingJoinPoint joinPoint) throws Throwable {
         var startTime = RobotController.getFPGATime();
         joinPoint.proceed();
@@ -90,7 +90,7 @@ public class SubsystemTracer {
         });
     }
 
-    @Around("execution(* xbot.common.command.BaseSubsystem.periodic())")
+    @Around("execution(* xbot.common.command.BaseSubsystem+.periodic())")
     public void measureSubsystemPeriodic(ProceedingJoinPoint joinPoint) throws Throwable {
         var startTime = RobotController.getFPGATime();
         joinPoint.proceed();
