@@ -20,8 +20,10 @@ public class TrimElevatorDown extends BaseCommand {
     }
 
     public void initialize(){
-        aKitLog.record("OldTrimValue", elevator.trimValue.get().in(Inches));
+
+        var oldTrim = elevator.trimValue.get().in(Inches);
         elevator.trimElevatorDown();
+        log.info("Updating trim value from" + oldTrim + "to" + elevator.trimValue.get().in(Inches));
         aKitLog.record("NewTrimValue", elevator.trimValue.get().in(Inches));
     }
 
