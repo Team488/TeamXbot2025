@@ -24,8 +24,6 @@ import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.AlignToNearestCoralStationCommand;
 import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.AlignToSpecificHumanLoadingStationCommand;
-import competition.subsystems.drive.commands.AlignWithCreeperCalculatorCommand;
-import competition.subsystems.drive.commands.AlignWithCreeperCalculatorCommandFactory;
 import competition.subsystems.drive.commands.CalibrateDriveCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
 import competition.subsystems.drive.commands.DriveToCoralStationInterstitialCommand;
@@ -33,7 +31,6 @@ import competition.subsystems.drive.commands.DriveToLocationWithPID;
 import competition.subsystems.drive.commands.DriveToNearestReefFaceWithPID;
 import competition.subsystems.drive.commands.RotateToHeadingWithHeadingModule;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
-import competition.subsystems.drive.logic.AlignCameraToAprilTagCalculator;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import competition.subsystems.elevator.commands.ForceElevatorCalibratedCommand;
 import competition.subsystems.elevator.commands.SetElevatorTargetHeightCommand;
@@ -84,38 +81,28 @@ public class OperatorCommandMap {
             ChangeActiveSwerveModuleCommand changeActiveModule,
             SwerveDriveWithJoysticksCommand typicalSwerveDrive,
             DriveToNearestReefFaceWithPID driveToNearestReefFaceWithPID,
-            DriveSubsystem drive, PoseSubsystem pose,
-            AlignWithCreeperCalculatorCommandFactory alignWithCreeperCalculatorCommandFactory) {
+            DriveSubsystem drive, PoseSubsystem pose) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
 
-        var pointAtNearestCoralStation = drive.createSetDynamicHeadingTargetCommand(() ->
+        var pointAtNearestCoralStation = drive.createSetStaticHeadingTargetCommand(() ->
                 PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.getCoralStationSectionPose(pose.getClosestCoralStation(), Landmarks.CoralStationSection.MID)
                         .getRotation()));
         var clearPointAtHeading = drive.createClearAllHeadingTargetsCommand();
 
         var alignToReefWithAprilTagWithLeftCamera = alignToReefWithAprilTagProvider.get();
-        alignToReefWithAprilTagWithLeftCamera.setConfigurations(
-                Cameras.FRONT_LEFT_CAMERA.getIndex(), false, -2, true,
-                AlignCameraToAprilTagCalculator.Activity.ApproachWhileCentering, false);
+        alignToReefWithAprilTagWithLeftCamera.setConfigurations(Cameras.FRONT_LEFT_CAMERA.getIndex(), false, -2, true);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(alignToReefWithAprilTagWithLeftCamera);
 
         var alignToReefWithAprilTagWithRightCamera = alignToReefWithAprilTagProvider.get();
-        alignToReefWithAprilTagWithRightCamera.setConfigurations(
-                Cameras.FRONT_RIGHT_CAMERA.getIndex(), false, -2, true,
-                AlignCameraToAprilTagCalculator.Activity.ApproachWhileCentering, false);
+        alignToReefWithAprilTagWithRightCamera.setConfigurations(Cameras.FRONT_RIGHT_CAMERA.getIndex(), false, -2, true);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(alignToReefWithAprilTagWithRightCamera);
 
         var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
 
-//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(pointAtNearestCoralStation)
-//                .onFalse(clearPointAtHeading);
-
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y)
-                .whileTrue(alignWithCreeperCalculatorCommandFactory.create(
-                        Cameras.FRONT_RIGHT_CAMERA));
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X)
-                .whileTrue(driveToNearestReefFaceWithPID);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(pointAtNearestCoralStation)
+                .onFalse(clearPointAtHeading);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(driveToNearestReefFaceWithPID);
 
 //        operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
 //        operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(changeActiveModule);
@@ -153,15 +140,12 @@ public class OperatorCommandMap {
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeCoralCommand);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreCoralCommand);
 
-        var calibrateAlgae = Commands.parallel(
-                forceAlgaeArmCalibrated).ignoringDisable(true);
-        var calibrateSuperstructure = Commands.parallel(
+        // combine all three claibration commands into one parallal command group
+        var calibrateAll = Commands.parallel(
                 forceElevatorCalibratedCommand,
-                forceCoralPivotCalibratedCommand
-        ).ignoringDisable(true);
-
-        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(calibrateAlgae);
-        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightStick).onTrue(calibrateSuperstructure);
+                forceCoralPivotCalibratedCommand,
+                forceAlgaeArmCalibrated).ignoringDisable(true);
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(calibrateAll);
 
         // Algae system buttons
         var removeLowAlgae = prepAlgaeSystemCommandGroupFactory.create(AlgaeArmSubsystem.AlgaeArmPositions.ReefAlgaeLow);
