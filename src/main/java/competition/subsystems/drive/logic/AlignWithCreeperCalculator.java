@@ -41,8 +41,7 @@ public class AlignWithCreeperCalculator {
     private final StringProperty photonVisionFrontRightHostname;
 
     private final DoubleProperty driveGain;
-    private final DoubleProperty logScalar;
-    private final DoubleProperty logErrScalar;
+    private final DoubleProperty errorSlope;
     private final DoubleProperty maxError;
     private final DoubleProperty errorThresholdPixels;
     private final DoubleProperty pushForce;
@@ -77,8 +76,7 @@ public class AlignWithCreeperCalculator {
 
         pf.setPrefix("AlignWithCreeperCommand/");
         this.driveGain = pf.createPersistentProperty("Drive Gain", 0.18);
-        this.logScalar = pf.createPersistentProperty("Log Scalar", 15);
-        this.logErrScalar = pf.createPersistentProperty("Log input Err Scalar", 9);
+        this.errorSlope = pf.createPersistentProperty("Cost Function Error slope", 1);
         this.maxError = pf.createPersistentProperty("Max Error", 0.2);
         this.photonVisionFrontLeftHostname = pf.createPersistentProperty(
                 "Photon Vision Front Left Hostname", "photonvisionfrontleft");
@@ -179,7 +177,7 @@ public class AlignWithCreeperCalculator {
             this.isCenteredConfidently = false;
         }
         else{
-            double resAdjustedDiff = resizeWidth(Math.abs(leftDistance - rightDistance));
+            double resAdjustedDiff = normalizeWidth(Math.abs(leftDistance - rightDistance));
             this.isCenteredConfidently = resAdjustedDiff < this.errorThresholdPixels.get();
         }
 
@@ -248,11 +246,13 @@ public class AlignWithCreeperCalculator {
             return maxError.get();
         }
         // abs error
-        double err = resizeWidth(Math.abs(leftErrPX-rightErrPX));
-        // log is negative when the input is less that 1,
-        // to make this never happen, add 1
-        double errFunc = Math.log(err/logErrScalar.get()+1)/logScalar.get();
-        return Math.max(-maxError.get(), Math.min(errFunc, maxError.get()));
+        double err = normalizeWidth(Math.abs(leftErrPX-rightErrPX));
+
+//       /**Linear Error**/
+        double errFunc = err*errorSlope.get();
+
+
+        return Math.max(-maxError.get(), Math.min(errFunc, maxError.get())); // clip
     }
 
     public boolean isFinished(boolean waitUntilStop) {
@@ -276,11 +276,11 @@ public class AlignWithCreeperCalculator {
         this.camera = camera;
     }
 
-    private double resizeWidth(double width){
+    private double normalizeWidth(double width){
         return width * this.currentCamHres / this.tunedWidth;
     }
 
-    private double resizeHeight(double height){
+    private double normalizeHeight(double height){
         return height * this.currentCamVres / this.tunedHeight;
     }
 }
