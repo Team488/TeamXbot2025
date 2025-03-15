@@ -26,6 +26,7 @@ public class AlignToReefWithAprilTagCommand extends AlignToTagGlobalMovementWith
     private boolean hasSetConfiguration = false;
     private AlignCameraToAprilTagCalculator.Activity startingActivity = AlignCameraToAprilTagCalculator.Activity.Searching;
     private boolean enableRetries = true;
+    private boolean useCreeperAlignment = true;
 
     @Inject
     public AlignToReefWithAprilTagCommand(AprilTagVisionSubsystemExtended aprilTagVisionSubsystem, DriveSubsystem drive,
@@ -41,11 +42,12 @@ public class AlignToReefWithAprilTagCommand extends AlignToTagGlobalMovementWith
 
     public void setConfigurations(int cameraToUse, boolean isCameraBackwards, double offsetInInches, boolean isDriverRelative) {
         setConfigurations(cameraToUse, isCameraBackwards, offsetInInches, isDriverRelative,
-                AlignCameraToAprilTagCalculator.Activity.Searching, true);
+                AlignCameraToAprilTagCalculator.Activity.Searching, true, true);
     }
 
     public void setConfigurations(int cameraToUse, boolean isCameraBackwards, double offsetInInches, boolean isDriverRelative,
-                                  AlignCameraToAprilTagCalculator.Activity startingActivity, boolean enableRetries) {
+                                  AlignCameraToAprilTagCalculator.Activity startingActivity, boolean enableRetries,
+                                  boolean useCreeperAlignment) {
         this.cameraToUse = cameraToUse;
         this.isCameraBackwards = isCameraBackwards;
         this.offsetInInches = offsetInInches;
@@ -53,6 +55,7 @@ public class AlignToReefWithAprilTagCommand extends AlignToTagGlobalMovementWith
         this.startingActivity = startingActivity;
         this.enableRetries = enableRetries;
         this.hasSetConfiguration = true;
+        this.useCreeperAlignment = useCreeperAlignment;
     }
 
     @Override
@@ -78,7 +81,8 @@ public class AlignToReefWithAprilTagCommand extends AlignToTagGlobalMovementWith
                 isCameraBackwards,
                 offsetInInches,
                 startingActivity,
-                enableRetries
+                enableRetries,
+                useCreeperAlignment
         );
 
         super.initialize();

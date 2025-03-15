@@ -27,6 +27,7 @@ public class AlignToTagGlobalMovementWithCalculator extends BaseCommand {
     private boolean hasSetConfiguration = false;
     private AlignCameraToAprilTagCalculator.Activity startingActivity = AlignCameraToAprilTagCalculator.Activity.Searching;
     private boolean requireExcellentAlignment = true;
+    private boolean useCreeperAlignment = true;
 
     final AlignCameraToAprilTagCalculator calculator;
 
@@ -51,11 +52,13 @@ public class AlignToTagGlobalMovementWithCalculator extends BaseCommand {
                 isCameraBackwards,
                 offsetInInches,
                 AlignCameraToAprilTagCalculator.Activity.Searching,
+                true,
                 true);
     }
 
     public void setConfigurations(int targetCameraID, int targetAprilTagID, boolean isCameraBackwards, double offsetInInches,
-    AlignCameraToAprilTagCalculator.Activity startingActivity, boolean requireExcellentAlignment) {
+                                  AlignCameraToAprilTagCalculator.Activity startingActivity,
+                                  boolean requireExcellentAlignment, boolean useCreeperAlignment) {
         this.targetCameraID = targetCameraID;
         this.targetAprilTagID = targetAprilTagID;
         this.isCameraBackwards = isCameraBackwards;
@@ -63,6 +66,7 @@ public class AlignToTagGlobalMovementWithCalculator extends BaseCommand {
         this.hasSetConfiguration = true;
         this.startingActivity = startingActivity;
         this.requireExcellentAlignment = requireExcellentAlignment;
+        this.useCreeperAlignment = useCreeperAlignment;
     }
 
     @Override
@@ -74,7 +78,7 @@ public class AlignToTagGlobalMovementWithCalculator extends BaseCommand {
         }
 
         calculator.configureAndReset(targetAprilTagID, targetCameraID, offset,
-                isCameraBackwards, startingActivity, requireExcellentAlignment);
+                isCameraBackwards, startingActivity, requireExcellentAlignment, useCreeperAlignment);
         pose.setPreferOdometryToVision(true);
     }
 

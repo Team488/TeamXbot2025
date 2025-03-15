@@ -39,6 +39,7 @@ public class AlignToSpecificHumanLoadingStationCommand extends AlignToTagGlobalM
                 true,
                 1.0,
                 AlignCameraToAprilTagCalculator.Activity.ApproachWhileCentering,
+                false,
                 false
         );
         super.initialize();

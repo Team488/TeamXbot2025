@@ -111,8 +111,7 @@ public class AlignCameraToAprilTagCalculator {
     private Translation2d coralStationPreShovePoint;
 
     // Creeper stuff
-    private boolean useVisionCreeperAlignment = true; // TODO: Configure and reset setting
-    private boolean canUseVisionCreeperAlignment = false;
+    private boolean canUseCreeperAlignment = false;
     private int creeperFailCount = 0;
     private final int creeperFailTolerance = 3; // TODO: "IntegerProperty"
     private double previousSidewaysPower = 0;
@@ -181,12 +180,12 @@ public class AlignCameraToAprilTagCalculator {
 
     public void configureAndReset(int targetAprilTagID, int targetCameraID, Distance offset,
                                   boolean isCameraBackwards) {
-        configureAndReset(targetAprilTagID, targetCameraID, offset, isCameraBackwards, Activity.Searching, true);
+        configureAndReset(targetAprilTagID, targetCameraID, offset, isCameraBackwards, Activity.Searching, true, true);
     }
 
     public void configureAndReset(int targetAprilTagID, int targetCameraID, Distance offset,
                                   boolean isCameraBackwards, Activity startingActivity,
-                                    boolean requireExcellentAlignment) {
+                                  boolean requireExcellentAlignment, boolean useCreeperAlignment) {
         this.startingActivity = startingActivity;
         this.requireExcellentAlignment = requireExcellentAlignment;
         this.targetAprilTagID = targetAprilTagID;
@@ -264,10 +263,9 @@ public class AlignCameraToAprilTagCalculator {
             );
         }
 
-        if (useVisionCreeperAlignment) {
-            // Consider try to initialize this multiple times in this future
+        if (useCreeperAlignment) {
             creeperCalculator.setCamera(targetCameraID);
-            canUseVisionCreeperAlignment = creeperCalculator.initialize();
+            canUseCreeperAlignment = creeperCalculator.initialize();
         }
 
         akitLog.record("InterstitialPoint", interstitialPoint);
@@ -399,7 +397,7 @@ public class AlignCameraToAprilTagCalculator {
             }
             case Shove -> {
                 // Use creeper when we are close enough to tag and horizontal error is small enough
-                boolean useCreeper = canUseVisionCreeperAlignment
+                boolean useCreeper = canUseCreeperAlignment
                         && (currentTranslation.getDistance(targetLocationOnField) < maxCreeperDistanceInMeters.get())
                         && (lastKnownHorizontalErrorMeters < maxHorizontalErrorWithVisionMeters.get());
                 akitLog.record("UseCreeper", useCreeper); // Debugging
@@ -465,8 +463,8 @@ public class AlignCameraToAprilTagCalculator {
         // If we're in the searching phase, error isn't relevant, so we return false.
         return switch (activity) {
             case ApproachWhileCentering, TerminalApproach, Shove -> {
-                if (canUseVisionCreeperAlignment) {
-                    yield Math.abs(lastKnownHorizontalErrorMeters) < maxHorizontalErrorMeters.get();
+                if (canUseCreeperAlignment) {
+                    yield Math.abs(lastKnownHorizontalErrorMeters) < maxHorizontalErrorWithVisionMeters.get();
                 } else {
                     yield Math.abs(lastKnownHorizontalErrorMeters) < maxHorizontalErrorMeters.get();
                 }
