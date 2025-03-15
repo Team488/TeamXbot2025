@@ -102,10 +102,12 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
 
             if (curves == null) {
                 log.warn("There was not any curves responded from the coprocessor ORIN!");
+                coprocessor.setCoprocessorHealthy(false);
                 cancel();
                 return;
             } else {
                 this.setSegmentedBezierCurve(curves, curves.getOptions());
+                coprocessor.setCoprocessorHealthy(true);
                 XTablesClient client = this.coprocessor.getXTablesManager().getOrNull();
                 if (client != null) {
                     log.info("Logged bezier curves onto XTABLES.");

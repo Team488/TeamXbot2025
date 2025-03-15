@@ -10,10 +10,11 @@ import edu.wpi.first.wpilibj.DriverStation;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
 
 import javax.inject.Inject;
+import java.util.function.Supplier;
 
 public class AlignToSpecificHumanLoadingStationCommand extends AlignToTagGlobalMovementWithCalculator {
 
-    private Landmarks.CoralStation station;
+    private Supplier<Landmarks.CoralStation> stationSupplier;
 
     @Inject
     public AlignToSpecificHumanLoadingStationCommand(
@@ -22,12 +23,14 @@ public class AlignToSpecificHumanLoadingStationCommand extends AlignToTagGlobalM
             ElectricalContract electricalContract,
             AlignCameraToAprilTagCalculator.AlignCameraToAprilTagCalculatorFactory calculatorFactory) {
         super(aprilTagVisionSubsystem, drive, headingModuleFactory, pose, electricalContract, calculatorFactory);
-
-        station = Landmarks.CoralStation.LEFT;
     }
 
-    public void setCoralStation(Landmarks.CoralStation station) {
-        this.station = station;
+    public void setTargetCoralStation(Landmarks.CoralStation station) {
+        setTargetCoralStationSupplier(() -> station);
+    }
+
+    public void setTargetCoralStationSupplier(Supplier<Landmarks.CoralStation> stationSupplier) {
+        this.stationSupplier = stationSupplier;
     }
 
     @Override
@@ -35,7 +38,7 @@ public class AlignToSpecificHumanLoadingStationCommand extends AlignToTagGlobalM
         var alliance = DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
         this.setConfigurations(
                 2,
-                Landmarks.getTagIdFromCoralStation(alliance, station),
+                Landmarks.getTagIdFromCoralStation(alliance, stationSupplier.get()),
                 true,
                 1.0,
                 AlignCameraToAprilTagCalculator.Activity.ApproachWhileCentering,

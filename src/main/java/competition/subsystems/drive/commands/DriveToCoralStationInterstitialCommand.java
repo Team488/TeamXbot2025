@@ -14,11 +14,12 @@ import xbot.common.trajectory.XbotSwervePoint;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.function.Supplier;
 
 public class DriveToCoralStationInterstitialCommand extends SwerveSimpleTrajectoryCommand {
 
     boolean kinematics = true;
-    Landmarks.CoralStation station = Landmarks.CoralStation.LEFT;
+    Supplier<Landmarks.CoralStation> stationSupplier;
     double endingThresholdInMeters = 1;
 
     // Interstitial points to avoid rotating into the reef when going for coral station alignment
@@ -50,7 +51,11 @@ public class DriveToCoralStationInterstitialCommand extends SwerveSimpleTrajecto
     }
 
     public void setTargetCoralStationSection(Landmarks.CoralStation station) {
-        this.station = station;
+        setTargetCoralStationSupplier(() -> station);
+    }
+
+    public void setTargetCoralStationSupplier(Supplier<Landmarks.CoralStation> stationSupplier) {
+        this.stationSupplier = stationSupplier;
     }
 
     @Override
@@ -58,7 +63,7 @@ public class DriveToCoralStationInterstitialCommand extends SwerveSimpleTrajecto
         log.info("Initializing");
         ArrayList<XbotSwervePoint> swervePoints = new ArrayList<>();
 
-        if (station == Landmarks.CoralStation.LEFT) {
+        if (stationSupplier.get() == Landmarks.CoralStation.LEFT) {
             swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(firstLeftStationInterstitialPoint), 10));
             swervePoints.add(new XbotSwervePoint(PoseSubsystem.convertBlueToRedIfNeeded(secondLeftStationInterstitialPoint), 10));
         }
@@ -82,7 +87,7 @@ public class DriveToCoralStationInterstitialCommand extends SwerveSimpleTrajecto
 
     @Override
     public boolean isFinished() {
-        var point = station == Landmarks.CoralStation.LEFT ? secondLeftStationInterstitialPoint : secondRightStationInterstitialPoint;
+        var point = stationSupplier.get() == Landmarks.CoralStation.LEFT ? secondLeftStationInterstitialPoint : secondRightStationInterstitialPoint;
         return pose.getCurrentPose2d().minus(PoseSubsystem.convertBlueToRedIfNeeded(point)).getTranslation().getNorm() < endingThresholdInMeters;
     }
 }

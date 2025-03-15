@@ -13,6 +13,8 @@ import xbot.common.properties.PropertyFactory;
 
 import javax.inject.Inject;
 
+import java.util.function.Supplier;
+
 import static edu.wpi.first.units.Units.Degrees;
 
 public class ShoveCoralStationCommand extends BaseCommand {
@@ -39,7 +41,11 @@ public class ShoveCoralStationCommand extends BaseCommand {
     }
 
     public void setShoveAngle(Landmarks.CoralStation coralStation) {
-        if (coralStation == Landmarks.CoralStation.LEFT) {
+        setShoveAngleSupplier(() -> coralStation);
+    }
+
+    public void setShoveAngleSupplier(Supplier<Landmarks.CoralStation> coralStationSupplier) {
+        if (coralStationSupplier.get() == Landmarks.CoralStation.LEFT) {
             shoveAngleRequested = Degrees.of(Landmarks.BlueLeftCoralStationMid.getRotation().getDegrees());
         }
         else {

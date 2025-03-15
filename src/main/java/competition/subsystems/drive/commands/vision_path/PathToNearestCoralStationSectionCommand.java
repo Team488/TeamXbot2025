@@ -33,7 +33,7 @@ import xbot.common.subsystems.drive.control_logic.HeadingModule;
  * Command to drive the robot to a specific coral station section.
  * Uses AprilTag vision data to determine target positions dynamically.
  */
-public class PathDriveToNearestCoralStationSectionCommandCommand
+public class PathToNearestCoralStationSectionCommand
         extends PathDriveToLocationCommand {
     /**
      * Target position for the coral station section.
@@ -77,7 +77,7 @@ public class PathDriveToNearestCoralStationSectionCommandCommand
      *                                          coprocessor.
      */
     @Inject
-    public PathDriveToNearestCoralStationSectionCommandCommand(
+    public PathToNearestCoralStationSectionCommand(
             DriveSubsystem drive, PoseSubsystem pose, PropertyFactory pf,
             HeadingModule.HeadingModuleFactory headingModuleFactory,
             AprilTagVisionSubsystemExtended aprilTagVisionSubsystem,
