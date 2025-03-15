@@ -426,7 +426,7 @@ public class AlignCameraToAprilTagCalculator {
                 // Calculate magnitude (only wanna activate creeper when within 4 inches)
                 if (currentTranslation.getDistance(targetLocationOnField) > 0.1016) {
                     useCreeper = false;
-                } else if (lastKnownHorizontalErrorMeters > 0.1016) { // consider isLastKnownErrorWithinBounds()
+                } else if (lastKnownHorizontalErrorMeters > maxHorizontalErrorMeters.get()) { // consider isLastKnownErrorWithinBounds()
                     // Only want to creeper when we can see the tag
                     useCreeper = false;
                 }
