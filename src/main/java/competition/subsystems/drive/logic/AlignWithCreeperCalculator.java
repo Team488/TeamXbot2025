@@ -51,7 +51,6 @@ public class AlignWithCreeperCalculator {
     private CachedSubscriber hresSubscriber;
     private CachedSubscriber vresSubscriber;
 
-
     private String hostname;
     private int camera;
 
@@ -65,7 +64,6 @@ public class AlignWithCreeperCalculator {
     @Inject
     public AlignWithCreeperCalculator(DriveSubsystem drive,
                                       CoprocessorCommunicationSubsystem coprocessorCommunications,
-                                      PoseSubsystem pose,
                                       PropertyFactory pf,
                                       PIDManager.PIDManagerFactory pidFactory) {
         this.log = LogManager.getLogger("AlignWithCreeperCommmand");
@@ -114,19 +112,19 @@ public class AlignWithCreeperCalculator {
             return false;
         }
 
-        if(this.leftOffsetPixelsSubscriber == null){
+        if (this.leftOffsetPixelsSubscriber == null) {
             this.leftOffsetPixelsSubscriber = new CachedSubscriber(hostname + "." + tableLeftDistance, client,5);
         }
 
-        if(this.rightOffsetPixelsSubscriber == null){
+        if (this.rightOffsetPixelsSubscriber == null) {
             this.rightOffsetPixelsSubscriber = new CachedSubscriber(hostname + "." + tableRightDistance, client,5);
         }
 
-        if(this.hresSubscriber == null){
+        if (this.hresSubscriber == null) {
             this.hresSubscriber = new CachedSubscriber(hostname + "." + tableHres, client,2);
         }
 
-        if(this.vresSubscriber == null){
+        if (this.vresSubscriber == null) {
             this.vresSubscriber = new CachedSubscriber(hostname + "." + tableVres, client,2);
         }
         initialized = true;
@@ -139,17 +137,15 @@ public class AlignWithCreeperCalculator {
 
 
     public boolean executeAlignment() {
-        if(!this.initialized){
+        if (!this.initialized) {
             log.error("AlignWithCreeperCommand initialization failed.");
             return false;
         }
 
-        if(forceStop){
-//            log.info("FORCE STOP");
+        if (forceStop) {
             drive.stop();
             return false;
         }
-
 
         Integer leftDistance = this.leftOffsetPixelsSubscriber.getAsInteger(null);
         Integer rightDistance = this.rightOffsetPixelsSubscriber.getAsInteger(null);
@@ -162,8 +158,7 @@ public class AlignWithCreeperCalculator {
             aKitLog.record("Subcriber updated?", false);
             log.warn("Vision offsets are returning null! Is alignment up?");
             return false;
-        }
-        else{
+        } else {
             aKitLog.record("Subcriber updated?", true);
         }
 
@@ -176,11 +171,10 @@ public class AlignWithCreeperCalculator {
         if(leftDistance == -1 || rightDistance == -1){
             this.isConfidentlyCentered = false;
         }
-        else{
+        else {
             double resAdjustedDiff = normalizeWidth(Math.abs(leftDistance - rightDistance));
             this.isConfidentlyCentered = resAdjustedDiff < this.errorThresholdPixels.get();
         }
-
 
         aKitLog.record("Is Centered confidently", this.isConfidentlyCentered);
         aKitLog.record("Left Distance Pixels Adjusted", leftDistance);
@@ -192,24 +186,14 @@ public class AlignWithCreeperCalculator {
             log.info("Vision is saying we are centered confidently!");
             // If the error is within the acceptable range, act as a "deadband"
             error = 0;
-        }
-        else{
+        } else {
             // Determine which side the misalignment error should be taken from.
-            boolean offToTheLeft;
-
-            if (leftDistance == -1) {
-                offToTheLeft = false; // we dont see left edge, means right side is "too" visible eg off to the right
-            } else if (rightDistance == -1) {
-                offToTheLeft = true; // we dont see right  edge, means left side is "too" visible eg off to the left
-            } else {
-                // Choose the pixel error value from the side indicating misalignment.
-                offToTheLeft = leftDistance < rightDistance; // we see both edges, so the one that is "closer to the center" is the one we are off by
-            }
+            boolean offToTheLeft = isOffToTheLeft(leftDistance, rightDistance);
 
             aKitLog.record("Off to the left?: ",offToTheLeft);
 
             // Calculate the error as a function of the left and right distance from the center.
-            error = costFunc(leftDistance, rightDistance);
+            error = costFunction(leftDistance, rightDistance);
 
             // add sign
             // if we are off to the right (!offtotheleft) and we want to minimize our error in the right direction,
@@ -217,8 +201,6 @@ public class AlignWithCreeperCalculator {
             if (!offToTheLeft) {
                 error = -error;
             }
-
-
         }
 
         aKitLog.record("creeper error from cost function: ",error);
@@ -227,7 +209,6 @@ public class AlignWithCreeperCalculator {
         double drivePower = driveGain.get() * pidManager.calculate(0, error);
         aKitLog.record("Creeper Drive Power", drivePower);
 
-
         double push = Math.max(Math.min(this.pushForce.get(),1),0);  // clip to range 0-1
 
         XYPair pair = new XYPair(push, drivePower);
@@ -235,13 +216,12 @@ public class AlignWithCreeperCalculator {
         this.drive.drive(pair, 0.0, true);
 
         return true;
-
     }
 
 
     // scaled cost function
-    private double costFunc(int leftErrPX, int rightErrPX){
-        if(leftErrPX == -1 || rightErrPX == -1){
+    private double costFunction(int leftErrPX, int rightErrPX){
+        if (leftErrPX == -1 || rightErrPX == -1) {
             // much too off aligned
             return maxError.get();
         }
@@ -251,17 +231,15 @@ public class AlignWithCreeperCalculator {
 //       /**Linear Error**/
         double errFunc = err*errorSlope.get();
 
-
         return Math.max(-maxError.get(), Math.min(errFunc, maxError.get())); // clip
     }
 
     public boolean isFinished(boolean waitUntilStop) {
         boolean isRegularFinish = this.isDriveStopped() && this.isConfidentlyCentered;
-        if(waitUntilStop){
+        if (waitUntilStop) {
             // us being centered is only valuable if we arent currently moving
             return isRegularFinish;
-        }
-        else{
+        } else {
             // if we want to immediately stop
             return forceStop || isRegularFinish;
         }
@@ -285,8 +263,6 @@ public class AlignWithCreeperCalculator {
     }
 
     /**
-     * NOTES: this could return 0 if leftdist or rightdist == null
-     * that will make movement clunky with occasional 0s
      * @return a suggested power 0-1 relative to robot
      */
     public CreeperAlignmentSuggestion getSuggestedSidewaysAlignmentPower() {
@@ -298,73 +274,69 @@ public class AlignWithCreeperCalculator {
 
         if (leftDistance == null || rightDistance == null) {
             // since subscriber is not updating fast enough, sometimes we get nulls
-            aKitLog.record("Subcriber updated?", false);
-            log.warn("Vision offsets are returning null! Is alignment up?");
+            aKitLog.record("SubscriberUpdated", false);
             return new CreeperAlignmentSuggestion();
-        }
-        else{
-            aKitLog.record("Subcriber updated?", true);
+        } else {
+            aKitLog.record("SubscriberUpdated", true);
         }
 
         if (leftDistance == -1 && rightDistance == -1) {
-            log.warn("No valid left or right distance measurements received from the camera.");
             forceStop = true;
             return new CreeperAlignmentSuggestion(0);
         }
 
-        if(leftDistance == -1 || rightDistance == -1){
+        if (leftDistance == -1 || rightDistance == -1) {
             this.isConfidentlyCentered = false;
-        }
-        else{
+        } else {
             double resAdjustedDiff = normalizeWidth(Math.abs(leftDistance - rightDistance));
             this.isConfidentlyCentered = resAdjustedDiff < this.errorThresholdPixels.get();
         }
 
-
-        aKitLog.record("Is Centered confidently", this.isConfidentlyCentered);
-        aKitLog.record("Left Distance Pixels Adjusted", leftDistance);
-        aKitLog.record("Right Distance Pixels Adjusted", rightDistance);
+        aKitLog.record("IsConfidentlyCentered", this.isConfidentlyCentered);
+        aKitLog.record("LeftDistPixelsAdjusted", leftDistance);
+        aKitLog.record("RightDistPixelsAdjusted", rightDistance);
 
         double error;
         if (isConfidentlyCentered) {
             // Alignment is achieved; stop any drive movement.
-            log.info("Vision is saying we are centered confidently!");
             // If the error is within the acceptable range, act as a "deadband"
             error = 0;
         }
-        else{
+        else {
             // Determine which side the misalignment error should be taken from.
-            boolean offToTheLeft;
-
-            if (leftDistance == -1) {
-                offToTheLeft = false; // we dont see left edge, means right side is "too" visible eg off to the right
-            } else if (rightDistance == -1) {
-                offToTheLeft = true; // we dont see right  edge, means left side is "too" visible eg off to the left
-            } else {
-                // Choose the pixel error value from the side indicating misalignment.
-                offToTheLeft = leftDistance < rightDistance; // we see both edges, so the one that is "closer to the center" is the one we are off by
-            }
-
-            aKitLog.record("Off to the left?: ",offToTheLeft);
+            boolean offToTheLeft = isOffToTheLeft(leftDistance, rightDistance);
 
             // Calculate the error as a function of the left and right distance from the center.
-            error = costFunc(leftDistance, rightDistance);
+            error = costFunction(leftDistance, rightDistance);
 
-            // add sign
-            // if we are off to the right (!offtotheleft) and we want to minimize our error in the right direction,
-            // we need to invert
+            // We need to invert the error if off to the right
             if (!offToTheLeft) {
                 error = -error;
             }
+
+            aKitLog.record("IsOffToLeft", offToTheLeft);
+        }
+        aKitLog.record("CreeperError", error);
+
+        // We'll return a drive power that is *ROBOT-RELATIVE*
+        double drivePower = driveGain.get() * pidManager.calculate(0, error);
+        aKitLog.record("CreeperPowerSuggestion", drivePower);
+        return new CreeperAlignmentSuggestion(drivePower);
+    }
+
+    private static boolean isOffToTheLeft(Integer leftDistance, Integer rightDistance) {
+        boolean offToTheLeft;
+        if (leftDistance == -1) {
+            // We don't see left edge, meaning that we are off to the right
+            offToTheLeft = false;
+        } else if (rightDistance == -1) {
+            // We don't see right edge, meaning that we are off to the left
+            offToTheLeft = true;
+        } else {
+            // We see both edges, so the one that is "closer to the center" is the one we are off by
+            offToTheLeft = leftDistance < rightDistance;
         }
 
-        aKitLog.record("creeper error from cost function: ",error);
-
-        // power.
-        double drivePower = driveGain.get() * pidManager.calculate(0, error);
-        aKitLog.record("Creeper Drive Power", drivePower);
-
-        // We'll return a drive power that is ROBOT RELATIVE
-        return new CreeperAlignmentSuggestion(drivePower);
+        return offToTheLeft;
     }
 }
