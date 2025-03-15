@@ -6,6 +6,7 @@ plugins {
     id 'checkstyle'
     id 'jacoco'
     id 'org.hidetake.ssh' version "2.9.0"
+    id 'io.freefair.aspectj.post-compile-weaving' version '8.13'
 }
 
 sourceCompatibility = JavaVersion.VERSION_17
@@ -94,13 +95,17 @@ repositories {
         }
     }
 
-
-
     mavenLocal()
     
     flatDir {
        dirs 'SeriouslyCommonLib/build/libs'
    }
+}
+
+configurations {
+    customAspectJ {
+        transitive = false
+    }
 }
 
 // Defining my dependencies. In this case, WPILib (+ friends), and vendor libraries.
@@ -109,6 +114,7 @@ dependencies {
     annotationProcessor wpi.java.deps.wpilibAnnotations()
     implementation wpi.java.deps.wpilib()
     implementation wpi.java.vendor.java()
+    customAspectJ wpi.java.vendor.java().findAll { dep -> dep.get().matches(/.*NewCommands.*/) }
 
     roborioDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.roborio)
     roborioDebug wpi.java.vendor.jniDebug(wpi.platforms.roborio)
@@ -126,7 +132,10 @@ dependencies {
 
     testImplementation 'junit:junit:4.12'
 
+    implementation 'org.aspectj:aspectjrt:1.9.22'
+
     implementation project(':SeriouslyCommonLib')
+    customAspectJ project(':SeriouslyCommonLib')
     implementation group: 'org.json', name:'json', version: '20220924'
 
     implementation 'org.apache.logging.log4j:log4j-api:2.19.0'
@@ -139,17 +148,20 @@ dependencies {
     testImplementation "org.mockito:mockito-core:3.12.4"
 
     // xtables
-    implementation "org.kobe.xbot:xtables:5.4.3"
+    implementation "org.kobe.xbot:xtables:5.4.4"
 
     def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
     annotationProcessor "org.littletonrobotics.akit:akit-autolog:$akitJson.version"
 }
 
+compileJava.ajc.options.compilerArgs += "-showWeaveInfo"
+compileJava.ajc.options.inpath.from(configurations.customAspectJ)
+
 wpi.sim.addGui().defaultEnabled = true
 wpi.sim.addDriverstation()
 
 jar {
-    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+    from { configurations.runtimeClasspath.findAll({ p -> !p.name.matches(/.*NewCommands.*/) && !p.name.matches(/.*SeriouslyCommonLib.*/) }).collect { it.isDirectory() ? it : zipTree(it) } }
     manifest edu.wpi.first.gradlerio.GradleRIOPlugin.javaManifest(ROBOT_MAIN_CLASS)
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
