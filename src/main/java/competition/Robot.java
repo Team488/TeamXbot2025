@@ -173,8 +173,10 @@ public class Robot extends BaseRobot {
     public void autonomousInit() {
         var poseSub = getInjectorComponent().poseSubsystem();
         if (autonomousCommandSelector.getCurrentAutonomousStartingPosition() != null){
-            simulator.resetPosition(autonomousCommandSelector.getCurrentAutonomousStartingPosition());
-            poseSub.setCurrentPosition(autonomousCommandSelector.getCurrentAutonomousStartingPosition());
+            simulator.resetPosition(PoseSubsystem.convertBlueToRedIfNeeded(
+                    autonomousCommandSelector.getCurrentAutonomousStartingPosition()));
+            poseSub.setCurrentPosition(PoseSubsystem.convertBlueToRedIfNeeded(
+                    autonomousCommandSelector.getCurrentAutonomousStartingPosition()));
         }
 
         super.autonomousInit();
