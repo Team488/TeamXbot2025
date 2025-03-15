@@ -1,5 +1,6 @@
 package competition.simulation;
 
+import competition.Robot;
 import competition.simulation.algae_arm.AlgaeArmSimulator;
 import competition.simulation.coral_arm.CoralArmSimulator;
 import competition.simulation.coral_scorer.CoralScorerSimulator;
@@ -116,7 +117,7 @@ public class MapleSimulator implements BaseSimulator {
 
         arena.addDriveTrainSimulation(swerveDriveSimulation.getDriveTrainSimulation());
 
-        SimulatedArena.overrideSimulationTimings(Seconds.of(0.04), 5);
+        SimulatedArena.overrideSimulationTimings(Seconds.of(Robot.LOOP_INTERVAL), 5);
     }
 
     public void update() {

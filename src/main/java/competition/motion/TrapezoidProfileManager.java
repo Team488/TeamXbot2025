@@ -11,6 +11,8 @@ import dagger.assisted.AssistedInject;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.MutTime;
 import org.checkerframework.checker.units.qual.A;
+
+import competition.Robot;
 import xbot.common.advantage.AKitLogger;
 import xbot.common.controls.sensors.XTimer;
 import xbot.common.properties.DoubleProperty;
@@ -74,7 +76,7 @@ public class TrapezoidProfileManager {
         initialState = new TrapezoidProfile.State(currentValue, currentVelocity);
         goalState = new TrapezoidProfile.State(currentValue, 0);
         previousSetpoint = currentValue;
-        profileStartTime.mut_replace(XTimer.getFPGATimestampTime().minus(Seconds.of(0.02)));
+        profileStartTime.mut_replace(XTimer.getFPGATimestampTime().minus(Seconds.of(Robot.LOOP_INTERVAL)));
     }
 
     private double getMaxVelocity() {
@@ -119,7 +121,7 @@ public class TrapezoidProfileManager {
                 initialState = new TrapezoidProfile.State(currentValue, currentVelocity);
             }
             goalState = new TrapezoidProfile.State(targetValue, 0);
-            profileStartTime.mut_replace(XTimer.getFPGATimestampTime().minus(Seconds.of(0.02)));
+            profileStartTime.mut_replace(XTimer.getFPGATimestampTime().minus(Seconds.of(Robot.LOOP_INTERVAL)));
         }
     }
 
