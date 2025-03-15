@@ -8,9 +8,9 @@ import static edu.wpi.first.units.Units.Seconds;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import competition.Robot;
 import competition.electrical_contract.ElectricalContract;
 import competition.simulation.MotorInternalPIDHelper;
-import competition.simulation.SimulationConstants;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -87,7 +87,7 @@ public class ElevatorSimulator {
             this.elevatorSim.setInputVoltage(0);
         }
 
-        this.elevatorSim.update(SimulationConstants.loopPeriodSec);
+        this.elevatorSim.update(Robot.LOOP_INTERVAL);
 
         // Read out the new elevator position for rendering
         var elevatorCurrentHeight = getCurrentHeight();
@@ -102,7 +102,7 @@ public class ElevatorSimulator {
                 Rotations.of(elevatorCurrentHeight.in(Meters) * ElevatorSimConstants.rotationsPerMeterHeight)
                         .plus(ElevatorSimConstants.rotationsAtZero));
         // set the motors velocity based on change in position and the control loop time
-        this.motor.setVelocity(prevPosition.minus(this.motor.getPosition()).per(Second).times(SimulationConstants.loopPeriodSec));
+        this.motor.setVelocity(prevPosition.minus(this.motor.getPosition()).per(Second).times(Robot.LOOP_INTERVAL));
 
         // this would be used to simulate the bottom position sensor being triggered
         var elevatorIsAtBottom = elevatorCurrentHeight
