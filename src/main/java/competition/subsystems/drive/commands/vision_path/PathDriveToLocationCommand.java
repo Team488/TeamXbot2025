@@ -21,6 +21,8 @@ import xbot.common.trajectory.XbotSwervePoint;
 import javax.inject.Inject;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static edu.wpi.first.units.Units.Inches;
 
@@ -33,8 +35,10 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
     private final ReefRoutingCircle routingCircle;
     private XTableValues.AdditionalArguments additionalArguments;
 
-    public XTableValues.BezierCurves curves = null;
     private CoprocessorCommunicationSubsystem coprocessor;
+    protected AtomicBoolean failed = new AtomicBoolean(false);
+    protected AtomicReference<XTableValues.BezierCurves> curves = new AtomicReference<>(null);
+    private boolean lock = false;
 
     @Inject
     public PathDriveToLocationCommand(BaseSwerveDriveSubsystem drive, PoseSubsystem pose,
@@ -76,6 +80,9 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
     @Override
     public void initialize() {
         log.info("Initializing");
+        curves.set(null);
+        lock = false;
+        failed.set(false);
         Pose2d startingPose = pose.getCurrentPose2d();
         if(!coprocessor.isUseBackupPointToPointForPathplanning()) {
             curves = null;
@@ -95,45 +102,52 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
             if (additionalArguments != null) {
                 message.setArguments(additionalArguments);
             }
-            aKitLog.record("Start time: ", XTimer.getFPGATimestamp());
-            log.info("Start time", XTimer.getFPGATimestamp());
-            curves = commander.requestBezierPathWithOptions(
+            commander.requestBezierPathWithOptionsAsync(
                     message
                             .build(),
-                    500, TimeUnit.MILLISECONDS); // When should it give up and return
-            aKitLog.record("End Time: ", XTimer.getFPGATimestamp());
-            log.info("End time", XTimer.getFPGATimestamp());
-            // null for any reason?
-
-            if (curves == null) {
-                log.warn("There was not any curves responded from the coprocessor ORIN!");
-                coprocessor.setCoprocessorHealthy(false);
-                cancel();
-                return;
-            } else {
-                this.setSegmentedBezierCurve(curves, curves.getOptions());
-                coprocessor.setCoprocessorHealthy(true);
-                XTablesClient client = this.coprocessor.getXTablesManager().getOrNull();
-                if (client != null) {
-                    log.info("Logged bezier curves onto XTABLES.");
-                    client.putBezierCurves("bezier_path", curves);
-                }
-            }
+                    500, TimeUnit.MILLISECONDS, (response) -> {
+                        curves.set(response);
+                        failed.set(false);
+                        coprocessor.setCoprocessorHealthy(true);
+                        XTablesClient client = this.coprocessor.getXTablesManager().getOrNull();
+                        if (client != null) {
+                            log.info("Logged bezier curves onto XTABLES.");
+                            client.putBezierCurves("bezier_path", response);
+                        }
+                    }, (err) -> {
+                        coprocessor.setCoprocessorHealthy(false);
+                        failed.set(true);
+                        curves.set(null);
+                        log.warn("Path drive failed with an error! Reason: {}", err.getMessage());
+                    }); // When should it give up and return
         } else {
             // Use backup Point To Point if settings allow to.
             pointToPoint();
         }
-        super.initialize();
     }
 
     public XTableValues.BezierCurves getCurves() {
-        return curves;
+        return curves.get();
     }
 
     private void pointToPoint() {
         List<XbotSwervePoint> swervePoints =
                 routingCircle.generateSwervePoints(pose.getCurrentPose2d(), target);
         super.logic.setKeyPoints(swervePoints);
+    }
+
+    @Override
+    public void execute() {
+        if(!lock && curves.get() != null && !failed.get()) {
+            XTableValues.BezierCurves c = curves.get();
+            this.setSegmentedBezierCurve(c, c.getOptions());
+            super.initialize();
+            lock = true;
+            return;
+        }
+        if(curves != null && curves.get() != null && !failed.get()) {
+            super.execute();
+        }
     }
 
     @Override
