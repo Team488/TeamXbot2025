@@ -111,10 +111,10 @@ public class AlignCameraToAprilTagCalculator {
     private Translation2d coralStationPreShovePoint;
 
     // Creeper stuff
-    private boolean useVisionCreeperAlignment = true;
+    private boolean useVisionCreeperAlignment = true; // TODO: Configure and reset setting
     private boolean canUseVisionCreeperAlignment = false;
     private int creeperFailCount = 0;
-    private final int creeperFailTolerance = 3;
+    private final int creeperFailTolerance = 3; // TODO: "IntegerProperty"
     private double previousSidewaysPower = 0;
 
     public static Translation2d generateAlignmentPointOffset(Distance robotCenterToOuterBumperX, CameraInfo cameraInfo,
@@ -456,6 +456,8 @@ public class AlignCameraToAprilTagCalculator {
                         previousSidewaysPower = 0;
                         sidewaysShove = new XYPair(0, previousSidewaysPower);
                     }
+                } else {
+                    previousSidewaysPower = 0;
                 }
 
                 driveIntent = forwardShove.add(sidewaysShove);
