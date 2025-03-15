@@ -13,8 +13,10 @@ import competition.injection.components.DaggerSimulationComponent;
 import competition.operator_interface.OperatorInterface;
 import competition.simulation.BaseSimulator;
 import competition.subsystems.algae_arm.AlgaeArmSubsystem;
+import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.wpilibj.Preferences;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import xbot.common.command.BaseRobot;
@@ -26,6 +28,8 @@ import java.util.concurrent.CountDownLatch;
 
 public class Robot extends BaseRobot {
     Logger log = LogManager.getLogger(Robot.class);
+
+    public static final double LOOP_INTERVAL = 0.04;
 
     final CountDownLatch reachedDisabledInit = new CountDownLatch(1);
     final CountDownLatch reachedEndOfLoop = new CountDownLatch(5);
@@ -40,7 +44,7 @@ public class Robot extends BaseRobot {
         // overruns ironically makes the problem worse. For now, we're going to set the loop time
         // to 0.04s to give us some breathing room and figure out some optimizations to bring us
         // back down to 0.02s.
-        super(0.04);
+        super(LOOP_INTERVAL);
     }
 
     @Override
@@ -169,6 +173,14 @@ public class Robot extends BaseRobot {
 
     @Override
     public void autonomousInit() {
+        var poseSub = getInjectorComponent().poseSubsystem();
+        if (autonomousCommandSelector.getCurrentAutonomousStartingPosition() != null){
+            simulator.resetPosition(PoseSubsystem.convertBlueToRedIfNeeded(
+                    autonomousCommandSelector.getCurrentAutonomousStartingPosition()));
+            poseSub.setCurrentPosition(PoseSubsystem.convertBlueToRedIfNeeded(
+                    autonomousCommandSelector.getCurrentAutonomousStartingPosition()));
+        }
+
         super.autonomousInit();
         if (!algaeArmSubsystem.isCalibrated()) {
             algaeArmSubsystem.forceCalibratedHere();
