@@ -13,6 +13,7 @@ import org.kobe.xbot.Utilities.Entities.XTableValues;
 import org.kobe.xbot.Utilities.VisionCoprocessorCommander;
 import xbot.common.controls.sensors.XTimer;
 import xbot.common.logging.RobotAssertionManager;
+import xbot.common.properties.DistanceProperty;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.drive.BaseSwerveDriveSubsystem;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
@@ -31,7 +32,7 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
 
     private final VisionCoprocessorCommander commander;
     private XTableValues.TraversalOptions traversalOptions;
-    private Distance safeDistance = Inches.of(10);
+    private DistanceProperty safeDistance;
     private final ReefRoutingCircle routingCircle;
     private XTableValues.AdditionalArguments additionalArguments;
 
@@ -55,6 +56,8 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
         this.traversalOptions = XTableValues.TraversalOptions.newBuilder().build();
         Translation2d center = Landmarks.BlueCenterOfReef.getTranslation();
         routingCircle = new ReefRoutingCircle(center, 2);
+        pf.setPrefix("PathDriveToLocationCommand");
+        this.safeDistance = pf.createPersistentProperty("SafeDistanceInches", Inches.of(0.5));
     }
 
     public PathDriveToLocationCommand setTarget(Pose2d target) {
@@ -65,11 +68,6 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
     public PathDriveToLocationCommand setOptions(
             XTableValues.TraversalOptions traversalOptions) {
         this.traversalOptions = traversalOptions;
-        return this;
-    }
-
-    public PathDriveToLocationCommand setSafeDistance(Distance safeDistance) {
-        this.safeDistance = safeDistance;
         return this;
     }
 
@@ -85,7 +83,7 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
         failed.set(false);
         Pose2d startingPose = pose.getCurrentPose2d();
         if(!coprocessor.isUseBackupPointToPointForPathplanning()) {
-            curves = null;
+            curves.set(null);
             XTableValues.RequestVisionCoprocessorMessage.Builder message = XTableValues.RequestVisionCoprocessorMessage.newBuilder()
                     .setStart(XTableValues.ControlPoint.newBuilder()
                             .setY(startingPose.getY()) // Set Pose2d Y value.
@@ -95,7 +93,7 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
                             .setX(target.getX()) // Set goal Pose2d X value.
                             .setY(target.getY()) // Set goal Pose2d Y value.
                             .build())
-                    .setSafeDistanceInches(safeDistance.in(Inches));
+                    .setSafeDistanceInches(safeDistance.get().in(Inches));
             if (traversalOptions != null) {
                 message.setOptions(traversalOptions);
             }
@@ -105,7 +103,7 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
             commander.requestBezierPathWithOptionsAsync(
                     message
                             .build(),
-                    500, TimeUnit.MILLISECONDS, (response) -> {
+                    3000, TimeUnit.MILLISECONDS, (response) -> {
                         curves.set(response);
                         failed.set(false);
                         coprocessor.setCoprocessorHealthy(true);

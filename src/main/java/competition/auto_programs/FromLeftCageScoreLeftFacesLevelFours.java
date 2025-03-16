@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import xbot.common.subsystems.autonomous.AutonomousCommandSelector;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 
 public class FromLeftCageScoreLeftFacesLevelFours extends BaseAutonomousSequentialCommandGroup {
 
@@ -59,7 +58,10 @@ public class FromLeftCageScoreLeftFacesLevelFours extends BaseAutonomousSequenti
         var driveToLeftStationAndIntakeSecond = driveToStationAndIntakeFact.create(
                         Landmarks.CoralStation.LEFT, false)
                 .alongWith(getDriveAndIntakeStatusMessageCommand(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.MID));
-        this.addCommands(driveToLeftStationAndIntakeSecond);
+//        this.addCommands(driveToLeftStationAndIntakeSecond);
+
+        var pathToLeftStationAndIntakeSecond = pathToNearestStationAndIntakeFactory.create(true);
+        this.addCommands(pathToLeftStationAndIntakeSecond);
 
         // Drive to close left, branch A and score level four
         var driveAndScoreCloseLeftBranchALevelFour = driveToFaceAndScoreFact.create(

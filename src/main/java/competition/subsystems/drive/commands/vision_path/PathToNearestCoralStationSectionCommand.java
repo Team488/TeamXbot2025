@@ -146,8 +146,6 @@ public class PathToNearestCoralStationSectionCommand
                                 DriverStation.getAlliance().orElse(
                                         DriverStation.Alliance.Blue)))
                         .build());
-        this.setSafeDistance(
-                electricalContract.getDiagonalDistanceDifferenceOfRobotRadius());
         this.setOptions(
                 XTableValues.TraversalOptions.newBuilder()
                         .setMetersPerSecond(driveSubsystem.getDriveToWaypointsSpeed().get())
