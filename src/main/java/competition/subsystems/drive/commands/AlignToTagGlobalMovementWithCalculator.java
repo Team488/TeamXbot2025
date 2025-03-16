@@ -83,6 +83,9 @@ public class AlignToTagGlobalMovementWithCalculator extends BaseCommand {
 
     @Override
     public void execute() {
+        if(!hasSetConfiguration) {
+            return;
+        }
         var advice = calculator.getXYPowersAlignToAprilTag(pose.getCurrentPose2d());
         aKitLog.record("driveValues", advice.driveIntent());
         drive.fieldOrientedDrive(
@@ -94,7 +97,7 @@ public class AlignToTagGlobalMovementWithCalculator extends BaseCommand {
 
     @Override
     public boolean isFinished() {
-        return calculator.recommendIsFinished();
+        return hasSetConfiguration && calculator.recommendIsFinished();
     }
 
     @Override
