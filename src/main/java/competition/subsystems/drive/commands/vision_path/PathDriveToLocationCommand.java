@@ -11,7 +11,9 @@ import edu.wpi.first.units.measure.Distance;
 import org.kobe.xbot.JClient.XTablesClient;
 import org.kobe.xbot.Utilities.Entities.XTableValues;
 import org.kobe.xbot.Utilities.VisionCoprocessorCommander;
+import xbot.common.controls.sensors.XTimer;
 import xbot.common.logging.RobotAssertionManager;
+import xbot.common.properties.DistanceProperty;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.drive.BaseSwerveDriveSubsystem;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
@@ -20,6 +22,8 @@ import xbot.common.trajectory.XbotSwervePoint;
 import javax.inject.Inject;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static edu.wpi.first.units.Units.Inches;
 
@@ -28,12 +32,14 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
 
     private final VisionCoprocessorCommander commander;
     private XTableValues.TraversalOptions traversalOptions;
-    private Distance safeDistance = Inches.of(10);
+    private DistanceProperty safeDistance;
     private final ReefRoutingCircle routingCircle;
     private XTableValues.AdditionalArguments additionalArguments;
 
-    public XTableValues.BezierCurves curves = null;
     private CoprocessorCommunicationSubsystem coprocessor;
+    public AtomicBoolean failed = new AtomicBoolean(false);
+    public AtomicReference<XTableValues.BezierCurves> curves = new AtomicReference<>(null);
+    private boolean lock = false;
 
     @Inject
     public PathDriveToLocationCommand(BaseSwerveDriveSubsystem drive, PoseSubsystem pose,
@@ -50,6 +56,8 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
         this.traversalOptions = XTableValues.TraversalOptions.newBuilder().build();
         Translation2d center = Landmarks.BlueCenterOfReef.getTranslation();
         routingCircle = new ReefRoutingCircle(center, 2);
+        pf.setPrefix("PathDriveToLocationCommand");
+        this.safeDistance = pf.createPersistentProperty("SafeDistanceInches", Inches.of(0.5));
     }
 
     public PathDriveToLocationCommand setTarget(Pose2d target) {
@@ -63,11 +71,6 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
         return this;
     }
 
-    public PathDriveToLocationCommand setSafeDistance(Distance safeDistance) {
-        this.safeDistance = safeDistance;
-        return this;
-    }
-
     public PathDriveToLocationCommand setAdditionalArguments(XTableValues.AdditionalArguments additionalArguments) {
         this.additionalArguments = additionalArguments;
         return this;
@@ -75,9 +78,12 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
     @Override
     public void initialize() {
         log.info("Initializing");
+        curves.set(null);
+        lock = false;
+        failed.set(false);
         Pose2d startingPose = pose.getCurrentPose2d();
         if(!coprocessor.isUseBackupPointToPointForPathplanning()) {
-            curves = null;
+            curves.set(null);
             XTableValues.RequestVisionCoprocessorMessage.Builder message = XTableValues.RequestVisionCoprocessorMessage.newBuilder()
                     .setStart(XTableValues.ControlPoint.newBuilder()
                             .setY(startingPose.getY()) // Set Pose2d Y value.
@@ -87,45 +93,63 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
                             .setX(target.getX()) // Set goal Pose2d X value.
                             .setY(target.getY()) // Set goal Pose2d Y value.
                             .build())
-                    .setSafeDistanceInches(safeDistance.in(Inches));
+                    .setSafeDistanceInches(safeDistance.get().in(Inches));
             if (traversalOptions != null) {
                 message.setOptions(traversalOptions);
             }
             if (additionalArguments != null) {
                 message.setArguments(additionalArguments);
             }
-            curves = commander.requestBezierPathWithOptions(
+            commander.requestBezierPathWithOptionsAsync(
                     message
                             .build(),
-                    3000, TimeUnit.MILLISECONDS); // When should it give up and return
-            // null for any reason?
-
-            if (curves == null) {
-                log.warn("There was not any curves responded from the coprocessor ORIN!");
-                cancel();
-                return;
-            } else {
-                this.setSegmentedBezierCurve(curves, curves.getOptions());
-                XTablesClient client = this.coprocessor.getXTablesManager().getOrNull();
-                if (client != null) {
-                    log.info("Logged bezier curves onto XTABLES.");
-                    client.putBezierCurves("bezier_path", curves);
-                }
-            }
+                    500, TimeUnit.MILLISECONDS, (response) -> {
+                        curves.set(response);
+                        failed.set(false);
+                        coprocessor.setCoprocessorHealthy(true);
+                        XTablesClient client = this.coprocessor.getXTablesManager().getOrNull();
+                        if (client != null) {
+                            log.info("Logged bezier curves onto XTABLES.");
+                            client.putBezierCurves("bezier_path", response);
+                        }
+                    }, (err) -> {
+                        coprocessor.setCoprocessorHealthy(false);
+                        failed.set(true);
+                        curves.set(null);
+                        log.warn("Path drive failed with an error! Reason: {}", err.getMessage());
+                    }); // When should it give up and return
         } else {
             // Use backup Point To Point if settings allow to.
             pointToPoint();
         }
-        super.initialize();
     }
 
     public XTableValues.BezierCurves getCurves() {
-        return curves;
+        return curves.get();
     }
 
     private void pointToPoint() {
         List<XbotSwervePoint> swervePoints =
                 routingCircle.generateSwervePoints(pose.getCurrentPose2d(), target);
         super.logic.setKeyPoints(swervePoints);
+    }
+
+    @Override
+    public void execute() {
+        if(!lock && curves.get() != null && !failed.get()) {
+            XTableValues.BezierCurves c = curves.get();
+            this.setSegmentedBezierCurve(c, c.getOptions());
+            super.initialize();
+            lock = true;
+            return;
+        }
+        if(curves != null && curves.get() != null && !failed.get()) {
+            super.execute();
+        }
+    }
+
+    @Override
+    public boolean isFinished() {
+        return !coprocessor.getIsCoprocessorHealthy() || super.isFinished();
     }
 }

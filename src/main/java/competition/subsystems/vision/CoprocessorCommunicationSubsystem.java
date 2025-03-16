@@ -38,7 +38,7 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
 
     private boolean useBackupPointToPointForPathplanning = false;
 
-
+    private boolean isCoprocessorHealthy = true;
 
     @Inject
     public CoprocessorCommunicationSubsystem(PropertyFactory pf, RobotAssertionManager assertionManager) {
@@ -52,7 +52,7 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
         xTablesClientManager = XTablesClient.getDefaultClientAsynchronously();
         XTablesLogger.setLoggingLevel(Level.OFF);
 
-        this.orinVisionCoprocessorCommander = new VisionCoprocessorCommander(VisionCoprocessor.ORIN3_STATIC);
+        this.orinVisionCoprocessorCommander = new VisionCoprocessorCommander(VisionCoprocessor.LOCALHOST);
     }
 
     public boolean isUseBackupPointToPointForPathplanning() {
@@ -91,6 +91,19 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
 
     public static XTableValues.Alliance fromAlliance(DriverStation.Alliance alliance) {
         return alliance.equals(DriverStation.Alliance.Blue) ? XTableValues.Alliance.BLUE : XTableValues.Alliance.RED;
+    }
+
+    public void setCoprocessorHealthy(boolean coprocessorHealthy) {
+        isCoprocessorHealthy = coprocessorHealthy;
+    }
+
+    public boolean getIsCoprocessorHealthy() {
+        return isCoprocessorHealthy;
+    }
+
+    @Override
+    public void periodic() {
+        aKitLog.record("isCoprocessorHealthy", isCoprocessorHealthy);
     }
 
 }

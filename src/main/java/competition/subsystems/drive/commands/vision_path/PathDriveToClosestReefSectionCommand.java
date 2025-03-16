@@ -65,9 +65,6 @@ public class PathDriveToClosestReefSectionCommand extends PathDriveToLocationCom
         this.setAdditionalArguments(XTableValues.AdditionalArguments.newBuilder()
                 .setAlliance(CoprocessorCommunicationSubsystem.fromAlliance(DriverStation.getAlliance()
                         .orElse(DriverStation.Alliance.Blue))).build());
-        this.setSafeDistance(
-                electricalContract.getDiagonalDistanceDifferenceOfRobotRadius()
-                );
         this.setOptions(XTableValues.TraversalOptions.newBuilder()
                 .setMetersPerSecond(driveSubsystem.getDriveToWaypointsSpeed().get())
                 .setAccelerationMetersPerSecond(driveSubsystem.getMaxAccelerationMetersPerSecondSquared())
