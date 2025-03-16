@@ -14,51 +14,54 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import java.util.function.Supplier;
+import javax.inject.Inject;
+import javax.inject.Provider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.kobe.xbot.Utilities.Entities.XTableValues;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
-import java.util.function.Supplier;
-
 public class PathToNearestStationAndIntakeUntilCollectedCommandGroupFactory {
-
-    Provider<DriveToCoralStationInterstitialCommand> driveToCoralStationSectionCommandProv;
-    Provider<AlignToSpecificHumanLoadingStationCommand> alignToCoralStationCommandProv;
-    Provider<IntakeUntilCoralCollectedCommand> intakeUntilCoralCollectedCommandProv;
+    Provider<DriveToCoralStationInterstitialCommand>
+            driveToCoralStationSectionCommandProv;
+    Provider<AlignToSpecificHumanLoadingStationCommand>
+            alignToCoralStationCommandProv;
+    Provider<IntakeUntilCoralCollectedCommand>
+            intakeUntilCoralCollectedCommandProv;
     Provider<ShoveCoralStationCommand> shoveCoralStationCommandProv;
     PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory;
-    Provider<PathToNearestCoralStationSectionCommand>pathToNearestCoralStationSectionCommandProv;
+    Provider<PathToNearestCoralStationSectionCommand>
+            pathToNearestCoralStationSectionCommandProv;
     PoseSubsystem pose;
     CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem;
     Logger log;
     DriveSubsystem driveSubsystem;
 
-
     @Inject
-    public PathToNearestStationAndIntakeUntilCollectedCommandGroupFactory(Provider<DriveToCoralStationInterstitialCommand>
-                                                                                      driveToCoralStationSectionCommandProv,
-                                                                          Provider<AlignToSpecificHumanLoadingStationCommand>
-                                                                                  alignToCoralStationCommandProv,
-                                                                          PrepCoralSystemCommandGroupFactory
-                                                                                      prepCoralSystemCommandGroupFactory,
-                                                                          Provider<IntakeUntilCoralCollectedCommand>
-                                                                                      intakeUntilCoralCollectedCommandProv,
-                                                                          Provider<ShoveCoralStationCommand>
-                                                                                      shoveCoralStationCommandProv,
-                                                                          Provider<PathToNearestCoralStationSectionCommand>
-                                                                                      pathToNearestCoralStationSectionCommandProv,
-                                                                          PoseSubsystem pose,
-                                                                          CoprocessorCommunicationSubsystem
-                                                                                      coprocessorCommunicationSubsystem,
-                                                                          DriveSubsystem driveSubsystem) {
-        this.driveToCoralStationSectionCommandProv = driveToCoralStationSectionCommandProv;
+    public PathToNearestStationAndIntakeUntilCollectedCommandGroupFactory(
+            Provider<DriveToCoralStationInterstitialCommand>
+                    driveToCoralStationSectionCommandProv,
+            Provider<AlignToSpecificHumanLoadingStationCommand>
+                    alignToCoralStationCommandProv,
+            PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
+            Provider<IntakeUntilCoralCollectedCommand>
+                    intakeUntilCoralCollectedCommandProv,
+            Provider<ShoveCoralStationCommand> shoveCoralStationCommandProv,
+            Provider<PathToNearestCoralStationSectionCommand>
+                    pathToNearestCoralStationSectionCommandProv,
+            PoseSubsystem pose,
+            CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem,
+            DriveSubsystem driveSubsystem) {
+        this.driveToCoralStationSectionCommandProv =
+                driveToCoralStationSectionCommandProv;
         this.alignToCoralStationCommandProv = alignToCoralStationCommandProv;
-        this.prepCoralSystemCommandGroupFactory = prepCoralSystemCommandGroupFactory;
-        this.intakeUntilCoralCollectedCommandProv = intakeUntilCoralCollectedCommandProv;
+        this.prepCoralSystemCommandGroupFactory =
+                prepCoralSystemCommandGroupFactory;
+        this.intakeUntilCoralCollectedCommandProv =
+                intakeUntilCoralCollectedCommandProv;
         this.shoveCoralStationCommandProv = shoveCoralStationCommandProv;
-        this.pathToNearestCoralStationSectionCommandProv = pathToNearestCoralStationSectionCommandProv;
+        this.pathToNearestCoralStationSectionCommandProv =
+                pathToNearestCoralStationSectionCommandProv;
         this.pose = pose;
         this.coprocessorCommunicationSubsystem = coprocessorCommunicationSubsystem;
         this.log = LogManager.getLogger("PATHINGLOG");
@@ -67,48 +70,62 @@ public class PathToNearestStationAndIntakeUntilCollectedCommandGroupFactory {
 
     public ParallelDeadlineGroup create(boolean addPoint) {
         Supplier<Landmarks.CoralStation> coralStationSupplier = () -> {
-
             var station = pose.getClosestCoralStation();
             log.info("initializing station");
             return station;
         };
-        // Overarching command group — preps coral system and drives to coral station at the same time, command group stops if a coral is collected
-        var driveUntilIntake = new ParallelDeadlineGroup(intakeUntilCoralCollectedCommandProv.get());
+        // Overarching command group — preps coral system and drives to coral
+        // station at the same time, command group stops if a coral is collected
+        var driveUntilIntake =
+                new ParallelDeadlineGroup(intakeUntilCoralCollectedCommandProv.get());
 
         // Prep coral system to coral collection
-        var prepCoralSystem = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
+        var prepCoralSystem = prepCoralSystemCommandGroupFactory.create(
+                () -> Landmarks.CoralLevel.COLLECTING);
         driveUntilIntake.addCommands(prepCoralSystem);
 
-        // Drive to coral station using terminal approach, have an interstitial point if needed
+        // Drive to coral station using terminal approach, have an interstitial
+        // point if needed
         var driveToCoralStation = new SequentialCommandGroup();
-        // We can add an interstitial point between scoring at the reef and terminally approaching to the coral station to avoid rotating into the reef
+        // We can add an interstitial point between scoring at the reef and
+        // terminally approaching to the coral station to avoid rotating into the
+        // reef
         if (addPoint) {
-            var driveToCoralStationSectionCommand = driveToCoralStationSectionCommandProv.get();
-            driveToCoralStationSectionCommand.setTargetCoralStationSupplier(coralStationSupplier);
-            driveToCoralStation.addCommands(driveToCoralStationSectionCommand.withTimeout(2.0));
+            var driveToCoralStationSectionCommand =
+                    driveToCoralStationSectionCommandProv.get();
+            driveToCoralStationSectionCommand.setTargetCoralStationSupplier(
+                    coralStationSupplier);
+            driveToCoralStation.addCommands(
+                    driveToCoralStationSectionCommand.withTimeout(2.0));
         }
         var alignToCoralStationCommand = alignToCoralStationCommandProv.get();
         var shoveCoralStationCommand = shoveCoralStationCommandProv.get();
-        alignToCoralStationCommand.setTargetCoralStationSupplier(coralStationSupplier);
+        alignToCoralStationCommand.setTargetCoralStationSupplier(
+                coralStationSupplier);
 
         driveToCoralStation.addCommands(alignToCoralStationCommand);
         shoveCoralStationCommand.setShoveAngleSupplier(coralStationSupplier);
 
         var pathOrDriveToStation = new SequentialCommandGroup();
-        var pathToNearestStation = pathToNearestCoralStationSectionCommandProv.get();
-        pathToNearestStation.setOptions(XTableValues.TraversalOptions.newBuilder()
-                        .setMetersPerSecond(driveSubsystem.getMaxTargetSpeedMetersPerSecond())
-                        .setAccelerationMetersPerSecond(driveSubsystem.getMaxAccelerationMetersPerSecondSquared())
-                .build());
-        var driveToStationAndShove = driveToCoralStation.andThen(shoveCoralStationCommand.withTimeout(4));
+        var pathToNearestStation =
+                pathToNearestCoralStationSectionCommandProv.get();
+        pathToNearestStation.setOptions(
+                XTableValues.TraversalOptions.newBuilder()
+                        .setMetersPerSecond(
+                                driveSubsystem.getMaxTargetSpeedMetersPerSecond())
+                        .setAccelerationMetersPerSecond(
+                                driveSubsystem.getMaxAccelerationMetersPerSecondSquared())
+                        .build());
+        var driveToStationAndShove =
+                driveToCoralStation.andThen(shoveCoralStationCommand.withTimeout(4));
         pathOrDriveToStation.addCommands(pathToNearestStation);
         var fallBack = new ConditionalCommand(
                 new WaitCommand(0), driveToStationAndShove, () -> {
-                    var isHealthy  = coprocessorCommunicationSubsystem.getIsCoprocessorHealthy();
-                    log.info("isHealthy", isHealthy);
-                    return isHealthy;
-                }
-        );
+            var isHealthy =
+                    coprocessorCommunicationSubsystem.getIsCoprocessorHealthy();
+            log.info("isHealthy", isHealthy);
+            return isHealthy;
+        });
         pathOrDriveToStation.addCommands(fallBack);
         driveUntilIntake.addCommands(pathOrDriveToStation);
 
