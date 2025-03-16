@@ -49,15 +49,18 @@ public class DriveToFaceAndScoreCommandGroupFactory {
                                          Landmarks.CoralLevel targetLevel) {
         // Overarching command group — drives to branch and preps coral system once the robot is close enough to the reef, scores when ready
         var driveToFaceAndScoreCommandGroup = new SequentialCommandGroup();
+        driveToFaceAndScoreCommandGroup.setName("DriveToFaceAndScore");
 
         // Drive to a branch while prepping the coral system once the robot is close enough
         var driveToBranchWhilePrepping = new ParallelCommandGroup();
+        driveToBranchWhilePrepping.setName("DriveToBranchWhilePrepping");
 
         // Terminally approach to branch
         var driveToReefFaceThenAlign = driveToReefFaceThenAlignCommandGroupFactory.create(targetReefFace, targetBranch);
 
         // Prep coral system once robot is within a distance threshold
         var measureDistanceThenPrep = new SequentialCommandGroup();
+        measureDistanceThenPrep.setName("MeasureDistanceThenPrep");
         Distance distanceThresholdInMeters = switch (targetLevel) { // Distance threshold may be much bigger for lower levels
             case ONE -> levelOneDistanceThreshold.get();
             case TWO -> levelTwoDistanceThreshold.get();

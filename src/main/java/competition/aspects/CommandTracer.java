@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
+import xbot.common.command.BaseMaintainerCommand;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,9 +20,11 @@ public class CommandTracer {
             "|| execution(* edu.wpi.first.wpilibj2.command.Command+.execute(..))")
     public void createCommandAlert(JoinPoint joinPoint) {
         if (!runningCommandAlerts.containsKey((Command)joinPoint.getThis())) {
-            var alert = new Alert("RunningCommands", ((Command)joinPoint.getThis()).getName(), Alert.AlertType.kInfo);
+            var command = (Command)joinPoint.getThis();
+            var alertType = command instanceof BaseMaintainerCommand<?> ? Alert.AlertType.kWarning : Alert.AlertType.kInfo;
+            var alert = new Alert("RunningCommands", command.getName(), alertType);
             alert.set(true);
-            runningCommandAlerts.put((Command)joinPoint.getThis(), alert);
+            runningCommandAlerts.put(command, alert);
         }
     }
 
