@@ -29,6 +29,7 @@ public class PrepAlgaeSystemCommandGroupFactory extends ParallelCommandGroup {
 
     public ParallelCommandGroup create(AlgaeArmSubsystem.AlgaeArmPositions algaeArmPositions) {
         var group  = new ParallelCommandGroup();
+        group.setName("PrepAlgaeSystemCommandGroup");
 
         var setAlgaeArmSetpointToTarget = setAlgaeArmSetpointToTargetPositionProvider.get();
         setAlgaeArmSetpointToTarget.setTargetPosition(algaeArmPositions);

@@ -34,6 +34,7 @@ public class PathDriveToCoralStationAndIntakeUntilCollected {
 
     public ParallelDeadlineGroup create() {
         var driveToCoralStationSectionWhilePrepping = new ParallelCommandGroup();
+        driveToCoralStationSectionWhilePrepping.setName("DriveToCoralStationSectionWhilePrepping");
         PathDriveToNearestCoralStationSectionCommandCommand pathDriveToNearestCoralStationSectionCommand = driveToCoralStationSectionCommandProvider.get();
         DriveVectorSmallCommand driveVectorSmallCommand = driveVectorSmallCommandProvider.get();
 
@@ -45,6 +46,7 @@ public class PathDriveToCoralStationAndIntakeUntilCollected {
                 }),
                 driveVectorSmallCommand
         );
+        driveToCoralStationThenDriveForward.setName("DriveToCoralStationThenDriveForward");
         var prepCoralSystem = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
         driveToCoralStationSectionWhilePrepping.addCommands(driveToCoralStationThenDriveForward, prepCoralSystem);
         IntakeUntilCoralCollectedCommand intakeUntilCoralCollectedCommand = intakeUntilCoralCollectedCommandProvider.get();
