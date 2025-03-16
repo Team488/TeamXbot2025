@@ -63,7 +63,6 @@ public class PoseSubsystem extends BasePoseSubsystem {
 
     public static final Distance fieldXMidpointInMeters = Meters.of(8.7785);
     public static final Distance fieldYMidpointInMeters = Meters.of(4.025);
-    private boolean areVisionUpdatesDisabled = false;
 
     protected Optional<SwerveModulePosition[]> simulatedModulePositions = Optional.empty();
 
@@ -119,11 +118,13 @@ public class PoseSubsystem extends BasePoseSubsystem {
     }
 
     private <T> PoseEstimator<T> getPrimaryPoseEstimator() {
-        return (PoseEstimator<T>)(this.useDeadwheelAssistedPose.get() ? this.fullDeadwheelOdometry : this.fullSwerveOdometry);
+        return (PoseEstimator<T>) (this.useDeadwheelAssistedPose.get() ? this.fullDeadwheelOdometry
+                : this.fullSwerveOdometry);
     }
 
     private <T> PoseEstimator<T> getPrimaryOdometryOnlyPoseEstimator() {
-        return (PoseEstimator<T>)(this.useDeadwheelAssistedPose.get() ? this.onlyWheelsGyroSwerveOdometry : this.onlyDeadwheelOdometry);
+        return (PoseEstimator<T>) (this.useDeadwheelAssistedPose.get() ? this.onlyWheelsGyroSwerveOdometry
+                : this.onlyDeadwheelOdometry);
     }
 
     private boolean shouldAlsoUpdateFullSwerve() {
@@ -133,21 +134,19 @@ public class PoseSubsystem extends BasePoseSubsystem {
     private void updateOdometryWithVision() {
         // Also update full swerve if we should add swerve and it's not already being
         // updated.
-        if (!areVisionUpdatesDisabled) {
-            this.aprilTagVisionSubsystem.getAllPoseObservations().forEach(observation -> {
-                this.getPrimaryPoseEstimator().addVisionMeasurement(
+        this.aprilTagVisionSubsystem.getAllPoseObservations().forEach(observation -> {
+            this.getPrimaryPoseEstimator().addVisionMeasurement(
+                    observation.visionRobotPoseMeters(),
+                    observation.timestampSeconds(),
+                    observation.visionMeasurementStdDevs());
+
+            if (this.shouldAlsoUpdateFullSwerve()) {
+                this.fullSwerveOdometry.addVisionMeasurement(
                         observation.visionRobotPoseMeters(),
                         observation.timestampSeconds(),
                         observation.visionMeasurementStdDevs());
-
-                if (this.shouldAlsoUpdateFullSwerve()) {
-                    this.fullSwerveOdometry.addVisionMeasurement(
-                            observation.visionRobotPoseMeters(),
-                            observation.timestampSeconds(),
-                            observation.visionMeasurementStdDevs());
-                }
-            });
-        }
+            }
+        });
     }
 
     @Override
@@ -224,11 +223,16 @@ public class PoseSubsystem extends BasePoseSubsystem {
         aKitLog.record("DeadWheelPosition", deadWheelPosition);
         batchedPushRequests.putPose2d(xtablesPrefix + ".DeadWheelPose", deadWheelPosition);
 
-        Pose2d robotPose = this.useVisionAssistedPose.get() && !preferOdometryToVision ? visionEnhancedPosition : estimatedPosition;
-        batchedPushRequests.putDouble(xtablesPrefix + ".DeadWheelPose.Right", this.deadWheelSubsystem.getRightAdjustedDistance().in(Meters));
-        batchedPushRequests.putDouble(xtablesPrefix + ".DeadWheelPose.Left", this.deadWheelSubsystem.getLeftAdjustedDistance().in(Meters));
-        batchedPushRequests.putDouble(xtablesPrefix + ".DeadWheelPose.Front", this.deadWheelSubsystem.getFrontAdjustedDistance().in(Meters));
-        batchedPushRequests.putDouble(xtablesPrefix + ".DeadWheelPose.Rear", this.deadWheelSubsystem.getRearAdjustedDistance().in(Meters));
+        Pose2d robotPose = this.useVisionAssistedPose.get() && !preferOdometryToVision ? visionEnhancedPosition
+                : estimatedPosition;
+        batchedPushRequests.putDouble(xtablesPrefix + ".DeadWheelPose.Right",
+                this.deadWheelSubsystem.getRightAdjustedDistance().in(Meters));
+        batchedPushRequests.putDouble(xtablesPrefix + ".DeadWheelPose.Left",
+                this.deadWheelSubsystem.getLeftAdjustedDistance().in(Meters));
+        batchedPushRequests.putDouble(xtablesPrefix + ".DeadWheelPose.Front",
+                this.deadWheelSubsystem.getFrontAdjustedDistance().in(Meters));
+        batchedPushRequests.putDouble(xtablesPrefix + ".DeadWheelPose.Rear",
+                this.deadWheelSubsystem.getRearAdjustedDistance().in(Meters));
         aKitLog.record("RobotPose", robotPose);
         batchedPushRequests.putPose2d(xtablesPrefix + ".RobotPose", robotPose);
 
@@ -273,10 +277,8 @@ public class PoseSubsystem extends BasePoseSubsystem {
      */
     public Command getResetTranslationToVisionEstimateCommand() {
         return new InstantCommand(() -> {
-            var fullOdometry = this.useDeadwheelAssistedPose.get() ? this.fullDeadwheelOdometry
-                    : this.fullSwerveOdometry;
             var estimatedPose = new Pose2d(
-                    fullOdometry.getEstimatedPosition().getTranslation(),
+                    this.getPrimaryPoseEstimator().getEstimatedPosition().getTranslation(),
                     getCurrentHeadingGyroOnly());
             resetPoseEstimator(estimatedPose);
         }).ignoringDisable(true);
@@ -295,7 +297,9 @@ public class PoseSubsystem extends BasePoseSubsystem {
 
     private void resetPoseEstimator(Pose2d pose) {
         this.fullSwerveOdometry.resetPose(pose);
+        this.fullDeadwheelOdometry.resetPose(pose);
         this.onlyWheelsGyroSwerveOdometry.resetPose(pose);
+        this.onlyDeadwheelOdometry.resetPose(pose);
         this.deadWheelSubsystem.resetPose(pose);
     }
 
@@ -384,16 +388,18 @@ public class PoseSubsystem extends BasePoseSubsystem {
                 this.getPrimaryPoseEstimator().getEstimatedPosition().getTranslation(),
                 this.getPrimaryPoseEstimator().getEstimatedPosition().getRotation())
                 : new Pose2d(
-                             this.getPrimaryOdometryOnlyPoseEstimator().getEstimatedPosition().getTranslation(),
-                             this.getPrimaryOdometryOnlyPoseEstimator().getEstimatedPosition().getRotation());
+                        this.getPrimaryOdometryOnlyPoseEstimator().getEstimatedPosition().getTranslation(),
+                        this.getPrimaryOdometryOnlyPoseEstimator().getEstimatedPosition().getRotation());
     }
 
     @Override
     public WrappedRotation2d getCurrentHeading() {
         if (useVisionAssistedPose.get()) {
-            return WrappedRotation2d.fromRotation2d(this.getPrimaryPoseEstimator().getEstimatedPosition().getRotation());
+            return WrappedRotation2d
+                    .fromRotation2d(this.getPrimaryPoseEstimator().getEstimatedPosition().getRotation());
         } else {
-            return WrappedRotation2d.fromRotation2d(this.getPrimaryOdometryOnlyPoseEstimator().getEstimatedPosition().getRotation());
+            return WrappedRotation2d
+                    .fromRotation2d(this.getPrimaryOdometryOnlyPoseEstimator().getEstimatedPosition().getRotation());
         }
     }
 
@@ -434,10 +440,12 @@ public class PoseSubsystem extends BasePoseSubsystem {
         double currentAngleInDegrees;
         if (useVisionAssistedPose.get()) {
             currentAngleInDegrees = PoseSubsystem
-                .convertBlueToRedIfNeeded(this.getPrimaryPoseEstimator().getEstimatedPosition().getRotation()).getDegrees();
+                    .convertBlueToRedIfNeeded(this.getPrimaryPoseEstimator().getEstimatedPosition().getRotation())
+                    .getDegrees();
         } else {
             currentAngleInDegrees = PoseSubsystem
-                .convertBlueToRedIfNeeded(this.getPrimaryOdometryOnlyPoseEstimator().getEstimatedPosition().getRotation())
+                    .convertBlueToRedIfNeeded(
+                            this.getPrimaryOdometryOnlyPoseEstimator().getEstimatedPosition().getRotation())
                     .getDegrees();
         }
 
