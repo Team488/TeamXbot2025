@@ -3,21 +3,20 @@ package competition.auto_programs.vision;
 import competition.auto_programs.BaseAutonomousSequentialCommandGroup;
 import competition.commandgroups.DriveToFaceAndScoreCommandGroupFactory;
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
+import competition.commandgroups.vision_path.PathDriveToCoralStationAndIntakeUntilCollected;
 import competition.commandgroups.vision_path.PathDriveToLocationAndIntakeUntilCollected;
 import competition.commandgroups.vision_path.PathToFaceAndScoreCommandGroupFactory;
+import competition.electrical_contract.ElectricalContract;
 import competition.simulation.BaseSimulator;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import org.kobe.xbot.Utilities.Entities.XTableValues;
 import xbot.common.subsystems.autonomous.AutonomousCommandSelector;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -70,104 +69,231 @@ public class LeftFourCoralAuto extends BaseAutonomousSequentialCommandGroup {
                     ))
                     .build())
             .build();
+    XTableValues.BezierCurves blueCageOneStartingLineToFarLeftBranchA = XTableValues.BezierCurves.newBuilder()
+            .setOptions(XTableValues.TraversalOptions.newBuilder()
+                    .setFinalRotationDegrees(-120.00)
+                    .build())
+            .addCurves(0, XTableValues.BezierCurve.newBuilder()
+                    .addAllControlPoints(List.of(
+                            XTableValues.ControlPoint.newBuilder()
+                                    .setX(7.1217391304347837)
+                                    .setY(7.2348101265822793)
+                                    .build(),
+                            XTableValues.ControlPoint.newBuilder()
+                                    .setX(5.0869565217391308)
+                                    .setY(5.1968354430379753)
+                                    .build(),
+                            XTableValues.ControlPoint.newBuilder()
+                                    .setX(4.9852173913043485)
+                                    .setY(5.1968354430379753)
+                                    .build()
+
+
+
+                    ))
+                    .build())
+            .build();
+    XTableValues.BezierCurves farLeftAToCoralStationBlue = XTableValues.BezierCurves.newBuilder()
+            .setOptions(XTableValues.TraversalOptions.newBuilder()
+                    .setFinalRotationDegrees(-54)
+                    .build())
+            .addCurves(0, XTableValues.BezierCurve.newBuilder()
+                    .addAllControlPoints(List.of(
+                            XTableValues.ControlPoint.newBuilder()
+                                    .setX(4.9852173913043485)
+                                    .setY(5.1968354430379753)
+                                    .build(),
+                            XTableValues.ControlPoint.newBuilder()
+                                    .setX(3.179347826086957)
+                                    .setY(7.0055379746835449)
+                                    .build(),
+                            XTableValues.ControlPoint.newBuilder()
+                                    .setX(1.1191304347826088)
+                                    .setY(7.0055379746835449)
+                                    .build()
+
+
+
+                    ))
+                    .build())
+            .build();
+    XTableValues.BezierCurves blueLeftCoralStationToCloseLeftBranchA = XTableValues.BezierCurves.newBuilder()
+            .setOptions(XTableValues.TraversalOptions.newBuilder()
+                    .setFinalRotationDegrees(-60.00)
+                    .build())
+            .addCurves(0, XTableValues.BezierCurve.newBuilder()
+                    .addAllControlPoints(List.of(
+                            XTableValues.ControlPoint.newBuilder()
+                                    .setX(1.1191304347826088)
+                                    .setY(7.0055379746835449)
+                                    .build(),
+                            XTableValues.ControlPoint.newBuilder()
+                                    .setX(2.9250000000000003)
+                                    .setY(5.1968354430379753)
+                                    .build(),
+                            XTableValues.ControlPoint.newBuilder()
+                                    .setX(3.9678260869565221)
+                                    .setY(5.1968354430379753)
+                                    .build()
+                    ))
+                    .build())
+            .build();
+    XTableValues.BezierCurves blueCloseLeftBranchAToLeftCoralStation = XTableValues.BezierCurves.newBuilder()
+            .setOptions(XTableValues.TraversalOptions.newBuilder()
+                    .setFinalRotationDegrees(-54)
+                    .build())
+            .addCurves(0, XTableValues.BezierCurve.newBuilder()
+                    .addAllControlPoints(List.of(
+                            XTableValues.ControlPoint.newBuilder()
+                                    .setX(3.9678260869565221)
+                                    .setY(5.1968354430379753)
+                                    .build(),
+                            XTableValues.ControlPoint.newBuilder()
+                                    .setX(2.1619565217391306)
+                                    .setY(7.0055379746835449)
+                                    .build(),
+                            XTableValues.ControlPoint.newBuilder()
+                                    .setX(1.1191304347826088)
+                                    .setY(7.0055379746835449)
+                                    .build()
+                    ))
+                    .build())
+            .build();
+    XTableValues.BezierCurves blueLeftCoralStationToCloseBranchA = XTableValues.BezierCurves.newBuilder()
+            .setOptions(XTableValues.TraversalOptions.newBuilder()
+                    .setFinalRotationDegrees(0)
+                    .build())
+            .addCurves(0, XTableValues.BezierCurve.newBuilder()
+                    .addAllControlPoints(List.of(
+                            XTableValues.ControlPoint.newBuilder()
+                                    .setX(1.1191304347826088)
+                                    .setY(7.0055379746835449)
+                                    .build(),
+
+                            XTableValues.ControlPoint.newBuilder()
+                                    .setX(3.179347826086957)
+                                    .setY(4.9420886075949371)
+                                    .build(),
+                            XTableValues.ControlPoint.newBuilder()
+                                    .setX(3.179347826086957)
+                                    .setY(4.1778481012658233)
+                                    .build()
+                    ))
+                    .build())
+            .build();
+    XTableValues.BezierCurves blueCloseBranchAToLeftCoralStation = XTableValues.BezierCurves.newBuilder()
+            .setOptions(XTableValues.TraversalOptions.newBuilder()
+                    .setFinalRotationDegrees(-54)
+                    .build())
+            .addCurves(0, XTableValues.BezierCurve.newBuilder()
+                    .addAllControlPoints(List.of(
+                            XTableValues.ControlPoint.newBuilder()
+                                    .setX(3.179347826086957)
+                                    .setY(4.1778481012658233)
+                                    .build(),
+
+                            XTableValues.ControlPoint.newBuilder()
+                                    .setX(3.179347826086957)
+                                    .setY(4.9420886075949371)
+                                    .build(),
+                            XTableValues.ControlPoint.newBuilder()
+                                    .setX(1.1191304347826088)
+                                    .setY(7.0055379746835449)
+                                    .build()
+                    ))
+                    .build())
+            .build();
     @Inject
-    public LeftFourCoralAuto(AutonomousCommandSelector autoSelector,
+    public LeftFourCoralAuto(
+            AprilTagFieldLayout aprilTagFieldLayout,
+            ElectricalContract electricalContract,
+            AutonomousCommandSelector autoSelector,
                              PoseSubsystem pose,
+                             Provider<PathDriveToCoralStationAndIntakeUntilCollected> driveToStationAndIntakeFactProv,
                              DriveToFaceAndScoreCommandGroupFactory driveToFaceAndScoreFact,
                              Provider<PathToFaceAndScoreCommandGroupFactory> driveToFaceAndScoreFactProv,
                              Provider<PathDriveToLocationAndIntakeUntilCollected> pathDriveToLocationAndIntakeUntilCollectedProvider,
                              PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFact,
                              BaseSimulator simulator) {
-        super(autoSelector);
 
+        super(autoSelector);
         var initializeStateCommand = pose.createSetPositionCommand(
                         () -> PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueCageOneStartingLine)
                 )
                 .alongWith(new InstantCommand(() -> simulator.resetPosition(PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueCageOneStartingLine))));
         this.addCommands(initializeStateCommand);
+
+        // Score 1
+
+//        getDriveAndScoreStatusMessageCommand(Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR);
+//        var driveAndScoreFarRightBranchBLevelFour = driveToFaceAndScoreFactProv.get().create(
+//                        Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR, blueCageOneStartingLineToFarLeftBranchA)
+//                .alongWith(getDriveAndScoreStatusMessageCommand(Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR));
+//        this.addCommands(driveAndScoreFarRightBranchBLevelFour);
         getDriveAndScoreStatusMessageCommand(Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR);
-
-
         var driveAndScoreFarLeftBranchBLevelFour = driveToFaceAndScoreFact.create(
                         Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR)
                 .alongWith(getDriveAndScoreStatusMessageCommand(Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR));
         this.addCommands(driveAndScoreFarLeftBranchBLevelFour);
 
-        if(DriverStation.getAlliance().orElse(DriverStation.Alliance.Red).equals(DriverStation.Alliance.Blue)) {
-            var driveToLeftStation = pathDriveToLocationAndIntakeUntilCollectedProvider.get().create(transformBezierCurve(farLeftBToCoralStation))
-                    .alongWith(
-                            getDriveAndIntakeStatusMessageCommand(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.MID));
-            this.addCommands(driveToLeftStation);
-        } else {
-            var driveToLeftStation = pathDriveToLocationAndIntakeUntilCollectedProvider.get().create(farLeftBToCoralStation)
-                    .alongWith(
-                            getDriveAndIntakeStatusMessageCommand(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.MID));
-            this.addCommands(driveToLeftStation);
-        }
-
-
-
-        var driveAndScoreCloseRightBranchBLevelFour = driveToFaceAndScoreFactProv.get().create(
-                        Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR, leftCoralStationToCloseLeftA)
+        // Coral Station
+        var driveToLeftStation = pathDriveToLocationAndIntakeUntilCollectedProvider.get().create(farLeftAToCoralStationBlue)
                 .alongWith(
-                        getDriveAndScoreStatusMessageCommand(Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR));
-        this.addCommands(driveAndScoreCloseRightBranchBLevelFour);
+                        getDriveAndIntakeStatusMessageCommand(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.MID));
+        this.addCommands(driveToLeftStation);
 
-//        // Drive to right coral station, close section and intake coral until collected
-//        var driveToRightStationAndIntakeSecond = driveToStationAndIntakeFactProv.get().create()
+        // Score 2
+//        var driveAndScoreCloseRightBranchBLevelFour = driveToFaceAndScoreFactProv.get().create(
+//                        Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR, blueLeftCoralStationToCloseLeftBranchA)
 //                .alongWith(
-//                        getDriveAndIntakeStatusMessageCommand(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.MID));
-//        this.addCommands(driveToRightStationAndIntakeSecond);
-//
-//        // Drive to close right, branch A and score level four
-//        var driveAndScoreCloseRightBranchALevelFour = driveToFaceAndScoreFactProv.get().create(
-//                        Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR)
+//                        getDriveAndScoreStatusMessageCommand(Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR));
+//        this.addCommands(driveAndScoreCloseRightBranchBLevelFour);
+        var driveAndScoreCloseLeftBranchBLevelFour = driveToFaceAndScoreFact.create(
+                        Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR)
+                .alongWith(getDriveAndScoreStatusMessageCommand(Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR));
+        this.addCommands(driveAndScoreCloseLeftBranchBLevelFour);
+
+        // Coral Station
+        var driveToRightStationAndIntakeSecond = pathDriveToLocationAndIntakeUntilCollectedProvider.get().create(blueCloseLeftBranchAToLeftCoralStation)
+                .alongWith(
+                        getDriveAndIntakeStatusMessageCommand(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.MID));
+        this.addCommands(driveToRightStationAndIntakeSecond);
+
+
+        // Score 3
+//        var driveAndScoreCloseaBranchALevelFour = driveToFaceAndScoreFactProv.get().create(
+//                        Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR, blueLeftCoralStationToCloseLeftBranchA)
 //                .alongWith(
 //                        getDriveAndScoreStatusMessageCommand(Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR));
-//        this.addCommands(driveAndScoreCloseRightBranchALevelFour);
-//
-//        // Drive to right coral station, far section and intake coral until collected again
-//        var driveToRightStationAndIntakeThird = driveToStationAndIntakeFactProv.get().create()
-//                .alongWith(
-//                        getDriveAndIntakeStatusMessageCommand(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.MID));
-//        this.addCommands(driveToRightStationAndIntakeThird);
-//
-//        // Drive to close, branch A and score level four
+//        this.addCommands(driveAndScoreCloseaBranchALevelFour);
+        var driveAndScoreCloseLeftBranchALevelFour = driveToFaceAndScoreFact.create(
+                        Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR)
+                .alongWith(
+                        getDriveAndScoreStatusMessageCommand(Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR));
+        this.addCommands(driveAndScoreCloseLeftBranchALevelFour);
+
+        // Coral Station
+        var driveToLeftStationAndIntakeSecond = pathDriveToLocationAndIntakeUntilCollectedProvider.get().create(blueCloseLeftBranchAToLeftCoralStation)
+                .alongWith(
+                        getDriveAndIntakeStatusMessageCommand(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.MID));
+        this.addCommands(driveToLeftStationAndIntakeSecond);
+
+        // Score 4
 //        var driveAndScoreCloseBranchALevelFour = driveToFaceAndScoreFactProv.get().create(
-//                        Landmarks.ReefFace.CLOSE, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR)
+//                        Landmarks.ReefFace.CLOSE, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR, blueLeftCoralStationToCloseBranchA)
 //                .alongWith(
 //                        getDriveAndScoreStatusMessageCommand(Landmarks.ReefFace.CLOSE, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR));
 //        this.addCommands(driveAndScoreCloseBranchALevelFour);
-//
-//        var driveToRightStationAndIntakeFinal = driveToStationAndIntakeFactProv.get().create()
-//                .alongWith(
-//                        getDriveAndIntakeStatusMessageCommand(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.MID));
-//        this.addCommands(driveToRightStationAndIntakeFinal);
+        var driveAndScoreCloseBranchALevelFour = driveToFaceAndScoreFact.create(
+                        Landmarks.ReefFace.CLOSE, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR)
+                .alongWith(
+                        getDriveAndScoreStatusMessageCommand(Landmarks.ReefFace.CLOSE, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR));
+        this.addCommands(driveAndScoreCloseBranchALevelFour);
+
+        // Home
+        var homed = pathDriveToLocationAndIntakeUntilCollectedProvider.get().create(blueCloseBranchAToLeftCoralStation)
+                .alongWith(
+                        getDriveAndIntakeStatusMessageCommand(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.MID));
+        this.addCommands(homed);
     }
-
-    public static XTableValues.BezierCurves transformBezierCurve(XTableValues.BezierCurves curve) {
-        XTableValues.BezierCurves.Builder updatedCurve = curve.toBuilder();
-
-        for (int i = 0; i < updatedCurve.getCurvesCount(); i++) {
-            XTableValues.BezierCurve.Builder updatedBezier = updatedCurve.getCurves(i).toBuilder();
-            List<XTableValues.ControlPoint> updatedPoints = new ArrayList<>();
-
-            for (XTableValues.ControlPoint point : updatedBezier.getControlPointsList()) {
-                Pose2d transformedPose = PoseSubsystem.convertBluetoRed(new Pose2d(point.getX(), point.getY(),
-                        new Rotation2d(0)));
-                XTableValues.ControlPoint transformedPoint = XTableValues.ControlPoint.newBuilder()
-                        .setX(transformedPose.getX())
-                        .setY(transformedPose.getY())
-                        .build();
-                updatedPoints.add(transformedPoint);
-            }
-
-            updatedBezier.clearControlPoints();
-            updatedBezier.addAllControlPoints(updatedPoints);
-            updatedCurve.setCurves(i, updatedBezier);
-        }
-
-        return updatedCurve.build();
-    }
-
 }

@@ -43,20 +43,20 @@ public class PathDriveToLocationAndIntakeUntilCollected {
         var driveToCoralStationSectionWhilePrepping = new ParallelCommandGroup();
         PathDriveToLocationCommand pathDriveToLocationCommand = pathDriveToLocationCommandProvider.get();
 
-        pathDriveToLocationCommand.setOverriddenPath(override);
         DriveVectorSmallCommand driveVectorSmallCommand = driveVectorSmallCommandProvider.get();
+        pathDriveToLocationCommand.setOverriddenPath(override);
         Angle finalDegrees = Degrees.of(override.hasOptions() ? override.getOptions()
                 .hasFinalRotationDegrees() ? override.getOptions().getFinalRotationDegrees() : 0 : 0);
         pathDriveToLocationCommand.setOptions(XTableValues.TraversalOptions.newBuilder()
                 .setFinalRotationDegrees(finalDegrees.in(Degrees))
                 .build());
-        var driveToCoralStationThenDriveForward = new SequentialCommandGroup(
+        SequentialCommandGroup driveToCoralStationThenDriveForward = new SequentialCommandGroup(
                 pathDriveToLocationCommand,
                 new InstantCommand(() -> {
                     Angle targetAngle = finalDegrees.plus(Degrees.of(180));
                     driveVectorSmallCommand.setTargetAngle(targetAngle);
                 }),
-                driveVectorSmallCommand.withTimeout(1)
+                driveVectorSmallCommand
         );
         var prepCoralSystem = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
         driveToCoralStationSectionWhilePrepping.addCommands(driveToCoralStationThenDriveForward, prepCoralSystem);

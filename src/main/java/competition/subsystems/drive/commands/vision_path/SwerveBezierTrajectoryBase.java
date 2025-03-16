@@ -12,7 +12,6 @@ import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.drive.BaseSwerveDriveSubsystem;
 import xbot.common.subsystems.drive.SwervePointKinematics;
 import xbot.common.subsystems.drive.SwerveSimpleBezierCommand;
-import xbot.common.subsystems.drive.SwerveSimpleTrajectoryCommand;
 import xbot.common.subsystems.drive.SwerveSimpleTrajectoryMode;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
 import xbot.common.subsystems.pose.BasePoseSubsystem;
@@ -92,7 +91,7 @@ public class SwerveBezierTrajectoryBase extends SwerveSimpleBezierCommand {
         this.logic.setVelocityMode(
                 SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
         this.logic.setGlobalKinematicValues(
-                new SwervePointKinematics(acceleration, 0, 0, speed));
+                new SwervePointKinematics(acceleration, 0, 1, speed));
         // Total number of segments and steps.
         int totalSegments = bezierCurves.getCurvesList().size();
         int totalSteps = totalSegments * STEPS_PER_SEGMENT;

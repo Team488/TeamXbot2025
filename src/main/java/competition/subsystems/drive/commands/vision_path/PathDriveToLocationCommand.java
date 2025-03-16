@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
 
 public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
     Pose2d target;
@@ -30,6 +31,8 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
     private final VisionCoprocessorCommander commander;
     private XTableValues.TraversalOptions traversalOptions;
     private DistanceProperty safeDistance;
+
+    private DistanceProperty distanceToGoalAndFinish;
     private final ReefRoutingCircle routingCircle;
     private XTableValues.AdditionalArguments additionalArguments;
 
@@ -55,6 +58,8 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
         routingCircle = new ReefRoutingCircle(center, 2);
         pf.setPrefix("PathDriveToLocationCommand");
         this.safeDistance = pf.createPersistentProperty("SafeDistanceInches", Inches.of(0.5));
+        this.distanceToGoalAndFinish = pf.createPersistentProperty("DistanceToGoalThenFinish", Inches.of(5));
+
     }
 
     public PathDriveToLocationCommand setTarget(Pose2d target) {
@@ -107,7 +112,7 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
                 commander.requestBezierPathWithOptionsAsync(
                         message
                                 .build(),
-                        500, TimeUnit.MILLISECONDS, (response) -> {
+                        3000, TimeUnit.MILLISECONDS, (response) -> {
                             curves.set(response);
                             failed.set(false);
                             coprocessor.setCoprocessorHealthy(true);
@@ -162,6 +167,12 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
 
     @Override
     public boolean isFinished() {
-        return !coprocessor.getIsCoprocessorHealthy() || super.isFinished();
+        distanceToGoalAndFinish.get();
+        XTableValues.BezierCurves c = curves.get();
+        XTableValues.BezierCurve lastCurve = c.getCurves(c.getCurvesCount() - 1);
+        XTableValues.ControlPoint lastPoint = lastCurve.getControlPoints(lastCurve.getControlPointsCount() - 1);
+        return super.isFinished() || pose.getCurrentPose2d().getTranslation().getDistance(
+                new Translation2d(lastPoint.getX(), lastPoint.getY())
+        ) <= distanceToGoalAndFinish.get().in(Meters);
     }
 }
