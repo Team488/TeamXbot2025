@@ -26,10 +26,11 @@ import xbot.common.properties.Property.PropertyLevel;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import java.util.Optional;
+
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Hertz;
 import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
@@ -76,6 +77,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     public final DistanceProperty trimValue;
     public final DistanceProperty trimChangeAmount;
 
+    public final DoubleProperty laserCanMaxMeasurementLatency;
+
     public final XDigitalInput bottomSensor;
     public final XLaserCAN distanceSensor;
 
@@ -102,7 +105,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         baseHeight = pf.createPersistentProperty("baseHeight", Inches.of(0));
         trimValue = pf.createPersistentProperty("trimValue",Inches.of(0));
         trimChangeAmount = pf.createPersistentProperty("TrimUpAmount", Inches.of(1));
-
+        laserCanMaxMeasurementLatency = pf.createPersistentProperty("laserCanMaxMeasurementLatency-S", 0.04);
 
 
         //to be tuned
@@ -192,28 +195,46 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         }
     }
 
-    public void markElevatorAsCalibratedAgainstLowerLimit() {
-        isCalibrated = true;
-        if (this.masterMotor != null) {
-            laserCANPositionOffset.mut_replace(getRawLaserDistance());
-            elevatorMotorPositionOffset.mut_replace(getRawMotorAngle().copy());
-        } else {
-            laserCANPositionOffset.mut_replace(Meters.zero());
-            elevatorMotorPositionOffset.mut_replace(Rotations.zero());
-        }
+    private boolean trySetLaserCANOffset() {
+        var distance = getRawLaserDistance();
+        distance.ifPresent(laserCANPositionOffset::mut_replace);
+        return distance.isPresent();
     }
 
-    private void calibrateElevatorMotorOffsetViaLaserCAN() {
-        var laserDistance = getCalibratedLaserDistance();
+    private boolean trySetMotorOffset() {
         var motorRotations = getRawMotorAngle();
-        var motorRotationsToZero = Rotations.of(laserDistance.in(Meters) / getMetersPerRotation().in(Meters));
-        elevatorMotorPositionOffset.mut_replace(motorRotations.minus(motorRotationsToZero));
+        if (motorRotations != null) {
+            elevatorMotorPositionOffset.mut_replace(motorRotations);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean tryMarkElevatorCalibratedAgainstLowerLimit() {
+        var success = trySetLaserCANOffset() && trySetMotorOffset();
+        if (success) {
+            isCalibrated = true;
+        }
+        return success;
+    }
+
+    private boolean tryCalibrateMotorOffsetViaLaserCAN() {
+        if (!isCalibrated) {
+            return false;
+        }
+        var laserDistance = getCalibratedLaserDistance();
+        laserDistance.ifPresent(d -> {
+            var motorRotations = getRawMotorAngle();
+            var motorRotationsToZero = Rotations.of(d.in(Meters) / getMetersPerRotation().in(Meters));
+            elevatorMotorPositionOffset.mut_replace(motorRotations.minus(motorRotationsToZero));
+        });
+        return laserDistance.isPresent();
     }
 
     @Override
     public Distance getCurrentValue() {
         return Meters.of(sensorFusionFilter.calculateFilteredValue(
-                getCalibratedLaserDistance().in(Meters),
+                getCalibratedLaserDistance().map(d -> d.in(Meters)).orElse(Double.MAX_VALUE),
                 getCalibratedMotorDistance().in(Meters)));
     }
 
@@ -265,18 +286,19 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         return isCalibrated;
     }
 
-    private Distance getCalibratedLaserDistance() {
-        return getRawLaserDistance().minus(laserCANPositionOffset);
+    private Optional<Distance> getCalibratedLaserDistance() {
+        return getRawLaserDistance().map(d -> d.minus(laserCANPositionOffset));
     }
 
-    private Distance getRawLaserDistance() {
+    private Optional<Distance> getRawLaserDistance() {
         if (contract.isElevatorDistanceSensorReady()) {
             var distance = distanceSensor.getDistance();
-            if (distance != null) {
-                return distance;
+            var latency = distanceSensor.getMeasurementLatency();
+            if (distance != null && latency != null && latency.lt(Seconds.of(laserCanMaxMeasurementLatency.get()))) {
+                return Optional.of(distance);
             }
         }
-        return Meter.of(0);
+        return Optional.empty();
     }
 
     private Angle getRawMotorAngle() {
@@ -353,8 +375,9 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         }
         //bandage case: isTouchingBottom flashes true for one tick on startup, investigate later?
         if (this.isTouchingBottom() && periodicTickCounter >= 3 && !isCalibrated()) {
-            markElevatorAsCalibratedAgainstLowerLimit();
-            setTargetValue(getCurrentValue());
+            if (tryMarkElevatorCalibratedAgainstLowerLimit()) {
+                setTargetValue(getCurrentValue());
+            }
         }
 
         aKitLog.record("ElevatorTrimValue", trimValue.get().in(Meters));
@@ -364,13 +387,11 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         aKitLog.record("isElevatorCalibrated", isCalibrated());
         aKitLog.record("isElevatorMaintainerAtGoal", this.isMaintainerAtGoal());
         isNotCalibratedAlert.set(!isCalibrated());
-        aKitLog.record("ElevatorDistanceSensor-m", getRawLaserDistance().in(Meters));
-        aKitLog.record("CalibratedElevatorDistanceSensor-m", getCalibratedLaserDistance().in(Meters));
+        getRawLaserDistance().ifPresent(d -> aKitLog.record("ElevatorDistanceSensor-m", d.in(Meters)));
+        getCalibratedLaserDistance().ifPresent(d -> aKitLog.record("CalibratedElevatorDistanceSensor-m", d.in(Meters)));
         aKitLog.record("CalibratedElevatorMotorSensor-m", getCalibratedMotorDistance().in(Meters));
         aKitLog.record("MotorOffset-rotations", elevatorMotorPositionOffset.in(Rotations));
 
         periodicTickCounter++;
     }
-
-
 }
