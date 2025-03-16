@@ -7,6 +7,7 @@ import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import org.kobe.xbot.Utilities.Entities.XTableValues;
 import xbot.common.properties.DistanceProperty;
 import xbot.common.properties.PropertyFactory;
 
@@ -42,10 +43,14 @@ public class PathToFaceAndScoreCommandGroupFactory {
         levelFourDistanceThreshold = pf.createPersistentProperty("LevelFourDistanceThresholdInMeters",  Meters.of(1.5));
 
     }
-
     public SequentialCommandGroup create(Landmarks.ReefFace targetReefFace,
                                          Landmarks.Branch targetBranch,
                                          Landmarks.CoralLevel targetLevel) {
+       return create(targetReefFace, targetBranch, targetLevel, null);
+    }
+    public SequentialCommandGroup create(Landmarks.ReefFace targetReefFace,
+                                         Landmarks.Branch targetBranch,
+                                         Landmarks.CoralLevel targetLevel, XTableValues.BezierCurves override) {
         // Overarching command group — drives to branch and preps coral system once the robot is close enough to the reef, scores when ready
         var driveToFaceAndScoreCommandGroup = new SequentialCommandGroup();
 
@@ -53,7 +58,12 @@ public class PathToFaceAndScoreCommandGroupFactory {
         var driveToBranchWhilePrepping = new ParallelCommandGroup();
 
         // Terminally approach to branch
-        var driveToReefFaceThenAlign = pathToReefFaceAndPrepThenAlignCommandGroupFactory.create(targetReefFace, targetBranch);
+        SequentialCommandGroup driveToReefFaceThenAlign;
+        if(override != null) {
+          driveToReefFaceThenAlign  = pathToReefFaceAndPrepThenAlignCommandGroupFactory.create(targetReefFace, targetBranch, override);
+        } else {
+            driveToReefFaceThenAlign = pathToReefFaceAndPrepThenAlignCommandGroupFactory.create(targetReefFace, targetBranch);
+        }
 
         // Prep coral system once robot is within a distance threshold
         var measureDistanceThenPrep = new SequentialCommandGroup();

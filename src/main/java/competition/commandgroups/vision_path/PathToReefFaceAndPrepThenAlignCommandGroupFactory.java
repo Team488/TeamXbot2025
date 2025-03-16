@@ -11,6 +11,7 @@ import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import org.kobe.xbot.Utilities.Entities.XTableValues;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -48,7 +49,15 @@ public class PathToReefFaceAndPrepThenAlignCommandGroupFactory {
 
     public SequentialCommandGroup create(
             Landmarks.ReefFace targetReefFace, Landmarks.Branch targetBranch) {
+        return create(targetReefFace, targetBranch, null);
+    }
+
+    public SequentialCommandGroup create(
+            Landmarks.ReefFace targetReefFace, Landmarks.Branch targetBranch, XTableValues.BezierCurves overridden) {
         PathDriveToReefFaceCommand driveToReefFaceCommand = driveToReefFaceCommandProvider.get();
+        if (overridden != null) {
+            driveToReefFaceCommand.setOverriddenPath(overridden);
+        }
         var alignToReefCommand = new DeferredCommand(
                 () -> {
                     var alignToReefWithAprilTagCommand = alignToReefWithAprilTagCommandProvider.get();
