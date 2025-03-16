@@ -72,9 +72,9 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     private void createNewProfileManager(){
         profileManager = trapezoidProfileManagerFactory.create(
                 getPrefix() + "trapezoidMotion",
-                1, // 5 for competition
-                1, // 3.5 for competition
-                1000, //tune for real robot
+                5, // 5 for competition
+                3.5, // 3.5 for competition
+                0.16, //tune for real robot
                 elevator.getCurrentValue().in(Meters));
     }
 
