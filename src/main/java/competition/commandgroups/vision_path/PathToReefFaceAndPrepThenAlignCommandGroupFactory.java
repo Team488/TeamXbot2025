@@ -1,6 +1,5 @@
 package competition.commandgroups.vision_path;
 
-import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.AlignToTagGlobalMovementWithCalculator;
 import competition.subsystems.drive.commands.vision_path.PathDriveToReefFaceCommand;
@@ -11,7 +10,6 @@ import competition.subsystems.pose.Landmarks;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
 import javax.inject.Inject;
@@ -21,20 +19,17 @@ import java.util.Set;
 public class PathToReefFaceAndPrepThenAlignCommandGroupFactory {
     Provider<PathDriveToReefFaceUntilAprilTagDetection> driveToReefFaceCommandProvider;
     AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
-    Provider<PrepCoralSystemCommandGroupFactory> prepCoralSystemCommandGroupFactory;
     Provider<AlignToTagGlobalMovementWithCalculator> alignToReefWithAprilTagCommandProvider;
     DriveSubsystem drive;
 
     @Inject
     public PathToReefFaceAndPrepThenAlignCommandGroupFactory(
             Provider<AlignToTagGlobalMovementWithCalculator> alignToReefWithAprilTagCommandProvider,
-            Provider<PrepCoralSystemCommandGroupFactory> prepCoralSystemFactory,
             Provider<PathDriveToReefFaceUntilAprilTagDetection> driveToReefFaceCommandProvider,
             AprilTagVisionSubsystemExtended aprilTagVisionSubsystem,
             DriveSubsystem drive) {
         this.driveToReefFaceCommandProvider = driveToReefFaceCommandProvider;
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
-        this.prepCoralSystemCommandGroupFactory = prepCoralSystemFactory;
         this.alignToReefWithAprilTagCommandProvider = alignToReefWithAprilTagCommandProvider;
         this.drive = drive;
     }

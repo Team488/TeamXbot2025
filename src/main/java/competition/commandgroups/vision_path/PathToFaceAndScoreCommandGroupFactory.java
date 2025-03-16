@@ -1,6 +1,5 @@
 package competition.commandgroups.vision_path;
 
-import competition.commandgroups.DriveToReefFaceThenAlignCommandGroupFactory;
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
 import competition.subsystems.coral_scorer.commands.ScoreWhenReadyCommand;
 import competition.subsystems.drive.commands.MeasureDistanceBeforeScoringCommand;
@@ -8,7 +7,6 @@ import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import xbot.common.properties.DistanceProperty;
 import xbot.common.properties.PropertyFactory;
 
