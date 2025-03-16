@@ -98,5 +98,5 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
     public abstract DeviceInfo getLightsDio2();
 
     public abstract DeviceInfo getLightsDio3();
-    public abstract  boolean isDeadWheelOdometryReady();
+    public abstract boolean isDeadWheelOdometryReady();
 }

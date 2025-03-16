@@ -53,7 +53,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
     private final AprilTagVisionSubsystemExtended aprilTagVisionSubsystem;
     private final BooleanProperty useVisionAssistedPose;
     private final BooleanProperty useDeadwheelAssistedPose;
-    private final BooleanProperty addSwerveTelemetry;
+    private final BooleanProperty continueUpdatingSwerveTelemetry;
     private final BooleanProperty reportCameraPoses;
     private final CoprocessorCommunicationSubsystem coprocessorComms;
 
@@ -90,7 +90,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
         propManager.setDefaultLevel(Property.PropertyLevel.Important);
         useVisionAssistedPose = propManager.createPersistentProperty("UseVisionAssistedPose", true);
         useDeadwheelAssistedPose = propManager.createPersistentProperty("useDeadwheelAssistedPose", false);
-        addSwerveTelemetry = propManager.createPersistentProperty("addSwerveTelemetry", true);
+        continueUpdatingSwerveTelemetry = propManager.createPersistentProperty("continueUpdatingSwerveTelemetry", true);
         reportCameraPoses = propManager.createPersistentProperty("ReportCameraPoses", false);
     }
 
@@ -128,7 +128,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
     }
 
     private boolean shouldAlsoUpdateFullSwerve() {
-        return this.useDeadwheelAssistedPose.get() && this.addSwerveTelemetry.get();
+        return this.useDeadwheelAssistedPose.get() && this.continueUpdatingSwerveTelemetry.get();
     }
 
     private void updateOdometryWithVision() {
@@ -164,7 +164,6 @@ public class PoseSubsystem extends BasePoseSubsystem {
 
         // DeadWheel pose estimator
         deadWheelSubsystem.update();
-        aKitLog.record("DeadWheelEstimate", deadWheelSubsystem.getEstimatedPosition());
 
         batchedPushRequests.putPose2d(xtablesPrefix + ".WheelsOnlyEstimate",
                 onlyWheelsGyroSwerveOdometry.getEstimatedPosition());
