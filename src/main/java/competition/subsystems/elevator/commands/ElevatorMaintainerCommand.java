@@ -125,10 +125,17 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         // only switch profiles when we're making a big change in direction so it doesn't
         // thrash around the goal
         var minTargetDifference = Inches.of(12);
-        if(elevator.getTargetValue().in(Meters) <= currentValue.minus(minTargetDifference).in(Meters)) {
+        if(goingUp && elevator.getTargetValue().in(Meters) <= currentValue.minus(minTargetDifference).in(Meters)) {
             goingUp = false;
-        } else if(elevator.getTargetValue().in(Meters) >= currentValue.plus(minTargetDifference).in(Meters)) {
+            downProfileManager.resetState(
+                elevator.getCurrentValue().in(Meters),
+                elevator.getCurrentVelocity().in(MetersPerSecond));
+
+        } else if(!goingUp && elevator.getTargetValue().in(Meters) >= currentValue.plus(minTargetDifference).in(Meters)) {
             goingUp = true;
+            upProfileManager.resetState(
+                elevator.getCurrentValue().in(Meters),
+                elevator.getCurrentVelocity().in(MetersPerSecond));
         }
 
         upProfileManager.setTargetPosition(
@@ -151,6 +158,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
         aKitLog.record("elevatorProfileTarget", setpoint);
         aKitLog.record("goingUp", goingUp);
+
         elevator.setElevatorHeightGoalOnMotor(setpoint);
     }
 
