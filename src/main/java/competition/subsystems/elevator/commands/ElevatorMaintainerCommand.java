@@ -37,7 +37,8 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     final DoubleProperty gravityPIDConstantPower;
 
     final TrapezoidProfileManager.Factory trapezoidProfileManagerFactory;
-    TrapezoidProfileManager profileManager;
+    TrapezoidProfileManager upProfileManager;
+    TrapezoidProfileManager downProfileManager;
 
     final ElectricalContract contract;
 
@@ -70,12 +71,19 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     }
 
     private void createNewProfileManager(){
-        profileManager = trapezoidProfileManagerFactory.create(
-                getPrefix() + "trapezoidMotion",
+        upProfileManager = trapezoidProfileManagerFactory.create(
+                getPrefix() + "trapezoidMotionUp",
                 5, // 5 for competition
                 3.5, // 3.5 for competition
                 0.16, //tune for real robot
                 elevator.getCurrentValue().in(Meters));
+        downProfileManager = trapezoidProfileManagerFactory.create(
+                getPrefix() + "trapezoidMotionDown",
+                2, // 5 for competition
+                1.5, // 3.5 for competition
+                0.16, //tune for real robot
+                elevator.getCurrentValue().in(Meters));
+            
     }
 
     @Override
@@ -113,12 +121,23 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         aKitLog.record("PM-CurrentVelocity", elevator.getCurrentVelocity().in(MetersPerSecond));
         aKitLog.setLogLevel(AKitLogger.LogLevel.INFO);
 
-        profileManager.setTargetPosition(
+        upProfileManager.setTargetPosition(
             elevator.getTargetValue().in(Meters),
             currentValue.in(Meters),
             elevator.getCurrentVelocity().in(MetersPerSecond)
         );
-        var setpoint = profileManager.getRecommendedPositionForTime();
+        downProfileManager.setTargetPosition(
+            elevator.getTargetValue().in(Meters),
+            currentValue.in(Meters),
+            elevator.getCurrentVelocity().in(MetersPerSecond)
+        );
+
+        var currentProfileManager = upProfileManager;
+        if(elevator.getTargetValue().in(Meters) < currentValue.in(Meters)){
+            currentProfileManager = downProfileManager;
+        }
+
+        var setpoint = currentProfileManager.getRecommendedPositionForTime();
         aKitLog.record("elevatorProfileTarget", setpoint);
 
         elevator.setElevatorHeightGoalOnMotor(setpoint);
