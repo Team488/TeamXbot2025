@@ -19,6 +19,7 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
+import org.littletonrobotics.junction.Logger;
 import xbot.common.advantage.AKitLogger;
 import xbot.common.controls.actuators.mock_adapters.MockCANMotorController;
 import xbot.common.controls.sensors.mock_adapters.MockLaserCAN;
@@ -38,6 +39,7 @@ public class ElevatorSimulator {
     final ElectricalContract electricalContract;
     final double gravityFeedForward = 0.02;
     final double laserNoiseInMeters = 0.01;
+    final int laserUpdateCycleCount = 3;
 
     final ElevatorSubsystem elevatorSubsystem;
     final MockCANMotorController motor;
@@ -93,7 +95,8 @@ public class ElevatorSimulator {
         var elevatorCurrentHeight = getCurrentHeight();
 
         // We'll set our laserSensor distance to our elevator height with some noise (to *mimic reality*)
-        laserSensor.setDistance(elevatorCurrentHeight.in(Meters) + ((Math.random() - 0.5) * laserNoiseInMeters * 2));
+        // We'll only update the laser sensor every 3 cycles to mimic the real sensor's update rate
+        Logger.runEveryN(3, () -> laserSensor.setDistance(elevatorCurrentHeight.in(Meters) + ((Math.random() - 0.5) * laserNoiseInMeters * 2)));
 
         // update the motor encoder position based on the elevator height, add in the
         // random from zero offset
