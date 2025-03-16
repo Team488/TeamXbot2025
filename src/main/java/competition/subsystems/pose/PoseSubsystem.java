@@ -177,28 +177,18 @@ public class PoseSubsystem extends BasePoseSubsystem {
                     this.deadWheelSubsystem.getRearAdjustedDistance().in(Meters));
 
         }
-
-        this.updateOdometryWithVision();
-
-        if (this.shouldAlsoUpdateFullSwerve()) {
+        if (!this.useDeadwheelAssistedPose.get() || this.shouldAlsoUpdateFullSwerve()) {
             this.fullSwerveOdometry.update(
                     this.getCurrentHeadingGyroOnly(),
                     getSwerveModulePositions());
         }
+
         this.onlyDeadwheelOdometry.update(
                 this.getCurrentHeading(),
                 getDeadwheelPositions());
-        aKitLog.record("DeadwheelOnlyEstimate", onlyDeadwheelOdometry.getEstimatedPosition());
 
-        fullDeadwheelOdometry.update(
-                this.getCurrentHeading(),
-                getDeadwheelPositions());
-        this.aprilTagVisionSubsystem.getAllPoseObservations().forEach(observation -> {
-            fullDeadwheelOdometry.addVisionMeasurement(
-                    observation.visionRobotPoseMeters(),
-                    observation.timestampSeconds(),
-                    observation.visionMeasurementStdDevs());
-        });
+        this.updateOdometryWithVision();
+        aKitLog.record("DeadwheelOnlyEstimate", onlyDeadwheelOdometry.getEstimatedPosition());
         aKitLog.record("FullVisionDeadwheelEstimate", fullDeadwheelOdometry.getEstimatedPosition());
 
         // Report poses
