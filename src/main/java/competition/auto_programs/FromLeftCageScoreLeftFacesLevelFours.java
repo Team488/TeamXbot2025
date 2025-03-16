@@ -25,13 +25,6 @@ public class FromLeftCageScoreLeftFacesLevelFours extends BaseAutonomousSequenti
                                                             pathToNearestStationAndIntakeFactory) {
         super(autoSelector);
 
-        // Force our location to start in front of cage one
-        var initializeStateCommand = pose.createSetPositionCommand(
-                        () -> PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueCageOneStartingLine)
-                )
-                .alongWith(new InstantCommand(() -> simulator.resetPosition(PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueCageOneStartingLine))));
-        this.addCommands(initializeStateCommand);
-
         // Drive to far left, branch B and score level four
         getDriveAndScoreStatusMessageCommand(Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR);
         var driveAndScoreFarLeftBranchBLevelFour = driveToFaceAndScoreFact.create(

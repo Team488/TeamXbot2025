@@ -11,6 +11,7 @@ import xbot.common.command.BaseMaintainerCommand;
 import xbot.common.controls.sensors.XXboxController;
 import xbot.common.logic.HumanVsMachineDecider;
 import xbot.common.math.MathUtils;
+import xbot.common.properties.DistanceProperty;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.Property;
 import xbot.common.properties.PropertyFactory;
@@ -35,6 +36,7 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
     final DoubleProperty algaeArmCollisionAngleDegrees;
     final DoubleProperty level123SafeArmAngleDegrees;
     final DoubleProperty level4SafeArmAngleDegrees;
+    final DistanceProperty level4SafeElevatorMarginInches;
 
     final TrapezoidProfileManager profileManager;
 
@@ -65,6 +67,7 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
         algaeArmCollisionAngleDegrees = pf.createPersistentProperty("AlgaeArmCollisionAngleDegrees", 110);
         level123SafeArmAngleDegrees = pf.createPersistentProperty("L123SafeArmAngleDegrees", 80);
         level4SafeArmAngleDegrees = pf.createPersistentProperty("L4SafeArmAngleDegrees", 146);
+        level4SafeElevatorMarginInches = pf.createPersistentProperty("L4SafeElevatorMargin", Inches.of(20));
 
         decider.setDeadband(0.02);
     }
@@ -119,7 +122,7 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
 
     private boolean wouldCollideWithReef(Angle targetGoal) {
         var coralArmGoalAboveSafeLevel = targetGoal.gt(Degrees.of(this.level4SafeArmAngleDegrees.get()));
-        var elevatorBelowLevel2Height = elevator.getCurrentValue().lt(elevator.l4Height.get().minus(Inches.of(5)));
+        var elevatorBelowLevel2Height = elevator.getCurrentValue().lt(elevator.l4Height.get().minus(level4SafeElevatorMarginInches.get()));
         return coralArmGoalAboveSafeLevel && elevatorBelowLevel2Height;
     }
 

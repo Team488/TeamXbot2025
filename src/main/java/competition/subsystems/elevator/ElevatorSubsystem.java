@@ -61,6 +61,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     public final DoubleProperty powerWhenBottomSensorHit;
 
 
+
     public XCANMotorController masterMotor;
 
     public final DistanceProperty upperHeightLimit;
@@ -72,6 +73,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     public final DistanceProperty l4Height;
     public final DistanceProperty humanLoadHeight;
     public final DistanceProperty baseHeight;
+    public final DistanceProperty trimValue;
+    public final DistanceProperty trimChangeAmount;
 
     public final XDigitalInput bottomSensor;
     public final XLaserCAN distanceSensor;
@@ -91,12 +94,15 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
         pf.setPrefix(this);
 
-        l2Height = pf.createPersistentProperty("l2Height", Inches.of(0.5));
-        l3Height = pf.createPersistentProperty("l3Height", Inches.of(16.0));
+        l2Height = pf.createPersistentProperty("l2Height", Inches.of(1.0));
+        l3Height = pf.createPersistentProperty("l3Height", Inches.of(17.0));
         l4Height = pf.createPersistentProperty("l4Height", Inches.of(46.0));
         humanLoadHeight = pf.createPersistentProperty("humanLoadHeight", Inches.of(1));
         pf.setDefaultLevel(PropertyLevel.Debug);
         baseHeight = pf.createPersistentProperty("baseHeight", Inches.of(0));
+        trimValue = pf.createPersistentProperty("trimValue",Inches.of(0));
+        trimChangeAmount = pf.createPersistentProperty("TrimUpAmount", Inches.of(1));
+
 
 
         //to be tuned
@@ -116,7 +122,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         this.powerNearLowerLimitThreshold = pf.createPersistentProperty("powerNearLowerLimit", 0.0);
         this.powerWhenBottomSensorHit = pf.createPersistentProperty("powerWhenBottomSensorHit", 0);
         pf.setDefaultLevel(PropertyLevel.Important);
-                                
+
+
         this.sysId = new SysIdRoutine(
                 new SysIdRoutine.Config(
                         Volts.of(0.2).per(Second),
@@ -231,8 +238,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     public void setTargetHeight(Landmarks.CoralLevel value) {
         switch (value) {
             case TWO -> setTargetValue(l2Height.get());
-            case THREE -> setTargetValue(l3Height.get());
-            case FOUR -> setTargetValue(l4Height.get());
+            case THREE -> setTargetValue(l3Height.get().plus(trimValue.get()));
+            case FOUR -> setTargetValue(l4Height.get().plus(trimValue.get()));
             case COLLECTING -> setTargetValue(humanLoadHeight.get());
             default -> setTargetValue(baseHeight.get());
         }
@@ -331,6 +338,14 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         return sysId.dynamic(direction);
     }
 
+    public void trimElevatorUp(){
+        trimValue.set(trimValue.get().plus(Inches.of(trimChangeAmount.get().in(Inches))));
+    }
+
+    public void trimElevatorDown(){
+        trimValue.set(trimValue.get().minus((Inches.of(trimChangeAmount.get().in(Inches)))));
+    }
+
     @Override
     public void periodic() {
         if (contract.isElevatorReady()) {
@@ -342,8 +357,9 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
             setTargetValue(getCurrentValue());
         }
 
-        aKitLog.record("ElevatorTargetHeight-m", elevatorTargetHeight);
-        aKitLog.record("ElevatorCurrentHeight-m", getCurrentValue().in(Meters));
+        aKitLog.record("ElevatorTrimValue", trimValue.get().in(Inches));
+        aKitLog.record("ElevatorTargetHeight-m", elevatorTargetHeight.in(Inches));
+        aKitLog.record("ElevatorCurrentHeight-m", getCurrentValue().in(Inches));
         aKitLog.record("ElevatorBottomSensor", this.isTouchingBottom());
         aKitLog.record("isElevatorCalibrated", isCalibrated());
         aKitLog.record("isElevatorMaintainerAtGoal", this.isMaintainerAtGoal());
