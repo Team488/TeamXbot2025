@@ -153,7 +153,8 @@ dependencies {
     annotationProcessor "org.littletonrobotics.akit:akit-autolog:$akitJson.version"
 }
 
-compileJava.ajc.options.compilerArgs += "-showWeaveInfo"
+// Uncomment the line below if you need to troubleshoot AspectJ weaving
+//compileJava.ajc.options.compilerArgs += "-showWeaveInfo"
 compileJava.ajc.options.inpath.from(configurations.customAspectJ)
 
 wpi.sim.addGui().defaultEnabled = true
