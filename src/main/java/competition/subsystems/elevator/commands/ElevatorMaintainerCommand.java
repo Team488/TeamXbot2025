@@ -39,6 +39,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     final TrapezoidProfileManager.Factory trapezoidProfileManagerFactory;
     TrapezoidProfileManager upProfileManager;
     TrapezoidProfileManager downProfileManager;
+    boolean goingUp = true;
 
     final ElectricalContract contract;
 
@@ -121,6 +122,15 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         aKitLog.record("PM-CurrentVelocity", elevator.getCurrentVelocity().in(MetersPerSecond));
         aKitLog.setLogLevel(AKitLogger.LogLevel.INFO);
 
+        // only switch profiles when we're making a big change in direction so it doesn't
+        // thrash around the goal
+        var minTargetDifference = Inches.of(12);
+        if(elevator.getTargetValue().in(Meters) <= currentValue.minus(minTargetDifference).in(Meters)) {
+            goingUp = false;
+        } else if(elevator.getTargetValue().in(Meters) >= currentValue.plus(minTargetDifference).in(Meters)) {
+            goingUp = true;
+        }
+
         upProfileManager.setTargetPosition(
             elevator.getTargetValue().in(Meters),
             currentValue.in(Meters),
@@ -132,14 +142,15 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
             elevator.getCurrentVelocity().in(MetersPerSecond)
         );
 
-        var currentProfileManager = upProfileManager;
-        if(elevator.getTargetValue().in(Meters) < currentValue.in(Meters)){
-            currentProfileManager = downProfileManager;
+        var setpoint = upProfileManager.getRecommendedPositionForTime();
+        var downSetpoint = downProfileManager.getRecommendedPositionForTime();
+        
+        if(!goingUp){
+            setpoint = downSetpoint;
         }
 
-        var setpoint = currentProfileManager.getRecommendedPositionForTime();
         aKitLog.record("elevatorProfileTarget", setpoint);
-
+        aKitLog.record("goingUp", goingUp);
         elevator.setElevatorHeightGoalOnMotor(setpoint);
     }
 
