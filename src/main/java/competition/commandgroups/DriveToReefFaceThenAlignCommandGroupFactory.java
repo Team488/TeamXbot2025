@@ -46,6 +46,7 @@ public class DriveToReefFaceThenAlignCommandGroupFactory {
 
     public SequentialCommandGroup create(Landmarks.ReefFace targetReefFace, Landmarks.Branch targetBranch) {
         var group = new SequentialCommandGroup();
+        group.setName("DriveToReefFaceThenAlignCommandGroup");
 
         var alignToReefCommand = new DeferredCommand(
                 () -> {

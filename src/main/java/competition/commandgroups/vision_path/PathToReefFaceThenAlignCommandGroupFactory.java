@@ -42,6 +42,7 @@ public class PathToReefFaceThenAlignCommandGroupFactory {
     public SequentialCommandGroup create(
             Landmarks.ReefFace targetReefFace, Landmarks.Branch targetBranch) {
         var group = new SequentialCommandGroup();
+        group.setName("PathToReefFaceThenAlignCommandGroup");
         PathDriveToLocationCommandUntilAprilTagDetection driveToReefFaceCommand = driveToReefFaceCommandProvider.get();
         AlignToTagGlobalMovementWithCalculator alignToReefWithAprilTagCommand = alignToReefWithAprilTagCommandProvider.get();
         driveToReefFaceCommand.setTarget(targetReefFace, targetBranch,
