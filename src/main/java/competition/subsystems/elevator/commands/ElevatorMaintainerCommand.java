@@ -7,6 +7,7 @@ import competition.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.units.measure.Distance;
 import xbot.common.advantage.AKitLogger;
 import xbot.common.command.BaseMaintainerCommand;
+import xbot.common.controls.actuators.XCANMotorController;
 import xbot.common.logic.CalibrationDecider;
 import xbot.common.logic.HumanVsMachineDecider;
 import xbot.common.math.MathUtils;
@@ -17,6 +18,7 @@ import xbot.common.properties.PropertyFactory;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Rotations;
 import static xbot.common.logic.CalibrationDecider.CalibrationMode.GaveUp;
 
 import javax.inject.Inject;
@@ -176,7 +178,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         elevator.setPower(elevator.calibrationNegativePower.get());
 
         if (elevator.isTouchingBottom()) {
-            elevator.tryMarkElevatorCalibratedAgainstLowerLimit();
+            elevator.markElevatorAsCalibratedAgainstLowerLimit();
             elevator.setTargetValue(elevator.getCurrentValue());
         }
     }
