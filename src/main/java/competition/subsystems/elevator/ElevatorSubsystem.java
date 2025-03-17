@@ -294,9 +294,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         if (contract.isElevatorDistanceSensorReady()) {
             var distance = distanceSensor.getDistance();
             var latency = distanceSensor.getMeasurementLatency();
-            if (distance != null && latency != null && latency.lt(Seconds.of(laserCanMaxMeasurementLatency.get()))) {
-                return Optional.of(distance);
-            }
+            return distance.filter(d -> latency.lt(Seconds.of(laserCanMaxMeasurementLatency.get())));
         }
         return Optional.empty();
     }
