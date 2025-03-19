@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
 import xbot.common.controls.actuators.XCANMotorControllerPIDProperties;
-import xbot.common.controls.sensors.XAbsoluteEncoder;
 import xbot.common.controls.sensors.XDigitalInput;
 import xbot.common.controls.sensors.XDutyCycleEncoder;
 import xbot.common.math.MathUtils;
@@ -48,6 +47,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     public final DoubleProperty humanLoadAngleDegrees;
     public final DoubleProperty rangeOfMotionDegrees;
     public final DoubleProperty powerWhenNotCalibrated;
+    public final DoubleProperty autoCalibrationDegrees;
 
     public Landmarks.CoralLevel targetCoralLevel;
 
@@ -98,6 +98,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
         this.degreesPerRotations = propertyFactory.createPersistentProperty("Degrees Per Rotations", 5.790);
         this.rangeOfMotionDegrees = propertyFactory.createPersistentProperty("Range of Motion in Degrees", 170);
         this.powerWhenNotCalibrated = propertyFactory.createPersistentProperty("Power When Not Calibrated", 0.25);
+        this.autoCalibrationDegrees = propertyFactory.createPersistentProperty("AutoCalibrationDegrees", 13.8);
         propertyFactory.setDefaultLevel(PropertyLevel.Important);
     }
 
@@ -276,6 +277,15 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
         // convert from [0,1] position to arm angle in degrees
         return Degrees.of(armPosition * rangeOfMotionDegrees);
 
+    }
+
+    public void forceCalibrationAtAutonomous() {
+        aKitLog.record("RUNNNINGG?", true);
+        if (electricalContract.isCoralArmMotorReady()) {
+            rotationsAtZero = getMotorPosition().in(Rotations)
+                    - Degrees.of(autoCalibrationDegrees.get()).div(degreesPerRotations.get()).in(Rotations);
+        }
+        isCalibrated = true;
     }
 
     public void forceCalibratedHere() {
