@@ -10,9 +10,11 @@ import competition.electrical_contract.ElectricalContract;
 import competition.simulation.BaseSimulator;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
+import competition.subsystems.pose.vision.Paths;
 import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import xbot.common.subsystems.autonomous.AutonomousCommandSelector;
 
 import javax.inject.Inject;
@@ -59,9 +61,10 @@ public class LeftFourCoralAuto extends BaseAutonomousSequentialCommandGroup {
         this.addCommands(driveAndScoreFarLeftBranchBLevelFour);
 
         // Coral Station
-        var driveToLeftStation = pathDriveToLocationAndIntakeUntilCollectedProvider.get().create(farLeftBToCoralStationBlue)
+        var driveToLeftStation = pathDriveToLocationAndIntakeUntilCollectedProvider.get().create(Paths.Side.LEFT, farLeftBToCoralStationBlue)
                 .alongWith(
                         getDriveAndIntakeStatusMessageCommand(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.MID));
+
         this.addCommands(driveToLeftStation);
 
         // Score 2
@@ -76,7 +79,7 @@ public class LeftFourCoralAuto extends BaseAutonomousSequentialCommandGroup {
         this.addCommands(driveAndScoreCloseLeftBranchBLevelFour);
 
         // Coral Station
-        var driveToRightStationAndIntakeSecond = pathDriveToLocationAndIntakeUntilCollectedProvider.get().create(blueCloseLeftBranchBToLeftCoralStation)
+        var driveToRightStationAndIntakeSecond = pathDriveToLocationAndIntakeUntilCollectedProvider.get().create(Paths.Side.LEFT, blueCloseLeftBranchBToLeftCoralStation)
                 .alongWith(
                         getDriveAndIntakeStatusMessageCommand(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.MID));
         this.addCommands(driveToRightStationAndIntakeSecond);
@@ -95,7 +98,7 @@ public class LeftFourCoralAuto extends BaseAutonomousSequentialCommandGroup {
         this.addCommands(driveAndScoreCloseLeftBranchALevelFour);
 
         // Coral Station
-        var driveToLeftStationAndIntakeSecond = pathDriveToLocationAndIntakeUntilCollectedProvider.get().create(blueCloseLeftBranchAToLeftCoralStation)
+        var driveToLeftStationAndIntakeSecond = pathDriveToLocationAndIntakeUntilCollectedProvider.get().create(Paths.Side.LEFT, blueCloseLeftBranchAToLeftCoralStation)
                 .alongWith(
                         getDriveAndIntakeStatusMessageCommand(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.MID));
         this.addCommands(driveToLeftStationAndIntakeSecond);
@@ -113,7 +116,7 @@ public class LeftFourCoralAuto extends BaseAutonomousSequentialCommandGroup {
         this.addCommands(driveAndScoreCloseBranchALevelFour);
 
         // Back to coral station
-        var homed = pathDriveToLocationAndIntakeUntilCollectedProvider.get().create(blueCloseBranchAToLeftCoralStation)
+        var homed = pathDriveToLocationAndIntakeUntilCollectedProvider.get().create(Paths.Side.LEFT, blueCloseBranchAToLeftCoralStation)
                 .alongWith(
                         getDriveAndIntakeStatusMessageCommand(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.MID));
         this.addCommands(homed);

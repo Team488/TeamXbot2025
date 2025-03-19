@@ -3,10 +3,12 @@ package competition.subsystems.drive.commands.vision_path;
 import competition.subsystems.oracle.ReefRoutingCircle;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
+import competition.subsystems.pose.vision.Paths;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import org.kobe.xbot.JClient.XTablesClient;
 import org.kobe.xbot.Utilities.Entities.XTableValues;
 import org.kobe.xbot.Utilities.VisionCoprocessorCommander;
@@ -39,6 +41,7 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
     private CoprocessorCommunicationSubsystem coprocessor;
     public AtomicReference<Boolean> failed = new AtomicReference<>(false);
     public AtomicReference<XTableValues.BezierCurves> curves = new AtomicReference<>(null);
+    private Paths.Side side = Paths.Side.LEFT;
     private boolean lock = false;
 
     @Inject
@@ -78,15 +81,24 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
         return this;
     }
 
+    public PathDriveToLocationCommand setOverriddenPath(Paths.Side side, XTableValues.BezierCurves curves) {
+        this.curves.set(curves);
+        this.failed.set(null);
+        this.side = side;
+        return this;
+    }
+
     public PathDriveToLocationCommand setOverriddenPath(XTableValues.BezierCurves curves) {
         this.curves.set(curves);
         this.failed.set(null);
+        this.side = null;
         return this;
     }
+
     @Override
     public void initialize() {
         log.info("Initializing");
-        if(this.failed.get() != null) {
+        if (this.failed.get() != null) {
             curves.set(null);
             lock = false;
             failed.set(false);
@@ -133,6 +145,9 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
             }
         } else {
             log.info("The path was overridden manually, no request was made to coprocessor.");
+            if (side != null)
+                curves.set(Paths.mirrorPathLeftOrRight(side, CoprocessorCommunicationSubsystem
+                        .fromAlliance(DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue)), curves.get()));
             XTablesClient client = this.coprocessor.getXTablesManager().getOrNull();
             if (client != null) {
                 log.info("Logged bezier curves onto XTABLES.");
@@ -153,14 +168,14 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
 
     @Override
     public void execute() {
-        if(!lock && curves.get() != null && ( failed.get() == null || !failed.get())) {
+        if (!lock && curves.get() != null && (failed.get() == null || !failed.get())) {
             XTableValues.BezierCurves c = curves.get();
             this.setSegmentedBezierCurve(c, c.getOptions());
             super.initialize();
             lock = true;
             return;
         }
-        if(curves != null && curves.get() != null && ( failed.get() == null || !failed.get())) {
+        if (curves != null && curves.get() != null && (failed.get() == null || !failed.get())) {
             super.execute();
         }
     }
