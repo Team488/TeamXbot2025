@@ -1,5 +1,7 @@
 package competition.subsystems.vision;
 
+import competition.subsystems.pose.PoseSubsystem;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import java.util.logging.Level;
 import javax.inject.Inject;
@@ -15,9 +17,13 @@ import xbot.common.advantage.DataFrameRefreshable;
 import xbot.common.command.BaseSubsystem;
 import xbot.common.controls.sensors.XTimer;
 import xbot.common.logging.RobotAssertionManager;
+import xbot.common.properties.DistanceProperty;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.properties.StringProperty;
+import xbot.common.subsystems.pose.BasePoseSubsystem;
+
+import static edu.wpi.first.units.Units.Meters;
 
 /**
  * This is a subsystem for getting data from coprocessors not related to
@@ -31,6 +37,7 @@ public class CoprocessorCommunicationSubsystem
     // xtables properties
     final StringProperty xtablesTargetPose;
     final DoubleProperty lastCoralStationConfidentTimeInterval;
+    final DistanceProperty lastCoralStationConfidentDistance;
     final StringProperty xtablesCoordinateLocation;
     final StringProperty xtablesHeadingLocation;
 
@@ -45,14 +52,18 @@ public class CoprocessorCommunicationSubsystem
 
     public XTableValues.BezierCurves lastCoralStationPath;
     private Double lastCoralStationTimestamp;
+    private BasePoseSubsystem poseSubsystem;
 
     @Inject
     public CoprocessorCommunicationSubsystem(
-            PropertyFactory pf, RobotAssertionManager assertionManager) {
+            PropertyFactory pf, RobotAssertionManager assertionManager, BasePoseSubsystem poseSubsystem) {
+        this.poseSubsystem = poseSubsystem;
         this.assertionManager = assertionManager;
         pf.setPrefix(this);
         lastCoralStationConfidentTimeInterval = pf.createPersistentProperty(
                 "lastCoralStationConfidentTimeInterval-in-seconds", 3);
+        lastCoralStationConfidentDistance = pf.createPersistentProperty(
+                "lastCoralStationConfidentDistance", Meters.of(1.5));
         xtablesTargetPose =
                 pf.createPersistentProperty("Xtables Target Pose", "target_pose");
         xtablesCoordinateLocation = pf.createPersistentProperty(
@@ -104,10 +115,21 @@ public class CoprocessorCommunicationSubsystem
     }
 
     public boolean isCoralStationPathConfident() {
-        return lastCoralStationPath != null && lastCoralStationTimestamp != null
-                && (XTimer.getFPGATimestamp() - lastCoralStationTimestamp
-                < (lastCoralStationConfidentTimeInterval.get() * 1000));
+        if (lastCoralStationPath == null || lastCoralStationTimestamp == null) {
+            return false;
+        }
+
+        XTableValues.ControlPoint start = lastCoralStationPath.getCurves(0).getControlPoints(0);
+        double timeElapsed = XTimer.getFPGATimestamp() - lastCoralStationTimestamp;
+        double maxTime = lastCoralStationConfidentTimeInterval.get() * 1000;
+
+        double distance = new Translation2d(start.getX(), start.getY())
+                .getDistance(poseSubsystem.getCurrentPose2d().getTranslation());
+        double maxDistance = lastCoralStationConfidentDistance.get().in(Meters);
+
+        return timeElapsed < maxTime && distance <= maxDistance;
     }
+
 
     public XTableValues.BezierCurves getLastCoralStationPath() {
         return lastCoralStationPath;
