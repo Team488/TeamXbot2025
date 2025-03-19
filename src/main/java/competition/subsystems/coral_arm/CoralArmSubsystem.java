@@ -280,7 +280,6 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     }
 
     public void forceCalibrationAtAutonomous() {
-        aKitLog.record("RUNNNINGG?", true);
         if (electricalContract.isCoralArmMotorReady()) {
             rotationsAtZero = getMotorPosition().in(Rotations)
                     - (autoCalibrationDegrees.get() / (degreesPerRotations.get()));
