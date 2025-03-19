@@ -91,7 +91,7 @@ public class SwerveBezierTrajectoryBase extends SwerveSimpleBezierCommand {
         this.logic.setVelocityMode(
                 SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
         this.logic.setGlobalKinematicValues(
-                new SwervePointKinematics(acceleration, 0, 1, speed));
+                new SwervePointKinematics(acceleration, 0, 0, speed));
         // Total number of segments and steps.
         int totalSegments = bezierCurves.getCurvesList().size();
         int totalSteps = totalSegments * STEPS_PER_SEGMENT;

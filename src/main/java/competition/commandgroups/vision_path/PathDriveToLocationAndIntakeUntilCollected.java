@@ -7,7 +7,9 @@ import competition.subsystems.coral_scorer.commands.IntakeUntilCoralCollectedCom
 import competition.subsystems.drive.commands.vision_path.DriveVectorSmallCommand;
 import competition.subsystems.drive.commands.vision_path.PathDriveToLocationCommand;
 import competition.subsystems.pose.Landmarks;
+import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.pose.vision.Paths;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -62,16 +64,10 @@ public class PathDriveToLocationAndIntakeUntilCollected {
                 XTableValues.TraversalOptions.newBuilder()
                         .setFinalRotationDegrees(finalDegrees.in(Degrees))
                         .build());
+        driveVectorSmallCommand.setBackwards(true);
+
         SequentialCommandGroup driveToCoralStationThenDriveForward =
                 new SequentialCommandGroup(pathDriveToLocationCommand,
-                        new InstantCommand(() -> {
-                            driveVectorSmallCommand.setTargetAngle(
-                                    DriverStation.getAlliance()
-                                            .orElse(DriverStation.Alliance.Blue)
-                                            .equals(DriverStation.Alliance.Red)
-                                            ? finalDegrees
-                                            : finalDegrees.plus(Degrees.of(180)));
-                        }),
                         driveVectorSmallCommand);
         var prepCoralSystem = prepCoralSystemCommandGroupFactory.create(
                 () -> Landmarks.CoralLevel.COLLECTING);

@@ -39,18 +39,10 @@ public class PathDriveToCoralStationAndIntakeUntilCollected {
         var driveToCoralStationSectionWhilePrepping = new ParallelCommandGroup();
         PathDriveToNearestCoralStationSectionCommand pathDriveToNearestCoralStationSectionCommand = driveToCoralStationSectionCommandProvider.get();
         DriveVectorSmallCommand driveVectorSmallCommand = driveVectorSmallCommandProvider.get();
-
+        driveVectorSmallCommand.setBackwards(true);
         var driveToCoralStationThenDriveForward = new SequentialCommandGroup(
                 pathDriveToNearestCoralStationSectionCommand,
-                new InstantCommand(() -> {
-                    Angle angle = pathDriveToNearestCoralStationSectionCommand
-                            .getTargetCoralStationSection().getRotation()
-                            .getMeasure();
-                    Angle targetAngle = angle.plus(Degrees.of(180));
-
-                    driveVectorSmallCommand.setTargetAngle(targetAngle);
-                }),
-                driveVectorSmallCommand.withTimeout(1)
+                driveVectorSmallCommand
         );
         var prepCoralSystem = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
         driveToCoralStationSectionWhilePrepping.addCommands(driveToCoralStationThenDriveForward, prepCoralSystem);

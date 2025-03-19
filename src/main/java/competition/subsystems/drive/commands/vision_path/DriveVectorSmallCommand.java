@@ -19,9 +19,6 @@ import static edu.wpi.first.units.Units.Seconds;
 public class DriveVectorSmallCommand extends BaseCommand {
     private double start;
     private Time duration = Seconds.of(0.25);
-
-    private Angle targetAngle;
-
     private final DriveSubsystem drive;
     private final PoseSubsystem poseSubsystem;
 
@@ -44,9 +41,7 @@ public class DriveVectorSmallCommand extends BaseCommand {
     public void initialize() {
         log.info("Initializing DriveVectorSmallCommand");
         this.start = XTimer.getFPGATimestamp();
-        if(backwards) {
-            targetAngle = targetAngle.times(-1);
-        }
+
     }
 
     /**
@@ -58,19 +53,13 @@ public class DriveVectorSmallCommand extends BaseCommand {
             drive.stop(); // Drive.stop doesnt stop unless called continuously
             return;
         }
-        drive.fieldOrientedDrive(
-                XYPair.fromPolar(targetAngle.in(Degrees), drivePower.get()),
-                0,
-                poseSubsystem.getCurrentHeading().getDegrees(),
-                true
-        );
+        XYPair xyPair = new XYPair(drivePower.get(), 0);
+        if(backwards) {
+            xyPair.scale(-1);
+        }
+        drive.move(xyPair, 0);
     }
 
-
-    public DriveVectorSmallCommand setTargetAngle(Angle targetAngle) {
-        this.targetAngle = targetAngle;
-        return this;
-    }
 
     public DriveVectorSmallCommand setBackwards(boolean backwards) {
         this.backwards = backwards;
@@ -86,9 +75,7 @@ public class DriveVectorSmallCommand extends BaseCommand {
         return this;
     }
 
-    public Angle getTargetAngle() {
-        return targetAngle;
-    }
+
 
     /**
      * Whether the command has finished. Once a command finishes, the scheduler will call its end()
