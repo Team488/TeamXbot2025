@@ -17,7 +17,7 @@ public class CoralArmSimConstants {
     // so we have 225 as the starting angle which is 0' in arm relative terms
     public static final Angle minAngleRads = Degrees.of(237 - 180);
     public static final Angle armEncoderAnglePerRotation = Degrees.of(6.94444);
-    public static final Angle angleAtRobotZero = Degrees.of(225);
+    public static final Angle angleAtRobotZero = Degrees.of(213);
     public static final Angle maxAngleRads = Degrees.of(237);
     public static final Angle startingAngle = maxAngleRads;
 }
