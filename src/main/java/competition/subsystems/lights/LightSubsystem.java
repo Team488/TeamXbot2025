@@ -15,8 +15,10 @@ import edu.wpi.first.wpilibj.DriverStation;
 import xbot.common.command.BaseSubsystem;
 import xbot.common.controls.actuators.XDigitalOutput;
 import xbot.common.controls.actuators.XDigitalOutput.XDigitalOutputFactory;
+import xbot.common.controls.sensors.XTimer;
 import xbot.common.subsystems.autonomous.AutonomousCommandSelector;
 
+import java.sql.Time;
 import java.util.Objects;
 
 
@@ -33,7 +35,8 @@ public class LightSubsystem extends BaseSubsystem {
     final AprilTagVisionSubsystemExtended visionSubsystem;
     private AlignCameraToAprilTagCalculator.Activity activity;
     private int targetCameraID;
-
+    private boolean recentlyAligned;
+    private double lastStateTime = -1;
     LightsStateMessage state = LightsStateMessage.NoCode;
     DIOInt dioInt;
 
@@ -144,15 +147,25 @@ public class LightSubsystem extends BaseSubsystem {
                     currentState = LightsStateMessage.TargetCameraUnavailable;
                 } else {
                     currentState = LightsStateMessage.CurrentlyAligning;
+                    recentlyAligned = true;
                 }
-            } else if (coralScorerSubsystem.confidentlyHasCoral()) {
-                currentState = LightsStateMessage.CoralPresent;
-            } else if (!coralScorerSubsystem.confidentlyHasCoral()) {
-                currentState = LightsStateMessage.NoCoralPresent;
-            } else if (activity == AlignCameraToAprilTagCalculator.Activity.Complete) {
+            } else if (activity == AlignCameraToAprilTagCalculator.Activity.Complete && recentlyAligned) {
                 currentState = LightsStateMessage.FinishedAligning;
+
+                if (lastStateTime == -1) {
+                    lastStateTime = XTimer.getFPGATimestamp();
+                }
+
+                if (XTimer.getFPGATimestamp() - lastStateTime >= 2) {
+                    recentlyAligned = false;
+                    lastStateTime = -1;
+                }
             } else if (coralScorerSubsystem.getCoralScorerState() == CoralScorerSubsystem.CoralScorerState.INTAKING) {
                 currentState = LightsStateMessage.RequestCoralFromHuman;
+            } else if (!coralScorerSubsystem.confidentlyHasCoral()) {
+                currentState = LightsStateMessage.NoCoralPresent;
+            } else if (coralScorerSubsystem.confidentlyHasCoral()) {
+                currentState = LightsStateMessage.CoralPresent;
             } else {
                 currentState = LightsStateMessage.RobotEnabled;
             }
