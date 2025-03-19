@@ -21,7 +21,7 @@ import javax.inject.Provider;
 import static competition.subsystems.pose.vision.Paths.blueCloseBranchAToLeftCoralStation;
 import static competition.subsystems.pose.vision.Paths.blueCloseLeftBranchAToLeftCoralStation;
 import static competition.subsystems.pose.vision.Paths.blueCloseLeftBranchBToLeftCoralStation;
-import static competition.subsystems.pose.vision.Paths.farLeftAToCoralStationBlue;
+import static competition.subsystems.pose.vision.Paths.farLeftBToCoralStationBlue;
 
 
 public class LeftFourCoralAuto extends BaseAutonomousSequentialCommandGroup {
@@ -59,7 +59,7 @@ public class LeftFourCoralAuto extends BaseAutonomousSequentialCommandGroup {
         this.addCommands(driveAndScoreFarLeftBranchBLevelFour);
 
         // Coral Station
-        var driveToLeftStation = pathDriveToLocationAndIntakeUntilCollectedProvider.get().create(farLeftAToCoralStationBlue)
+        var driveToLeftStation = pathDriveToLocationAndIntakeUntilCollectedProvider.get().create(farLeftBToCoralStationBlue)
                 .alongWith(
                         getDriveAndIntakeStatusMessageCommand(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.MID));
         this.addCommands(driveToLeftStation);

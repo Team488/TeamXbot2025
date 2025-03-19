@@ -49,7 +49,7 @@ public class Paths {
                             .build())
                     .build();
 
-    public static XTableValues.BezierCurves farLeftAToCoralStationBlue =
+    public static XTableValues.BezierCurves farLeftBToCoralStationBlue =
             XTableValues.BezierCurves.newBuilder()
                     .setOptions(XTableValues.TraversalOptions.newBuilder()
                             .setFinalRotationDegrees(-54)
