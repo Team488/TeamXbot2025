@@ -230,8 +230,11 @@ public class Paths {
                 // Compute the mirrored Y coordinate by reflecting about the field's Y midpoint.
                 double mirroredY = 2 * fieldYMidpoint - originalY;
 
-                Translation2d mirroredPose = PoseSubsystem
-                        .convertBlueToRed(new Translation2d(originalX, mirroredY));
+                Translation2d mirroredPose = new Translation2d(originalX, mirroredY);
+                if(alliance.equals(XTableValues.Alliance.RED)) {
+                   mirroredPose = PoseSubsystem
+                            .convertBlueToRed(new Translation2d(originalX, side.equals(Side.LEFT) ? originalY : mirroredY));
+                }
 
                 // Build a new control point with the mirrored Y coordinate.
                 XTableValues.ControlPoint mirroredCp = cp.toBuilder()
@@ -249,12 +252,14 @@ public class Paths {
             XTableValues.TraversalOptions originalOptions = originalPath.getOptions();
             double originalFinalRotation = originalOptions.getFinalRotationDegrees();
             if(side.equals(Side.RIGHT)) {
-                originalFinalRotation = -originalFinalRotation;
+                originalFinalRotation = -originalFinalRotation + 180;
             }
 
             Rotation2d finalRotation = PoseSubsystem
-                    .convertBlueToRed(Rotation2d.fromDegrees(originalFinalRotation));
-
+                        .convertBlueToRed(Rotation2d.fromDegrees(originalFinalRotation));
+            if(alliance.equals(XTableValues.Alliance.RED) && side.equals(Side.RIGHT)) {
+               finalRotation = finalRotation.plus(Rotation2d.fromDegrees(180));
+            }
             XTableValues.TraversalOptions mirroredOptions = originalOptions.toBuilder()
                     .setFinalRotationDegrees(finalRotation.getDegrees())
                     .build();
