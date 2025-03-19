@@ -4,6 +4,7 @@ import competition.auto_programs.FromCageScoreOneCoralAutoFactory;
 import competition.auto_programs.FromLeftCageScoreLeftFacesLevelFours;
 import competition.auto_programs.FromRightCageScoreRightFacesLevelFours;
 import competition.auto_programs.vision.LeftFourCoralAuto;
+import competition.auto_programs.vision.RightFourCoralAuto;
 import competition.commandgroups.PrepAlgaeSystemCommandGroupFactory;
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
 import competition.simulation.commands.ResetSimulatedPose;
@@ -257,8 +258,8 @@ public class OperatorCommandMap {
                                         Provider<FromCageScoreOneCoralAutoFactory> fromCageScoreOneLevelFourAutoFactProv,
                                         FromLeftCageScoreLeftFacesLevelFours fromLeftCageScoreLeftFacesLevelFours,
                                         FromRightCageScoreRightFacesLevelFours fromRightCageScoreRightFacesLevelFours,
-                                        Provider<LeftFourCoralAuto> leftFourCoralAutoProvider
-//                                        Provider<RightFourCoralAuto> rightFourCoralAuto
+                                        Provider<LeftFourCoralAuto> leftFourCoralAutoProvider,
+                                        Provider<RightFourCoralAuto> rightFourCoralAuto
     ) {
         var setFromLeftFarLeftBranchBLevelFour = setAutonomousCommandProvider.get();
         setFromLeftFarLeftBranchBLevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFactProv.get().create(
@@ -294,9 +295,9 @@ public class OperatorCommandMap {
         var leftVisionAuto = setAutonomousCommandProvider.get();
         leftVisionAuto.setAutoCommand(leftFourCoralAutoProvider.get());
         leftVisionAuto.includeOnSmartDashboard("Left Vision Auto");
-//        var rightVisionAuto = setAutonomousCommandProvider.get();
-//        rightVisionAuto.setAutoCommand(rightFourCoralAuto.get(), Landmarks.BlueCageSixStartingLine);
-//        rightVisionAuto.includeOnSmartDashboard("Right Vision Auto");
+        var rightVisionAuto = setAutonomousCommandProvider.get();
+        rightVisionAuto.setAutoCommand(rightFourCoralAuto.get(), Landmarks.BlueCageSixStartingLine);
+        rightVisionAuto.includeOnSmartDashboard("Right Vision Auto");
     }
 
     @Inject

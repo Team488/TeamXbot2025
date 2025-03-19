@@ -14,7 +14,6 @@ import competition.subsystems.pose.vision.Paths;
 import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import xbot.common.subsystems.autonomous.AutonomousCommandSelector;
 
 import javax.inject.Inject;
@@ -26,9 +25,9 @@ import static competition.subsystems.pose.vision.Paths.blueCloseLeftBranchBToLef
 import static competition.subsystems.pose.vision.Paths.farLeftBToCoralStationBlue;
 
 
-public class LeftFourCoralAuto extends BaseAutonomousSequentialCommandGroup {
+public class RightFourCoralAuto extends BaseAutonomousSequentialCommandGroup {
     @Inject
-    public LeftFourCoralAuto(
+    public RightFourCoralAuto(
             AprilTagFieldLayout aprilTagFieldLayout,
             ElectricalContract electricalContract,
             AutonomousCommandSelector autoSelector,
@@ -48,10 +47,10 @@ public class LeftFourCoralAuto extends BaseAutonomousSequentialCommandGroup {
                 .alongWith(new InstantCommand(() -> simulator.resetPosition(PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueCageOneStartingLine))));
         this.addCommands(initializeStateCommand);
         // Score 1
-        getDriveAndScoreStatusMessageCommand(Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR);
+        getDriveAndScoreStatusMessageCommand(Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR);
         var driveAndScoreFarLeftBranchBLevelFour = driveToFaceAndScoreFact.create(
-                        Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR)
-                .alongWith(getDriveAndScoreStatusMessageCommand(Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR));
+                        Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR)
+                .alongWith(getDriveAndScoreStatusMessageCommand(Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR));
         this.addCommands(driveAndScoreFarLeftBranchBLevelFour);
 
         // Coral Station
@@ -63,12 +62,12 @@ public class LeftFourCoralAuto extends BaseAutonomousSequentialCommandGroup {
 
         // Score 2
         var driveAndScoreCloseLeftBranchBLevelFour = driveToFaceAndScoreFact.create(
-                        Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR)
-                .alongWith(getDriveAndScoreStatusMessageCommand(Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR));
+                        Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR)
+                .alongWith(getDriveAndScoreStatusMessageCommand(Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR));
         this.addCommands(driveAndScoreCloseLeftBranchBLevelFour);
 
         // Coral Station
-        var driveToRightStationAndIntakeSecond = pathDriveToLocationAndIntakeUntilCollectedProvider.get().create(Paths.Side.LEFT, blueCloseLeftBranchBToLeftCoralStation)
+        var driveToRightStationAndIntakeSecond = pathDriveToLocationAndIntakeUntilCollectedProvider.get().create(Paths.Side.LEFT, blueCloseLeftBranchAToLeftCoralStation)
                 .alongWith(
                         getDriveAndIntakeStatusMessageCommand(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.MID));
         this.addCommands(driveToRightStationAndIntakeSecond);
@@ -76,22 +75,22 @@ public class LeftFourCoralAuto extends BaseAutonomousSequentialCommandGroup {
 
         // Score 3
         var driveAndScoreCloseLeftBranchALevelFour = driveToFaceAndScoreFact.create(
-                        Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR)
+                        Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR)
                 .alongWith(
-                        getDriveAndScoreStatusMessageCommand(Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR));
+                        getDriveAndScoreStatusMessageCommand(Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR));
         this.addCommands(driveAndScoreCloseLeftBranchALevelFour);
 
         // Coral Station
-        var driveToLeftStationAndIntakeSecond = pathDriveToLocationAndIntakeUntilCollectedProvider.get().create(Paths.Side.LEFT, blueCloseLeftBranchAToLeftCoralStation)
+        var driveToLeftStationAndIntakeSecond = pathDriveToLocationAndIntakeUntilCollectedProvider.get().create(Paths.Side.LEFT, blueCloseLeftBranchBToLeftCoralStation)
                 .alongWith(
                         getDriveAndIntakeStatusMessageCommand(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.MID));
         this.addCommands(driveToLeftStationAndIntakeSecond);
 
         // Score 4
         var driveAndScoreCloseBranchALevelFour = driveToFaceAndScoreFact.create(
-                        Landmarks.ReefFace.CLOSE, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR)
+                        Landmarks.ReefFace.CLOSE, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR)
                 .alongWith(
-                        getDriveAndScoreStatusMessageCommand(Landmarks.ReefFace.CLOSE, Landmarks.Branch.A, Landmarks.CoralLevel.FOUR));
+                        getDriveAndScoreStatusMessageCommand(Landmarks.ReefFace.CLOSE, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR));
         this.addCommands(driveAndScoreCloseBranchALevelFour);
 
         // Back to coral station
