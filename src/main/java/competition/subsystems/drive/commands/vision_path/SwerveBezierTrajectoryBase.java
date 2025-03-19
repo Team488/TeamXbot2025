@@ -66,7 +66,7 @@ public class SwerveBezierTrajectoryBase extends SwerveSimpleBezierCommand {
         XTableValues.ControlPoint lastPoint = lastCurve.getControlPoints(lastCurve.getControlPointsCount() - 1);
         Translation2d endPoint = new Translation2d( lastPoint.getX(), lastPoint.getY());
         double distanceFromEnd = currentStartPoint.getDistance(endPoint);
-        double halfDistanceFromEnd = distanceFromEnd / 1.5;
+        double halfDistanceFromEnd = distanceFromEnd / 1.8;
 
 
         final Rotation2d overallStartRotation =
