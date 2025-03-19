@@ -283,7 +283,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
         aKitLog.record("RUNNNINGG?", true);
         if (electricalContract.isCoralArmMotorReady()) {
             rotationsAtZero = getMotorPosition().in(Rotations)
-                    - Degrees.of(autoCalibrationDegrees.get()).div(degreesPerRotations.get()).in(Rotations);
+                    - (autoCalibrationDegrees.get() / (degreesPerRotations.get()));
         }
         isCalibrated = true;
     }
