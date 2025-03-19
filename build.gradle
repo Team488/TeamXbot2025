@@ -172,9 +172,16 @@ deployArtifact.jarTask = jar
 wpi.java.configureExecutableTasks(jar)
 wpi.java.configureTestTasks(test)
 
+// We need to clean out the cached aspectJ files or else
+// the aspectJ compiler will not respect SCL updates
+tasks.register('cleanPreviousAspectJRun', Delete) {
+    delete "$buildDir/classes/java/main/xbot/common"
+}
+
 // Configure string concat to always inline compile
 tasks.withType(JavaCompile) {
     options.compilerArgs.add '-XDstringConcat=inline'
+    dependsOn cleanPreviousAspectJRun
 }
 
 // Our custom gradle stuff after this line
