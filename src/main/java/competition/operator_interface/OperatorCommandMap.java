@@ -258,7 +258,8 @@ public class OperatorCommandMap {
                                         FromLeftCageScoreLeftFacesLevelFours fromLeftCageScoreLeftFacesLevelFours,
                                         FromRightCageScoreRightFacesLevelFours fromRightCageScoreRightFacesLevelFours,
                                         Provider<LeftFourCoralAuto> leftFourCoralAutoProvider
-                                     ) {
+//                                        Provider<RightFourCoralAuto> rightFourCoralAuto
+    ) {
         var setFromLeftFarLeftBranchBLevelFour = setAutonomousCommandProvider.get();
         setFromLeftFarLeftBranchBLevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFactProv.get().create(
                 Landmarks.BlueCageOneStartingLine, Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR
@@ -294,7 +295,7 @@ public class OperatorCommandMap {
         leftVisionAuto.setAutoCommand(leftFourCoralAutoProvider.get());
         leftVisionAuto.includeOnSmartDashboard("Left Vision Auto");
 //        var rightVisionAuto = setAutonomousCommandProvider.get();
-//        rightVisionAuto.setAutoCommand(rightFourCoralAutoProvider.get());
+//        rightVisionAuto.setAutoCommand(rightFourCoralAuto.get(), Landmarks.BlueCageSixStartingLine);
 //        rightVisionAuto.includeOnSmartDashboard("Right Vision Auto");
     }
 
