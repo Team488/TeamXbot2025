@@ -1,8 +1,5 @@
 package competition.subsystems.drive.commands.vision_path;
 
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Meters;
-
 import competition.subsystems.oracle.ReefRoutingCircle;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
@@ -12,10 +9,6 @@ import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-import javax.inject.Inject;
 import org.kobe.xbot.JClient.XTablesClient;
 import org.kobe.xbot.Utilities.Entities.XTableValues;
 import org.kobe.xbot.Utilities.VisionCoprocessorCommander;
@@ -25,6 +18,14 @@ import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.drive.BaseSwerveDriveSubsystem;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
 import xbot.common.trajectory.XbotSwervePoint;
+
+import javax.inject.Inject;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
 
 public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
     Pose2d target;
@@ -154,12 +155,13 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
         } else {
             log.info("The path was overridden manually, no request was made to "
                     + "coprocessor.");
-            if (side != null)
+            if (side != null) {
                 curves.set(Paths.mirrorPathLeftOrRight(side,
                         CoprocessorCommunicationSubsystem.fromAlliance(
                                 DriverStation.getAlliance().orElse(
                                         DriverStation.Alliance.Blue)),
                         curves.get()));
+            }
             XTablesClient client = this.coprocessor.getXTablesManager().getOrNull();
             if (client != null) {
                 log.info("Logged bezier curves onto XTABLES.");
