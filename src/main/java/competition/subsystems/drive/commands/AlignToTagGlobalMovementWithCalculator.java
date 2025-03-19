@@ -7,6 +7,7 @@ import competition.subsystems.drive.logic.AlignCameraToAprilTagCalculator;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import edu.wpi.first.units.measure.Distance;
 import xbot.common.command.BaseCommand;
+import xbot.common.controls.sensors.XTimer;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
 
 import javax.inject.Inject;
@@ -29,6 +30,7 @@ public class AlignToTagGlobalMovementWithCalculator extends BaseCommand {
     private boolean requireExcellentAlignment = true;
 
     final AlignCameraToAprilTagCalculator calculator;
+    private double startTime = 0;
 
     @Inject
     public AlignToTagGlobalMovementWithCalculator(AprilTagVisionSubsystemExtended aprilTagVisionSubsystem, DriveSubsystem drive,
@@ -55,7 +57,7 @@ public class AlignToTagGlobalMovementWithCalculator extends BaseCommand {
     }
 
     public void setConfigurations(int targetCameraID, int targetAprilTagID, boolean isCameraBackwards, double offsetInInches,
-    AlignCameraToAprilTagCalculator.Activity startingActivity, boolean requireExcellentAlignment) {
+                                  AlignCameraToAprilTagCalculator.Activity startingActivity, boolean requireExcellentAlignment) {
         this.targetCameraID = targetCameraID;
         this.targetAprilTagID = targetAprilTagID;
         this.isCameraBackwards = isCameraBackwards;
@@ -76,10 +78,14 @@ public class AlignToTagGlobalMovementWithCalculator extends BaseCommand {
         calculator.configureAndReset(targetAprilTagID, targetCameraID, offset,
                 isCameraBackwards, startingActivity, requireExcellentAlignment);
         pose.setPreferOdometryToVision(true);
+        startTime = XTimer.getFPGATimestamp();
     }
 
     @Override
     public void execute() {
+        if(!hasSetConfiguration) {
+            return;
+        }
         var advice = calculator.getXYPowersAlignToAprilTag(pose.getCurrentPose2d());
         aKitLog.record("driveValues", advice.driveIntent());
         drive.fieldOrientedDrive(
@@ -91,12 +97,15 @@ public class AlignToTagGlobalMovementWithCalculator extends BaseCommand {
 
     @Override
     public boolean isFinished() {
-        return calculator.recommendIsFinished();
+        return hasSetConfiguration && calculator.recommendIsFinished();
     }
 
     @Override
     public void end(boolean interrupted) {
         pose.setPreferOdometryToVision(false);
         drive.stop();
+        var duration = XTimer.getFPGATimestamp() - startTime;
+        aKitLog.record("align duration", duration);
+        log.info("align duration: ", duration);
     }
 }

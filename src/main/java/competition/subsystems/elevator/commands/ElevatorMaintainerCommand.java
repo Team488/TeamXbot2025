@@ -7,7 +7,6 @@ import competition.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.units.measure.Distance;
 import xbot.common.advantage.AKitLogger;
 import xbot.common.command.BaseMaintainerCommand;
-import xbot.common.controls.actuators.XCANMotorController;
 import xbot.common.logic.CalibrationDecider;
 import xbot.common.logic.HumanVsMachineDecider;
 import xbot.common.math.MathUtils;
@@ -18,7 +17,6 @@ import xbot.common.properties.PropertyFactory;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Rotations;
 import static xbot.common.logic.CalibrationDecider.CalibrationMode.GaveUp;
 
 import javax.inject.Inject;
@@ -72,9 +70,9 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     private void createNewProfileManager(){
         profileManager = trapezoidProfileManagerFactory.create(
                 getPrefix() + "trapezoidMotion",
-                1, // 5 for competition
-                1, // 3.5 for competition
-                1000, //tune for real robot
+                5, // 5 for competition
+                3.5, // 3.5 for competition
+                0.16, //tune for real robot
                 elevator.getCurrentValue().in(Meters));
     }
 
@@ -140,7 +138,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         elevator.setPower(elevator.calibrationNegativePower.get());
 
         if (elevator.isTouchingBottom()) {
-            elevator.markElevatorAsCalibratedAgainstLowerLimit();
+            elevator.tryMarkElevatorCalibratedAgainstLowerLimit();
             elevator.setTargetValue(elevator.getCurrentValue());
         }
     }

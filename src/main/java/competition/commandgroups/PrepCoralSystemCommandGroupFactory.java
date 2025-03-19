@@ -24,6 +24,7 @@ public class PrepCoralSystemCommandGroupFactory {
 
     public ParallelCommandGroup create(Supplier<Landmarks.CoralLevel> coralLevelSupplier) {
         var group = new ParallelCommandGroup();
+        group.setName("PrepCoralSystemCommandGroup");
 
         var setElevatorTargetHeightCommand = setElevatorTargetHeightCommandProvider.get();
         setElevatorTargetHeightCommand.setHeightSupplier(coralLevelSupplier);
