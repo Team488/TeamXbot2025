@@ -98,9 +98,9 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
     @Override
     public void initialize() {
         log.info("Initializing");
+        lock = false;
         if (this.failed.get() != null) {
             curves.set(null);
-            lock = false;
             failed.set(false);
             Pose2d startingPose = pose.getCurrentPose2d();
             if (!coprocessor.isUseBackupPointToPointForPathplanning()) {
