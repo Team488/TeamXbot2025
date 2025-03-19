@@ -36,6 +36,7 @@ public class FromCageScoreOneCoralAutoFactory {
                                                        Landmarks.ReefFace targetReefFace, Landmarks.Branch targetBranch,
                                                        Landmarks.CoralLevel targetLevel) {
         var auto = new BaseAutonomousSequentialCommandGroup(autoSelector);
+        auto.setName("FromCageScoreOneCoralAuto");
 
         var initializeStateCommand = pose.createSetPositionCommand(
                         () -> PoseSubsystem.convertBlueToRedIfNeeded(startingLocation)

@@ -69,19 +69,21 @@ public class AlignToReefWithAprilTagCommand extends AlignToTagGlobalMovementWith
         }
 
         if (!aprilTagVisionSubsystem.isCameraConnected(cameraToUse)) {
+            // if the camera isn't connected, we can't really do this
+            // rumble to notify driver
             oi.driverGamepad.getRumbleManager().rumbleGamepad(1, 1);
+        } else {
+            super.setConfigurations(
+                    cameraToUse,
+                    aprilTagVisionSubsystem.getTargetAprilTagID(pose.getClosestReefFacePose()),
+                    isCameraBackwards,
+                    offsetInInches,
+                    startingActivity,
+                    enableRetries
+            );
+    
+            super.initialize();
         }
-
-        super.setConfigurations(
-                cameraToUse,
-                aprilTagVisionSubsystem.getTargetAprilTagID(pose.getClosestReefFacePose()),
-                isCameraBackwards,
-                offsetInInches,
-                startingActivity,
-                enableRetries
-        );
-
-        super.initialize();
     }
 
     private void setDriverRelativeCameraToUse() {
