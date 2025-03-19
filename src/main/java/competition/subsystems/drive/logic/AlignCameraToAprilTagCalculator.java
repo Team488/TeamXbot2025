@@ -331,7 +331,6 @@ public class AlignCameraToAprilTagCalculator {
                 rotationIntent = headingModule.calculateHeadingPower(headingToPointAtAprilTag);
 
                 // Finally, a check to see if we're quite close and should advance to the next state.
-
                 var distanceThresholdToAdvance = (approachMode == ApproachMode.Close)
                         ? distanceFromInterstitialToAdvanceSlow.get()
                         : distanceFromInterstitialToAdvanceFast.get();

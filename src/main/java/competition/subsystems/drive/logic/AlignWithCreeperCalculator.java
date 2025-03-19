@@ -281,7 +281,6 @@ public class AlignWithCreeperCalculator {
         }
 
         if (leftDistance == -1 && rightDistance == -1) {
-            forceStop = true;
             return new CreeperAlignmentSuggestion(0);
         }
 

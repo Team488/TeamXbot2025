@@ -9,8 +9,8 @@ import javax.inject.Inject;
 
 
 public class AlignWithCreeperCalculatorCommand extends BaseCommand {
-    private DriveSubsystem drive;
-    private AlignWithCreeperCalculator calculator;
+    final DriveSubsystem drive;
+    final AlignWithCreeperCalculator calculator;
     private Cameras camera;
 
     @Inject
@@ -23,7 +23,7 @@ public class AlignWithCreeperCalculatorCommand extends BaseCommand {
     @Override
     public void initialize() {
         this.calculator.setCamera(this.camera.getIndex());
-        if(!this.calculator.initialize()){
+        if (!this.calculator.initialize()) {
             log.warn("Failed to initialize Calculator.");
             cancel();
         };
@@ -39,7 +39,7 @@ public class AlignWithCreeperCalculatorCommand extends BaseCommand {
 
     @Override
     public boolean isFinished() {
-        // us being centered is only valuable if we arent currently moving
+        // Us being centered is only valuable if we aren't currently moving
         return calculator.isFinished(true);
     }
 
@@ -52,12 +52,7 @@ public class AlignWithCreeperCalculatorCommand extends BaseCommand {
         drive.stop();
     }
 
-    public Cameras getCamera() {
-        return camera;
-    }
-
-    public AlignWithCreeperCalculatorCommand setCamera(Cameras camera) {
+    public void setCamera(Cameras camera) {
         this.camera = camera;
-        return this;
     }
 }
