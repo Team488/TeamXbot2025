@@ -21,7 +21,7 @@ public class AlignToNearestCoralStationCommand extends AlignToSpecificHumanLoadi
 
     @Override
     public void initialize() {
-        setCoralStation(pose.getClosestCoralStation());
+        setTargetCoralStation(pose.getClosestCoralStation());
         super.initialize();
     }
 }

@@ -3,6 +3,7 @@ package competition.auto_programs;
 import competition.commandgroups.DriveToFaceAndScoreCommandGroupFactory;
 import competition.commandgroups.DriveToStationAndIntakeUntilCollectedCommandGroupFactory;
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
+import competition.commandgroups.vision_path.PathToNearestStationAndIntakeUntilCollectedCommandGroupFactory;
 import competition.simulation.BaseSimulator;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
@@ -19,7 +20,9 @@ public class FromLeftCageScoreLeftFacesLevelFours extends BaseAutonomousSequenti
                                                 DriveToFaceAndScoreCommandGroupFactory driveToFaceAndScoreFact,
                                                 DriveToStationAndIntakeUntilCollectedCommandGroupFactory driveToStationAndIntakeFact,
                                                 PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFact,
-                                                BaseSimulator simulator) {
+                                                BaseSimulator simulator,
+                                                PathToNearestStationAndIntakeUntilCollectedCommandGroupFactory
+                                                            pathToNearestStationAndIntakeFactory) {
         super(autoSelector);
 
         // Drive to far left, branch B and score level four
@@ -33,7 +36,10 @@ public class FromLeftCageScoreLeftFacesLevelFours extends BaseAutonomousSequenti
         var driveToLeftStationAndIntakeFirst = driveToStationAndIntakeFact.create(
                         Landmarks.CoralStation.LEFT, true)
                 .alongWith(getDriveAndIntakeStatusMessageCommand(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.MID));
-        this.addCommands(driveToLeftStationAndIntakeFirst);
+//        this.addCommands(driveToLeftStationAndIntakeFirst);
+
+        var pathToLeftStationAndIntakeFirst = pathToNearestStationAndIntakeFactory.create(true);
+        this.addCommands(pathToLeftStationAndIntakeFirst);
 
         // Drive to close left, branch B and score level four
         var driveAndScoreCloseLeftBranchBLevelFour = driveToFaceAndScoreFact.create(
@@ -45,7 +51,10 @@ public class FromLeftCageScoreLeftFacesLevelFours extends BaseAutonomousSequenti
         var driveToLeftStationAndIntakeSecond = driveToStationAndIntakeFact.create(
                         Landmarks.CoralStation.LEFT, false)
                 .alongWith(getDriveAndIntakeStatusMessageCommand(Landmarks.CoralStation.LEFT, Landmarks.CoralStationSection.MID));
-        this.addCommands(driveToLeftStationAndIntakeSecond);
+//        this.addCommands(driveToLeftStationAndIntakeSecond);
+
+        var pathToLeftStationAndIntakeSecond = pathToNearestStationAndIntakeFactory.create(true);
+        this.addCommands(pathToLeftStationAndIntakeSecond);
 
         // Drive to close left, branch A and score level four
         var driveAndScoreCloseLeftBranchALevelFour = driveToFaceAndScoreFact.create(

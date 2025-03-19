@@ -53,7 +53,7 @@ public class DriveToStationAndIntakeUntilCollectedCommandGroupFactory {
         }
         var alignToCoralStationCommand = alignToCoralStationCommandProv.get();
         var shoveCoralStationCommand = shoveCoralStationCommandProv.get();
-        alignToCoralStationCommand.setCoralStation(station);
+        alignToCoralStationCommand.setTargetCoralStation(station);
         driveToCoralStation.addCommands(alignToCoralStationCommand);
         shoveCoralStationCommand.setShoveAngle(station);
         driveUntilIntake.addCommands(driveToCoralStation.andThen(shoveCoralStationCommand.withTimeout(4)));
