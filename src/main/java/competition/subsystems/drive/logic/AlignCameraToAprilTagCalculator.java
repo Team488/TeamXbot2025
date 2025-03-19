@@ -177,7 +177,7 @@ public class AlignCameraToAprilTagCalculator {
         this.isCameraBackwards = isCameraBackwards;
         var currentPose = pose.getCurrentPose2d();
 
-        lights.updateTargetCameraID(targetCameraID);
+        lights.updateFromCalculator(activity, targetCameraID);
 
         reset();
 
@@ -411,7 +411,7 @@ public class AlignCameraToAprilTagCalculator {
             default -> {} // We're done! We don't need to do anything.
         }
 
-        lights.updateActivity(activity);
+        lights.updateFromCalculator(activity, targetCameraID);
         akitLog.record("Activity", activity);
         akitLog.record("TagAcquisitionState", tagAcquisitionState);
         akitLog.record("ErrorIsWithinBounds", isLastKnownErrorWithinBounds());

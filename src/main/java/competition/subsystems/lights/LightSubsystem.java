@@ -47,7 +47,7 @@ public class LightSubsystem extends BaseSubsystem {
         CoralPresent(4),
         RequestCoralFromHuman(5),
         Victory(6), 
-        ReadyToScore(7),
+        //ReadyToScore(7),
         DisabledCameraUnavailable(8),
         TargetCameraUnavailable(9),
         CurrentlyAligning(10),
@@ -132,11 +132,11 @@ public class LightSubsystem extends BaseSubsystem {
             if (DriverStation.getMatchTime() > 230 && DriverStation.isTeleop()) {
                 currentState = LightsStateMessage.Victory;
             }
-            if (!Objects.equals(autonomousCommandSelector.getProgramName(), "EmergencyAutonomousCommand")) {
-                currentState = LightsStateMessage.RobotDisabledAuto;
-            }
             if (!visionSubsystem.areAllCamerasConnected()) {
                 currentState = LightsStateMessage.DisabledCameraUnavailable;
+            }
+            if (!Objects.equals(autonomousCommandSelector.getProgramName(), "EmergencyAutonomousCommand")) {
+                currentState = LightsStateMessage.RobotDisabledAuto;
             }
         } else {
             if (activity == AlignCameraToAprilTagCalculator.Activity.TerminalApproach) {
@@ -145,15 +145,12 @@ public class LightSubsystem extends BaseSubsystem {
                 } else {
                     currentState = LightsStateMessage.CurrentlyAligning;
                 }
-            } else if (activity == AlignCameraToAprilTagCalculator.Activity.Complete) {
-                currentState = LightsStateMessage.FinishedAligning;
             } else if (coralScorerSubsystem.confidentlyHasCoral()) {
                 currentState = LightsStateMessage.CoralPresent;
-            } else if (coralScorerSubsystem.confidentlyHasCoral() && coralArmSubsystem.getIsTargetAngleScoring()
-                    && coralArmSubsystem.isMaintainerAtGoal() && elevatorSubsystem.isMaintainerAtGoal()) {
-                currentState = LightsStateMessage.ReadyToScore;
             } else if (!coralScorerSubsystem.confidentlyHasCoral()) {
                 currentState = LightsStateMessage.NoCoralPresent;
+            } else if (activity == AlignCameraToAprilTagCalculator.Activity.Complete) {
+                currentState = LightsStateMessage.FinishedAligning;
             } else if (coralScorerSubsystem.getCoralScorerState() == CoralScorerSubsystem.CoralScorerState.INTAKING) {
                 currentState = LightsStateMessage.RequestCoralFromHuman;
             } else {
@@ -170,8 +167,9 @@ public class LightSubsystem extends BaseSubsystem {
         return state;
     }
 
-    public void updateActivity(AlignCameraToAprilTagCalculator.Activity activity) {
+    public void updateFromCalculator(AlignCameraToAprilTagCalculator.Activity activity, int targetCameraID) {
         this.activity = activity;
+        this.targetCameraID = targetCameraID;
     }
 
     public void updateTargetCameraID(int targetCameraID) {
