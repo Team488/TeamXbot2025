@@ -1,7 +1,6 @@
 
 package competition;
 
-import au.grapplerobotics.CanBridge;
 import competition.electrical_contract.ElectricalContract;
 import competition.electrical_contract.UnitTestContract2025;
 import competition.injection.components.BaseRobotComponent;
@@ -13,15 +12,19 @@ import competition.injection.components.DaggerSimulationComponent;
 import competition.operator_interface.OperatorInterface;
 import competition.simulation.BaseSimulator;
 import competition.subsystems.algae_arm.AlgaeArmSubsystem;
+import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.wpilibj.Preferences;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 import xbot.common.command.BaseRobot;
 import xbot.common.command.XScheduler;
 import xbot.common.math.FieldPose;
 import xbot.common.subsystems.pose.BasePoseSubsystem;
 
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
 public class Robot extends BaseRobot {
@@ -32,7 +35,7 @@ public class Robot extends BaseRobot {
     final CountDownLatch reachedDisabledInit = new CountDownLatch(1);
     final CountDownLatch reachedEndOfLoop = new CountDownLatch(5);
 
-    BaseSimulator simulator;
+    Optional<BaseSimulator> simulator = Optional.empty();
     ElectricalContract simulatorContract = new UnitTestContract2025();
     OperatorInterface oi;
     AlgaeArmSubsystem algaeArmSubsystem;
@@ -59,7 +62,7 @@ public class Robot extends BaseRobot {
         algaeArmSubsystem = getInjectorComponent().algaeArmSubsystem();
 
         if (BaseRobot.isSimulation()) {
-            simulator = getInjectorComponent().simulator();
+            simulator = Optional.of(getInjectorComponent().simulator());
         }
 
         autonomousCommandSelector.setCurrentAutonomousCommand(getInjectorComponent().emergencyAutonomousCommand());
@@ -74,6 +77,7 @@ public class Robot extends BaseRobot {
         dataFrameRefreshables.add(getInjectorComponent().coralScorerSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().algaeCollectionSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().algaeArmSubsystem());
+        dataFrameRefreshables.add(getInjectorComponent().deadWheelSubsystem());
 
         // Not needed unless we are actively configuring the LaserCAN.
         //CanBridge.runTCP();
@@ -158,9 +162,9 @@ public class Robot extends BaseRobot {
     public void simulationPeriodic() {
         super.simulationPeriodic();
 
-        if (simulator != null) {
-            simulator.update();
-        }
+        simulator.ifPresent((nullSafeSimulator) -> {
+            nullSafeSimulator.update();
+        });
     }
 
     @Override
@@ -171,6 +175,16 @@ public class Robot extends BaseRobot {
 
     @Override
     public void autonomousInit() {
+        var poseSub = getInjectorComponent().poseSubsystem();
+        if (autonomousCommandSelector.getCurrentAutonomousStartingPosition() != null){
+            if(Robot.isSimulation()) {
+                simulator.ifPresent((nullSafeSimulator) -> nullSafeSimulator.resetPosition(PoseSubsystem.convertBlueToRedIfNeeded(
+                        autonomousCommandSelector.getCurrentAutonomousStartingPosition())));
+            }
+            poseSub.setCurrentPosition(PoseSubsystem.convertBlueToRedIfNeeded(
+                    autonomousCommandSelector.getCurrentAutonomousStartingPosition()));
+        }
+
         super.autonomousInit();
         if (!algaeArmSubsystem.isCalibrated()) {
             algaeArmSubsystem.forceCalibratedHere();
