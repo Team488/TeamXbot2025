@@ -195,6 +195,12 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         }
     }
 
+    /**
+     * This method sets the LaserCAN sensor offset if the sensor is reporting a
+     * valid value. This should only be called when the elevator is touching the
+     * bottom sensor.
+     * @return true if the offset was set successfully
+     */
     private boolean trySetLaserCANOffset() {
         var distance = getRawLaserDistance();
         distance.ifPresent(laserCANPositionOffset::mut_replace);
@@ -210,6 +216,13 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         return false;
     }
 
+    /**
+     * This method attempts to calibrate the elevator against the lower limit. It
+     * will set the laserCAN offset and the motor offset if the sensor is reporting a
+     * valid value. This should only be called when the elevator is touching the
+     * bottom sensor.
+     * @return true if the calibration was successful
+     */
     public boolean tryMarkElevatorCalibratedAgainstLowerLimit() {
         var success = trySetLaserCANOffset() && trySetMotorOffset();
         if (success) {
@@ -373,6 +386,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         }
         //bandage case: isTouchingBottom flashes true for one tick on startup, investigate later?
         if (this.isTouchingBottom() && periodicTickCounter >= 3 && !isCalibrated()) {
+            // Calibration may fail if the LaserCAN is not reporting a valid value
             if (tryMarkElevatorCalibratedAgainstLowerLimit()) {
                 setTargetValue(getCurrentValue());
             }
