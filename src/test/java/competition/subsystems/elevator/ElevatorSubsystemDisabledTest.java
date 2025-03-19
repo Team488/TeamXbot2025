@@ -52,6 +52,6 @@ public class ElevatorSubsystemDisabledTest extends BaseCompetitionTest {
 
         assertFalse(subsystem.isTouchingBottom());
 
-        subsystem.markElevatorAsCalibratedAgainstLowerLimit();
+        subsystem.tryMarkElevatorCalibratedAgainstLowerLimit();
     }
 }
