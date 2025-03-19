@@ -72,6 +72,10 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
     public XTablesClient tryGetXTablesClient(){
         return xTablesClientManager.getOrNull();
     }
+    public boolean isXTablesFound(){
+        return xTablesClientManager != null && xTablesClientManager.getOrNull() != null;
+    }
+
 
     public String getXtablesCoordinateLocation(){
         return xtablesCoordinateLocation.get();
@@ -104,6 +108,10 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
     @Override
     public void periodic() {
         aKitLog.record("isCoprocessorHealthy", isCoprocessorHealthy);
+        if(isXTablesFound()){
+            tryGetXTablesClient()
+                    .putString("TEAM", DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue).name());
+        }
     }
 
 }

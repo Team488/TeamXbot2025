@@ -10,11 +10,9 @@ import competition.electrical_contract.ElectricalContract;
 import competition.simulation.BaseSimulator;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
-import competition.subsystems.pose.vision.Paths;
 import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import org.kobe.xbot.Utilities.Entities.XTableValues;
 import xbot.common.subsystems.autonomous.AutonomousCommandSelector;
 
 import javax.inject.Inject;
@@ -32,14 +30,14 @@ public class LeftFourCoralAuto extends BaseAutonomousSequentialCommandGroup {
             AprilTagFieldLayout aprilTagFieldLayout,
             ElectricalContract electricalContract,
             AutonomousCommandSelector autoSelector,
-                             CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem,
-                             PoseSubsystem pose,
-                             Provider<PathDriveToCoralStationAndIntakeUntilCollected> driveToStationAndIntakeFactProv,
-                             DriveToFaceAndScoreCommandGroupFactory driveToFaceAndScoreFact,
-                             Provider<PathToFaceAndScoreCommandGroupFactory> driveToFaceAndScoreFactProv,
-                             Provider<PathDriveToLocationAndIntakeUntilCollected> pathDriveToLocationAndIntakeUntilCollectedProvider,
-                             PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFact,
-                             BaseSimulator simulator) {
+            CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem,
+            PoseSubsystem pose,
+            Provider<PathDriveToCoralStationAndIntakeUntilCollected> driveToStationAndIntakeFactProv,
+            DriveToFaceAndScoreCommandGroupFactory driveToFaceAndScoreFact,
+            Provider<PathToFaceAndScoreCommandGroupFactory> driveToFaceAndScoreFactProv,
+            Provider<PathDriveToLocationAndIntakeUntilCollected> pathDriveToLocationAndIntakeUntilCollectedProvider,
+            PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFact,
+            BaseSimulator simulator) {
 
         super(autoSelector);
         var initializeStateCommand = pose.createSetPositionCommand(
@@ -47,8 +45,6 @@ public class LeftFourCoralAuto extends BaseAutonomousSequentialCommandGroup {
                 )
                 .alongWith(new InstantCommand(() -> simulator.resetPosition(PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueCageOneStartingLine))));
         this.addCommands(initializeStateCommand);
-        coprocessorCommunicationSubsystem.tryGetXTablesClient()
-                .putBezierCurves("bezier_path", Paths.mirrorPathLeftOrRight(Paths.Side.RIGHT, XTableValues.Alliance.RED, farLeftAToCoralStationBlue));
         // Score 1
 
 //        getDriveAndScoreStatusMessageCommand(Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR);
