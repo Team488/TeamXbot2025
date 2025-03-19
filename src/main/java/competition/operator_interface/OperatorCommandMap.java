@@ -3,6 +3,7 @@ package competition.operator_interface;
 import competition.auto_programs.FromCageScoreOneCoralAutoFactory;
 import competition.auto_programs.FromLeftCageScoreLeftFacesLevelFours;
 import competition.auto_programs.FromRightCageScoreRightFacesLevelFours;
+import competition.commandgroups.DriveToTargetBranchThenAlignCommandGroupFactory;
 import competition.commandgroups.HeadingAssistedDriveAndScoreCommandGroup;
 import competition.commandgroups.PrepAlgaeSystemCommandGroupFactory;
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
@@ -43,6 +44,7 @@ import competition.subsystems.pose.commands.ResetPoseCommand;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import xbot.common.controls.sensors.XXboxController;
 import xbot.common.subsystems.autonomous.SetAutonomousCommand;
@@ -81,7 +83,8 @@ public class OperatorCommandMap {
             ChangeActiveSwerveModuleCommand changeActiveModule,
             SwerveDriveWithJoysticksCommand typicalSwerveDrive,
             DriveToNearestReefFaceWithPID driveToNearestReefFaceWithPID,
-            DriveSubsystem drive, PoseSubsystem pose) {
+            DriveSubsystem drive, PoseSubsystem pose,
+            Provider<DriveToTargetBranchThenAlignCommandGroupFactory> driveToTargetBranchThenAlignCommandGroupFactory) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
 
@@ -99,14 +102,33 @@ public class OperatorCommandMap {
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(alignToReefWithAprilTagWithRightCamera);
 
         var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
-
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(pointAtNearestCoralStation)
-                .onFalse(clearPointAtHeading);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(driveToNearestReefFaceWithPID);
+//
+//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(pointAtNearestCoralStation)
+//                .onFalse(clearPointAtHeading);
+//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(driveToNearestReefFaceWithPID);
 
 //        operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
 //        operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(changeActiveModule);
 //        operatorInterface.driverGamepad.getPovIfAvailable(180).onTrue(typicalSwerveDrive);
+
+        var blah = driveToTargetBranchThenAlignCommandGroupFactory.get().create();
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(blah);
+
+        var setCloseBranchA = new InstantCommand(
+                () -> pose.setTargetReefFaceAndBranch(Landmarks.ReefFace.CLOSE, Landmarks.Branch.A)
+        );
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(setCloseBranchA);
+
+        var setFarLeftBranchB = new InstantCommand(
+                () -> pose.setTargetReefFaceAndBranch(Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.B)
+        );
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(setFarLeftBranchB);
+
+        var setCloseRightBranchB = new InstantCommand(
+                () -> pose.setTargetReefFaceAndBranch(Landmarks.ReefFace.CLOSE_RIGHT, Landmarks.Branch.B)
+        );
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).onTrue(setCloseRightBranchB);
+
     }
 
 

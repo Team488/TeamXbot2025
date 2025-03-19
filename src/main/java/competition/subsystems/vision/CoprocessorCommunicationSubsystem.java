@@ -52,7 +52,7 @@ public class CoprocessorCommunicationSubsystem extends BaseSubsystem implements 
         xTablesClientManager = XTablesClient.getDefaultClientAsynchronously();
         XTablesLogger.setLoggingLevel(Level.OFF);
 
-        this.orinVisionCoprocessorCommander = new VisionCoprocessorCommander(VisionCoprocessor.ORIN3_STATIC);
+        this.orinVisionCoprocessorCommander = new VisionCoprocessorCommander(VisionCoprocessor.LOCALHOST);
     }
 
     public boolean isUseBackupPointToPointForPathplanning() {

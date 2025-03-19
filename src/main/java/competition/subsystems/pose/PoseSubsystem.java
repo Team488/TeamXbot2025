@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.swing.text.html.Option;
 
 import competition.electrical_contract.ElectricalContract;
 import competition.subsystems.deadwheel.DeadWheelSubsystem;
@@ -63,6 +64,8 @@ public class PoseSubsystem extends BasePoseSubsystem {
 
     public static final Distance fieldXMidpointInMeters = Meters.of(8.7785);
     public static final Distance fieldYMidpointInMeters = Meters.of(4.025);
+
+    private Optional<Landmarks.GlobalBranch> targetReefAndBranch = Optional.empty();
 
     protected Optional<SwerveModulePosition[]> simulatedModulePositions = Optional.empty();
 
@@ -499,4 +502,13 @@ public class PoseSubsystem extends BasePoseSubsystem {
         }
         return new DriverRelativeCameraValues(hasCameraFlippedDriverRelative, cameraToUse);
     }
+
+    public void setTargetReefFaceAndBranch(Landmarks.ReefFace targetReefFace, Landmarks.Branch targetBranch) {
+        this.targetReefAndBranch = Optional.of(new Landmarks.GlobalBranch(targetReefFace, targetBranch));
+    }
+
+    public Optional<Landmarks.GlobalBranch> getTargetReefFaceAndBranch() {
+        return this.targetReefAndBranch;
+    }
+
 }

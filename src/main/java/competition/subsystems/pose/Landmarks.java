@@ -95,6 +95,8 @@ public class Landmarks {
 
     public HashMap<String, Pose2d> namesToLocations;
 
+    public record GlobalBranch(ReefFace reefFace, Branch branch) {}
+
     public Landmarks() {
         namesToLocations = new HashMap<>();
     }
