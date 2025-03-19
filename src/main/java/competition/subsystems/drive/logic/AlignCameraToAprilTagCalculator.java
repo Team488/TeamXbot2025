@@ -327,7 +327,8 @@ public class AlignCameraToAprilTagCalculator {
                     }
 
                     // Trying to approach reef but camera no good? We should just stay still
-                    if (!aprilTagVisionSubsystem.isCameraConnected(targetCameraID) && !isCameraBackwards) {
+                    if (!aprilTagVisionSubsystem.isCameraConnected(targetCameraID)
+                            && !isCameraBackwards && requireExcellentAlignment) {
                         activity = Activity.Stall;
                     }
                 }
