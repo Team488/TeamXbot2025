@@ -29,6 +29,7 @@ import competition.subsystems.drive.commands.CalibrateDriveCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
 import competition.subsystems.drive.commands.DriveToNearestReefFaceWithPID;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
+import competition.subsystems.drive.logic.AlignCameraToAprilTagCalculator;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import competition.subsystems.elevator.commands.ForceElevatorCalibratedCommand;
 import competition.subsystems.elevator.commands.SetElevatorTargetHeightCommand;
@@ -51,6 +52,8 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
+import static edu.wpi.first.units.Units.Degree;
+
 /**
  * Maps operator interface buttons to commands
  */
@@ -58,8 +61,7 @@ import javax.inject.Singleton;
 public class OperatorCommandMap {
 
     @Inject
-    public OperatorCommandMap() {
-    }
+    public OperatorCommandMap() {}
 
     @Inject
     public void setupDriverCommands(
@@ -79,17 +81,22 @@ public class OperatorCommandMap {
             PathDriveToLocationForCoralStationAndIntakeUntilCollectedFactory pathDriveToLocationForCoralStationAndIntakeUntilCollectedFactory) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
+
         var pointAtNearestCoralStation = drive.createSetStaticHeadingTargetCommand(() ->
                 PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.getCoralStationSectionPose(pose.getClosestCoralStation(), Landmarks.CoralStationSection.MID)
                         .getRotation()));
         var clearPointAtHeading = drive.createClearAllHeadingTargetsCommand();
 
         var alignToReefWithAprilTagWithLeftCamera = alignToReefWithAprilTagProvider.get();
-        alignToReefWithAprilTagWithLeftCamera.setConfigurations(Cameras.FRONT_LEFT_CAMERA.getIndex(), false, -2, true);
+        alignToReefWithAprilTagWithLeftCamera.setConfigurations(
+                Cameras.FRONT_LEFT_CAMERA.getIndex(), false, -2, true,
+                AlignCameraToAprilTagCalculator.Activity.ApproachWhileCentering, false);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(alignToReefWithAprilTagWithLeftCamera);
 
         var alignToReefWithAprilTagWithRightCamera = alignToReefWithAprilTagProvider.get();
-        alignToReefWithAprilTagWithRightCamera.setConfigurations(Cameras.FRONT_RIGHT_CAMERA.getIndex(), false, -2, true);
+        alignToReefWithAprilTagWithRightCamera.setConfigurations(
+                Cameras.FRONT_RIGHT_CAMERA.getIndex(), false, -2, true,
+                AlignCameraToAprilTagCalculator.Activity.ApproachWhileCentering, false);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(alignToReefWithAprilTagWithRightCamera);
 
         var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
@@ -112,6 +119,7 @@ public class OperatorCommandMap {
 //        operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(changeActiveModule);
 //        operatorInterface.driverGamepad.getPovIfAvailable(180).onTrue(typicalSwerveDrive);
     }
+
 
 
     @Inject
