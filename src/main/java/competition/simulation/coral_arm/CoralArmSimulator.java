@@ -38,7 +38,8 @@ public class CoralArmSimulator {
     final ElectricalContract contract;
 
     @Inject
-    public CoralArmSimulator(CoralArmSubsystem armPivotSubsystem, PIDManager.PIDManagerFactory pidManagerFactory, PropertyFactory pf, ElectricalContract contract) {
+    public CoralArmSimulator(CoralArmSubsystem armPivotSubsystem, PIDManager.PIDManagerFactory pidManagerFactory,
+            PropertyFactory pf, ElectricalContract contract) {
         pf.setPrefix("CoralArmSimulator");
         this.aKitLog = new AKitLogger("FieldSimulation/CoralArm");
         this.contract = contract;
