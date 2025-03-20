@@ -19,7 +19,7 @@ import javax.inject.Provider;
 
 import static edu.wpi.first.units.Units.Degrees;
 
-public class PathDriveToLocationAndIntakeUntilCollectedFactory {
+public class PathDriveToLocationForCoralStationAndIntakeUntilCollectedFactory {
     Provider<PathDriveToLocationCommand> pathDriveToLocationCommandProvider;
     PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory;
     Provider<IntakeUntilCoralCollectedCommand>
@@ -28,7 +28,7 @@ public class PathDriveToLocationAndIntakeUntilCollectedFactory {
     CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem;
 
     @Inject
-    public PathDriveToLocationAndIntakeUntilCollectedFactory(
+    public PathDriveToLocationForCoralStationAndIntakeUntilCollectedFactory(
             CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem,
             Provider<PathDriveToLocationCommand> pathDriveToLocationCommandProvider,
             PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,

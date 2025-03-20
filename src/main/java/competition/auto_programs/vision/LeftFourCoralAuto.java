@@ -9,7 +9,7 @@ import competition.auto_programs.BaseAutonomousSequentialCommandGroup;
 import competition.commandgroups.DriveToFaceAndScoreCommandGroupFactory;
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
 import competition.commandgroups.vision_path.PathDriveToCoralStationAndIntakeUntilCollected;
-import competition.commandgroups.vision_path.PathDriveToLocationAndIntakeUntilCollectedFactory;
+import competition.commandgroups.vision_path.PathDriveToLocationForCoralStationAndIntakeUntilCollectedFactory;
 import competition.commandgroups.vision_path.PathToFaceAndScoreCommandGroupFactory;
 import competition.electrical_contract.ElectricalContract;
 import competition.simulation.BaseSimulator;
@@ -36,7 +36,7 @@ public class LeftFourCoralAuto extends BaseAutonomousSequentialCommandGroup {
                              DriveToFaceAndScoreCommandGroupFactory driveToFaceAndScoreFact,
                              Provider<PathToFaceAndScoreCommandGroupFactory>
                                      driveToFaceAndScoreFactProv,
-                             Provider<PathDriveToLocationAndIntakeUntilCollectedFactory>
+                             Provider<PathDriveToLocationForCoralStationAndIntakeUntilCollectedFactory>
                                      pathDriveToLocationAndIntakeUntilCollectedProvider,
                              PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFact,
                              BaseSimulator simulator) {

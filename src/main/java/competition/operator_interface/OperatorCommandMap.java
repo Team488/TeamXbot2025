@@ -5,9 +5,10 @@ import competition.auto_programs.FromLeftCageScoreLeftFacesLevelFours;
 import competition.auto_programs.FromRightCageScoreRightFacesLevelFours;
 import competition.auto_programs.vision.LeftFourCoralAuto;
 import competition.auto_programs.vision.RightFourCoralAuto;
+import competition.commandgroups.DriveToClosestStationAndIntakeUntilCollectedCommandGroupFactory;
 import competition.commandgroups.PrepAlgaeSystemCommandGroupFactory;
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
-import competition.commandgroups.vision_path.PathDriveToLocationAndIntakeUntilCollectedFactory;
+import competition.commandgroups.vision_path.PathDriveToLocationForCoralStationAndIntakeUntilCollectedFactory;
 import competition.simulation.commands.ResetSimulatedPose;
 import competition.subsystems.algae_arm.AlgaeArmSubsystem;
 import competition.subsystems.algae_arm.commands.ForceAlgaeArmCalibrated;
@@ -72,8 +73,10 @@ public class OperatorCommandMap {
             SwerveDriveWithJoysticksCommand typicalSwerveDrive,
             DriveToNearestReefFaceWithPID driveToNearestReefFaceWithPID,
             DriveSubsystem drive, PoseSubsystem pose,
+            DriveToClosestStationAndIntakeUntilCollectedCommandGroupFactory
+                    driveToClosestStationAndIntakeUntilCollectedCommandGroupFactory,
             CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem,
-            PathDriveToLocationAndIntakeUntilCollectedFactory pathDriveToLocationAndIntakeUntilCollectedFactory) {
+            PathDriveToLocationForCoralStationAndIntakeUntilCollectedFactory pathDriveToLocationForCoralStationAndIntakeUntilCollectedFactory) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
         var pointAtNearestCoralStation = drive.createSetStaticHeadingTargetCommand(() ->
@@ -94,12 +97,14 @@ public class OperatorCommandMap {
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(pointAtNearestCoralStation)
                 .onFalse(clearPointAtHeading);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(driveToNearestReefFaceWithPID);
-        ParallelDeadlineGroup pathDriveToLocationAndIntakeUntilCollected = pathDriveToLocationAndIntakeUntilCollectedFactory.create(
+        ParallelDeadlineGroup pathDriveToLocationAndIntakeUntilCollected = pathDriveToLocationForCoralStationAndIntakeUntilCollectedFactory.create(
                 null
         );
+        ParallelDeadlineGroup driveToClosestStationAndIntakeUntilCollectedCommandGroup =
+                driveToClosestStationAndIntakeUntilCollectedCommandGroupFactory.create(false);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(new ConditionalCommand(
                 pathDriveToLocationAndIntakeUntilCollected,
-                new InstantCommand(() -> System.out.println("TEST FALSE")),
+                driveToClosestStationAndIntakeUntilCollectedCommandGroup,
                 () -> coprocessorCommunicationSubsystem.isCoralStationPathConfident(pose)
         ));
 
