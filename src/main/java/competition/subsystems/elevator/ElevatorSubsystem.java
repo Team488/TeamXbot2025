@@ -426,6 +426,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         getCalibratedLaserDistance().ifPresent(d -> aKitLog.record("CalibratedElevatorDistanceSensor-m", d.in(Meters)));
         aKitLog.record("CalibratedElevatorMotorSensor-m", getCalibratedMotorDistance().in(Meters));
         aKitLog.record("MotorOffset-rotations", elevatorMotorPositionOffset.in(Rotations));
+        aKitLog.record("MotionMagicEnabled", isMotionMagicEnabled());
 
         periodicTickCounter++;
     }
