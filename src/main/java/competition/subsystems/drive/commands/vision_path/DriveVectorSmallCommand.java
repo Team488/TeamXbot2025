@@ -85,7 +85,9 @@ public class DriveVectorSmallCommand extends BaseCommand {
      */
     @Override
     public boolean isFinished() {
-        return (XTimer.getFPGATimestamp() - this.start) >= this.duration.in(Seconds);
+        // If duration is larger than 0, then use duration otherwise shove until this command is interrupted for any reason.
+        return super.isFinished() || (this.duration.baseUnitMagnitude() > 0 && (XTimer.getFPGATimestamp() - this.start)
+                >= this.duration.in(Seconds));
     }
 
     /**
@@ -96,6 +98,7 @@ public class DriveVectorSmallCommand extends BaseCommand {
      */
     @Override
     public void end(boolean interrupted) {
+        super.end(interrupted);
         drive.stop();
     }
 }
