@@ -52,12 +52,9 @@ public class CoprocessorCommunicationSubsystem
 
     public XTableValues.BezierCurves lastCoralStationPath;
     private Double lastCoralStationTimestamp;
-    private BasePoseSubsystem poseSubsystem;
-
     @Inject
     public CoprocessorCommunicationSubsystem(
-            PropertyFactory pf, RobotAssertionManager assertionManager, BasePoseSubsystem poseSubsystem) {
-        this.poseSubsystem = poseSubsystem;
+            PropertyFactory pf, RobotAssertionManager assertionManager) {
         this.assertionManager = assertionManager;
         pf.setPrefix(this);
         lastCoralStationConfidentTimeInterval = pf.createPersistentProperty(
@@ -114,7 +111,7 @@ public class CoprocessorCommunicationSubsystem
                 && xTablesClientManager.getOrNull() != null;
     }
 
-    public boolean isCoralStationPathConfident() {
+    public boolean isCoralStationPathConfident(BasePoseSubsystem poseSubsystem) {
         if (lastCoralStationPath == null || lastCoralStationTimestamp == null) {
             return false;
         }

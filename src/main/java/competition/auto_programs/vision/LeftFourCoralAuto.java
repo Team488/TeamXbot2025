@@ -9,7 +9,7 @@ import competition.auto_programs.BaseAutonomousSequentialCommandGroup;
 import competition.commandgroups.DriveToFaceAndScoreCommandGroupFactory;
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
 import competition.commandgroups.vision_path.PathDriveToCoralStationAndIntakeUntilCollected;
-import competition.commandgroups.vision_path.PathDriveToLocationAndIntakeUntilCollected;
+import competition.commandgroups.vision_path.PathDriveToLocationAndIntakeUntilCollectedFactory;
 import competition.commandgroups.vision_path.PathToFaceAndScoreCommandGroupFactory;
 import competition.electrical_contract.ElectricalContract;
 import competition.simulation.BaseSimulator;
@@ -19,7 +19,7 @@ import competition.subsystems.pose.vision.Paths;
 import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+
 import javax.inject.Inject;
 import javax.inject.Provider;
 import xbot.common.subsystems.autonomous.AutonomousCommandSelector;
@@ -36,7 +36,7 @@ public class LeftFourCoralAuto extends BaseAutonomousSequentialCommandGroup {
                              DriveToFaceAndScoreCommandGroupFactory driveToFaceAndScoreFact,
                              Provider<PathToFaceAndScoreCommandGroupFactory>
                                      driveToFaceAndScoreFactProv,
-                             Provider<PathDriveToLocationAndIntakeUntilCollected>
+                             Provider<PathDriveToLocationAndIntakeUntilCollectedFactory>
                                      pathDriveToLocationAndIntakeUntilCollectedProvider,
                              PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFact,
                              BaseSimulator simulator) {
