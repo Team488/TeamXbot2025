@@ -118,7 +118,7 @@ public class CoprocessorCommunicationSubsystem
 
         XTableValues.ControlPoint start = lastCoralStationPath.getCurves(0).getControlPoints(0);
         double timeElapsed = XTimer.getFPGATimestamp() - lastCoralStationTimestamp;
-        double maxTime = lastCoralStationConfidentTimeInterval.get() * 1000;
+        double maxTime = lastCoralStationConfidentTimeInterval.get();
 
         double distance = new Translation2d(start.getX(), start.getY())
                 .getDistance(poseSubsystem.getCurrentPose2d().getTranslation());
@@ -167,6 +167,7 @@ public class CoprocessorCommunicationSubsystem
     public void periodic() {
         aKitLog.record("isCoprocessorHealthy", isCoprocessorHealthy);
         if (isXTablesFound()) {
+            // This allows the Orin to choose correct paths for the current alliance when possible.
             tryGetXTablesClient().putString("TEAM",
                     DriverStation.getAlliance()
                             .orElse(DriverStation.Alliance.Blue)
