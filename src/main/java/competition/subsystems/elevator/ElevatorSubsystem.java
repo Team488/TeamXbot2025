@@ -407,6 +407,9 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         if (contract.isElevatorReady()) {
             masterMotor.periodic();
         }
+        if(motionMagicAcceleration.hasChangedSinceLastCheck() || motionMagicJerk.hasChangedSinceLastCheck()){
+            configureMotionMagicConstraints();
+        }
         //bandage case: isTouchingBottom flashes true for one tick on startup, investigate later?
         if (this.isTouchingBottom() && periodicTickCounter >= 3 && !isCalibrated()) {
             // Calibration may fail if the LaserCAN is not reporting a valid value
