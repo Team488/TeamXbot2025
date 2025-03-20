@@ -32,9 +32,9 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
 
     private final VisionCoprocessorCommander commander;
     private XTableValues.TraversalOptions traversalOptions;
-    private DistanceProperty safeDistance;
+    private final DistanceProperty safeDistance;
 
-    private DistanceProperty distanceToGoalAndFinish;
+    private final DistanceProperty distanceToGoalAndFinish;
     private final ReefRoutingCircle routingCircle;
     private XTableValues.AdditionalArguments additionalArguments;
 
