@@ -198,7 +198,6 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
 
     @Override
     public boolean isFinished() {
-        distanceToGoalAndFinish.get();
         XTableValues.BezierCurves c = curves.get();
         XTableValues.BezierCurve lastCurve = c.getCurves(c.getCurvesCount() - 1);
         XTableValues.ControlPoint lastPoint =
