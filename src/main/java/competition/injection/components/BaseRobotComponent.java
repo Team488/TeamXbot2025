@@ -74,6 +74,8 @@ public abstract class BaseRobotComponent extends BaseComponent {
 
     public abstract AlgaeArmSubsystem algaeArmSubsystem();
 
+    public abstract CoralArmSubsystem coralArmSubsystem();
+
     public abstract AlgaeCollectionSubsystem algaeCollectionSubsystem();
 
     public abstract EmergencyAutonomousCommand emergencyAutonomousCommand();
