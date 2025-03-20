@@ -33,6 +33,7 @@ import static edu.wpi.first.units.Units.Hertz;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Second;
@@ -61,7 +62,10 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     public final DoubleProperty powerNearUpperLimitThreshold;
     public final DoubleProperty powerWhenBottomSensorHit;
 
+    public final DoubleProperty motionMagicAcceleration;
+    public final DoubleProperty motionMagicJerk;
 
+    public boolean motionMagicEnabled;
 
     public XCANMotorController masterMotor;
 
@@ -124,6 +128,9 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         this.powerNearUpperLimitThreshold = pf.createPersistentProperty("powerNearUpperLimit", 0.0);
         this.powerNearLowerLimitThreshold = pf.createPersistentProperty("powerNearLowerLimit", 0.0);
         this.powerWhenBottomSensorHit = pf.createPersistentProperty("powerWhenBottomSensorHit", 0);
+
+        this.motionMagicAcceleration = pf.createPersistentProperty("motionMagicMaxAcceleration", 1);
+        this.motionMagicJerk = pf.createPersistentProperty("motionMagicMaxJerk", 0.1);
         pf.setDefaultLevel(PropertyLevel.Important);
 
 
@@ -154,6 +161,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
                     );
             this.registerDataFrameRefreshable(masterMotor);
             masterMotor.setPositionAndVelocityUpdateFrequency(Hertz.of(50));
+            configureMotionMagicConstraints();
         }
 
         if (contract.isElevatorBottomSensorReady()) {
@@ -348,7 +356,9 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         var deltaRotations = Rotations.of(heightDelta.in(Meters) * rotationsPerMeter.get());
         masterMotor.setPositionTarget(
                 masterMotor.getPosition().plus(deltaRotations),
-                XCANMotorController.MotorPidMode.Voltage);
+                motionMagicEnabled
+                ? XCANMotorController.MotorPidMode.TrapezoidalVoltage
+                : XCANMotorController.MotorPidMode.Voltage);
     }
 
     /**
@@ -377,6 +387,19 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     public void trimElevatorDown(){
         trimValue.set(trimValue.get().minus((Inches.of(trimChangeAmount.get().in(Inches)))));
+    }
+
+    public void toggleMotionMagic(){
+        motionMagicEnabled = !motionMagicEnabled;
+    }
+
+    public boolean isMotionMagicEnabled(){
+        return motionMagicEnabled;
+    }
+
+    public void configureMotionMagicConstraints(){
+        masterMotor.setTrapezoidalProfileAcceleration(RadiansPerSecondPerSecond.of(motionMagicAcceleration.get()));
+        masterMotor.setTrapezoidalProfileJerk(RadiansPerSecondPerSecond.of(motionMagicJerk.get()).per(Second));
     }
 
     @Override
