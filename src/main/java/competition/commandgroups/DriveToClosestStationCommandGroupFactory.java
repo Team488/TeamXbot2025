@@ -55,22 +55,24 @@ public class DriveToClosestStationCommandGroupFactory {
         // We can add an interstitial point between scoring at the reef and
         // terminally approaching to the coral station to avoid rotating into the
         // reef
+        var driveToCoralStationSectionCommand =
+                driveToCoralStationSectionCommandProv.get();
         driveToCoralStation.addCommands(
                 new NamedInstantCommand("GetNearestCoralStation", () -> {
                     Landmarks.CoralStation station =
                             poseSubsystem.getClosestCoralStation();
+                    System.out.println("CLOSEST CORAL STATION: " + station);
                     if (addPoint) {
-                        var driveToCoralStationSectionCommand =
-                                driveToCoralStationSectionCommandProv.get();
                         driveToCoralStationSectionCommand.setTargetCoralStationSection(
                                 station);
-                        driveToCoralStation.addCommands(
-                                driveToCoralStationSectionCommand.withTimeout(2.0));
                     }
                     alignToCoralStationCommand.setCoralStation(station);
                     shoveCoralStationCommand.setShoveAngle(station);
                 }));
-
+        if(addPoint) {
+            driveToCoralStation.addCommands(
+                    driveToCoralStationSectionCommand.withTimeout(2.0));
+        }
         driveToCoralStation.addCommands(alignToCoralStationCommand);
         return driveToCoralStation.andThen(shoveCoralStationCommand.withTimeout(4));
     }

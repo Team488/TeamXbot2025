@@ -49,6 +49,7 @@ public class PathDriveToLocationForCoralStationFactory {
             Paths.Side side, XTableValues.BezierCurves override) {
         PathDriveToLocationCommand pathDriveToLocationCommand =
                 pathDriveToLocationCommandProvider.get();
+        pathDriveToLocationCommand.logic.setPrioritizeRotationIfCloseToGoal(false);
 
         DriveVectorSmallCommand driveVectorSmallCommand =
                 driveVectorSmallCommandProvider.get();

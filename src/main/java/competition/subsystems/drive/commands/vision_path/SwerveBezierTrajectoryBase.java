@@ -40,11 +40,12 @@ public class SwerveBezierTrajectoryBase extends SwerveSimpleBezierCommand {
         this.coprocessor = coprocessorCommunicationSubsystem;
         this.layout =
                 AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
+        this.logic.setPrioritizeRotationIfCloseToGoal(true);
+        this.logic.setDistanceThresholdToPrioritizeRotation(1.2446);
     }
 
     @Override
     public void initialize() {
-        this.logic.setPrioritizeRotationIfCloseToGoal(true);
         super.initialize();
     }
 
