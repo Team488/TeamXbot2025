@@ -77,7 +77,7 @@ public class DriveToFaceAndScoreCommandGroupFactory {
         driveToBranchWhilePrepping.addCommands(driveToReefFaceThenAlign, measureDistanceThenPrep);
 
         var scoreWhenReady = scoreWhenReadyProvider.get();
-        var waitBeforeScoring = new WaitCommand(0.8); // Wait for the wobble to go away
+        var waitBeforeScoring = new WaitCommand(0.4); // Wait for the wobble to go away
 
         driveToFaceAndScoreCommandGroup.addCommands(driveToBranchWhilePrepping, waitBeforeScoring, scoreWhenReady);
 

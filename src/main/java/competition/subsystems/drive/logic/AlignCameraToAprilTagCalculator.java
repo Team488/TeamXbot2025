@@ -140,7 +140,7 @@ public class AlignCameraToAprilTagCalculator {
         this.oi = oi;
 
         pf.setPrefix(prefix);
-        interstitialDistance = pf.createPersistentProperty("InterstitialDistance-m", 1.25);
+        interstitialDistance = pf.createPersistentProperty("InterstitialDistance-m", 1.75);
         distanceFromInterstitialToAdvanceFast = pf.createPersistentProperty("DistanceFromInterstitialToAdvanceFast-m", 0.4);
         distanceFromInterstitialToAdvanceSlow = pf.createPersistentProperty("DistanceFromInterstitialToAdvanceSlow-m", 0.2);
         approachSpeedFactor = pf.createPersistentProperty("ApproachSpeedFactor", 0.65);
