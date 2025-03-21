@@ -18,8 +18,9 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Seconds;
 
-public class PathDriveToLocationForCoralStationAndIntakeUntilCollectedFactory {
+public class PathDriveToLocationForCoralStationFactory {
     Provider<PathDriveToLocationCommand> pathDriveToLocationCommandProvider;
     PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory;
     Provider<IntakeUntilCoralCollectedCommand>
@@ -28,7 +29,7 @@ public class PathDriveToLocationForCoralStationAndIntakeUntilCollectedFactory {
     CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem;
 
     @Inject
-    public PathDriveToLocationForCoralStationAndIntakeUntilCollectedFactory(
+    public PathDriveToLocationForCoralStationFactory(
             CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem,
             Provider<PathDriveToLocationCommand> pathDriveToLocationCommandProvider,
             PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
@@ -49,7 +50,51 @@ public class PathDriveToLocationForCoralStationAndIntakeUntilCollectedFactory {
             XTableValues.BezierCurves override) {
         return create(null, override);
     }
+    public SequentialCommandGroup createDriveOnly(
+            Paths.Side side, XTableValues.BezierCurves override) {
 
+
+        PathDriveToLocationCommand pathDriveToLocationCommand =
+                pathDriveToLocationCommandProvider.get();
+
+        DriveVectorSmallCommand driveVectorSmallCommand =
+                driveVectorSmallCommandProvider.get();
+        if (override != null) {
+            if (side == null) {
+                pathDriveToLocationCommand.setOverriddenPath(override);
+            } else {
+                pathDriveToLocationCommand.setOverriddenPath(side, override);
+            }
+        }
+        SequentialCommandGroup driveToCoralStationThenDriveForward =
+                new SequentialCommandGroup();
+        if(override == null) {
+            driveToCoralStationThenDriveForward.addCommands(new NamedInstantCommand("OverridePath", () -> {
+                XTableValues.BezierCurves curves = coprocessorCommunicationSubsystem
+                        .getLastCoralStationPath();
+                if(curves != null) {
+                    pathDriveToLocationCommand.setOverriddenPath(curves);
+                    Angle finalDegrees = Degrees.of(curves.hasOptions()
+                            ? curves.getOptions().hasFinalRotationDegrees()
+                            ? curves.getOptions().getFinalRotationDegrees()
+                            : 0
+                            : 0);
+                    pathDriveToLocationCommand.setOptions(
+                            XTableValues.TraversalOptions.newBuilder()
+                                    .setFinalRotationDegrees(finalDegrees.in(Degrees))
+                                    .build());
+                }
+            }));
+        }
+        driveVectorSmallCommand.setBackwards(true);
+        driveVectorSmallCommand.setLast(Seconds.of(-1));
+
+        driveToCoralStationThenDriveForward.addCommands(pathDriveToLocationCommand,
+                driveVectorSmallCommand);
+
+
+        return driveToCoralStationThenDriveForward;
+    }
     public ParallelDeadlineGroup create(
             Paths.Side side, XTableValues.BezierCurves override) {
 
