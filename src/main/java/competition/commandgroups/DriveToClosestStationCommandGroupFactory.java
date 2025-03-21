@@ -13,15 +13,15 @@ import javax.inject.Provider;
 import xbot.common.command.NamedInstantCommand;
 
 public class DriveToClosestStationCommandGroupFactory {
-    Provider<DriveToCoralStationInterstitialCommand>
+    private final Provider<DriveToCoralStationInterstitialCommand>
             driveToCoralStationSectionCommandProv;
-    Provider<AlignToSpecificHumanLoadingStationCommand>
+    private final Provider<AlignToSpecificHumanLoadingStationCommand>
             alignToCoralStationCommandProv;
-    Provider<IntakeUntilCoralCollectedCommand>
+    private final Provider<IntakeUntilCoralCollectedCommand>
             intakeUntilCoralCollectedCommandProv;
-    Provider<ShoveCoralStationCommand> shoveCoralStationCommandProv;
-    PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory;
-    PoseSubsystem poseSubsystem;
+    private final Provider<ShoveCoralStationCommand> shoveCoralStationCommandProv;
+    private final PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory;
+    private final PoseSubsystem poseSubsystem;
 
     @Inject
     public DriveToClosestStationCommandGroupFactory(PoseSubsystem poseSubsystem,
