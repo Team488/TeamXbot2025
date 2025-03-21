@@ -48,17 +48,17 @@ deploy {
                 // Note - the commented block below has the various configuration settings suggested by
                 // the AdvantageKit team.
                 //frcJava(getArtifactTypeClass('FRCJavaArtifact')) {
-                    //jvmArgs.add("-XX:+UnlockExperimentalVMOptions")
-                    //jvmArgs.add("-XX:GCTimeRatio=5")
-                    //jvmArgs.add("-XX:+UseSerialGC")
-                    //jvmArgs.add("-XX:MaxGCPauseMillis=50")
+                //jvmArgs.add("-XX:+UnlockExperimentalVMOptions")
+                //jvmArgs.add("-XX:GCTimeRatio=5")
+                //jvmArgs.add("-XX:+UseSerialGC")
+                //jvmArgs.add("-XX:MaxGCPauseMillis=50")
 
-                    // The options below may improve performance, but should only be enabled on the RIO 2
-                    //
-                     //final MAX_JAVA_HEAP_SIZE_MB = 100;
-                     //jvmArgs.add("-Xmx" + MAX_JAVA_HEAP_SIZE_MB + "M")
-                     //jvmArgs.add("-Xms" + MAX_JAVA_HEAP_SIZE_MB + "M")
-                     //jvmArgs.add("-XX:+AlwaysPreTouch")
+                // The options below may improve performance, but should only be enabled on the RIO 2
+                //
+                //final MAX_JAVA_HEAP_SIZE_MB = 100;
+                //jvmArgs.add("-Xmx" + MAX_JAVA_HEAP_SIZE_MB + "M")
+                //jvmArgs.add("-Xms" + MAX_JAVA_HEAP_SIZE_MB + "M")
+                //jvmArgs.add("-XX:+AlwaysPreTouch")
                 //}
 
                 // Static files artifact
@@ -96,10 +96,10 @@ repositories {
     }
 
     mavenLocal()
-    
+
     flatDir {
-       dirs 'SeriouslyCommonLib/build/libs'
-   }
+        dirs 'SeriouslyCommonLib/build/libs'
+    }
 }
 
 configurations {
@@ -148,7 +148,7 @@ dependencies {
     testImplementation "org.mockito:mockito-core:3.12.4"
 
     // xtables
-    implementation "org.kobe.xbot:xtables:5.4.4"
+    implementation "org.kobe.xbot:xtables:5.4.9"
 
     def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
     annotationProcessor "org.littletonrobotics.akit:akit-autolog:$akitJson.version"
@@ -215,7 +215,7 @@ checkstyle {
 task checkstyle(type: Checkstyle) {
     source 'src/main/java'
     configProperties.basedir = file('SeriouslyCommonLib')
-    
+
     // Empty classpath
     classpath = files()
 }
@@ -223,7 +223,7 @@ task checkstyle(type: Checkstyle) {
 test {
     reports {
         junitXml.required = true
-    }               
+    }
 }
 
 // Configuration for AdvantageKit
@@ -234,15 +234,15 @@ task(replayWatch, type: JavaExec) {
 
 tasks.withType(Test) {
     testLogging.showStandardStreams = true
-    
-    afterTest { desc, result -> 
+
+    afterTest { desc, result ->
         logger.quiet "Executed test ${desc.name} [${desc.className}] with result: ${result.resultType}"
     }
 
     afterSuite { desc, result ->
-      if (!desc.parent) { // will match the outermost suite
-        logger.quiet "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
-      }
+        if (!desc.parent) { // will match the outermost suite
+            logger.quiet "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
+        }
     }
 }
 

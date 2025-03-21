@@ -3,8 +3,12 @@ package competition.operator_interface;
 import competition.auto_programs.FromCageScoreOneCoralAutoFactory;
 import competition.auto_programs.FromLeftCageScoreLeftFacesLevelFours;
 import competition.auto_programs.FromRightCageScoreRightFacesLevelFours;
+import competition.auto_programs.vision.LeftFourCoralAuto;
+import competition.auto_programs.vision.RightFourCoralAuto;
+import competition.commandgroups.DriveToClosestStationAndIntakeUntilCollectedCommandGroupFactory;
 import competition.commandgroups.PrepAlgaeSystemCommandGroupFactory;
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
+import competition.commandgroups.vision_path.PathDriveToLocationForCoralStationAndIntakeUntilCollectedFactory;
 import competition.simulation.commands.ResetSimulatedPose;
 import competition.subsystems.algae_arm.AlgaeArmSubsystem;
 import competition.subsystems.algae_arm.commands.ForceAlgaeArmCalibrated;
@@ -29,12 +33,17 @@ import competition.subsystems.drive.logic.AlignCameraToAprilTagCalculator;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import competition.subsystems.elevator.commands.ForceElevatorCalibratedCommand;
 import competition.subsystems.elevator.commands.SetElevatorTargetHeightCommand;
+import competition.subsystems.elevator.commands.ToggleElevatorMotionMagicCommand;
 import competition.subsystems.oracle.commands.DriveAccordingToOracleCommand;
 import competition.subsystems.oracle.commands.SuperstructureAccordingToOracleCommand;
 import competition.subsystems.pose.Cameras;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
+import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import xbot.common.controls.sensors.XXboxController;
 import xbot.common.subsystems.autonomous.SetAutonomousCommand;
 import xbot.common.subsystems.drive.swerve.commands.ChangeActiveSwerveModuleCommand;
@@ -66,7 +75,11 @@ public class OperatorCommandMap {
             ChangeActiveSwerveModuleCommand changeActiveModule,
             SwerveDriveWithJoysticksCommand typicalSwerveDrive,
             DriveToNearestReefFaceWithPID driveToNearestReefFaceWithPID,
-            DriveSubsystem drive, PoseSubsystem pose) {
+            DriveSubsystem drive, PoseSubsystem pose,
+            DriveToClosestStationAndIntakeUntilCollectedCommandGroupFactory
+                    driveToClosestStationAndIntakeUntilCollectedCommandGroupFactory,
+            CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem,
+            PathDriveToLocationForCoralStationAndIntakeUntilCollectedFactory pathDriveToLocationForCoralStationAndIntakeUntilCollectedFactory) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
 
@@ -92,6 +105,16 @@ public class OperatorCommandMap {
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(pointAtNearestCoralStation)
                 .onFalse(clearPointAtHeading);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(driveToNearestReefFaceWithPID);
+//        ParallelDeadlineGroup pathDriveToLocationAndIntakeUntilCollected = pathDriveToLocationForCoralStationAndIntakeUntilCollectedFactory.create(
+//                null
+//        );
+//        ParallelDeadlineGroup driveToClosestStationAndIntakeUntilCollectedCommandGroup =
+//                driveToClosestStationAndIntakeUntilCollectedCommandGroupFactory.create(false);
+//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(new ConditionalCommand(
+//                pathDriveToLocationAndIntakeUntilCollected,
+//                driveToClosestStationAndIntakeUntilCollectedCommandGroup,
+//                () -> coprocessorCommunicationSubsystem.isCoralStationPathConfident(pose)
+//        ));
 
 //        operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
 //        operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(changeActiveModule);
@@ -172,7 +195,8 @@ public class OperatorCommandMap {
             ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
             ForceCoralArmCalibratedCommand forceCoralArmCalibratedCommand,
             RepositionAlgaeArmDown repositionAlgaeArmDown,
-            RepositionAlgaeArmUp repositionAlgaeArmUp) {
+            RepositionAlgaeArmUp repositionAlgaeArmUp,
+            ToggleElevatorMotionMagicCommand toggleElevatorMotionMagicCommand) {
 
         var returnToBase = setElevatorTargetHeightCommandProvider.get();
         returnToBase.setHeight(Landmarks.CoralLevel.COLLECTING);
@@ -195,7 +219,8 @@ public class OperatorCommandMap {
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).onTrue(riseToScore);
 
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(forceElevatorCalibratedCommand);
-        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(riseToL2);
+        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(toggleElevatorMotionMagicCommand);
+        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(returnToBase);
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(riseToL3);
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(riseToL4);
 
@@ -262,7 +287,10 @@ public class OperatorCommandMap {
                                         Provider<SetAutonomousCommand> setAutonomousCommandProvider,
                                         Provider<FromCageScoreOneCoralAutoFactory> fromCageScoreOneLevelFourAutoFactProv,
                                         FromLeftCageScoreLeftFacesLevelFours fromLeftCageScoreLeftFacesLevelFours,
-                                        FromRightCageScoreRightFacesLevelFours fromRightCageScoreRightFacesLevelFours) {
+                                        FromRightCageScoreRightFacesLevelFours fromRightCageScoreRightFacesLevelFours,
+                                        Provider<LeftFourCoralAuto> leftFourCoralAutoProvider,
+                                        Provider<RightFourCoralAuto> rightFourCoralAuto
+    ) {
         var setFromLeftFarLeftBranchBLevelFour = setAutonomousCommandProvider.get();
         setFromLeftFarLeftBranchBLevelFour.setAutoCommand(fromCageScoreOneLevelFourAutoFactProv.get().create(
                 Landmarks.BlueCageOneStartingLine, Landmarks.ReefFace.FAR_LEFT, Landmarks.Branch.B, Landmarks.CoralLevel.FOUR
@@ -285,7 +313,7 @@ public class OperatorCommandMap {
         setFromRightFarRightBranchALevelFour.includeOnSmartDashboard("From Right Score Far Right Branch A Level 4 Auto");
 
         var setFromLeftCageScoreLeftFacesLevelFours = setAutonomousCommandProvider.get();
-        setFromLeftCageScoreLeftFacesLevelFours.setAutoCommand(fromLeftCageScoreLeftFacesLevelFours,Landmarks.BlueCageOneStartingLine);
+        setFromLeftCageScoreLeftFacesLevelFours.setAutoCommand(fromLeftCageScoreLeftFacesLevelFours, Landmarks.BlueCageOneStartingLine);
         oi.neoTrellis.getifAvailable(4).onTrue(setFromLeftCageScoreLeftFacesLevelFours); // temporary button
         setFromLeftCageScoreLeftFacesLevelFours.includeOnSmartDashboard("From Left Score Left Face Level Fours Auto");
 
@@ -293,6 +321,13 @@ public class OperatorCommandMap {
         setFromRightCageScoreRightFacesLevelFours.setAutoCommand(fromRightCageScoreRightFacesLevelFours, Landmarks.BlueCageSixStartingLine);
         oi.neoTrellis.getifAvailable(5).onTrue(setFromRightCageScoreRightFacesLevelFours);
         setFromRightCageScoreRightFacesLevelFours.includeOnSmartDashboard("From Right Score Right Face Level Fours auto");
+
+        var leftVisionAuto = setAutonomousCommandProvider.get();
+        leftVisionAuto.setAutoCommand(leftFourCoralAutoProvider.get());
+        leftVisionAuto.includeOnSmartDashboard("Left Vision Auto");
+        var rightVisionAuto = setAutonomousCommandProvider.get();
+        rightVisionAuto.setAutoCommand(rightFourCoralAuto.get(), Landmarks.BlueCageSixStartingLine);
+        rightVisionAuto.includeOnSmartDashboard("Right Vision Auto");
     }
 
     @Inject

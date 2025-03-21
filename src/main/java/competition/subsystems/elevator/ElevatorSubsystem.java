@@ -18,6 +18,7 @@ import xbot.common.controls.actuators.XCANMotorControllerPIDProperties;
 import xbot.common.controls.sensors.XDigitalInput;
 import xbot.common.controls.sensors.XLaserCAN;
 import xbot.common.math.MathUtils;
+import xbot.common.properties.BooleanProperty;
 import xbot.common.properties.DistanceProperty;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
@@ -33,6 +34,7 @@ import static edu.wpi.first.units.Units.Hertz;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Second;
@@ -61,7 +63,10 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     public final DoubleProperty powerNearUpperLimitThreshold;
     public final DoubleProperty powerWhenBottomSensorHit;
 
+    public final DoubleProperty motionMagicAcceleration;
+    public final DoubleProperty motionMagicJerk;
 
+    public final BooleanProperty motionMagicEnabled;
 
     public XCANMotorController masterMotor;
 
@@ -124,6 +129,11 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         this.powerNearUpperLimitThreshold = pf.createPersistentProperty("powerNearUpperLimit", 0.0);
         this.powerNearLowerLimitThreshold = pf.createPersistentProperty("powerNearLowerLimit", 0.0);
         this.powerWhenBottomSensorHit = pf.createPersistentProperty("powerWhenBottomSensorHit", 0);
+
+        this.motionMagicAcceleration = pf.createPersistentProperty("motionMagicMaxAcceleration", 1);
+        this.motionMagicJerk = pf.createPersistentProperty("motionMagicMaxJerk", 0.1);
+
+        this.motionMagicEnabled = pf.createPersistentProperty("motionMagicEnabled", false);
         pf.setDefaultLevel(PropertyLevel.Important);
 
 
@@ -154,6 +164,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
                     );
             this.registerDataFrameRefreshable(masterMotor);
             masterMotor.setPositionAndVelocityUpdateFrequency(Hertz.of(50));
+            configureMotionMagicConstraints();
         }
 
         if (contract.isElevatorBottomSensorReady()) {
@@ -348,7 +359,9 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         var deltaRotations = Rotations.of(heightDelta.in(Meters) * rotationsPerMeter.get());
         masterMotor.setPositionTarget(
                 masterMotor.getPosition().plus(deltaRotations),
-                XCANMotorController.MotorPidMode.Voltage);
+                motionMagicEnabled.get()
+                ? XCANMotorController.MotorPidMode.TrapezoidalVoltage
+                : XCANMotorController.MotorPidMode.Voltage);
     }
 
     /**
@@ -379,10 +392,26 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         trimValue.set(trimValue.get().minus((Inches.of(trimChangeAmount.get().in(Inches)))));
     }
 
+    public void toggleMotionMagic(){
+        motionMagicEnabled.set(!motionMagicEnabled.get());
+    }
+
+    public boolean isMotionMagicEnabled(){
+        return motionMagicEnabled.get();
+    }
+
+    public void configureMotionMagicConstraints(){
+        masterMotor.setTrapezoidalProfileAcceleration(RadiansPerSecondPerSecond.of(motionMagicAcceleration.get()));
+        masterMotor.setTrapezoidalProfileJerk(RadiansPerSecondPerSecond.of(motionMagicJerk.get()).per(Second));
+    }
+
     @Override
     public void periodic() {
         if (contract.isElevatorReady()) {
             masterMotor.periodic();
+        }
+        if(motionMagicAcceleration.hasChangedSinceLastCheck() || motionMagicJerk.hasChangedSinceLastCheck()){
+            configureMotionMagicConstraints();
         }
         //bandage case: isTouchingBottom flashes true for one tick on startup, investigate later?
         if (this.isTouchingBottom() && periodicTickCounter >= 3 && !isCalibrated()) {
