@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import xbot.common.injection.electrical_contract.CameraInfo;
 import xbot.common.injection.electrical_contract.XCameraElectricalContract;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.vision.AprilTagVisionIO;
@@ -22,13 +23,14 @@ import java.util.Optional;
 public class AprilTagVisionSubsystemExtended extends AprilTagVisionSubsystem {
     HashMap<Pose2d, Integer> aprilTagIDHashMap = new HashMap<>();
     private final AprilTagFieldLayout aprilTagFieldLayout;
+    public final CameraInfo[] cameras;
 
     @Inject
     public AprilTagVisionSubsystemExtended(PropertyFactory pf,
                                            AprilTagFieldLayout fieldLayout, XCameraElectricalContract contract,
                                            AprilTagVisionIOFactory visionIOFactory) {
         super(pf, fieldLayout, contract, visionIOFactory);
-
+        this.cameras = contract.getCameraInfo();
         // Note: flipped april tag IDs across the y-midpoint of the field for blue alliance
         // map both blue and red alliance poses
         aprilTagIDHashMap.put(PoseSubsystem.convertBluetoRed(Landmarks.BlueCloseLeftAlgae), 6);
@@ -92,5 +94,14 @@ public class AprilTagVisionSubsystemExtended extends AprilTagVisionSubsystem {
     public int getTargetAprilTagID(Landmarks.ReefFace reefFace) {
         Pose2d targetReefFacePose = PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.getReefFacePose(reefFace));
         return getTargetAprilTagID(targetReefFacePose);
+    }
+
+    public boolean areAllCamerasConnected() {
+        for (int i = 0; i < cameras.length; i++) {
+            if (!isCameraConnected(i)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

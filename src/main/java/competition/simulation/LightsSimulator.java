@@ -45,8 +45,8 @@ public class LightsSimulator {
                 return new Color8Bit(Color.kBlue);
             case RequestCoralFromHuman:
                 return new Color8Bit(Color.kTurquoise);
-            case ReadyToScore:
-                return new Color8Bit(Color.kWhite);
+//            case ReadyToScore:
+//                return new Color8Bit(Color.kWhite);
             default:
                 return new Color8Bit(Color.kBlack);
         }

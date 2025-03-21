@@ -3,6 +3,7 @@ package competition.subsystems.drive.logic;
 import competition.electrical_contract.ElectricalContract;
 import competition.operator_interface.OperatorInterface;
 import competition.subsystems.drive.DriveSubsystem;
+import competition.subsystems.lights.LightSubsystem;
 import competition.subsystems.oracle.ReefCoordinateGenerator;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
@@ -60,13 +61,14 @@ public class AlignCameraToAprilTagCalculator {
     final HeadingModule headingModule;
     final DriveSubsystem drive;
     final PoseSubsystem pose;
+    final LightSubsystem lights;
     final AKitLogger akitLog;
     final ElectricalContract electricalContract;
     final ReefCoordinateGenerator reefCoordinateGenerator;
     final OperatorInterface oi;
 
     int targetAprilTagID;
-    int targetCameraID;
+    private int targetCameraID;
     double initialHeading;
     Translation2d alignmentPointOffset;
     Rotation3d cameraRotation;
@@ -126,11 +128,12 @@ public class AlignCameraToAprilTagCalculator {
     public AlignCameraToAprilTagCalculator(AprilTagVisionSubsystemExtended vision, DriveSubsystem drive,
                                            ElectricalContract electricalContract, PoseSubsystem pose,
                                            HeadingModule.HeadingModuleFactory headingModuleFactory, ReefCoordinateGenerator reefCoordinateGenerator,
-                                           PropertyFactory pf, OperatorInterface oi) {
+                                           PropertyFactory pf, OperatorInterface oi, LightSubsystem lights) {
         this.aprilTagVisionSubsystem = vision;
         this.headingModule = headingModuleFactory.create(drive.getRotateToHeadingPid());
         this.drive = drive;
         this.pose = pose;
+        this.lights = lights;
         this.electricalContract = electricalContract;
         this.reefCoordinateGenerator = reefCoordinateGenerator;
         this.akitLog = new AKitLogger(prefix);
@@ -174,6 +177,8 @@ public class AlignCameraToAprilTagCalculator {
         this.targetCameraID = targetCameraID;
         this.isCameraBackwards = isCameraBackwards;
         var currentPose = pose.getCurrentPose2d();
+
+        lights.updateFromCalculator(activity, targetCameraID);
 
         reset();
 
@@ -244,6 +249,7 @@ public class AlignCameraToAprilTagCalculator {
                     coralStationPose.getRotation()
             );
         }
+
 
         akitLog.record("InterstitialPoint", interstitialPoint);
     }
@@ -413,6 +419,7 @@ public class AlignCameraToAprilTagCalculator {
             default -> {} // We're done! We don't need to do anything.
         }
 
+        lights.updateFromCalculator(activity, targetCameraID);
         akitLog.record("Activity", activity);
         akitLog.record("TagAcquisitionState", tagAcquisitionState);
         akitLog.record("ErrorIsWithinBounds", isLastKnownErrorWithinBounds());
