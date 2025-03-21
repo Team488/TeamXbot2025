@@ -92,7 +92,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
         }
 
         this.level123ScoringAngle = propertyFactory.createPersistentProperty("Level 1 2 3 Scoring Angle", 136);
-        this.level4ScoringAngle = propertyFactory.createPersistentProperty("Level 4 Scoring Angle", 161);
+        this.level4ScoringAngle = propertyFactory.createPersistentProperty("Level 4 Scoring Angle", 166);
         propertyFactory.setDefaultLevel(PropertyLevel.Debug);
         this.humanLoadAngleDegrees = propertyFactory.createPersistentProperty("Human Loading Angle in Degrees", 0);
         this.degreesPerRotations = propertyFactory.createPersistentProperty("Degrees Per Rotations", 5.790);
