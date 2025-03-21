@@ -138,15 +138,12 @@ public class LightSubsystem extends BaseSubsystem {
         // Needs to implement vision as well
         // Not sure about if the way we are checking the shooter is correct (and collector)
         if (!dsEnabled) {
-            currentState = LightsStateMessage.RobotDisabledDefault;
-            if (DriverStation.getMatchTime() > 230 && DriverStation.isTeleop()) {
-                currentState = LightsStateMessage.Victory;
-            }
             if (!visionSubsystem.areAllCamerasConnected()) {
                 currentState = LightsStateMessage.DisabledCameraUnavailable;
-            }
-            if (!Objects.equals(autonomousCommandSelector.getProgramName(), "EmergencyAutonomousCommand")) {
+            } else if (!Objects.equals(autonomousCommandSelector.getProgramName(), "EmergencyAutonomousCommand")) {
                 currentState = LightsStateMessage.RobotDisabledAuto;
+            } else {
+                currentState = LightsStateMessage.RobotDisabledDefault;
             }
         } else {
             if (activity == AlignCameraToAprilTagCalculator.Activity.TerminalApproach) {
