@@ -104,16 +104,16 @@ public class OperatorCommandMap {
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(pointAtNearestCoralStation)
                 .onFalse(clearPointAtHeading);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(driveToNearestReefFaceWithPID);
-        ParallelDeadlineGroup pathDriveToLocationAndIntakeUntilCollected = pathDriveToLocationForCoralStationAndIntakeUntilCollectedFactory.create(
-                null
-        );
-        ParallelDeadlineGroup driveToClosestStationAndIntakeUntilCollectedCommandGroup =
-                driveToClosestStationAndIntakeUntilCollectedCommandGroupFactory.create(false);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(new ConditionalCommand(
-                pathDriveToLocationAndIntakeUntilCollected,
-                driveToClosestStationAndIntakeUntilCollectedCommandGroup,
-                () -> coprocessorCommunicationSubsystem.isCoralStationPathConfident(pose)
-        ));
+//        ParallelDeadlineGroup pathDriveToLocationAndIntakeUntilCollected = pathDriveToLocationForCoralStationAndIntakeUntilCollectedFactory.create(
+//                null
+//        );
+//        ParallelDeadlineGroup driveToClosestStationAndIntakeUntilCollectedCommandGroup =
+//                driveToClosestStationAndIntakeUntilCollectedCommandGroupFactory.create(false);
+//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(new ConditionalCommand(
+//                pathDriveToLocationAndIntakeUntilCollected,
+//                driveToClosestStationAndIntakeUntilCollectedCommandGroup,
+//                () -> coprocessorCommunicationSubsystem.isCoralStationPathConfident(pose)
+//        ));
 
 //        operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
 //        operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(changeActiveModule);
