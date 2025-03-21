@@ -18,6 +18,7 @@ import xbot.common.controls.actuators.XCANMotorControllerPIDProperties;
 import xbot.common.controls.sensors.XDigitalInput;
 import xbot.common.controls.sensors.XLaserCAN;
 import xbot.common.math.MathUtils;
+import xbot.common.properties.BooleanProperty;
 import xbot.common.properties.DistanceProperty;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
@@ -65,7 +66,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     public final DoubleProperty motionMagicAcceleration;
     public final DoubleProperty motionMagicJerk;
 
-    public boolean motionMagicEnabled;
+    public final BooleanProperty motionMagicEnabled;
 
     public XCANMotorController masterMotor;
 
@@ -131,6 +132,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
         this.motionMagicAcceleration = pf.createPersistentProperty("motionMagicMaxAcceleration", 1);
         this.motionMagicJerk = pf.createPersistentProperty("motionMagicMaxJerk", 0.1);
+
+        this.motionMagicEnabled = pf.createPersistentProperty("motionMagicEnabled", false);
         pf.setDefaultLevel(PropertyLevel.Important);
 
 
@@ -356,7 +359,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         var deltaRotations = Rotations.of(heightDelta.in(Meters) * rotationsPerMeter.get());
         masterMotor.setPositionTarget(
                 masterMotor.getPosition().plus(deltaRotations),
-                motionMagicEnabled
+                motionMagicEnabled.get()
                 ? XCANMotorController.MotorPidMode.TrapezoidalVoltage
                 : XCANMotorController.MotorPidMode.Voltage);
     }
@@ -390,11 +393,11 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     }
 
     public void toggleMotionMagic(){
-        motionMagicEnabled = !motionMagicEnabled;
+        motionMagicEnabled.set(!motionMagicEnabled.get());
     }
 
     public boolean isMotionMagicEnabled(){
-        return motionMagicEnabled;
+        return motionMagicEnabled.get();
     }
 
     public void configureMotionMagicConstraints(){
@@ -429,7 +432,6 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         getCalibratedLaserDistance().ifPresent(d -> aKitLog.record("CalibratedElevatorDistanceSensor-m", d.in(Meters)));
         aKitLog.record("CalibratedElevatorMotorSensor-m", getCalibratedMotorDistance().in(Meters));
         aKitLog.record("MotorOffset-rotations", elevatorMotorPositionOffset.in(Rotations));
-        aKitLog.record("MotionMagicEnabled", isMotionMagicEnabled());
 
         periodicTickCounter++;
     }
