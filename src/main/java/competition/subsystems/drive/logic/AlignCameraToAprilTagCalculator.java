@@ -47,7 +47,8 @@ public class AlignCameraToAprilTagCalculator {
         TerminalApproach,
         Shove,
         Complete,
-        GaveUp,
+        Stall,
+        GaveUp, // Not used currently ever?
         TerminalApproachWithoutVision
     }
 
@@ -330,6 +331,12 @@ public class AlignCameraToAprilTagCalculator {
                         coralStationPreShovePoint = getCoralStationPreShovePoint();
                         pose.setPreferOdometryToVision(false);
                     }
+
+                    // Trying to approach reef but camera no good? We should just stay still
+                    if (!aprilTagVisionSubsystem.isCameraConnected(targetCameraID)
+                            && !isCameraBackwards && requireExcellentAlignment) {
+                        activity = Activity.Stall;
+                    }
                 }
             }
             case TerminalApproach -> {
@@ -406,6 +413,7 @@ public class AlignCameraToAprilTagCalculator {
                     oi.driverGamepad.getRumbleManager().rumbleGamepad(1, .75);
                 }
             }
+            case Stall -> {}
             case Complete -> {}
             case GaveUp -> {}
             default -> {} // We're done! We don't need to do anything.
@@ -459,6 +467,7 @@ public class AlignCameraToAprilTagCalculator {
     }
 
     public boolean recommendIsFinished() {
+        // We'll finish in complete or gaveup state, but will not during stall.
         return activity == Activity.Complete || activity == Activity.GaveUp;
     }
 
