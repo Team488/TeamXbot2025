@@ -17,7 +17,8 @@ public class UnitTestContract2025 extends Contract2025 {
 
     public boolean isCoralArmMotorReady() { return true; }
 
-    public boolean isCoralArmPivotAbsoluteEncoderReady() { return true; }
+    // we don't have plans to have this sensor on the robot
+    public boolean isCoralArmPivotAbsoluteEncoderReady() { return false; }
 
     public boolean isCoralArmLowSensorReady() { return true; }
 
