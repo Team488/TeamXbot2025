@@ -16,6 +16,8 @@ import xbot.common.command.BaseSubsystem;
 import xbot.common.controls.actuators.XDigitalOutput;
 import xbot.common.controls.actuators.XDigitalOutput.XDigitalOutputFactory;
 import xbot.common.controls.sensors.XTimer;
+import xbot.common.properties.DoubleProperty;
+import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.autonomous.AutonomousCommandSelector;
 
 import java.sql.Time;
@@ -37,6 +39,8 @@ public class LightSubsystem extends BaseSubsystem {
     private int targetCameraID;
     private boolean recentlyAligned;
     private double lastStateTime = -1;
+    private boolean isLastStateTimeSet = false;
+    private DoubleProperty delayTime;
     LightsStateMessage state = LightsStateMessage.NoCode;
     DIOInt dioInt;
 
@@ -110,7 +114,9 @@ public class LightSubsystem extends BaseSubsystem {
                           CoralScorerSubsystem coralScorerSubsystem,
                           CoralArmSubsystem coralArmSubsystem,
                           ElevatorSubsystem elevatorSubsystem,
-                          AprilTagVisionSubsystemExtended visionSubsystem) {
+                          AprilTagVisionSubsystemExtended visionSubsystem,
+                          PropertyFactory pf) {
+        pf.setPrefix(this);
         this.autonomousCommandSelector = autonomousCommandSelector;
         this.coralScorerSubsystem = coralScorerSubsystem;
         this.coralArmSubsystem = coralArmSubsystem;
@@ -122,6 +128,7 @@ public class LightSubsystem extends BaseSubsystem {
             digitalOutputFactory.create(contract.getLightsDio2().channel), 
             digitalOutputFactory.create(contract.getLightsDio3().channel)};
         this.dioInt = new DIOInt(dios);
+        this.delayTime = pf.createPersistentProperty("Light State Time Active", 2);
     }
 
     public LightsStateMessage getCurrentState() {
@@ -152,13 +159,14 @@ public class LightSubsystem extends BaseSubsystem {
             } else if (activity == AlignCameraToAprilTagCalculator.Activity.Complete && recentlyAligned) {
                 currentState = LightsStateMessage.FinishedAligning;
 
-                if (lastStateTime == -1) {
+                if (!isLastStateTimeSet) {
                     lastStateTime = XTimer.getFPGATimestamp();
+                    isLastStateTimeSet = true;
                 }
 
-                if (XTimer.getFPGATimestamp() - lastStateTime >= 2) {
+                if (XTimer.getFPGATimestamp() - lastStateTime >= delayTime.get()) {
                     recentlyAligned = false;
-                    lastStateTime = -1;
+                    isLastStateTimeSet = false;
                 }
             } else if (coralScorerSubsystem.getCoralScorerState() == CoralScorerSubsystem.CoralScorerState.INTAKING) {
                 currentState = LightsStateMessage.RequestCoralFromHuman;
@@ -182,10 +190,6 @@ public class LightSubsystem extends BaseSubsystem {
 
     public void updateFromCalculator(AlignCameraToAprilTagCalculator.Activity activity, int targetCameraID) {
         this.activity = activity;
-        this.targetCameraID = targetCameraID;
-    }
-
-    public void updateTargetCameraID(int targetCameraID) {
         this.targetCameraID = targetCameraID;
     }
 
