@@ -111,15 +111,20 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         aKitLog.record("PM-CurrentVelocity", elevator.getCurrentVelocity().in(MetersPerSecond));
         aKitLog.setLogLevel(AKitLogger.LogLevel.INFO);
 
-        profileManager.setTargetPosition(
-            elevator.getTargetValue().in(Meters),
-            currentValue.in(Meters),
-            elevator.getCurrentVelocity().in(MetersPerSecond)
-        );
-        var setpoint = profileManager.getRecommendedPositionForTime();
-        aKitLog.record("elevatorProfileTarget", setpoint);
+        if (elevator.isMotionMagicEnabled()){
+            elevator.setElevatorHeightGoalOnMotor(elevator.getTargetValue().in(Meters));
+        }
+        else {
+            profileManager.setTargetPosition(
+                    elevator.getTargetValue().in(Meters),
+                    currentValue.in(Meters),
+                    elevator.getCurrentVelocity().in(MetersPerSecond)
+            );
+            var setpoint = profileManager.getRecommendedPositionForTime();
+            aKitLog.record("elevatorProfileTarget", setpoint);
 
-        elevator.setElevatorHeightGoalOnMotor(setpoint);
+            elevator.setElevatorHeightGoalOnMotor(setpoint);
+        }
     }
 
     //defaults humanControlAction if there is no bottom sensor
