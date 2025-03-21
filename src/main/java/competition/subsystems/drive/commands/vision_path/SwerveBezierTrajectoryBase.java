@@ -12,7 +12,6 @@ import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.drive.BaseSwerveDriveSubsystem;
 import xbot.common.subsystems.drive.SwervePointKinematics;
 import xbot.common.subsystems.drive.SwerveSimpleBezierCommand;
-import xbot.common.subsystems.drive.SwerveSimpleTrajectoryCommand;
 import xbot.common.subsystems.drive.SwerveSimpleTrajectoryMode;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
 import xbot.common.subsystems.pose.BasePoseSubsystem;
@@ -63,6 +62,13 @@ public class SwerveBezierTrajectoryBase extends SwerveSimpleBezierCommand {
 
         // Get the current robot pose.
         Translation2d currentStartPoint = pose.getCurrentPose2d().getTranslation();
+        XTableValues.BezierCurve lastCurve = bezierCurves.getCurvesList().get(bezierCurves.getCurvesCount() - 1);
+        XTableValues.ControlPoint lastPoint = lastCurve.getControlPoints(lastCurve.getControlPointsCount() - 1);
+        Translation2d endPoint = new Translation2d( lastPoint.getX(), lastPoint.getY());
+        double distanceFromEnd = currentStartPoint.getDistance(endPoint);
+        double halfDistanceFromEnd = distanceFromEnd / 1.65;
+
+
         final Rotation2d overallStartRotation =
                 pose.getCurrentPose2d().getRotation();
 
@@ -91,8 +97,6 @@ public class SwerveBezierTrajectoryBase extends SwerveSimpleBezierCommand {
         int totalSteps = totalSegments * STEPS_PER_SEGMENT;
         int globalStep = 0;
 
-        // Rotation start threshold (50% of the path)
-        double rotationStartThreshold = 0.1;
 
         // Process each Bézier segment.
         for (XTableValues.BezierCurve segment : bezierCurves.getCurvesList()) {
@@ -125,17 +129,8 @@ public class SwerveBezierTrajectoryBase extends SwerveSimpleBezierCommand {
                 double lerpFraction = i / (double) STEPS_PER_SEGMENT;
                 Translation2d pointTranslation =
                         deCasteljauIterative(allPoints, lerpFraction);
-
-                // Compute global progress (0 to 1) along the entire trajectory.
-                double globalProgress = globalStep / (double) totalSteps;
-
-                Rotation2d targetRotation;
-                if (globalProgress < rotationStartThreshold) {
-                    // Before 10% progress, maintain the current heading.
-                    targetRotation =
-                            Rotation2d.fromDegrees(pose.getCurrentHeading().getDegrees());
-                } else {
-                    // After 10% progress, switch to the target rotation.
+                Rotation2d targetRotation = overallStartRotation;
+                if(pointTranslation.getDistance(endPoint) <= halfDistanceFromEnd) {
                     targetRotation = finalRotation;
                 }
 

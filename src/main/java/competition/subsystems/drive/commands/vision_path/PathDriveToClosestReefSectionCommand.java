@@ -22,13 +22,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class PathDriveToClosestReefSectionCommandCommand extends PathDriveToLocationCommand {
+public class PathDriveToClosestReefSectionCommand extends PathDriveToLocationCommand {
     private final AprilTagFieldLayout aprilTagFieldLayout;
     private final DriveSubsystem driveSubsystem;
     private final ElectricalContract electricalContract;
 
     @Inject
-    PathDriveToClosestReefSectionCommandCommand(
+    PathDriveToClosestReefSectionCommand(
             PoseSubsystem pose, DriveSubsystem drive,
             CoprocessorCommunicationSubsystem coprocessorComms,
             PropertyFactory pf, HeadingModule.HeadingModuleFactory headingModuleFactory,
@@ -65,9 +65,6 @@ public class PathDriveToClosestReefSectionCommandCommand extends PathDriveToLoca
         this.setAdditionalArguments(XTableValues.AdditionalArguments.newBuilder()
                 .setAlliance(CoprocessorCommunicationSubsystem.fromAlliance(DriverStation.getAlliance()
                         .orElse(DriverStation.Alliance.Blue))).build());
-        this.setSafeDistance(
-                electricalContract.getDiagonalDistanceDifferenceOfRobotRadius()
-                );
         this.setOptions(XTableValues.TraversalOptions.newBuilder()
                 .setMetersPerSecond(driveSubsystem.getDriveToWaypointsSpeed().get())
                 .setAccelerationMetersPerSecond(driveSubsystem.getMaxAccelerationMetersPerSecondSquared())
