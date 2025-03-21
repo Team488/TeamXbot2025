@@ -3,6 +3,7 @@ package competition.simulation.coral_arm;
 import javax.inject.Inject;
 
 import competition.Robot;
+import competition.electrical_contract.ElectricalContract;
 import competition.simulation.MotorInternalPIDHelper;
 import competition.subsystems.coral_arm.CoralArmSubsystem;
 
@@ -20,7 +21,6 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import xbot.common.advantage.AKitLogger;
 import xbot.common.controls.actuators.mock_adapters.MockCANMotorController;
-import xbot.common.controls.sensors.mock_adapters.MockAbsoluteEncoder;
 import xbot.common.controls.sensors.mock_adapters.MockDutyCycleEncoder;
 import xbot.common.math.PIDManager;
 import xbot.common.properties.PropertyFactory;
@@ -35,11 +35,14 @@ public class CoralArmSimulator {
     final MockCANMotorController armMotor;
     final MockDutyCycleEncoder absoluteEncoder;
     final MockDigitalInput lowSensor;
+    final ElectricalContract contract;
 
     @Inject
-    public CoralArmSimulator(CoralArmSubsystem armPivotSubsystem, PIDManager.PIDManagerFactory pidManagerFactory, PropertyFactory pf) {
+    public CoralArmSimulator(CoralArmSubsystem armPivotSubsystem, PIDManager.PIDManagerFactory pidManagerFactory,
+            PropertyFactory pf, ElectricalContract contract) {
         pf.setPrefix("CoralArmSimulator");
         this.aKitLog = new AKitLogger("FieldSimulation/CoralArm");
+        this.contract = contract;
         this.pidManager = pidManagerFactory.create(pf.getPrefix() + "/CANMotorPositionalPID", 0.2, 0.001, 0.0, 0.0, 1.0, -1.0);
         this.armPivotSubsystem = armPivotSubsystem;
         this.armMotor = (MockCANMotorController) armPivotSubsystem.armMotor;
@@ -77,8 +80,10 @@ public class CoralArmSimulator {
         var armMotorRotations = armRelativeAngle.in(Radians) / CoralArmSimConstants.armEncoderAnglePerRotation.in(Radians);
         armMotor.setPosition(Rotations.of(armMotorRotations));
 
-        absoluteEncoder.setRawPosition(getAbsoluteEncoderPosition(getArmAngle(), 0.0,
-                armPivotSubsystem.rangeOfMotionDegrees.get() / 360).in(Rotations) + 0.5);
+        if(contract.isCoralArmPivotAbsoluteEncoderReady()) {
+            absoluteEncoder.setRawPosition(getAbsoluteEncoderPosition(getArmAngle(), 0.0,
+                    armPivotSubsystem.rangeOfMotionDegrees.get() / 360).in(Rotations) + 0.5);
+        }
 
         // if the arm angle is lower than 10.8 degrees it will return true, otherwise return false
         lowSensor.setValue(getArmAngle().in(Degrees) < 10.8);
