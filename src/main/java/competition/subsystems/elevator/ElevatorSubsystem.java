@@ -421,9 +421,9 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
             }
         }
 
-        aKitLog.record("ElevatorTrimValue", trimValue.get().in(Inches));
-        aKitLog.record("ElevatorTargetHeight-m", elevatorTargetHeight.in(Inches));
-        aKitLog.record("ElevatorCurrentHeight-m", getCurrentValue().in(Inches));
+        aKitLog.record("ElevatorTrimValue", trimValue.get().in(Meters));
+        aKitLog.record("ElevatorTargetHeight-m", elevatorTargetHeight.in(Meters));
+        aKitLog.record("ElevatorCurrentHeight-m", getCurrentValue().in(Meters));
         aKitLog.record("ElevatorBottomSensor", this.isTouchingBottom());
         aKitLog.record("isElevatorCalibrated", isCalibrated());
         aKitLog.record("isElevatorMaintainerAtGoal", this.isMaintainerAtGoal());
@@ -432,6 +432,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         getCalibratedLaserDistance().ifPresent(d -> aKitLog.record("CalibratedElevatorDistanceSensor-m", d.in(Meters)));
         aKitLog.record("CalibratedElevatorMotorSensor-m", getCalibratedMotorDistance().in(Meters));
         aKitLog.record("MotorOffset-rotations", elevatorMotorPositionOffset.in(Rotations));
+        aKitLog.record("LaserCANOffset", laserCANPositionOffset.in(Meters));
 
         periodicTickCounter++;
     }
