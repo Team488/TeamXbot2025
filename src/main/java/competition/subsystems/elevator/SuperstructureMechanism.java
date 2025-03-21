@@ -31,7 +31,7 @@ public class SuperstructureMechanism {
     // these constants define the mechanism geometry rendering at zero height and zero angle
     // all tuned by trial and error
     public final double elevatorLigamentBaseLengthMeters = 0.7;
-    final double coralArmLigamentBaseAngleDegrees = 145;
+    final double coralArmLigamentBaseAngleDegrees = 165;
     final double coralArmLengthMeters = 0.47;
     final double scorerLengthMeters = 0.6;
     final double scorerAngleDegrees = -145;
