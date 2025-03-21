@@ -34,6 +34,8 @@ import competition.subsystems.elevator.ElevatorSubsystem;
 import competition.subsystems.elevator.commands.ForceElevatorCalibratedCommand;
 import competition.subsystems.elevator.commands.SetElevatorTargetHeightCommand;
 import competition.subsystems.elevator.commands.ToggleElevatorMotionMagicCommand;
+import competition.subsystems.elevator.commands.TrimElevatorDown;
+import competition.subsystems.elevator.commands.TrimElevatorUp;
 import competition.subsystems.oracle.commands.DriveAccordingToOracleCommand;
 import competition.subsystems.oracle.commands.SuperstructureAccordingToOracleCommand;
 import competition.subsystems.pose.Cameras;
@@ -136,7 +138,9 @@ public class OperatorCommandMap {
                                       AlgaeCollectionOutputCommand ejectAlgae,
                                       CoralArmSubsystem coralArmSubsystem,
                                       IntakeCoralCommand intakeCoralCommand,
-                                      PrepAlgaeSystemCommandGroupFactory prepAlgaeSystemCommandGroupFactory) {
+                                      PrepAlgaeSystemCommandGroupFactory prepAlgaeSystemCommandGroupFactory,
+                                      TrimElevatorUp trimElevatorUp,
+                                      TrimElevatorDown trimElevatorDown) {
         // Coral system buttons
         var prepL4 = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.FOUR);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
@@ -175,6 +179,10 @@ public class OperatorCommandMap {
 
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(intakeAlgae);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(ejectAlgae);
+
+        oi.neoTrellis.getifAvailable(8).onTrue(trimElevatorUp);
+        oi.neoTrellis.getifAvailable(16).onTrue(trimElevatorDown);
+
     }
 
     @Inject
