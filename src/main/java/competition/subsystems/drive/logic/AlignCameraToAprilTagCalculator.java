@@ -325,17 +325,18 @@ public class AlignCameraToAprilTagCalculator {
                 if (currentTranslation.getDistance(interstitialPoint.getTranslation()) < distanceThresholdToAdvance) {
                     activity = Activity.TerminalApproach;
 
-                    // Trying to approach coral station but found no tag? We'll just use pure pose
-                    if (!hasEverSeenAprilTag && isCameraBackwards) {
-                        activity = Activity.TerminalApproachWithoutVision;
-                        coralStationPreShovePoint = getCoralStationPreShovePoint();
-                        pose.setPreferOdometryToVision(false);
-                    }
-
-                    // Trying to approach reef but camera no good? We should just stay still
-                    if (!aprilTagVisionSubsystem.isCameraConnected(targetCameraID)
-                            && !isCameraBackwards && requireExcellentAlignment) {
-                        activity = Activity.Stall;
+                    // We should not do TerminalApproach if vision stuff is abnormal
+                    if (!hasEverSeenAprilTag || !aprilTagVisionSubsystem.isCameraConnected(targetCameraID)) {
+                        if (isCameraBackwards) {
+                            // Trying to approach coral station but found no tag? We'll just use pure pose
+                            activity = Activity.TerminalApproachWithoutVision;
+                            coralStationPreShovePoint = getCoralStationPreShovePoint();
+                            pose.setPreferOdometryToVision(false);
+                        } else {
+                            // This is for front facing cameras
+                            // Trying to approach reef but camera no good? We should just stay still
+                            activity = Activity.Stall;
+                        }
                     }
                 }
             }
