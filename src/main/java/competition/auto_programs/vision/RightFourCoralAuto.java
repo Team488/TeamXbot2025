@@ -40,17 +40,7 @@ public class RightFourCoralAuto extends BaseAutonomousSequentialCommandGroup {
                               PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFact,
                               BaseSimulator simulator) {
         super(autoSelector);
-        var initializeStateCommand =
-                pose.createSetPositionCommand(
-                                ()
-                                        -> PoseSubsystem.convertBlueToRedIfNeeded(
-                                        Landmarks.BlueCageSixStartingLine))
-                        .alongWith(new InstantCommand(
-                                ()
-                                        -> simulator.resetPosition(
-                                        PoseSubsystem.convertBlueToRedIfNeeded(
-                                                Landmarks.BlueCageSixStartingLine))));
-        this.addCommands(initializeStateCommand);
+        
         // Score 1
         getDriveAndScoreStatusMessageCommand(Landmarks.ReefFace.FAR_RIGHT,
                 Landmarks.Branch.A, Landmarks.CoralLevel.FOUR);
