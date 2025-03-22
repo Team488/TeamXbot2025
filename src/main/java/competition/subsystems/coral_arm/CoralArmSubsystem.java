@@ -45,6 +45,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     public final DoubleProperty level123ScoringAngle;
     public final DoubleProperty level4ScoringAngle;
     public final DoubleProperty humanLoadAngleDegrees;
+    public final DoubleProperty humanLoad1CoralBackAngleDegrees;
     public final DoubleProperty rangeOfMotionDegrees;
     public final DoubleProperty powerWhenNotCalibrated;
     public final DoubleProperty autoCalibrationDegrees;
@@ -93,8 +94,9 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
         this.level123ScoringAngle = propertyFactory.createPersistentProperty("Level 1 2 3 Scoring Angle", 136);
         this.level4ScoringAngle = propertyFactory.createPersistentProperty("Level 4 Scoring Angle", 166);
+        this.humanLoad1CoralBackAngleDegrees = propertyFactory.createPersistentProperty("Human Loading Angle 1 coral back-in-degrees", 0);
+        this.humanLoadAngleDegrees = propertyFactory.createPersistentProperty("Human Loading Angle in Degrees", 13.8);
         propertyFactory.setDefaultLevel(PropertyLevel.Debug);
-        this.humanLoadAngleDegrees = propertyFactory.createPersistentProperty("Human Loading Angle in Degrees", 0);
         this.degreesPerRotations = propertyFactory.createPersistentProperty("Degrees Per Rotations", 5.790);
         this.rangeOfMotionDegrees = propertyFactory.createPersistentProperty("Range of Motion in Degrees", 170);
         this.powerWhenNotCalibrated = propertyFactory.createPersistentProperty("Power When Not Calibrated", 0.25);
