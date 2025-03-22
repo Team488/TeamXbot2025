@@ -285,6 +285,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
             case TWO -> setTargetValue(l2Height.get());
             case THREE -> setTargetValue(l3Height.get().plus(trimValue.get()));
             case FOUR -> setTargetValue(l4Height.get().plus(trimValue.get()));
+            case COLLECTING_1_CORAL_BACK -> setTargetValue(humanLoadHeight.get());
             case COLLECTING -> setTargetValue(humanLoadHeight.get());
             default -> setTargetValue(baseHeight.get());
         }
