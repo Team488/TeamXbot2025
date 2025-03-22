@@ -25,7 +25,7 @@ public class SwerveBezierTrajectoryBase extends SwerveSimpleBezierCommand {
     private final CoprocessorCommunicationSubsystem coprocessor;
 
     // --- NEW CONSTANTS ---
-    private static final int STEPS_PER_SEGMENT = 15;
+    private static final int STEPS_PER_SEGMENT = 13;
     private static final double DEFAULT_ACCELERATION = 1.0;
     private static final double DEFAULT_METERS_PER_SECOND_VELOCITY = 2.0;
     private final AprilTagFieldLayout layout;
