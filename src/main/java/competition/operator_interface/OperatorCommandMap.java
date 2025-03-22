@@ -5,10 +5,10 @@ import competition.auto_programs.FromLeftCageScoreLeftFacesLevelFours;
 import competition.auto_programs.FromRightCageScoreRightFacesLevelFours;
 import competition.auto_programs.vision.LeftFourCoralAuto;
 import competition.auto_programs.vision.RightFourCoralAuto;
-import competition.commandgroups.DriveToClosestStationAndIntakeUntilCollectedCommandGroupFactory;
+import competition.commandgroups.DriveToClosestStationCommandGroupFactory;
 import competition.commandgroups.PrepAlgaeSystemCommandGroupFactory;
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
-import competition.commandgroups.vision_path.PathDriveToLocationForCoralStationAndIntakeUntilCollectedFactory;
+import competition.commandgroups.vision_path.PathDriveToLocationForCoralStationFactory;
 import competition.simulation.commands.ResetSimulatedPose;
 import competition.subsystems.algae_arm.AlgaeArmSubsystem;
 import competition.subsystems.algae_arm.commands.ForceAlgaeArmCalibrated;
@@ -42,8 +42,8 @@ import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import xbot.common.controls.sensors.XXboxController;
 import xbot.common.subsystems.autonomous.SetAutonomousCommand;
 import xbot.common.subsystems.drive.swerve.commands.ChangeActiveSwerveModuleCommand;
@@ -53,8 +53,6 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
-import static edu.wpi.first.units.Units.Degree;
-
 /**
  * Maps operator interface buttons to commands
  */
@@ -62,7 +60,8 @@ import static edu.wpi.first.units.Units.Degree;
 public class OperatorCommandMap {
 
     @Inject
-    public OperatorCommandMap() {}
+    public OperatorCommandMap() {
+    }
 
     @Inject
     public void setupDriverCommands(
@@ -76,10 +75,10 @@ public class OperatorCommandMap {
             SwerveDriveWithJoysticksCommand typicalSwerveDrive,
             DriveToNearestReefFaceWithPID driveToNearestReefFaceWithPID,
             DriveSubsystem drive, PoseSubsystem pose,
-            DriveToClosestStationAndIntakeUntilCollectedCommandGroupFactory
-                    driveToClosestStationAndIntakeUntilCollectedCommandGroupFactory,
+            DriveToClosestStationCommandGroupFactory
+                    driveToClosestStationCommandGroupFactory,
             CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem,
-            PathDriveToLocationForCoralStationAndIntakeUntilCollectedFactory pathDriveToLocationForCoralStationAndIntakeUntilCollectedFactory) {
+            PathDriveToLocationForCoralStationFactory pathDriveToLocationForCoralStationFactory) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
 
@@ -105,22 +104,24 @@ public class OperatorCommandMap {
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(pointAtNearestCoralStation)
                 .onFalse(clearPointAtHeading);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(driveToNearestReefFaceWithPID);
-//        ParallelDeadlineGroup pathDriveToLocationAndIntakeUntilCollected = pathDriveToLocationForCoralStationAndIntakeUntilCollectedFactory.create(
-//                null
-//        );
-//        ParallelDeadlineGroup driveToClosestStationAndIntakeUntilCollectedCommandGroup =
-//                driveToClosestStationAndIntakeUntilCollectedCommandGroupFactory.create(false);
-//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(new ConditionalCommand(
-//                pathDriveToLocationAndIntakeUntilCollected,
-//                driveToClosestStationAndIntakeUntilCollectedCommandGroup,
-//                () -> coprocessorCommunicationSubsystem.isCoralStationPathConfident(pose)
-//        ));
+
+
+        // Instantly drives to closest coral station
+        SequentialCommandGroup pathDriveToClosestCoralStation = pathDriveToLocationForCoralStationFactory.createDriveOnly(
+                null, null
+        );
+        SequentialCommandGroup driveToClosestCoralStation =
+                driveToClosestStationCommandGroupFactory.createDriveOnly(true);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(new ConditionalCommand(
+                pathDriveToClosestCoralStation,
+                driveToClosestCoralStation,
+                () -> coprocessorCommunicationSubsystem.isCoralStationPathConfident(pose)
+        ));
 
 //        operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
 //        operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(changeActiveModule);
 //        operatorInterface.driverGamepad.getPovIfAvailable(180).onTrue(typicalSwerveDrive);
     }
-
 
 
     @Inject
