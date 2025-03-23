@@ -18,6 +18,7 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import xbot.common.advantage.AKitLogger;
 import xbot.common.controls.sensors.XTimer;
 import xbot.common.injection.electrical_contract.CameraInfo;
@@ -94,6 +95,7 @@ public class AlignCameraToAprilTagCalculator {
     final DoubleProperty closeInterstitialActivationRange;
 
     final DoubleProperty globalHorizontalOffsetInches;
+    private double globalTemporaryHorizontalOffsetInches;
 
     double lastKnownHorizontalErrorMeters = 999999;
     double shoveStartTime = 0;
@@ -168,6 +170,23 @@ public class AlignCameraToAprilTagCalculator {
         activity = startingActivity;
     }
 
+    private void addToEphemeralOffsetInInches(double inches) {
+        globalTemporaryHorizontalOffsetInches += inches;
+        akitLog.record("GlobalTemporaryHorizontalOffsetInches", globalTemporaryHorizontalOffsetInches);
+    }
+
+    public InstantCommand createIncreaseOffsetByOneInchCommand() {
+        return new InstantCommand(() -> addToEphemeralOffsetInInches(1));
+    }
+
+    public InstantCommand createDecreaseOffsetByOneInchCommand() {
+        return new InstantCommand(() -> addToEphemeralOffsetInInches(-1));
+    }
+
+    private double getHorizontalTrimAdjustmentMeters() {
+        return Inches.of(globalTemporaryHorizontalOffsetInches + globalHorizontalOffsetInches.get()).in(Meters);
+    }
+
     public void configureAndReset(int targetAprilTagID, int targetCameraID, Distance offset,
                                   boolean isCameraBackwards) {
         configureAndReset(targetAprilTagID, targetCameraID, offset, isCameraBackwards, Activity.Searching, true);
@@ -201,7 +220,7 @@ public class AlignCameraToAprilTagCalculator {
 
         this.alignmentPointOffset = new Translation2d(
                 alignmentPointOffset.getX(),
-                -Inches.of(globalHorizontalOffsetInches.get()).in(Meters)
+                -getHorizontalTrimAdjustmentMeters()
         );
 
         // Now for some other one-time calculations about the tag itself
@@ -453,7 +472,7 @@ public class AlignCameraToAprilTagCalculator {
         Optional<Translation2d> aprilTagData = aprilTagVisionSubsystem.getRobotRelativeLocationOfAprilTag(targetCameraID, targetAprilTagID);
 
         if (aprilTagData.isPresent()) {
-            lastKnownHorizontalErrorMeters = aprilTagData.get().getY() + Inches.of(globalHorizontalOffsetInches.get()).in(Meters);
+            lastKnownHorizontalErrorMeters = aprilTagData.get().getY() + getHorizontalTrimAdjustmentMeters();
         }
         akitLog.record("AprilTagData", aprilTagData.orElse(null));
 

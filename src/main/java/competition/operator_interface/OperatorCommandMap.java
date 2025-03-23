@@ -78,7 +78,8 @@ public class OperatorCommandMap {
             DriveToClosestStationCommandGroupFactory
                     driveToClosestStationCommandGroupFactory,
             CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem,
-            PathDriveToLocationForCoralStationFactory pathDriveToLocationForCoralStationFactory) {
+            PathDriveToLocationForCoralStationFactory pathDriveToLocationForCoralStationFactory,
+            AlignCameraToAprilTagCalculator.AlignCameraToAprilTagCalculatorFactory aprilTagCalculatorFactory) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
 
@@ -121,6 +122,11 @@ public class OperatorCommandMap {
 //        operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
 //        operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(changeActiveModule);
 //        operatorInterface.driverGamepad.getPovIfAvailable(180).onTrue(typicalSwerveDrive);
+
+        var aprilTagCalculator = aprilTagCalculatorFactory.create();
+
+        operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(aprilTagCalculator.createDecreaseOffsetByOneInchCommand());
+        operatorInterface.driverGamepad.getPovIfAvailable(270).onTrue(aprilTagCalculator.createIncreaseOffsetByOneInchCommand());
     }
 
 
