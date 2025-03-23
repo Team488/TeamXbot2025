@@ -30,6 +30,7 @@ import xbot.common.subsystems.vision.AprilTagVisionIO;
 import java.util.Optional;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 
@@ -91,6 +92,8 @@ public class AlignCameraToAprilTagCalculator {
     final DoubleProperty closeInterstitialDistance;
     final DoubleProperty closeApproachSpeedFactor;
     final DoubleProperty closeInterstitialActivationRange;
+
+    final DoubleProperty globalHorizontalOffsetInches;
 
     double lastKnownHorizontalErrorMeters = 999999;
     double shoveStartTime = 0;
@@ -154,6 +157,8 @@ public class AlignCameraToAprilTagCalculator {
         closeApproachSpeedFactor = pf.createPersistentProperty("CloseApproachSpeedFactor", 0.33);
         closeInterstitialActivationRange = pf.createPersistentProperty("CloseInterstitialActivationRange-m", 1.33);
 
+        globalHorizontalOffsetInches = pf.createPersistentProperty("GlobalHorizontalOffset-Inches", 0.0);
+
         reset();
     }
 
@@ -192,6 +197,11 @@ public class AlignCameraToAprilTagCalculator {
                 cameraInfo,
                 offset,
                 isCameraBackwards
+        );
+
+        this.alignmentPointOffset = new Translation2d(
+                alignmentPointOffset.getX(),
+                -Inches.of(globalHorizontalOffsetInches.get()).in(Meters)
         );
 
         // Now for some other one-time calculations about the tag itself
@@ -443,7 +453,7 @@ public class AlignCameraToAprilTagCalculator {
         Optional<Translation2d> aprilTagData = aprilTagVisionSubsystem.getRobotRelativeLocationOfAprilTag(targetCameraID, targetAprilTagID);
 
         if (aprilTagData.isPresent()) {
-            lastKnownHorizontalErrorMeters = aprilTagData.get().getY();
+            lastKnownHorizontalErrorMeters = aprilTagData.get().getY() + Inches.of(globalHorizontalOffsetInches.get()).in(Meters);
         }
         akitLog.record("AprilTagData", aprilTagData.orElse(null));
 
@@ -464,6 +474,7 @@ public class AlignCameraToAprilTagCalculator {
         // Use WPI libraries to transform the relative goal into a field-oriented goal. That way, if we ever lose the tag,
         // we can still attempt to move to this target location
         targetLocationOnField = currentPose.transformBy(relativeGoalTransform).getTranslation();
+
         akitLog.record("TargetLocationOnField", targetLocationOnField);
     }
 
