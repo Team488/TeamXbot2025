@@ -18,6 +18,7 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import xbot.common.advantage.AKitLogger;
 import xbot.common.controls.sensors.XTimer;
@@ -175,12 +176,12 @@ public class AlignCameraToAprilTagCalculator {
         akitLog.record("GlobalTemporaryHorizontalOffsetInches", globalTemporaryHorizontalOffsetInches);
     }
 
-    public InstantCommand createIncreaseOffsetByOneInchCommand() {
-        return new InstantCommand(() -> addToEphemeralOffsetInInches(1));
+    public Command createIncreaseOffsetByOneInchCommand() {
+        return new InstantCommand(() -> addToEphemeralOffsetInInches(1)).ignoringDisable(true);
     }
 
-    public InstantCommand createDecreaseOffsetByOneInchCommand() {
-        return new InstantCommand(() -> addToEphemeralOffsetInInches(-1));
+    public Command createDecreaseOffsetByOneInchCommand() {
+        return new InstantCommand(() -> addToEphemeralOffsetInInches(-1)).ignoringDisable(true);
     }
 
     private double getHorizontalTrimAdjustmentMeters() {
