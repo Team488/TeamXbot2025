@@ -116,12 +116,12 @@ public class PoseSubsystem extends BasePoseSubsystem {
                 getSwerveModulePositions(),
                 new Pose2d());
     }
-
+    @SuppressWarnings("unchecked")
     private <T> PoseEstimator<T> getPrimaryPoseEstimator() {
         return (PoseEstimator<T>) (this.useDeadwheelAssistedPose.get() ? this.fullDeadwheelOdometry
                 : this.fullSwerveOdometry);
     }
-
+    @SuppressWarnings("unchecked")
     private <T> PoseEstimator<T> getPrimaryOdometryOnlyPoseEstimator() {
         return (PoseEstimator<T>) (this.useDeadwheelAssistedPose.get() ? this.onlyWheelsGyroSwerveOdometry
                 : this.onlyDeadwheelOdometry);

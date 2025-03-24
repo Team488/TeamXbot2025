@@ -25,7 +25,7 @@ public class SwerveBezierTrajectoryBase extends SwerveSimpleBezierCommand {
     private final CoprocessorCommunicationSubsystem coprocessor;
 
     // --- NEW CONSTANTS ---
-    private static final int STEPS_PER_SEGMENT = 15;
+    private static final int STEPS_PER_SEGMENT = 13;
     private static final double DEFAULT_ACCELERATION = 1.0;
     private static final double DEFAULT_METERS_PER_SECOND_VELOCITY = 2.0;
     private final AprilTagFieldLayout layout;
@@ -40,11 +40,12 @@ public class SwerveBezierTrajectoryBase extends SwerveSimpleBezierCommand {
         this.coprocessor = coprocessorCommunicationSubsystem;
         this.layout =
                 AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
+        this.logic.setPrioritizeRotationIfCloseToGoal(true);
+        this.logic.setDistanceThresholdToPrioritizeRotation(1.2446);
     }
 
     @Override
     public void initialize() {
-        this.logic.setPrioritizeRotationIfCloseToGoal(true);
         super.initialize();
     }
 
