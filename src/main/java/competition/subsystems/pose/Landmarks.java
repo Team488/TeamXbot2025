@@ -194,6 +194,8 @@ public class Landmarks {
         FOUR,
         HIGH_ALGAE,
         LOW_ALGAE,
+        SCORE_ALGAE_NET,
+        SCORE_ALGAE_PROCESSOR
     }
 
     public enum CoralStation {
