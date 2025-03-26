@@ -145,6 +145,12 @@ public class OperatorCommandMap {
                                       IntakeCoralCommand intakeCoralCommand,
                                       PrepAlgaeSystemCommandGroupFactory prepAlgaeSystemCommandGroupFactory) {
         // Coral system buttons
+        var prepAlgaeScoring = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.ALGAE_SCORING);
+        oi.operatorGamepad.getPovIfAvailable(270).onTrue(prepAlgaeScoring);
+
+        var prepAlgaeCollect = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.ALGAE_COLLECT);
+        oi.operatorGamepad.getPovIfAvailable(90).onTrue(prepAlgaeCollect);
+
         var prepL4 = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.FOUR);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
 
@@ -174,13 +180,7 @@ public class OperatorCommandMap {
 
         var removeHighAlgae = prepAlgaeSystemCommandGroupFactory.create(AlgaeArmSubsystem.AlgaeArmPositions.ReefAlgaeHigh);
         oi.operatorGamepad.getPovIfAvailable(0).onTrue(removeHighAlgae);
-
-        var collectGroundAlgae = prepAlgaeSystemCommandGroupFactory.create(AlgaeArmSubsystem.AlgaeArmPositions.GroundCollection);
-        oi.operatorGamepad.getPovIfAvailable(90).onTrue(collectGroundAlgae);
-
-        var homeAlgaeArm = prepAlgaeSystemCommandGroupFactory.create(AlgaeArmSubsystem.AlgaeArmPositions.FullyRetracted);
-        oi.operatorGamepad.getPovIfAvailable(270).onTrue(homeAlgaeArm);
-
+        
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(intakeAlgae);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(ejectAlgae);
     }

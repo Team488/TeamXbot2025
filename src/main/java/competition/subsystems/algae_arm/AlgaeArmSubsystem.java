@@ -18,6 +18,8 @@ import xbot.common.properties.Property.PropertyLevel;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import java.awt.geom.Arc2D;
+
 import static edu.wpi.first.units.Units.Degree;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
@@ -45,13 +47,15 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
     final DoubleProperty reefHighSweepEnd;
     final DoubleProperty repositionArmAmount;
 
+
     final Alert isNotCalibratedAlert = new Alert("AlgaeArm: not calibrated", Alert.AlertType.kWarning);
 
     public enum AlgaeArmPositions {
         FullyRetracted,
         GroundCollection,
         ReefAlgaeLow,
-        ReefAlgaeHigh
+        ReefAlgaeHigh,
+        ALGAE_ARM_POSITIONS
     }
 
     @Inject
@@ -96,6 +100,7 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
         this.reefLowTopToBottomSweepEnd = propertyFactory.createPersistentProperty("ReefLowTopToBottomSweepEnd", 90.0);
         this.reefHighSweepStart = propertyFactory.createPersistentProperty("ReefHighSweepStart", 160.0);
         this.reefHighSweepEnd = propertyFactory.createPersistentProperty("ReefHighSweepEnd", 150.0);
+
     }
 
     @Override

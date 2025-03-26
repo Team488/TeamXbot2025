@@ -48,6 +48,9 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     public final DoubleProperty rangeOfMotionDegrees;
     public final DoubleProperty powerWhenNotCalibrated;
     public final DoubleProperty autoCalibrationDegrees;
+    public final DoubleProperty horizontalAngleInDegrees;
+    public final DoubleProperty algaeScoringAngle;
+
 
     public Landmarks.CoralLevel targetCoralLevel;
 
@@ -103,6 +106,8 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
         this.powerWhenNotCalibrated = propertyFactory.createPersistentProperty("Power When Not Calibrated", 0.25);
         this.autoCalibrationDegrees = propertyFactory.createPersistentProperty("AutoCalibrationDegrees", 13.8);
         propertyFactory.setDefaultLevel(PropertyLevel.Important);
+        this.horizontalAngleInDegrees = propertyFactory.createPersistentProperty("Horizontal angle", 45);
+        this.algaeScoringAngle = propertyFactory.createPersistentProperty("Algae Scoring Angle",45);
     }
 
     @Override
@@ -176,6 +181,11 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
             case FOUR:
                 setTargetValue(Degrees.of(level4ScoringAngle.get()));
                 break;
+            case ALGAE_COLLECT:
+                setTargetValue(Degrees.of(horizontalAngleInDegrees.get()));
+                break;
+            case ALGAE_SCORING:
+                setTargetValue(Degrees.of(algaeScoringAngle.get()));
             case COLLECTING:
             default:
                 setTargetValue(Degrees.of(humanLoadAngleDegrees.get()));

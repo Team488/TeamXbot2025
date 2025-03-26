@@ -191,7 +191,10 @@ public class Landmarks {
         ONE,
         TWO,
         THREE,
-        FOUR
+        FOUR,
+        ALGAE_COLLECT,
+        ALGAE_SCORING
+
     }
 
     public enum CoralStation {
