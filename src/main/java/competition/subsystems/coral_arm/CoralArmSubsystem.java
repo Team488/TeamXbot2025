@@ -186,6 +186,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
                 break;
             case ALGAE_SCORING:
                 setTargetValue(Degrees.of(algaeScoringAngle.get()));
+                break;
             case COLLECTING:
             default:
                 setTargetValue(Degrees.of(humanLoadAngleDegrees.get()));
