@@ -135,6 +135,7 @@ public class OperatorCommandMap {
                                       Provider<SetAlgaeArmSetpointToTargetPosition> setAlgaeArmProvider,
                                       AlgaeCollectionIntakeCommand intakeAlgae,
                                       AlgaeCollectionOutputCommand ejectAlgae,
+                                      Provider<SetElevatorTargetHeightCommand> setElevatorTargetHeightCommandProvider,
                                       CoralArmSubsystem coralArmSubsystem,
                                       IntakeCoralCommand intakeCoralCommand,
                                       PrepAlgaeSystemCommandGroupFactory prepAlgaeSystemCommandGroupFactory) {
@@ -153,6 +154,12 @@ public class OperatorCommandMap {
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeCoralCommand);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreCoralCommand);
 
+        var removeHighAlgaeHeight = setElevatorTargetHeightCommandProvider.get();
+        removeHighAlgaeHeight.setHeight(Landmarks.CoralLevel.HIGH_ALGAE);
+
+        var removeLowAlgaeHeight = setElevatorTargetHeightCommandProvider.get();
+        removeLowAlgaeHeight.setHeight(Landmarks.CoralLevel.LOW_ALGAE);
+
         // combine all three claibration commands into one parallal command group
         var calibrateAll = Commands.parallel(
                 forceElevatorCalibratedCommand,
@@ -163,10 +170,10 @@ public class OperatorCommandMap {
 
         // Algae system buttons
         var removeLowAlgae = prepAlgaeSystemCommandGroupFactory.create(AlgaeArmSubsystem.AlgaeArmPositions.ReefAlgaeLow);
-        oi.operatorGamepad.getPovIfAvailable(180).onTrue(removeLowAlgae);
+        oi.operatorGamepad.getPovIfAvailable(180).onTrue(removeLowAlgaeHeight);
 
         var removeHighAlgae = prepAlgaeSystemCommandGroupFactory.create(AlgaeArmSubsystem.AlgaeArmPositions.ReefAlgaeHigh);
-        oi.operatorGamepad.getPovIfAvailable(0).onTrue(removeHighAlgae);
+        oi.operatorGamepad.getPovIfAvailable(0).onTrue(removeHighAlgaeHeight);
 
         var collectGroundAlgae = prepAlgaeSystemCommandGroupFactory.create(AlgaeArmSubsystem.AlgaeArmPositions.GroundCollection);
         oi.operatorGamepad.getPovIfAvailable(90).onTrue(collectGroundAlgae);
