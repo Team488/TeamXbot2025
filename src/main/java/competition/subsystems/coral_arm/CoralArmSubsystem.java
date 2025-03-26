@@ -176,7 +176,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
             case FOUR:
                 setTargetValue(Degrees.of(level4ScoringAngle.get()));
                 break;
-            case COLLECTING:
+            case CORAL_COLLECTING:
             default:
                 setTargetValue(Degrees.of(humanLoadAngleDegrees.get()));
                 break;
