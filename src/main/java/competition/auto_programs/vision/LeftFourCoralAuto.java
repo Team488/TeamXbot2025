@@ -22,6 +22,8 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import xbot.common.subsystems.autonomous.AutonomousCommandSelector;
 
 public class LeftFourCoralAuto extends BaseAutonomousSequentialCommandGroup {
@@ -41,6 +43,9 @@ public class LeftFourCoralAuto extends BaseAutonomousSequentialCommandGroup {
                              PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFact,
                              BaseSimulator simulator) {
         super(autoSelector);
+
+        this.addCommands(new WaitCommand(2.0));
+
         var initializeStateCommand =
                 pose.createSetPositionCommand(
                                 ()
