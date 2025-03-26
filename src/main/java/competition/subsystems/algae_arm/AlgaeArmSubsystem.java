@@ -18,8 +18,6 @@ import xbot.common.properties.Property.PropertyLevel;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import java.awt.geom.Arc2D;
-
 import static edu.wpi.first.units.Units.Degree;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
@@ -55,7 +53,7 @@ public class AlgaeArmSubsystem extends BaseSetpointSubsystem<Angle> {
         GroundCollection,
         ReefAlgaeLow,
         ReefAlgaeHigh,
-        ALGAE_ARM_POSITIONS
+
     }
 
     @Inject
