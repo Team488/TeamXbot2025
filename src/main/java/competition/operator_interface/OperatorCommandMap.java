@@ -10,11 +10,6 @@ import competition.commandgroups.PrepAlgaeSystemCommandGroupFactory;
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
 import competition.commandgroups.vision_path.PathDriveToLocationForCoralStationFactory;
 import competition.simulation.commands.ResetSimulatedPose;
-import competition.subsystems.algae_arm.AlgaeArmSubsystem;
-import competition.subsystems.algae_arm.commands.ForceAlgaeArmCalibrated;
-import competition.subsystems.algae_arm.commands.RepositionAlgaeArmDown;
-import competition.subsystems.algae_arm.commands.RepositionAlgaeArmUp;
-import competition.subsystems.algae_arm.commands.SetAlgaeArmSetpointToTargetPosition;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionIntakeCommand;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionOutputCommand;
 import competition.subsystems.coral_arm.CoralArmSubsystem;
@@ -136,8 +131,6 @@ public class OperatorCommandMap {
                                       ScoreWhenReadyCommand scoreWhenReadyCommand,
                                       ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
                                       ForceCoralArmCalibratedCommand forceCoralPivotCalibratedCommand,
-                                      ForceAlgaeArmCalibrated forceAlgaeArmCalibrated,
-                                      Provider<SetAlgaeArmSetpointToTargetPosition> setAlgaeArmProvider,
                                       AlgaeCollectionIntakeCommand intakeAlgae,
                                       AlgaeCollectionOutputCommand ejectAlgae,
                                       Provider<SetElevatorTargetHeightCommand> setElevatorTargetHeightCommandProvider,
@@ -168,27 +161,15 @@ public class OperatorCommandMap {
         var scoreAlgaeInNetHeight = setElevatorTargetHeightCommandProvider.get();
         scoreAlgaeInNetHeight.setHeight(Landmarks.CoralLevel.SCORE_ALGAE_NET);
 
-        var calibrateAlgae = Commands.parallel(
-                forceAlgaeArmCalibrated).ignoringDisable(true);
+
         var calibrateSuperstructure = Commands.parallel(
                 forceElevatorCalibratedCommand,
                 forceCoralPivotCalibratedCommand
         ).ignoringDisable(true);
 
-        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightStick).onTrue(calibrateAlgae);
+
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(calibrateSuperstructure);
         // Algae system buttons
-        var removeLowAlgae = prepAlgaeSystemCommandGroupFactory.create(AlgaeArmSubsystem.AlgaeArmPositions.ReefAlgaeLow);
-        oi.operatorGamepad.getPovIfAvailable(180).onTrue(removeLowAlgaeHeight);
-
-        var removeHighAlgae = prepAlgaeSystemCommandGroupFactory.create(AlgaeArmSubsystem.AlgaeArmPositions.ReefAlgaeHigh);
-        oi.operatorGamepad.getPovIfAvailable(0).onTrue(removeHighAlgaeHeight);
-
-        var collectGroundAlgae = prepAlgaeSystemCommandGroupFactory.create(AlgaeArmSubsystem.AlgaeArmPositions.GroundCollection);
-        oi.operatorGamepad.getPovIfAvailable(90).onTrue(scoreAlgaeInNetHeight);
-
-        var homeAlgaeArm = prepAlgaeSystemCommandGroupFactory.create(AlgaeArmSubsystem.AlgaeArmPositions.FullyRetracted);
-        oi.operatorGamepad.getPovIfAvailable(270).onTrue(homeAlgaeArm);
 
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(intakeAlgae);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(ejectAlgae);
@@ -211,8 +192,7 @@ public class OperatorCommandMap {
             Provider<SetElevatorTargetHeightCommand> setElevatorTargetHeightCommandProvider,
             ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
             ForceCoralArmCalibratedCommand forceCoralArmCalibratedCommand,
-            RepositionAlgaeArmDown repositionAlgaeArmDown,
-            RepositionAlgaeArmUp repositionAlgaeArmUp,
+
             ToggleElevatorMotionMagicCommand toggleElevatorMotionMagicCommand) {
 
         var returnToBase = setElevatorTargetHeightCommandProvider.get();

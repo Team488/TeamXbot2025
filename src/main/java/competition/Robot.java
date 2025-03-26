@@ -11,7 +11,6 @@ import competition.injection.components.DaggerRoboxComponent;
 import competition.injection.components.DaggerSimulationComponent;
 import competition.operator_interface.OperatorInterface;
 import competition.simulation.BaseSimulator;
-import competition.subsystems.algae_arm.AlgaeArmSubsystem;
 import competition.subsystems.coral_arm.CoralArmSubsystem;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
@@ -39,7 +38,6 @@ public class Robot extends BaseRobot {
     Optional<BaseSimulator> simulator = Optional.empty();
     ElectricalContract simulatorContract = new UnitTestContract2025();
     OperatorInterface oi;
-    AlgaeArmSubsystem algaeArmSubsystem;
     CoralArmSubsystem coralArmSubsystem;
 
     Robot() {
@@ -61,7 +59,6 @@ public class Robot extends BaseRobot {
         getInjectorComponent().oracleSubsystem();
         getInjectorComponent().lightSubsystem();
         oi = getInjectorComponent().operatorInterface();
-        algaeArmSubsystem = getInjectorComponent().algaeArmSubsystem();
         coralArmSubsystem = getInjectorComponent().coralArmSubsystem();
 
         if (BaseRobot.isSimulation()) {
@@ -79,7 +76,6 @@ public class Robot extends BaseRobot {
         dataFrameRefreshables.add(getInjectorComponent().elevatorSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().coralScorerSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().algaeCollectionSubsystem());
-        dataFrameRefreshables.add(getInjectorComponent().algaeArmSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().deadWheelSubsystem());
 
         // Not needed unless we are actively configuring the LaserCAN.
@@ -189,9 +185,7 @@ public class Robot extends BaseRobot {
         }
 
         super.autonomousInit();
-        if (!algaeArmSubsystem.isCalibrated()) {
-            algaeArmSubsystem.forceCalibratedHere();
-        }
+
 
         if (!coralArmSubsystem.isCalibrated()) {
             coralArmSubsystem.forceCalibrationAtAutonomous();

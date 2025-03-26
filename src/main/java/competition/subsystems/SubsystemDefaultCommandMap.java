@@ -1,7 +1,6 @@
 package competition.subsystems;
 
-import competition.subsystems.algae_arm.AlgaeArmSubsystem;
-import competition.subsystems.algae_arm.commands.AlgaeArmMaintainerCommand;
+
 import competition.subsystems.algae_collection.AlgaeCollectionSubsystem;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionStopCommand;
 import competition.subsystems.climber.ClimberSubsystem;
@@ -45,11 +44,6 @@ public class SubsystemDefaultCommandMap {
     @Inject
     public void setupCoralArmPivotSubsystem(CoralArmSubsystem coralArmPivotSubsystem, CoralArmMaintainerCommand command){
         coralArmPivotSubsystem.setDefaultCommand(command);
-    }
-
-    @Inject
-    public void setupAlgaeArmSubsystem(AlgaeArmSubsystem algaeArmSubsystem, AlgaeArmMaintainerCommand commands){
-        algaeArmSubsystem.setDefaultCommand(commands);
     }
 
     @Inject

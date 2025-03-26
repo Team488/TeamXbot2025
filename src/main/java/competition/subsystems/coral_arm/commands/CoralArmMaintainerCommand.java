@@ -2,7 +2,6 @@ package competition.subsystems.coral_arm.commands;
 
 import competition.motion.TrapezoidProfileManager;
 import competition.operator_interface.OperatorInterface;
-import competition.subsystems.algae_arm.AlgaeArmSubsystem;
 import competition.subsystems.coral_arm.CoralArmSubsystem;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.units.measure.Angle;
@@ -26,7 +25,6 @@ import static edu.wpi.first.units.Units.Inches;
 public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
 
     final CoralArmSubsystem coralArm;
-    final AlgaeArmSubsystem algaeArm;
     final ElevatorSubsystem elevator;
 
     final OperatorInterface oi;
@@ -43,14 +41,12 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
     final Alert collisionSafetiesEngaged = new Alert("Coral Arm: collision safeties engaged", Alert.AlertType.kWarning);
 
     @Inject
-    public CoralArmMaintainerCommand(CoralArmSubsystem armPivotSubsystem, ElevatorSubsystem elevator,
-                                     AlgaeArmSubsystem algaeArm, PropertyFactory pf,
+    public CoralArmMaintainerCommand(CoralArmSubsystem armPivotSubsystem, ElevatorSubsystem elevator, PropertyFactory pf,
                                      HumanVsMachineDecider.HumanVsMachineDeciderFactory hvmFactory,
                                      TrapezoidProfileManager.Factory trapzoidProfileManagerFactory,
                                      OperatorInterface oi) {
         super(armPivotSubsystem, pf, hvmFactory, 2, 0.10);
         this.coralArm = armPivotSubsystem;
-        this.algaeArm = algaeArm;
         this.elevator = elevator;
 
         this.oi = oi;
@@ -88,17 +84,11 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
         // manages and runs pid
         // if the arm is being requested to go to a position that would cause a
         // collision, move to a safe position instead until that changes
-        var imminentAlgaeArmCollision = wouldCollideWithAlgaeArm(coralArm.getTargetValue());
         var imminentReefCollision = wouldCollideWithReef(coralArm.getTargetValue());
-        collisionSafetiesEngaged.set(imminentAlgaeArmCollision || imminentReefCollision);
         
         var currentTarget = coralArm.getTargetValue();
         if(imminentReefCollision) {
             currentTarget = Degrees.of(this.level4SafeArmAngleDegrees.get());
-        }
-        // this angle is even more conservative
-        if(imminentAlgaeArmCollision) {
-            currentTarget = Degrees.of(this.level123SafeArmAngleDegrees.get());
         }
 
         profileManager.setTargetPosition(
@@ -110,14 +100,6 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
         aKitLog.record("ProfileTarget", setpoint);
 
         coralArm.setPositionalGoalIncludingOffset(Degrees.of(setpoint));
-    }
-
-    private boolean wouldCollideWithAlgaeArm(Angle targetGoal) {
-        var coralArmGoalAboveSafeLevel = targetGoal.gt(Degrees.of(this.level123SafeArmAngleDegrees.get()));
-        var algaeArmRaised = algaeArm.getCurrentValue().in(Degrees) >= algaeArmCollisionAngleDegrees.get();
-        var elevatorBelowLevel2Height = elevator.getCurrentValue().lt(elevator.l2Height.get().minus(Inches.of(0.25)));
-
-        return coralArmGoalAboveSafeLevel && (algaeArmRaised || elevatorBelowLevel2Height);
     }
 
     private boolean wouldCollideWithReef(Angle targetGoal) {
