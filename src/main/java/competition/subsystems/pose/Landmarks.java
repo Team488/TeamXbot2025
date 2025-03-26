@@ -193,7 +193,11 @@ public class Landmarks {
         THREE,
         FOUR,
         ALGAE_COLLECT,
-        ALGAE_SCORING
+        ALGAE_SCORING,
+        HIGH_ALGAE,
+        LOW_ALGAE,
+        SCORE_ALGAE_NET,
+        SCORE_ALGAE_PROCESSOR
 
     }
 
