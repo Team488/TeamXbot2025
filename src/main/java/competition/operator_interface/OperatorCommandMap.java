@@ -165,12 +165,7 @@ public class OperatorCommandMap {
 
         var removeLowAlgaeHeight = setElevatorTargetHeightCommandProvider.get();
         removeLowAlgaeHeight.setHeight(Landmarks.CoralLevel.LOW_ALGAE);
-
-        // combine all three claibration commands into one parallal command group
-        var calibrateAll = Commands.parallel(
-                forceElevatorCalibratedCommand,
-                forceCoralPivotCalibratedCommand,
-                forceAlgaeArmCalibrated).ignoringDisable(true);
+        
         var calibrateAlgae = Commands.parallel(
                 forceAlgaeArmCalibrated).ignoringDisable(true);
         var calibrateSuperstructure = Commands.parallel(
