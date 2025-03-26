@@ -115,19 +115,19 @@ public class AlignWithCreeperCalculator {
         }
 
         if(this.leftOffsetPixelsSubscriber == null){
-            this.leftOffsetPixelsSubscriber = new CachedSubscriber(hostname + "." + tableLeftDistance, client,5);
+            this.leftOffsetPixelsSubscriber = new CachedSubscriber(hostname + "." + tableLeftDistance, client, 5);
         }
 
         if(this.rightOffsetPixelsSubscriber == null){
-            this.rightOffsetPixelsSubscriber = new CachedSubscriber(hostname + "." + tableRightDistance, client,5);
+            this.rightOffsetPixelsSubscriber = new CachedSubscriber(hostname + "." + tableRightDistance, client, 5);
         }
 
         if(this.hresSubscriber == null){
-            this.hresSubscriber = new CachedSubscriber(hostname + "." + tableHres, client,2);
+            this.hresSubscriber = new CachedSubscriber(hostname + "." + tableHres, client, 2);
         }
 
         if(this.vresSubscriber == null){
-            this.vresSubscriber = new CachedSubscriber(hostname + "." + tableVres, client,2);
+            this.vresSubscriber = new CachedSubscriber(hostname + "." + tableVres, client, 2);
         }
         initalized = true;
         return true;
@@ -145,7 +145,6 @@ public class AlignWithCreeperCalculator {
         }
 
         if(forceStop){
-//            log.info("FORCE STOP");
             drive.stop();
             return false;
         }
@@ -173,11 +172,17 @@ public class AlignWithCreeperCalculator {
             return false;
         }
 
+        // If right is not detected assume it's 1 pixel outside of the camera when determining where to move.
+        // This can have an error margin and think it's centered in some scenarios. We may want to change this to 2x currentCamHres.
+        var rightAdustedDistance = rightDistance == -1 ? this.currentCamHres + 1 : rightDistance;
+        var targetOffset = this.calculateOffset(leftDistance, rightAdustedDistance);
+        aKitLog.record("Target offset pixels from center", targetOffset);
+
         if(leftDistance == -1 || rightDistance == -1){
             this.isCenteredConfidently = false;
         }
         else{
-            double resAdjustedDiff = normalizeWidth(Math.abs(leftDistance - rightDistance));
+            double resAdjustedDiff = Math.abs(targetOffset);
             this.isCenteredConfidently = resAdjustedDiff < this.errorThresholdPixels.get();
         }
 
@@ -197,16 +202,9 @@ public class AlignWithCreeperCalculator {
             // Determine which side the misalignment error should be taken from.
             boolean offToTheLeft;
 
-            if (leftDistance == -1) {
-                offToTheLeft = false; // we dont see left edge, means right side is "too" visible eg off to the right
-            } else if (rightDistance == -1) {
-                offToTheLeft = true; // we dont see right  edge, means left side is "too" visible eg off to the left
-            } else {
-                // Choose the pixel error value from the side indicating misalignment.
-                offToTheLeft = leftDistance < rightDistance; // we see both edges, so the one that is "closer to the center" is the one we are off by
-            }
+            offToTheLeft = targetOffset > 0;
 
-            aKitLog.record("Off to the left?: ",offToTheLeft);
+            aKitLog.record("Off to the left?: ", offToTheLeft);
 
             // Calculate the error as a function of the left and right distance from the center.
             error = costFunc(leftDistance, rightDistance);
@@ -221,7 +219,7 @@ public class AlignWithCreeperCalculator {
 
         }
 
-        aKitLog.record("creeper error from cost function: ",error);
+        aKitLog.record("creeper error from cost function: ", error);
 
         // power.
         double drivePower = driveGain.get() * pidManager.calculate(0, error);
@@ -246,12 +244,10 @@ public class AlignWithCreeperCalculator {
             return maxError.get();
         }
         // abs error
-        double err = normalizeWidth(Math.abs(leftErrPX-rightErrPX));
+        double err = this.calculateOffset(leftErrPX, rightErrPX);
 
-//       /**Linear Error**/
-        double errFunc = err*errorSlope.get();
-
-
+        // Linear Error
+        double errFunc = err * errorSlope.get();
         return Math.max(-maxError.get(), Math.min(errFunc, maxError.get())); // clip
     }
 
@@ -276,11 +272,9 @@ public class AlignWithCreeperCalculator {
         this.camera = camera;
     }
 
-    private double normalizeWidth(double width){
-        return width * this.currentCamHres / this.tunedWidth;
-    }
-
-    private double normalizeHeight(double height){
-        return height * this.currentCamVres / this.tunedHeight;
+    private double calculateOffset(int leftDistance, int rightDistance) {
+        var cameraCenterPixels = (this.currentCamHres / 2.0);
+        var targetCenterPixels = (leftDistance + rightDistance) / 2.0;
+        return targetCenterPixels - cameraCenterPixels;
     }
 }
