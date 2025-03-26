@@ -26,8 +26,8 @@ public class EmergencyAutonomousCommand extends BaseCommand {
         pf.setPrefix(this);
         this.drive = drive;
         this.addRequirements(drive);
-        this.moveRobotX = pf.createPersistentProperty("Move robot X", 1);
-        this.timeAmountToMove= pf.createPersistentProperty("Seconds it moves",1);
+        this.moveRobotX = pf.createPersistentProperty("Move robot X", 0.2);
+        this.timeAmountToMove= pf.createPersistentProperty("Seconds it moves", 1);
 
     }
 
