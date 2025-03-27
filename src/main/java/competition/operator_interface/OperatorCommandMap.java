@@ -180,6 +180,9 @@ public class OperatorCommandMap {
         var removeHighAlgae = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.HIGH_ALGAE);
         oi.operatorGamepad.getPovIfAvailable(0).onTrue(removeHighAlgae);
 
+        var scoreAlgaeInNetHeight = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.SCORE_ALGAE_NET);
+        oi.operatorGamepad.getPovIfAvailable(90).onTrue(scoreAlgaeInNetHeight);
+
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(intakeAlgae);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(ejectAlgae);
     }
