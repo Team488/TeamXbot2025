@@ -48,6 +48,8 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     public final DoubleProperty rangeOfMotionDegrees;
     public final DoubleProperty powerWhenNotCalibrated;
     public final DoubleProperty autoCalibrationDegrees;
+    public final DoubleProperty algaeCollectAngleInDegrees;
+    public final DoubleProperty algaeScoreNetAngleInDegrees;
 
     public Landmarks.CoralLevel targetCoralLevel;
 
@@ -97,6 +99,8 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
         // NOTE: For now, the human loading angle is "vertical" with respect to the ground, which should also match
         // the "AutoCalibrationDegrees" value.
         this.humanLoadAngleDegrees = propertyFactory.createPersistentProperty("Human Loading Angle in Degrees", 13.8);
+        this.algaeCollectAngleInDegrees = propertyFactory.createPersistentProperty("Algae Collect Angle in Degrees", 45);
+        this.algaeScoreNetAngleInDegrees = propertyFactory.createPersistentProperty("Algae Score Net Angle in Degrees", 136);
         propertyFactory.setDefaultLevel(PropertyLevel.Debug);
         this.degreesPerRotations = propertyFactory.createPersistentProperty("Degrees Per Rotations", 5.790);
         this.rangeOfMotionDegrees = propertyFactory.createPersistentProperty("Range of Motion in Degrees", 170);
@@ -176,7 +180,14 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
             case FOUR:
                 setTargetValue(Degrees.of(level4ScoringAngle.get()));
                 break;
-            case COLLECTING:
+            case LOW_ALGAE:
+            case HIGH_ALGAE:
+                setTargetValue(Degrees.of(algaeCollectAngleInDegrees.get()));
+                break;
+            case SCORE_ALGAE_NET:
+                setTargetValue(Degrees.of(algaeScoreNetAngleInDegrees.get()));
+                break;
+                case COLLECTING:
             default:
                 setTargetValue(Degrees.of(humanLoadAngleDegrees.get()));
                 break;
