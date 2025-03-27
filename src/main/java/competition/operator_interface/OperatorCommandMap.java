@@ -41,8 +41,6 @@ import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import xbot.common.controls.sensors.XXboxController;
 import xbot.common.subsystems.autonomous.SetAutonomousCommand;
@@ -113,17 +111,22 @@ public class OperatorCommandMap {
         );
         SequentialCommandGroup driveToClosestCoralStation =
                 driveToClosestStationCommandGroupFactory.createDriveOnly(true);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(new ConditionalCommand(
-                pathDriveToClosestCoralStation,
-                driveToClosestCoralStation,
-                () -> coprocessorCommunicationSubsystem.isCoralStationPathConfident(pose)
-        ));
+//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(new ConditionalCommand(
+//                pathDriveToClosestCoralStation,
+//                driveToClosestCoralStation,
+//                () -> coprocessorCommunicationSubsystem.isCoralStationPathConfident(pose)
+//        ));
 
 //        operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
 //        operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(changeActiveModule);
 //        operatorInterface.driverGamepad.getPovIfAvailable(180).onTrue(typicalSwerveDrive);
 
         var aprilTagCalculator = aprilTagCalculatorFactory.create();
+
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A)
+                .onTrue(aprilTagCalculator.createSetHorizontalBranchOffsetMeters(1));
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B)
+                .onTrue(aprilTagCalculator.createSetHorizontalBranchOffsetMeters(0));
 
         operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(aprilTagCalculator.createDecreaseOffsetByOneInchCommand());
         operatorInterface.driverGamepad.getPovIfAvailable(270).onTrue(aprilTagCalculator.createIncreaseOffsetByOneInchCommand());
