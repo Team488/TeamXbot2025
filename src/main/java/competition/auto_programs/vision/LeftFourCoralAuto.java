@@ -11,14 +11,9 @@ import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
 import competition.commandgroups.vision_path.PathDriveToCoralStationAndIntakeUntilCollected;
 import competition.commandgroups.vision_path.PathDriveToLocationForCoralStationFactory;
 import competition.commandgroups.vision_path.PathToFaceAndScoreCommandGroupFactory;
-import competition.electrical_contract.ElectricalContract;
 import competition.simulation.BaseSimulator;
 import competition.subsystems.pose.Landmarks;
-import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.pose.vision.Paths;
-import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -28,11 +23,8 @@ import xbot.common.subsystems.autonomous.AutonomousCommandSelector;
 
 public class LeftFourCoralAuto extends BaseAutonomousSequentialCommandGroup {
     @Inject
-    public LeftFourCoralAuto(AprilTagFieldLayout aprilTagFieldLayout,
-                             ElectricalContract electricalContract,
+    public LeftFourCoralAuto(
                              AutonomousCommandSelector autoSelector,
-                             CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem,
-                             PoseSubsystem pose,
                              Provider<PathDriveToCoralStationAndIntakeUntilCollected>
                                      driveToStationAndIntakeFactProv,
                              DriveToFaceAndScoreCommandGroupFactory driveToFaceAndScoreFact,
@@ -45,18 +37,6 @@ public class LeftFourCoralAuto extends BaseAutonomousSequentialCommandGroup {
         super(autoSelector);
 
         this.addCommands(new WaitCommand(2.0));
-
-        var initializeStateCommand =
-                pose.createSetPositionCommand(
-                                ()
-                                        -> PoseSubsystem.convertBlueToRedIfNeeded(
-                                        Landmarks.BlueCageOneStartingLine))
-                        .alongWith(new InstantCommand(
-                                ()
-                                        -> simulator.resetPosition(
-                                        PoseSubsystem.convertBlueToRedIfNeeded(
-                                                Landmarks.BlueCageOneStartingLine))));
-        this.addCommands(initializeStateCommand);
         // Score 1
         getDriveAndScoreStatusMessageCommand(Landmarks.ReefFace.FAR_LEFT,
                 Landmarks.Branch.B, Landmarks.CoralLevel.FOUR);

@@ -27,11 +27,8 @@ import xbot.common.subsystems.autonomous.AutonomousCommandSelector;
 
 public class RightFourCoralAuto extends BaseAutonomousSequentialCommandGroup {
     @Inject
-    public RightFourCoralAuto(AprilTagFieldLayout aprilTagFieldLayout,
-                              ElectricalContract electricalContract,
+    public RightFourCoralAuto(
                               AutonomousCommandSelector autoSelector,
-                              CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem,
-                              PoseSubsystem pose,
                               Provider<PathDriveToCoralStationAndIntakeUntilCollected>
                                       driveToStationAndIntakeFactProv,
                               DriveToFaceAndScoreCommandGroupFactory driveToFaceAndScoreFact,
@@ -44,18 +41,6 @@ public class RightFourCoralAuto extends BaseAutonomousSequentialCommandGroup {
         super(autoSelector);
 
         this.addCommands(new WaitCommand(2.0));
-
-        var initializeStateCommand =
-                pose.createSetPositionCommand(
-                                ()
-                                        -> PoseSubsystem.convertBlueToRedIfNeeded(
-                                        Landmarks.BlueCageSixStartingLine))
-                        .alongWith(new InstantCommand(
-                                ()
-                                        -> simulator.resetPosition(
-                                        PoseSubsystem.convertBlueToRedIfNeeded(
-                                                Landmarks.BlueCageSixStartingLine))));
-        this.addCommands(initializeStateCommand);
         // Score 1
         getDriveAndScoreStatusMessageCommand(Landmarks.ReefFace.FAR_RIGHT,
                 Landmarks.Branch.A, Landmarks.CoralLevel.FOUR);
