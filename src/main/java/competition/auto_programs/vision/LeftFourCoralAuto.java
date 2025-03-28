@@ -7,11 +7,7 @@ import static competition.subsystems.pose.vision.Paths.farLeftBToCoralStationBlu
 
 import competition.auto_programs.BaseAutonomousSequentialCommandGroup;
 import competition.commandgroups.DriveToFaceAndScoreCommandGroupFactory;
-import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
-import competition.commandgroups.vision_path.PathDriveToCoralStationAndIntakeUntilCollected;
 import competition.commandgroups.vision_path.PathDriveToLocationForCoralStationFactory;
-import competition.commandgroups.vision_path.PathToFaceAndScoreCommandGroupFactory;
-import competition.simulation.BaseSimulator;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.vision.Paths;
 
@@ -22,21 +18,16 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import xbot.common.subsystems.autonomous.AutonomousCommandSelector;
 
 public class LeftFourCoralAuto extends BaseAutonomousSequentialCommandGroup {
+
     @Inject
     public LeftFourCoralAuto(
-                             AutonomousCommandSelector autoSelector,
-                             Provider<PathDriveToCoralStationAndIntakeUntilCollected>
-                                     driveToStationAndIntakeFactProv,
-                             DriveToFaceAndScoreCommandGroupFactory driveToFaceAndScoreFact,
-                             Provider<PathToFaceAndScoreCommandGroupFactory>
-                                     driveToFaceAndScoreFactProv,
-                             Provider<PathDriveToLocationForCoralStationFactory>
-                                     pathDriveToLocationAndIntakeUntilCollectedProvider,
-                             PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFact,
-                             BaseSimulator simulator) {
+            AutonomousCommandSelector autoSelector,
+            DriveToFaceAndScoreCommandGroupFactory driveToFaceAndScoreFact,
+            Provider<PathDriveToLocationForCoralStationFactory> pathDriveToLocationAndIntakeUntilCollectedProvider) {
         super(autoSelector);
 
         this.addCommands(new WaitCommand(2.0));
+
         // Score 1
         getDriveAndScoreStatusMessageCommand(Landmarks.ReefFace.FAR_LEFT,
                 Landmarks.Branch.B, Landmarks.CoralLevel.FOUR);
