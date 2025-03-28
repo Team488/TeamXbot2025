@@ -34,6 +34,8 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     final DoubleProperty gravityPIDConstantPower;
 
+    final DoubleProperty manualGravityPower;
+
     final TrapezoidProfileManager.Factory trapezoidProfileManagerFactory;
     TrapezoidProfileManager profileManager;
 
@@ -63,6 +65,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         this.humanMaxPowerGoingDown = pf.createPersistentProperty("humanMaxPowerGoingDown", -0.2);
 
         this.gravityPIDConstantPower = pf.createPersistentProperty("gravityPIDConstant", 0.07416666);
+        this.manualGravityPower = pf.createPersistentProperty("manualGravityPower", .0625);
 
         decider.setDeadband(0.02);
     }
@@ -97,7 +100,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     @Override
     protected void coastAction() {
-        elevator.setPower(0);
+        elevator.setPower(manualGravityPower.get());
     }
 
     @Override
@@ -150,7 +153,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     @Override
     protected void humanControlAction() {
-        super.humanControlAction();
+        super.humanControlAction() + manualGravityPower.get();
     }
 
     //returns error magnitude of elevator in inches
