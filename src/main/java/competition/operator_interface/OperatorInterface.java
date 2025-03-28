@@ -20,7 +20,8 @@ public class OperatorInterface {
     public final XXboxController driverGamepad;
     public final XXboxController operatorGamepad;
     public final XJoystick neoTrellis;
-    public final XXboxController oiPanel;
+    public final XJoystick oiReef;
+    public final XJoystick oiGrid;
     public final XXboxController superstructureGamepad;
     public final XXboxController algaeAndSysIdGamepad;
 
@@ -49,7 +50,8 @@ public class OperatorInterface {
         neoTrellis = joystickFactory.create(2, 32);
         // No axes to invert on the NeoTrellis
 
-        oiPanel = controllerFactory.create(3);
+        oiReef = joystickFactory.create(3, 12);
+        oiGrid = joystickFactory.create(6, 12);
         // No axes to invert on the OI Panel
 
         superstructureGamepad = controllerFactory.create(4);
