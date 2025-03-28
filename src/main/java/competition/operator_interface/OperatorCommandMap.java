@@ -154,7 +154,7 @@ public class OperatorCommandMap {
         var prepL2 = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.TWO);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(prepL2);
 
-        var homed = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
+        var homed = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.CORAL_COLLECTING);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeCoralCommand);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreCoralCommand);
@@ -209,7 +209,7 @@ public class OperatorCommandMap {
             ToggleElevatorMotionMagicCommand toggleElevatorMotionMagicCommand) {
 
         var returnToBase = setElevatorTargetHeightCommandProvider.get();
-        returnToBase.setHeight(Landmarks.CoralLevel.COLLECTING);
+        returnToBase.setHeight(Landmarks.CoralLevel.CORAL_COLLECTING);
         var riseToL2 = setElevatorTargetHeightCommandProvider.get();
         riseToL2.setHeight(Landmarks.CoralLevel.TWO);
         var riseToL3 = setElevatorTargetHeightCommandProvider.get();
@@ -220,7 +220,7 @@ public class OperatorCommandMap {
         var riseToScore = setArmTargetAngleCommandProvider.get();
         riseToScore.setAngle(Landmarks.CoralLevel.FOUR);
         var lowerToHumanLoad = setArmTargetAngleCommandProvider.get();
-        lowerToHumanLoad.setAngle(Landmarks.CoralLevel.COLLECTING);
+        lowerToHumanLoad.setAngle(Landmarks.CoralLevel.CORAL_COLLECTING);
 
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeCoralCommand);
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreCoralCommand);

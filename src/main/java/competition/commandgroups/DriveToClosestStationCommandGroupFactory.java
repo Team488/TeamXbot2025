@@ -88,7 +88,7 @@ public class DriveToClosestStationCommandGroupFactory {
 
         // Prep coral system to coral collection
         var prepCoralSystem = prepCoralSystemCommandGroupFactory.create(
-                () -> Landmarks.CoralLevel.COLLECTING);
+                () -> Landmarks.CoralLevel.CORAL_COLLECTING);
         driveUntilIntake.addCommands(prepCoralSystem);
 
         // Drive to coral station using terminal approach, have an interstitial

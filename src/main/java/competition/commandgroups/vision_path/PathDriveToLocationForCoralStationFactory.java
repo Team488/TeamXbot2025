@@ -135,7 +135,7 @@ public class PathDriveToLocationForCoralStationFactory {
         driveToCoralStationThenDriveForward.addCommands(
                 pathDriveToLocationCommand, driveVectorSmallCommand);
         var prepCoralSystem = prepCoralSystemCommandGroupFactory.create(
-                () -> Landmarks.CoralLevel.COLLECTING);
+                () -> Landmarks.CoralLevel.CORAL_COLLECTING);
         driveToCoralStationSectionWhilePrepping.addCommands(
                 driveToCoralStationThenDriveForward, prepCoralSystem);
         IntakeUntilCoralCollectedCommand intakeUntilCoralCollectedCommand =
