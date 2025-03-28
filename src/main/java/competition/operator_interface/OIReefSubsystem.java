@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import competition.commandgroups.DriveToReefFaceThenAlignCommandGroupFactory;
 import competition.subsystems.oracle.FaceBranch;
@@ -14,6 +15,7 @@ import xbot.common.command.BaseSubsystem;
 import xbot.common.controls.sensors.XJoystick;
 import xbot.common.logic.Latch;
 
+@Singleton
 public class OIReefSubsystem extends BaseSubsystem {
     final OperatorInterface oi;
     final XJoystick oiReef;
@@ -63,8 +65,6 @@ public class OIReefSubsystem extends BaseSubsystem {
             oiReef.getifAvailable(channel).onTrue(driveToReefCommand);
         }
     }
-
-
 
     @Override
     public void periodic() {

@@ -3,6 +3,7 @@ package competition.injection.components;
 import competition.electrical_contract.ElectricalContract;
 import competition.motion.TrapezoidProfileManager;
 import competition.operator_interface.NeoTrellisSubsystem;
+import competition.operator_interface.OIReefSubsystem;
 import competition.operator_interface.OperatorCommandMap;
 import competition.operator_interface.OperatorInterface;
 import competition.simulation.BaseSimulator;
@@ -67,6 +68,8 @@ public abstract class BaseRobotComponent extends BaseComponent {
     public abstract NeoTrellisSubsystem neoTrellisSubsystem();
 
     public abstract OperatorInterface operatorInterface();
+
+    public abstract OIReefSubsystem oiReefSubsystem();
 
     public abstract ScoringQueue scoringQueue();
 
