@@ -195,7 +195,7 @@ public class OracleSubsystem extends BaseSubsystem {
         switch (currentScoringSubstage) {
             case Travel:
                 if (isScoringSubstageInitilizationRequired()) {
-                    setSuperstructureAdvice(Landmarks.CoralLevel.COLLECTING, CoralScorerSubsystem.CoralScorerState.INTAKING);
+                    setSuperstructureAdvice(Landmarks.CoralLevel.CORAL_COLLECTING, CoralScorerSubsystem.CoralScorerState.INTAKING);
                     setScoringSubstageInitilizationFinished();
                 }
 
@@ -230,7 +230,7 @@ public class OracleSubsystem extends BaseSubsystem {
             default:
                 // How did you get here?
                 // When in doubt, make the mechanism safe.
-                setSuperstructureAdvice(Landmarks.CoralLevel.COLLECTING, CoralScorerSubsystem.CoralScorerState.STOPPED);
+                setSuperstructureAdvice(Landmarks.CoralLevel.CORAL_COLLECTING, CoralScorerSubsystem.CoralScorerState.STOPPED);
                 currentScoringSubstage = ScoringSubstage.Travel;
                 firstRunInScoringSubstage = true;
                 break;
@@ -291,7 +291,7 @@ public class OracleSubsystem extends BaseSubsystem {
                     setCurrentDriveAdvice(newDriveAdvice);
                     // Command the superstructure
                     var newSuperstructureAdvice = new OracleSuperstructureAdvice(
-                            getNextInstructionNumber(), Landmarks.CoralLevel.COLLECTING, CoralScorerSubsystem.CoralScorerState.INTAKING);
+                            getNextInstructionNumber(), Landmarks.CoralLevel.CORAL_COLLECTING, CoralScorerSubsystem.CoralScorerState.INTAKING);
                     setSuperstructureAdvice(newSuperstructureAdvice);
 
                     setPrimaryActivityInitializationFinished();
