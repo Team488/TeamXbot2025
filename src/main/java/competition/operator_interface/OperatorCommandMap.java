@@ -10,7 +10,6 @@ import competition.commandgroups.PrepAlgaeSystemCommandGroupFactory;
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
 import competition.commandgroups.vision_path.PathDriveToLocationForCoralStationFactory;
 import competition.simulation.commands.ResetSimulatedPose;
-import competition.subsystems.algae_arm.AlgaeArmSubsystem;
 import competition.subsystems.algae_arm.commands.ForceAlgaeArmCalibrated;
 import competition.subsystems.algae_arm.commands.RepositionAlgaeArmDown;
 import competition.subsystems.algae_arm.commands.RepositionAlgaeArmUp;
@@ -145,9 +144,7 @@ public class OperatorCommandMap {
                                       Provider<SetElevatorTargetHeightCommand> setElevatorTargetHeightCommandProvider,
                                       CoralArmSubsystem coralArmSubsystem,
                                       IntakeCoralCommand intakeCoralCommand,
-                                      PrepAlgaeSystemCommandGroupFactory prepAlgaeSystemCommandGroupFactory,
-                                      TrimElevatorUp trimElevatorUp,
-                                      TrimElevatorDown trimElevatorDown) {
+                                      PrepAlgaeSystemCommandGroupFactory prepAlgaeSystemCommandGroupFactory) {
         // Coral system buttons
         var prepL4 = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.FOUR);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
@@ -189,10 +186,6 @@ public class OperatorCommandMap {
 
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(intakeAlgae);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(ejectAlgae);
-
-        oi.neoTrellis.getifAvailable(8).onTrue(trimElevatorUp);
-        oi.neoTrellis.getifAvailable(16).onTrue(trimElevatorDown);
-
     }
 
     @Inject
@@ -250,13 +243,16 @@ public class OperatorCommandMap {
     }
 
     @Inject
-    public void setUpButtonCommands(OperatorInterface oi, CoralArmSubsystem coralArmSubsystem) {
+    public void setupNeoTrellis(OperatorInterface oi, CoralArmSubsystem coralArmSubsystem, TrimElevatorUp trimElevatorUp,
+                                TrimElevatorDown trimElevatorDown) {
         oi.neoTrellis.getifAvailable(9)
                 .onTrue(coralArmSubsystem.createSetTargetCoralLevelCommand(Landmarks.CoralLevel.TWO));
         oi.neoTrellis.getifAvailable(10)
                 .onTrue(coralArmSubsystem.createSetTargetCoralLevelCommand(Landmarks.CoralLevel.THREE));
         oi.neoTrellis.getifAvailable(11)
                 .onTrue(coralArmSubsystem.createSetTargetCoralLevelCommand(Landmarks.CoralLevel.FOUR));
+        oi.neoTrellis.getifAvailable(8).onTrue(trimElevatorUp);
+        oi.neoTrellis.getifAvailable(16).onTrue(trimElevatorDown);
     }
 
     @Inject
