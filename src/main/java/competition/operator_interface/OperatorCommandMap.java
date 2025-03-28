@@ -35,8 +35,6 @@ import competition.subsystems.elevator.commands.SetElevatorTargetHeightCommand;
 import competition.subsystems.elevator.commands.ToggleElevatorMotionMagicCommand;
 import competition.subsystems.elevator.commands.TrimElevatorDown;
 import competition.subsystems.elevator.commands.TrimElevatorUp;
-import competition.subsystems.oracle.commands.DriveAccordingToOracleCommand;
-import competition.subsystems.oracle.commands.SuperstructureAccordingToOracleCommand;
 import competition.subsystems.pose.Cameras;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
@@ -68,8 +66,6 @@ public class OperatorCommandMap {
             OperatorInterface operatorInterface,
             SetRobotHeadingCommand resetHeading,
             Provider<AlignToReefWithAprilTagCommand> alignToReefWithAprilTagProvider,
-            DriveAccordingToOracleCommand driveAccordingToOracle,
-            SuperstructureAccordingToOracleCommand superstructureAccordingToOracle,
             DebugSwerveModuleCommand debugModule,
             ChangeActiveSwerveModuleCommand changeActiveModule,
             SwerveDriveWithJoysticksCommand typicalSwerveDrive,
@@ -99,8 +95,6 @@ public class OperatorCommandMap {
                 Cameras.FRONT_RIGHT_CAMERA.getIndex(), false, -2, true,
                 AlignCameraToAprilTagCalculator.Activity.ApproachWhileCentering, false);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(alignToReefWithAprilTagWithRightCamera);
-
-        var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
 
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(pointAtNearestCoralStation)
                 .onFalse(clearPointAtHeading);
