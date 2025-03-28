@@ -10,7 +10,10 @@ import xbot.common.command.BaseMaintainerCommand;
 import xbot.common.controls.sensors.XTimer;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 
 // CHECKSTYLE:OFF
 @Aspect
@@ -20,6 +23,14 @@ public class CommandTracer {
 
     private final Map<Command, Double> commandStartTimes = new HashMap<>();
     private final Map<Command, Alert> runningCommandAlerts = new HashMap<>();
+    private final LinkedList<Alert> completedAlertList = new LinkedList<>();
+
+    @Before("execution(* edu.wpi.first.wpilibj.IterativeRobotBase.loopFunc(..))")
+    public void clearAlertsForFinishedCommands(JoinPoint joinPoint) {
+        while (!completedAlertList.isEmpty()) {
+            completedAlertList.poll().close();
+        }
+    }
 
     @Before("execution(* edu.wpi.first.wpilibj2.command.Command+.initialize(..))" +
             "|| execution(* edu.wpi.first.wpilibj2.command.Command+.execute(..))")
@@ -39,7 +50,7 @@ public class CommandTracer {
         if (runningCommandAlerts.containsKey((Command)joinPoint.getThis())) {
             var command = (Command)joinPoint.getThis();
             var wasInterrupted = (Boolean)joinPoint.getArgs()[0];
-            runningCommandAlerts.remove(command).close();
+            completedAlertList.add(runningCommandAlerts.remove(command));
             var startTime = commandStartTimes.remove(command);
             var endTime = XTimer.getFPGATimestamp();
             logger.info("Command {} took {} seconds (interrupted: {})",

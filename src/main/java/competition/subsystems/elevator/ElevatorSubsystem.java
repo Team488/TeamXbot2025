@@ -31,6 +31,7 @@ import java.util.Optional;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Hertz;
+import static edu.wpi.first.units.Units.Inch;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
@@ -78,6 +79,10 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     public final DistanceProperty l3Height;
     public final DistanceProperty l4Height;
     public final DistanceProperty humanLoadHeight;
+    public final DistanceProperty highAlgaeRemovalHeight;
+    public final DistanceProperty lowAlgaeRemovalHeight;
+    public final DistanceProperty scoreAlgaeNetHeight;
+    public final DistanceProperty scoreAlgaeProcessorHeight;
     public final DistanceProperty baseHeight;
     public final DistanceProperty trimValue;
     public final DistanceProperty trimChangeAmount;
@@ -102,10 +107,14 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
         pf.setPrefix(this);
 
-        l2Height = pf.createPersistentProperty("l2Height", Inches.of(1.0));
-        l3Height = pf.createPersistentProperty("l3Height", Inches.of(17.0));
-        l4Height = pf.createPersistentProperty("l4Height", Inches.of(46.0));
+        l2Height = pf.createPersistentProperty("l2Height", Inches.of(1.5));
+        l3Height = pf.createPersistentProperty("l3Height", Inches.of(16.25));
+        l4Height = pf.createPersistentProperty("l4Height", Inches.of(47.5));
         humanLoadHeight = pf.createPersistentProperty("humanLoadHeight", Inches.of(1));
+        highAlgaeRemovalHeight = pf.createPersistentProperty("highAlgaeRemovalHeight", Inches.of(20));
+        lowAlgaeRemovalHeight = pf.createPersistentProperty("lowAlgaeRemovalHeight", Inches.of(5));
+        scoreAlgaeNetHeight = pf.createPersistentProperty("scoreAlgaeNetHeight", Inches.of(47.5));
+        scoreAlgaeProcessorHeight = pf.createPersistentProperty("scoreAlgaeProcessorHeight", Inches.of(1));
         pf.setDefaultLevel(PropertyLevel.Debug);
         baseHeight = pf.createPersistentProperty("baseHeight", Inches.of(0));
         trimValue = pf.createPersistentProperty("trimValue",Inches.of(0));
@@ -286,6 +295,10 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
             case THREE -> setTargetValue(l3Height.get().plus(trimValue.get()));
             case FOUR -> setTargetValue(l4Height.get().plus(trimValue.get()));
             case COLLECTING -> setTargetValue(humanLoadHeight.get());
+            case HIGH_ALGAE -> setTargetValue(highAlgaeRemovalHeight.get());
+            case LOW_ALGAE -> setTargetValue(lowAlgaeRemovalHeight.get());
+            case SCORE_ALGAE_NET -> setTargetValue(scoreAlgaeNetHeight.get());
+            case SCORE_ALGAE_PROCESSOR -> setTargetValue(scoreAlgaeProcessorHeight.get());
             default -> setTargetValue(baseHeight.get());
         }
     }
@@ -421,9 +434,9 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
             }
         }
 
-        aKitLog.record("ElevatorTrimValue", trimValue.get().in(Inches));
-        aKitLog.record("ElevatorTargetHeight-m", elevatorTargetHeight.in(Inches));
-        aKitLog.record("ElevatorCurrentHeight-m", getCurrentValue().in(Inches));
+        aKitLog.record("ElevatorTrimValue", trimValue.get().in(Meters));
+        aKitLog.record("ElevatorTargetHeight-m", elevatorTargetHeight.in(Meters));
+        aKitLog.record("ElevatorCurrentHeight-m", getCurrentValue().in(Meters));
         aKitLog.record("ElevatorBottomSensor", this.isTouchingBottom());
         aKitLog.record("isElevatorCalibrated", isCalibrated());
         aKitLog.record("isElevatorMaintainerAtGoal", this.isMaintainerAtGoal());
@@ -432,6 +445,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         getCalibratedLaserDistance().ifPresent(d -> aKitLog.record("CalibratedElevatorDistanceSensor-m", d.in(Meters)));
         aKitLog.record("CalibratedElevatorMotorSensor-m", getCalibratedMotorDistance().in(Meters));
         aKitLog.record("MotorOffset-rotations", elevatorMotorPositionOffset.in(Rotations));
+        aKitLog.record("LaserCANOffset", laserCANPositionOffset.in(Meters));
 
         periodicTickCounter++;
     }

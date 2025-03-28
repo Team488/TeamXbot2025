@@ -5,10 +5,10 @@ import competition.auto_programs.FromLeftCageScoreLeftFacesLevelFours;
 import competition.auto_programs.FromRightCageScoreRightFacesLevelFours;
 import competition.auto_programs.vision.LeftFourCoralAuto;
 import competition.auto_programs.vision.RightFourCoralAuto;
-import competition.commandgroups.DriveToClosestStationAndIntakeUntilCollectedCommandGroupFactory;
+import competition.commandgroups.DriveToClosestStationCommandGroupFactory;
 import competition.commandgroups.PrepAlgaeSystemCommandGroupFactory;
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
-import competition.commandgroups.vision_path.PathDriveToLocationForCoralStationAndIntakeUntilCollectedFactory;
+import competition.commandgroups.vision_path.PathDriveToLocationForCoralStationFactory;
 import competition.simulation.commands.ResetSimulatedPose;
 import competition.subsystems.algae_arm.AlgaeArmSubsystem;
 import competition.subsystems.algae_arm.commands.ForceAlgaeArmCalibrated;
@@ -44,8 +44,7 @@ import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import xbot.common.controls.sensors.XXboxController;
 import xbot.common.subsystems.autonomous.SetAutonomousCommand;
 import xbot.common.subsystems.drive.swerve.commands.ChangeActiveSwerveModuleCommand;
@@ -55,8 +54,6 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
-import static edu.wpi.first.units.Units.Degree;
-
 /**
  * Maps operator interface buttons to commands
  */
@@ -64,7 +61,8 @@ import static edu.wpi.first.units.Units.Degree;
 public class OperatorCommandMap {
 
     @Inject
-    public OperatorCommandMap() {}
+    public OperatorCommandMap() {
+    }
 
     @Inject
     public void setupDriverCommands(
@@ -78,14 +76,15 @@ public class OperatorCommandMap {
             SwerveDriveWithJoysticksCommand typicalSwerveDrive,
             DriveToNearestReefFaceWithPID driveToNearestReefFaceWithPID,
             DriveSubsystem drive, PoseSubsystem pose,
-            DriveToClosestStationAndIntakeUntilCollectedCommandGroupFactory
-                    driveToClosestStationAndIntakeUntilCollectedCommandGroupFactory,
+            DriveToClosestStationCommandGroupFactory
+                    driveToClosestStationCommandGroupFactory,
             CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem,
-            PathDriveToLocationForCoralStationAndIntakeUntilCollectedFactory pathDriveToLocationForCoralStationAndIntakeUntilCollectedFactory) {
+            PathDriveToLocationForCoralStationFactory pathDriveToLocationForCoralStationFactory,
+            AlignCameraToAprilTagCalculator.AlignCameraToAprilTagCalculatorFactory aprilTagCalculatorFactory) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
 
-        var pointAtNearestCoralStation = drive.createSetStaticHeadingTargetCommand(() ->
+        var pointAtNearestCoralStation = drive.createSetDynamicHeadingTargetCommand(() ->
                 PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.getCoralStationSectionPose(pose.getClosestCoralStation(), Landmarks.CoralStationSection.MID)
                         .getRotation()));
         var clearPointAtHeading = drive.createClearAllHeadingTargetsCommand();
@@ -107,22 +106,29 @@ public class OperatorCommandMap {
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(pointAtNearestCoralStation)
                 .onFalse(clearPointAtHeading);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(driveToNearestReefFaceWithPID);
-//        ParallelDeadlineGroup pathDriveToLocationAndIntakeUntilCollected = pathDriveToLocationForCoralStationAndIntakeUntilCollectedFactory.create(
-//                null
-//        );
-//        ParallelDeadlineGroup driveToClosestStationAndIntakeUntilCollectedCommandGroup =
-//                driveToClosestStationAndIntakeUntilCollectedCommandGroupFactory.create(false);
-//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(new ConditionalCommand(
-//                pathDriveToLocationAndIntakeUntilCollected,
-//                driveToClosestStationAndIntakeUntilCollectedCommandGroup,
-//                () -> coprocessorCommunicationSubsystem.isCoralStationPathConfident(pose)
-//        ));
+
+
+        // Instantly drives to closest coral station
+        SequentialCommandGroup pathDriveToClosestCoralStation = pathDriveToLocationForCoralStationFactory.createDriveOnly(
+                null, null
+        );
+        SequentialCommandGroup driveToClosestCoralStation =
+                driveToClosestStationCommandGroupFactory.createDriveOnly(true);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(new ConditionalCommand(
+                pathDriveToClosestCoralStation,
+                driveToClosestCoralStation,
+                () -> coprocessorCommunicationSubsystem.isCoralStationPathConfident(pose)
+        ));
 
 //        operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
 //        operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(changeActiveModule);
 //        operatorInterface.driverGamepad.getPovIfAvailable(180).onTrue(typicalSwerveDrive);
-    }
 
+        var aprilTagCalculator = aprilTagCalculatorFactory.create();
+
+        operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(aprilTagCalculator.createDecreaseOffsetByOneInchCommand());
+        operatorInterface.driverGamepad.getPovIfAvailable(270).onTrue(aprilTagCalculator.createIncreaseOffsetByOneInchCommand());
+    }
 
 
     @Inject
@@ -136,6 +142,7 @@ public class OperatorCommandMap {
                                       Provider<SetAlgaeArmSetpointToTargetPosition> setAlgaeArmProvider,
                                       AlgaeCollectionIntakeCommand intakeAlgae,
                                       AlgaeCollectionOutputCommand ejectAlgae,
+                                      Provider<SetElevatorTargetHeightCommand> setElevatorTargetHeightCommandProvider,
                                       CoralArmSubsystem coralArmSubsystem,
                                       IntakeCoralCommand intakeCoralCommand,
                                       PrepAlgaeSystemCommandGroupFactory prepAlgaeSystemCommandGroupFactory,
@@ -156,26 +163,29 @@ public class OperatorCommandMap {
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeCoralCommand);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreCoralCommand);
 
-        // combine all three claibration commands into one parallal command group
-        var calibrateAll = Commands.parallel(
-                forceElevatorCalibratedCommand,
-                forceCoralPivotCalibratedCommand,
+
+
+
+        var calibrateAlgae = Commands.parallel(
                 forceAlgaeArmCalibrated).ignoringDisable(true);
-        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(calibrateAll);
+        var calibrateSuperstructure = Commands.parallel(
+                forceElevatorCalibratedCommand,
+                forceCoralPivotCalibratedCommand
+        ).ignoringDisable(true);
 
-
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightStick).onTrue(calibrateAlgae);
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(calibrateSuperstructure);
         // Algae system buttons
-        var removeLowAlgae = prepAlgaeSystemCommandGroupFactory.create(AlgaeArmSubsystem.AlgaeArmPositions.ReefAlgaeLow);
+        
+        var removeLowAlgae = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.LOW_ALGAE);
+        
         oi.operatorGamepad.getPovIfAvailable(180).onTrue(removeLowAlgae);
-
-        var removeHighAlgae = prepAlgaeSystemCommandGroupFactory.create(AlgaeArmSubsystem.AlgaeArmPositions.ReefAlgaeHigh);
+        
+        var removeHighAlgae = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.HIGH_ALGAE);
         oi.operatorGamepad.getPovIfAvailable(0).onTrue(removeHighAlgae);
 
-        var collectGroundAlgae = prepAlgaeSystemCommandGroupFactory.create(AlgaeArmSubsystem.AlgaeArmPositions.GroundCollection);
-        oi.operatorGamepad.getPovIfAvailable(90).onTrue(collectGroundAlgae);
-
-        var homeAlgaeArm = prepAlgaeSystemCommandGroupFactory.create(AlgaeArmSubsystem.AlgaeArmPositions.FullyRetracted);
-        oi.operatorGamepad.getPovIfAvailable(270).onTrue(homeAlgaeArm);
+        var scoreAlgaeInNetHeight = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.SCORE_ALGAE_NET);
+        oi.operatorGamepad.getPovIfAvailable(90).onTrue(scoreAlgaeInNetHeight);
 
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(intakeAlgae);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(ejectAlgae);

@@ -18,6 +18,8 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import xbot.common.advantage.AKitLogger;
 import xbot.common.controls.sensors.XTimer;
 import xbot.common.injection.electrical_contract.CameraInfo;
@@ -30,6 +32,7 @@ import xbot.common.subsystems.vision.AprilTagVisionIO;
 import java.util.Optional;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 
@@ -92,6 +95,9 @@ public class AlignCameraToAprilTagCalculator {
     final DoubleProperty closeApproachSpeedFactor;
     final DoubleProperty closeInterstitialActivationRange;
 
+    final DoubleProperty globalHorizontalOffsetInches;
+    private double globalTemporaryHorizontalOffsetInches;
+
     double lastKnownHorizontalErrorMeters = 999999;
     double shoveStartTime = 0;
     private Activity startingActivity = Activity.Searching;
@@ -140,7 +146,7 @@ public class AlignCameraToAprilTagCalculator {
         this.oi = oi;
 
         pf.setPrefix(prefix);
-        interstitialDistance = pf.createPersistentProperty("InterstitialDistance-m", 1.25);
+        interstitialDistance = pf.createPersistentProperty("InterstitialDistance-m", 1.75);
         distanceFromInterstitialToAdvanceFast = pf.createPersistentProperty("DistanceFromInterstitialToAdvanceFast-m", 0.4);
         distanceFromInterstitialToAdvanceSlow = pf.createPersistentProperty("DistanceFromInterstitialToAdvanceSlow-m", 0.2);
         approachSpeedFactor = pf.createPersistentProperty("ApproachSpeedFactor", 0.65);
@@ -154,6 +160,8 @@ public class AlignCameraToAprilTagCalculator {
         closeApproachSpeedFactor = pf.createPersistentProperty("CloseApproachSpeedFactor", 0.33);
         closeInterstitialActivationRange = pf.createPersistentProperty("CloseInterstitialActivationRange-m", 1.33);
 
+        globalHorizontalOffsetInches = pf.createPersistentProperty("GlobalHorizontalOffset-Inches", 0.0);
+
         reset();
     }
 
@@ -161,6 +169,23 @@ public class AlignCameraToAprilTagCalculator {
         drive.getPositionalPid().reset();
         tagAcquisitionState = TagAcquisitionState.NeverSeen;
         activity = startingActivity;
+    }
+
+    private void addToEphemeralOffsetInInches(double inches) {
+        globalTemporaryHorizontalOffsetInches += inches;
+        akitLog.record("GlobalTemporaryHorizontalOffsetInches", globalTemporaryHorizontalOffsetInches);
+    }
+
+    public Command createIncreaseOffsetByOneInchCommand() {
+        return new InstantCommand(() -> addToEphemeralOffsetInInches(1)).ignoringDisable(true);
+    }
+
+    public Command createDecreaseOffsetByOneInchCommand() {
+        return new InstantCommand(() -> addToEphemeralOffsetInInches(-1)).ignoringDisable(true);
+    }
+
+    private double getHorizontalTrimAdjustmentMeters() {
+        return Inches.of(globalTemporaryHorizontalOffsetInches + globalHorizontalOffsetInches.get()).in(Meters);
     }
 
     public void configureAndReset(int targetAprilTagID, int targetCameraID, Distance offset,
@@ -192,6 +217,11 @@ public class AlignCameraToAprilTagCalculator {
                 cameraInfo,
                 offset,
                 isCameraBackwards
+        );
+
+        this.alignmentPointOffset = new Translation2d(
+                alignmentPointOffset.getX(),
+                -getHorizontalTrimAdjustmentMeters()
         );
 
         // Now for some other one-time calculations about the tag itself
@@ -325,17 +355,18 @@ public class AlignCameraToAprilTagCalculator {
                 if (currentTranslation.getDistance(interstitialPoint.getTranslation()) < distanceThresholdToAdvance) {
                     activity = Activity.TerminalApproach;
 
-                    // Trying to approach coral station but found no tag? We'll just use pure pose
-                    if (!hasEverSeenAprilTag && isCameraBackwards) {
-                        activity = Activity.TerminalApproachWithoutVision;
-                        coralStationPreShovePoint = getCoralStationPreShovePoint();
-                        pose.setPreferOdometryToVision(false);
-                    }
-
-                    // Trying to approach reef but camera no good? We should just stay still
-                    if (!aprilTagVisionSubsystem.isCameraConnected(targetCameraID)
-                            && !isCameraBackwards && requireExcellentAlignment) {
-                        activity = Activity.Stall;
+                    // We should not do TerminalApproach if vision stuff is abnormal
+                    if (!hasEverSeenAprilTag || !aprilTagVisionSubsystem.isCameraConnected(targetCameraID)) {
+                        if (isCameraBackwards) {
+                            // Trying to approach coral station but found no tag? We'll just use pure pose
+                            activity = Activity.TerminalApproachWithoutVision;
+                            coralStationPreShovePoint = getCoralStationPreShovePoint();
+                            pose.setPreferOdometryToVision(false);
+                        } else {
+                            // This is for front facing cameras
+                            // Trying to approach reef but camera no good? We should just stay still
+                            activity = Activity.Stall;
+                        }
                     }
                 }
             }
@@ -442,7 +473,7 @@ public class AlignCameraToAprilTagCalculator {
         Optional<Translation2d> aprilTagData = aprilTagVisionSubsystem.getRobotRelativeLocationOfAprilTag(targetCameraID, targetAprilTagID);
 
         if (aprilTagData.isPresent()) {
-            lastKnownHorizontalErrorMeters = aprilTagData.get().getY();
+            lastKnownHorizontalErrorMeters = aprilTagData.get().getY() + getHorizontalTrimAdjustmentMeters();
         }
         akitLog.record("AprilTagData", aprilTagData.orElse(null));
 
@@ -463,6 +494,7 @@ public class AlignCameraToAprilTagCalculator {
         // Use WPI libraries to transform the relative goal into a field-oriented goal. That way, if we ever lose the tag,
         // we can still attempt to move to this target location
         targetLocationOnField = currentPose.transformBy(relativeGoalTransform).getTranslation();
+
         akitLog.record("TargetLocationOnField", targetLocationOnField);
     }
 

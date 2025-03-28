@@ -9,7 +9,7 @@ import competition.auto_programs.BaseAutonomousSequentialCommandGroup;
 import competition.commandgroups.DriveToFaceAndScoreCommandGroupFactory;
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
 import competition.commandgroups.vision_path.PathDriveToCoralStationAndIntakeUntilCollected;
-import competition.commandgroups.vision_path.PathDriveToLocationForCoralStationAndIntakeUntilCollectedFactory;
+import competition.commandgroups.vision_path.PathDriveToLocationForCoralStationFactory;
 import competition.commandgroups.vision_path.PathToFaceAndScoreCommandGroupFactory;
 import competition.electrical_contract.ElectricalContract;
 import competition.simulation.BaseSimulator;
@@ -22,6 +22,8 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import xbot.common.subsystems.autonomous.AutonomousCommandSelector;
 
 public class LeftFourCoralAuto extends BaseAutonomousSequentialCommandGroup {
@@ -36,11 +38,14 @@ public class LeftFourCoralAuto extends BaseAutonomousSequentialCommandGroup {
                              DriveToFaceAndScoreCommandGroupFactory driveToFaceAndScoreFact,
                              Provider<PathToFaceAndScoreCommandGroupFactory>
                                      driveToFaceAndScoreFactProv,
-                             Provider<PathDriveToLocationForCoralStationAndIntakeUntilCollectedFactory>
+                             Provider<PathDriveToLocationForCoralStationFactory>
                                      pathDriveToLocationAndIntakeUntilCollectedProvider,
                              PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFact,
                              BaseSimulator simulator) {
         super(autoSelector);
+
+        this.addCommands(new WaitCommand(2.0));
+
         var initializeStateCommand =
                 pose.createSetPositionCommand(
                                 ()
