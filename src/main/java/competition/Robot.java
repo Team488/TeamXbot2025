@@ -63,6 +63,7 @@ public class Robot extends BaseRobot {
         oi = getInjectorComponent().operatorInterface();
         algaeArmSubsystem = getInjectorComponent().algaeArmSubsystem();
         coralArmSubsystem = getInjectorComponent().coralArmSubsystem();
+        getInjectorComponent().oiReefSubsystem();
 
         if (BaseRobot.isSimulation()) {
             simulator = Optional.of(getInjectorComponent().simulator());
@@ -81,6 +82,7 @@ public class Robot extends BaseRobot {
         dataFrameRefreshables.add(getInjectorComponent().algaeCollectionSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().algaeArmSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().deadWheelSubsystem());
+        dataFrameRefreshables.add(getInjectorComponent().oiReefSubsystem());
 
         // Not needed unless we are actively configuring the LaserCAN.
         //CanBridge.runTCP();
