@@ -1,13 +1,6 @@
 package competition.subsystems;
-
-
-
-import competition.subsystems.climber.ClimberSubsystem;
-import competition.subsystems.climber.commands.ClimbWithJoySticksCommand;
 import competition.subsystems.coral_arm.CoralArmSubsystem;
 import competition.subsystems.coral_arm.commands.CoralArmMaintainerCommand;
-import competition.subsystems.coral_scorer.CoralScorerSubsystem;
-import competition.subsystems.coral_scorer.commands.StopCoralCommand;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.elevator.ElevatorSubsystem;
@@ -23,7 +16,8 @@ import javax.inject.Singleton;
 public class SubsystemDefaultCommandMap {
 
     @Inject
-    public SubsystemDefaultCommandMap() {}
+    public SubsystemDefaultCommandMap() {
+    }
 
     @Inject
     public void setupDriveSubsystem(DriveSubsystem driveSubsystem, SwerveDriveWithJoysticksCommand command) {
@@ -31,17 +25,12 @@ public class SubsystemDefaultCommandMap {
     }
 
     @Inject
-    public void setupElevatorSubsystem(ElevatorSubsystem elevatorSubsystem, ElevatorMaintainerCommand command){
+    public void setupElevatorSubsystem(ElevatorSubsystem elevatorSubsystem, ElevatorMaintainerCommand command) {
         elevatorSubsystem.setDefaultCommand(command);
     }
 
     @Inject
-    public void setupCoralArmPivotSubsystem(CoralArmSubsystem coralArmPivotSubsystem, CoralArmMaintainerCommand command){
+    public void setupCoralArmPivotSubsystem(CoralArmSubsystem coralArmPivotSubsystem, CoralArmMaintainerCommand command) {
         coralArmPivotSubsystem.setDefaultCommand(command);
-    }
-
-    @Inject
-    public void setupClimberSubsystem(ClimberSubsystem climberSubsystem, ClimbWithJoySticksCommand command) {
-        climberSubsystem.setDefaultCommand(command);
     }
 }

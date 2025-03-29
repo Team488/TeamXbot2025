@@ -6,7 +6,6 @@ import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
 import competition.simulation.BaseSimulator;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import xbot.common.subsystems.autonomous.AutonomousCommandSelector;
 
 import javax.inject.Inject;
@@ -72,7 +71,7 @@ public class FromRightCageScoreRightFacesLevelFours extends BaseAutonomousSequen
         this.addCommands(driveAndScoreCloseBranchALevelFour);
 
         // TODO: replace this with drive and intake commandgroup instead
-        var homeCoralSystem = prepCoralSystemCommandGroupFact.create(() -> Landmarks.CoralLevel.COLLECTING);
+        var homeCoralSystem = prepCoralSystemCommandGroupFact.create(() -> Landmarks.CoralLevel.CORAL_COLLECTING);
         this.addCommands(homeCoralSystem);
     }
 }

@@ -31,7 +31,6 @@ import java.util.Optional;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Hertz;
-import static edu.wpi.first.units.Units.Inch;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
@@ -111,8 +110,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         l3Height = pf.createPersistentProperty("l3Height", Inches.of(16.25));
         l4Height = pf.createPersistentProperty("l4Height", Inches.of(47.5));
         humanLoadHeight = pf.createPersistentProperty("humanLoadHeight", Inches.of(1));
-        highAlgaeRemovalHeight = pf.createPersistentProperty("highAlgaeRemovalHeight", Inches.of(20));
-        lowAlgaeRemovalHeight = pf.createPersistentProperty("lowAlgaeRemovalHeight", Inches.of(5));
+        highAlgaeRemovalHeight = pf.createPersistentProperty("highAlgaeRemovalHeight", Inches.of(30));
+        lowAlgaeRemovalHeight = pf.createPersistentProperty("lowAlgaeRemovalHeight", Inches.of(17));
         scoreAlgaeNetHeight = pf.createPersistentProperty("scoreAlgaeNetHeight", Inches.of(47.5));
         scoreAlgaeProcessorHeight = pf.createPersistentProperty("scoreAlgaeProcessorHeight", Inches.of(1));
         pf.setDefaultLevel(PropertyLevel.Debug);
@@ -294,7 +293,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
             case TWO -> setTargetValue(l2Height.get());
             case THREE -> setTargetValue(l3Height.get().plus(trimValue.get()));
             case FOUR -> setTargetValue(l4Height.get().plus(trimValue.get()));
-            case COLLECTING -> setTargetValue(humanLoadHeight.get());
+            case CORAL_COLLECTING -> setTargetValue(humanLoadHeight.get());
             case HIGH_ALGAE -> setTargetValue(highAlgaeRemovalHeight.get());
             case LOW_ALGAE -> setTargetValue(lowAlgaeRemovalHeight.get());
             case SCORE_ALGAE_NET -> setTargetValue(scoreAlgaeNetHeight.get());

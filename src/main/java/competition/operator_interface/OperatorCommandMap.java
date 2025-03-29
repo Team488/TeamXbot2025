@@ -12,22 +12,24 @@ import competition.simulation.commands.ResetSimulatedPose;
 import competition.subsystems.coral_arm.CoralArmSubsystem;
 import competition.subsystems.coral_arm.commands.ForceCoralArmCalibratedCommand;
 import competition.subsystems.coral_arm.commands.SetCoralArmTargetAngleCommand;
+import competition.subsystems.coral_scorer.commands.IntakeAlgaeCommand;
 import competition.subsystems.coral_scorer.commands.IntakeCoralCommand;
+import competition.subsystems.coral_scorer.commands.ScoreAlgaeCommand;
 import competition.subsystems.coral_scorer.commands.ScoreCoralCommand;
 import competition.subsystems.coral_scorer.commands.ScoreWhenReadyCommand;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.CalibrateDriveCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
-import competition.subsystems.drive.commands.DriveToNearestReefFaceWithPID;
+import competition.subsystems.drive.commands.AlignToNearestReefFaceForAlgaeCommand;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.drive.logic.AlignCameraToAprilTagCalculator;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import competition.subsystems.elevator.commands.ForceElevatorCalibratedCommand;
 import competition.subsystems.elevator.commands.SetElevatorTargetHeightCommand;
 import competition.subsystems.elevator.commands.ToggleElevatorMotionMagicCommand;
-import competition.subsystems.oracle.commands.DriveAccordingToOracleCommand;
-import competition.subsystems.oracle.commands.SuperstructureAccordingToOracleCommand;
+import competition.subsystems.elevator.commands.TrimElevatorDown;
+import competition.subsystems.elevator.commands.TrimElevatorUp;
 import competition.subsystems.pose.Cameras;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
@@ -59,12 +61,10 @@ public class OperatorCommandMap {
             OperatorInterface operatorInterface,
             SetRobotHeadingCommand resetHeading,
             Provider<AlignToReefWithAprilTagCommand> alignToReefWithAprilTagProvider,
-            DriveAccordingToOracleCommand driveAccordingToOracle,
-            SuperstructureAccordingToOracleCommand superstructureAccordingToOracle,
             DebugSwerveModuleCommand debugModule,
             ChangeActiveSwerveModuleCommand changeActiveModule,
             SwerveDriveWithJoysticksCommand typicalSwerveDrive,
-            DriveToNearestReefFaceWithPID driveToNearestReefFaceWithPID,
+            AlignToNearestReefFaceForAlgaeCommand alignToNearestReefFaceForAlgaeCommand,
             DriveSubsystem drive, PoseSubsystem pose,
             DriveToClosestStationCommandGroupFactory
                     driveToClosestStationCommandGroupFactory,
@@ -91,11 +91,9 @@ public class OperatorCommandMap {
                 AlignCameraToAprilTagCalculator.Activity.ApproachWhileCentering, false);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(alignToReefWithAprilTagWithRightCamera);
 
-        var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
-
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(pointAtNearestCoralStation)
                 .onFalse(clearPointAtHeading);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(driveToNearestReefFaceWithPID);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(alignToNearestReefFaceForAlgaeCommand);
 
 
         // Instantly drives to closest coral station
@@ -131,6 +129,10 @@ public class OperatorCommandMap {
                                       Provider<SetElevatorTargetHeightCommand> setElevatorTargetHeightCommandProvider,
                                       CoralArmSubsystem coralArmSubsystem,
                                       IntakeCoralCommand intakeCoralCommand) {
+
+
+
+
         // Coral system buttons
         var prepL4 = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.FOUR);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
@@ -141,7 +143,7 @@ public class OperatorCommandMap {
         var prepL2 = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.TWO);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(prepL2);
 
-        var homed = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
+        var homed = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.CORAL_COLLECTING);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeCoralCommand);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreCoralCommand);
@@ -164,6 +166,12 @@ public class OperatorCommandMap {
 
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(calibrateSuperstructure);
         // Algae system buttons
+
+
+
+        var scoreAlgaeInProcessor = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.SCORE_ALGAE_PROCESSOR);
+        oi.operatorGamepad.getPovIfAvailable(270).onTrue(scoreAlgaeInProcessor);
+
 
 
     }
@@ -189,7 +197,7 @@ public class OperatorCommandMap {
             ToggleElevatorMotionMagicCommand toggleElevatorMotionMagicCommand) {
 
         var returnToBase = setElevatorTargetHeightCommandProvider.get();
-        returnToBase.setHeight(Landmarks.CoralLevel.COLLECTING);
+        returnToBase.setHeight(Landmarks.CoralLevel.CORAL_COLLECTING);
         var riseToL2 = setElevatorTargetHeightCommandProvider.get();
         riseToL2.setHeight(Landmarks.CoralLevel.TWO);
         var riseToL3 = setElevatorTargetHeightCommandProvider.get();
@@ -200,7 +208,7 @@ public class OperatorCommandMap {
         var riseToScore = setArmTargetAngleCommandProvider.get();
         riseToScore.setAngle(Landmarks.CoralLevel.FOUR);
         var lowerToHumanLoad = setArmTargetAngleCommandProvider.get();
-        lowerToHumanLoad.setAngle(Landmarks.CoralLevel.COLLECTING);
+        lowerToHumanLoad.setAngle(Landmarks.CoralLevel.CORAL_COLLECTING);
 
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeCoralCommand);
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreCoralCommand);
@@ -222,13 +230,16 @@ public class OperatorCommandMap {
     }
 
     @Inject
-    public void setUpButtonCommands(OperatorInterface oi, CoralArmSubsystem coralArmSubsystem) {
+    public void setupNeoTrellis(OperatorInterface oi, CoralArmSubsystem coralArmSubsystem, TrimElevatorUp trimElevatorUp,
+                                TrimElevatorDown trimElevatorDown) {
         oi.neoTrellis.getifAvailable(9)
                 .onTrue(coralArmSubsystem.createSetTargetCoralLevelCommand(Landmarks.CoralLevel.TWO));
         oi.neoTrellis.getifAvailable(10)
                 .onTrue(coralArmSubsystem.createSetTargetCoralLevelCommand(Landmarks.CoralLevel.THREE));
         oi.neoTrellis.getifAvailable(11)
                 .onTrue(coralArmSubsystem.createSetTargetCoralLevelCommand(Landmarks.CoralLevel.FOUR));
+        oi.neoTrellis.getifAvailable(8).onTrue(trimElevatorUp);
+        oi.neoTrellis.getifAvailable(16).onTrue(trimElevatorDown);
     }
 
     @Inject
@@ -313,8 +324,9 @@ public class OperatorCommandMap {
         setFromRightCageScoreRightFacesLevelFours.includeOnSmartDashboard("From Right Score Right Face Level Fours auto");
 
         var leftVisionAuto = setAutonomousCommandProvider.get();
-        leftVisionAuto.setAutoCommand(leftFourCoralAutoProvider.get());
+        leftVisionAuto.setAutoCommand(leftFourCoralAutoProvider.get(), Landmarks.BlueCageOneStartingLine);
         leftVisionAuto.includeOnSmartDashboard("Left Vision Auto");
+        
         var rightVisionAuto = setAutonomousCommandProvider.get();
         rightVisionAuto.setAutoCommand(rightFourCoralAuto.get(), Landmarks.BlueCageSixStartingLine);
         rightVisionAuto.includeOnSmartDashboard("Right Vision Auto");
