@@ -27,7 +27,7 @@ public class DriveToBargeCommand extends PathDriveToLocationCommand {
                                CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem) {
         super(drive, pose, pf, headingModuleFactory, robotAssertionManager, coprocessorCommunicationSubsystem);
         distanceFromBarge = pf.createPersistentProperty("distanceFromBarge-m", 1);
-        midFieldX = pf.createPersistentProperty("midFieldX-in", 344.75);
+        midFieldX = pf.createPersistentProperty("midFieldX-m", 8.75665);
     }
 
     @Override
