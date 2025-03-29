@@ -100,7 +100,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     @Override
     protected void coastAction() {
-        elevator.setPower(manualGravityPower.get());
+        elevator.setPower(manualGravityPower.get()); // Should help the elevator fall slower instead of falling really fast at 0 power
     }
 
     @Override
@@ -153,7 +153,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     @Override
     protected void humanControlAction() {
-        super.humanControlAction() + manualGravityPower.get();
+        elevator.setPower(getHumanInput() + manualGravityPower.get());
     }
 
     //returns error magnitude of elevator in inches
