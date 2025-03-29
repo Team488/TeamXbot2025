@@ -78,6 +78,10 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     public final DistanceProperty l3Height;
     public final DistanceProperty l4Height;
     public final DistanceProperty humanLoadHeight;
+    public final DistanceProperty highAlgaeRemovalHeight;
+    public final DistanceProperty lowAlgaeRemovalHeight;
+    public final DistanceProperty scoreAlgaeNetHeight;
+    public final DistanceProperty scoreAlgaeProcessorHeight;
     public final DistanceProperty baseHeight;
     public final DistanceProperty trimValue;
     public final DistanceProperty trimChangeAmount;
@@ -106,6 +110,10 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         l3Height = pf.createPersistentProperty("l3Height", Inches.of(16.25));
         l4Height = pf.createPersistentProperty("l4Height", Inches.of(47.5));
         humanLoadHeight = pf.createPersistentProperty("humanLoadHeight", Inches.of(1));
+        highAlgaeRemovalHeight = pf.createPersistentProperty("highAlgaeRemovalHeight", Inches.of(20));
+        lowAlgaeRemovalHeight = pf.createPersistentProperty("lowAlgaeRemovalHeight", Inches.of(5));
+        scoreAlgaeNetHeight = pf.createPersistentProperty("scoreAlgaeNetHeight", Inches.of(47.5));
+        scoreAlgaeProcessorHeight = pf.createPersistentProperty("scoreAlgaeProcessorHeight", Inches.of(1));
         pf.setDefaultLevel(PropertyLevel.Debug);
         baseHeight = pf.createPersistentProperty("baseHeight", Inches.of(0));
         trimValue = pf.createPersistentProperty("trimValue",Inches.of(0));
@@ -285,7 +293,11 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
             case TWO -> setTargetValue(l2Height.get());
             case THREE -> setTargetValue(l3Height.get().plus(trimValue.get()));
             case FOUR -> setTargetValue(l4Height.get().plus(trimValue.get()));
-            case COLLECTING -> setTargetValue(humanLoadHeight.get());
+            case CORAL_COLLECTING -> setTargetValue(humanLoadHeight.get());
+            case HIGH_ALGAE -> setTargetValue(highAlgaeRemovalHeight.get());
+            case LOW_ALGAE -> setTargetValue(lowAlgaeRemovalHeight.get());
+            case SCORE_ALGAE_NET -> setTargetValue(scoreAlgaeNetHeight.get());
+            case SCORE_ALGAE_PROCESSOR -> setTargetValue(scoreAlgaeProcessorHeight.get());
             default -> setTargetValue(baseHeight.get());
         }
     }

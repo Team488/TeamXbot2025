@@ -5,16 +5,12 @@ import competition.subsystems.coral_scorer.commands.IntakeUntilCoralCollectedCom
 import competition.subsystems.drive.commands.vision_path.DriveVectorSmallCommand;
 import competition.subsystems.drive.commands.vision_path.PathDriveToNearestCoralStationSectionCommand;
 import competition.subsystems.pose.Landmarks;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-
-import static edu.wpi.first.units.Units.Degrees;
 
 public class PathDriveToCoralStationAndIntakeUntilCollected {
     Provider<PathDriveToNearestCoralStationSectionCommand> driveToCoralStationSectionCommandProvider;
@@ -44,7 +40,7 @@ public class PathDriveToCoralStationAndIntakeUntilCollected {
                 pathDriveToNearestCoralStationSectionCommand,
                 driveVectorSmallCommand
         );
-        var prepCoralSystem = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
+        var prepCoralSystem = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.CORAL_COLLECTING);
         driveToCoralStationSectionWhilePrepping.addCommands(driveToCoralStationThenDriveForward, prepCoralSystem);
         IntakeUntilCoralCollectedCommand intakeUntilCoralCollectedCommand = intakeUntilCoralCollectedCommandProvider.get();
         return new ParallelDeadlineGroup(intakeUntilCoralCollectedCommand, driveToCoralStationSectionWhilePrepping);
