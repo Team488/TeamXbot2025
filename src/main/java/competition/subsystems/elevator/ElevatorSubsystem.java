@@ -58,6 +58,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
     public final DoubleProperty rotationsPerMeter;
 
+    public int currentPIDSlot;
+
     public final DoubleProperty calibrationNegativePower;
     public final DoubleProperty powerNearLowerLimitThreshold;
     public final DoubleProperty powerNearUpperLimitThreshold;
@@ -101,6 +103,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
                              XLaserCAN.XLaserCANFactory xLaserCANFactory) {
 
         this.contract = contract;
+
+        currentPIDSlot = 0;
 
         sensorFusionFilter = new ComplimentaryFilter(pf, this.getPrefix(), true, 0.5);
 
@@ -373,7 +377,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
                 masterMotor.getPosition().plus(deltaRotations),
                 motionMagicEnabled.get()
                 ? XCANMotorController.MotorPidMode.TrapezoidalVoltage
-                : XCANMotorController.MotorPidMode.Voltage);
+                : XCANMotorController.MotorPidMode.Voltage,
+                currentPIDSlot);
     }
 
     /**
@@ -415,6 +420,15 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     public void configureMotionMagicConstraints(){
         masterMotor.setTrapezoidalProfileAcceleration(RadiansPerSecondPerSecond.of(motionMagicAcceleration.get()));
         masterMotor.setTrapezoidalProfileJerk(RadiansPerSecondPerSecond.of(motionMagicJerk.get()).per(Second));
+    }
+
+    public void setCurrentPIDSlot(int slot){
+        currentPIDSlot = slot;
+    }
+
+    public void configurePIDForEachSlot(){
+        masterMotor.setPidDirectly(0,0,0,0,0,1); //update with tuned values from the robot
+        masterMotor.setPidDirectly(0,0,0,0,0,2);
     }
 
     @Override
