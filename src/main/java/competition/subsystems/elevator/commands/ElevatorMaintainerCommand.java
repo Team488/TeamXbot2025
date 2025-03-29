@@ -65,7 +65,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         this.humanMaxPowerGoingDown = pf.createPersistentProperty("humanMaxPowerGoingDown", -0.2);
 
         this.gravityPIDConstantPower = pf.createPersistentProperty("gravityPIDConstant", 0.07416666);
-        this.manualGravityPower = pf.createPersistentProperty("manualGravityPower", .0625);
+        this.manualGravityPower = pf.createPersistentProperty("manualGravityPower", 0);
 
         decider.setDeadband(0.02);
     }
