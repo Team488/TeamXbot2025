@@ -42,6 +42,7 @@ import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import xbot.common.controls.sensors.XXboxController;
 import xbot.common.subsystems.autonomous.SetAutonomousCommand;
@@ -112,11 +113,11 @@ public class OperatorCommandMap {
         );
         SequentialCommandGroup driveToClosestCoralStation =
                 driveToClosestStationCommandGroupFactory.createDriveOnly(true);
-//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(new ConditionalCommand(
-//                pathDriveToClosestCoralStation,
-//                driveToClosestCoralStation,
-//                () -> coprocessorCommunicationSubsystem.isCoralStationPathConfident(pose)
-//        ));
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(new ConditionalCommand(
+                pathDriveToClosestCoralStation,
+                driveToClosestCoralStation,
+                () -> coprocessorCommunicationSubsystem.isCoralStationPathConfident(pose)
+        ));
 
 //        operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
 //        operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(changeActiveModule);
