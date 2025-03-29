@@ -40,6 +40,7 @@ import competition.subsystems.pose.Cameras;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import xbot.common.controls.sensors.XXboxController;
@@ -123,10 +124,13 @@ public class OperatorCommandMap {
 
         var aprilTagCalculator = aprilTagCalculatorFactory.create();
 
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A)
-                .onTrue(aprilTagCalculator.createSetHorizontalBranchOffsetMeters(1));
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B)
-                .onTrue(aprilTagCalculator.createSetHorizontalBranchOffsetMeters(0));
+        var setHorizontalBranchAOffsetMeters = aprilTagCalculator.createSetHorizontalBranchOffsetMeters(1);
+        setHorizontalBranchAOffsetMeters.setName("SetHorizontalBranchAOffset");
+        SmartDashboard.putData(setHorizontalBranchAOffsetMeters);
+
+        var setHorizontalBranchBOffsetMeters = aprilTagCalculator.createSetHorizontalBranchOffsetMeters(0);
+        setHorizontalBranchBOffsetMeters.setName("SetHorizontalBranchBOffset");
+        SmartDashboard.putData(setHorizontalBranchBOffsetMeters);
 
         operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(aprilTagCalculator.createDecreaseOffsetByOneInchCommand());
         operatorInterface.driverGamepad.getPovIfAvailable(270).onTrue(aprilTagCalculator.createIncreaseOffsetByOneInchCommand());

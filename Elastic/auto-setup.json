@@ -113,6 +113,46 @@
               "period": 0.06,
               "show_type": true
             }
+          },
+          {
+            "title": "Left Vision Auto",
+            "x": 0.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Left Vision Auto",
+              "period": 0.06,
+              "show_type": true
+            }
+          },
+          {
+            "title": "Right Vision Auto",
+            "x": 1152.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Right Vision Auto",
+              "period": 0.06,
+              "show_type": true
+            }
+          },
+          {
+            "title": "GlobalHorizontalOffset-Inches",
+            "x": 768.0,
+            "y": 384.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/AlignCameraToAprilTagCalculator//GlobalHorizontalOffset-Inches",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
           }
         ]
       }
@@ -289,6 +329,19 @@
               "data_type": "double",
               "show_submit_button": false
             }
+          },
+          {
+            "title": "SetHorizontalBranchAOffset",
+            "x": 896.0,
+            "y": 384.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/SetHorizontalBranchAOffset",
+              "period": 0.06,
+              "show_type": true
+            }
           }
         ]
       }
@@ -464,6 +517,19 @@
               "period": 0.06,
               "data_type": "double",
               "show_submit_button": false
+            }
+          },
+          {
+            "title": "SetHorizontalBranchBOffset",
+            "x": 896.0,
+            "y": 384.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/SetHorizontalBranchBOffset",
+              "period": 0.06,
+              "show_type": true
             }
           }
         ]
