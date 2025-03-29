@@ -67,7 +67,7 @@ public class Contract2025 extends ElectricalContract {
                 MotorControllerType.TalonFx,
                 CANBusId.RIO,
                 24,
-                new CANMotorControllerOutputConfig().withStatorCurrentLimit(Amps.of(20)));
+                new CANMotorControllerOutputConfig().withStatorCurrentLimit(Amps.of(40)));
     }
 
     public boolean isCoralScorerSensorReady() { return true; }
