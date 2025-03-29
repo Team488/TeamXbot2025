@@ -6,12 +6,9 @@ import competition.auto_programs.FromRightCageScoreRightFacesLevelFours;
 import competition.auto_programs.vision.LeftFourCoralAuto;
 import competition.auto_programs.vision.RightFourCoralAuto;
 import competition.commandgroups.DriveToClosestStationCommandGroupFactory;
-import competition.commandgroups.PrepAlgaeSystemCommandGroupFactory;
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
 import competition.commandgroups.vision_path.PathDriveToLocationForCoralStationFactory;
 import competition.simulation.commands.ResetSimulatedPose;
-import competition.subsystems.algae_collection.commands.AlgaeCollectionIntakeCommand;
-import competition.subsystems.algae_collection.commands.AlgaeCollectionOutputCommand;
 import competition.subsystems.coral_arm.CoralArmSubsystem;
 import competition.subsystems.coral_arm.commands.ForceCoralArmCalibratedCommand;
 import competition.subsystems.coral_arm.commands.SetCoralArmTargetAngleCommand;
@@ -131,12 +128,9 @@ public class OperatorCommandMap {
                                       ScoreWhenReadyCommand scoreWhenReadyCommand,
                                       ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
                                       ForceCoralArmCalibratedCommand forceCoralPivotCalibratedCommand,
-                                      AlgaeCollectionIntakeCommand intakeAlgae,
-                                      AlgaeCollectionOutputCommand ejectAlgae,
                                       Provider<SetElevatorTargetHeightCommand> setElevatorTargetHeightCommandProvider,
                                       CoralArmSubsystem coralArmSubsystem,
-                                      IntakeCoralCommand intakeCoralCommand,
-                                      PrepAlgaeSystemCommandGroupFactory prepAlgaeSystemCommandGroupFactory) {
+                                      IntakeCoralCommand intakeCoralCommand) {
         // Coral system buttons
         var prepL4 = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.FOUR);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
@@ -171,8 +165,7 @@ public class OperatorCommandMap {
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(calibrateSuperstructure);
         // Algae system buttons
 
-        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(intakeAlgae);
-        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(ejectAlgae);
+
     }
 
     @Inject

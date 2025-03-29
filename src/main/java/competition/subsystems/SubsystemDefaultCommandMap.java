@@ -1,8 +1,7 @@
 package competition.subsystems;
 
 
-import competition.subsystems.algae_collection.AlgaeCollectionSubsystem;
-import competition.subsystems.algae_collection.commands.AlgaeCollectionStopCommand;
+
 import competition.subsystems.climber.ClimberSubsystem;
 import competition.subsystems.climber.commands.ClimbWithJoySticksCommand;
 import competition.subsystems.coral_arm.CoralArmSubsystem;
@@ -29,11 +28,6 @@ public class SubsystemDefaultCommandMap {
     @Inject
     public void setupDriveSubsystem(DriveSubsystem driveSubsystem, SwerveDriveWithJoysticksCommand command) {
         driveSubsystem.setDefaultCommand(command);
-    }
-
-    @Inject
-    public void setupAlgaeCollectionSubsystem(AlgaeCollectionSubsystem algaeCollectionSubsystem, AlgaeCollectionStopCommand command) {
-        algaeCollectionSubsystem.setDefaultCommand(command);
     }
 
     @Inject
