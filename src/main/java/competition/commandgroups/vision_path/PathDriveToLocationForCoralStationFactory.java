@@ -131,6 +131,8 @@ public class PathDriveToLocationForCoralStationFactory {
                     }));
         }
         driveVectorSmallCommand.setBackwards(true);
+        driveVectorSmallCommand.setLast(Seconds.of(-1));
+
 
         driveToCoralStationThenDriveForward.addCommands(
                 pathDriveToLocationCommand, driveVectorSmallCommand);
