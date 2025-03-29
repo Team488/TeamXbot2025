@@ -110,8 +110,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         l3Height = pf.createPersistentProperty("l3Height", Inches.of(16.25));
         l4Height = pf.createPersistentProperty("l4Height", Inches.of(47.5));
         humanLoadHeight = pf.createPersistentProperty("humanLoadHeight", Inches.of(1));
-        highAlgaeRemovalHeight = pf.createPersistentProperty("highAlgaeRemovalHeight", Inches.of(20));
-        lowAlgaeRemovalHeight = pf.createPersistentProperty("lowAlgaeRemovalHeight", Inches.of(5));
+        highAlgaeRemovalHeight = pf.createPersistentProperty("highAlgaeRemovalHeight", Inches.of(30));
+        lowAlgaeRemovalHeight = pf.createPersistentProperty("lowAlgaeRemovalHeight", Inches.of(17));
         scoreAlgaeNetHeight = pf.createPersistentProperty("scoreAlgaeNetHeight", Inches.of(47.5));
         scoreAlgaeProcessorHeight = pf.createPersistentProperty("scoreAlgaeProcessorHeight", Inches.of(1));
         pf.setDefaultLevel(PropertyLevel.Debug);

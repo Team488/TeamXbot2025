@@ -16,7 +16,7 @@ public class IntakeUntilCoralCollectedCommand extends BaseCommand {
 
     @Override
     public void initialize() {
-        coral.setCoralScorerState(CoralScorerSubsystem.CoralScorerState.INTAKING);
+        coral.setCoralScorerState(CoralScorerSubsystem.CoralScorerState.INTAKING_CORAL);
     }
 
     @Override

@@ -33,7 +33,7 @@ public class ScoreWhenReadyCommand extends BaseCommand {
         var armMaintainerAtGoal = coralArmSubsystem.isMaintainerAtGoal();
         var elevatorMaintainerAtGoal = elevatorSubsystem.isMaintainerAtGoal();
         if (hasCoral && getIsTargetAngleScoring && armMaintainerAtGoal && elevatorMaintainerAtGoal) {
-            coralScorerSubsystem.setCoralScorerState(CoralScorerSubsystem.CoralScorerState.SCORING);
+            coralScorerSubsystem.setCoralScorerState(CoralScorerSubsystem.CoralScorerState.SCORING_CORAL);
         }
         aKitLog.record("isTargetAngleScoring", getIsTargetAngleScoring);
         aKitLog.record("armPrepped", armMaintainerAtGoal);
