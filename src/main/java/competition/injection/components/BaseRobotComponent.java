@@ -15,7 +15,6 @@ import competition.subsystems.drive.commands.AlignToNearestCoralStationCommand;
 import competition.subsystems.drive.commands.EmergencyAutonomousCommand;
 import competition.subsystems.deadwheel.DeadWheelSubsystem;
 import competition.subsystems.elevator.ElevatorSubsystem;
-import competition.subsystems.oracle.OracleSubsystem;
 import competition.subsystems.oracle.ReefCoordinateGenerator;
 import competition.subsystems.oracle.ScoringQueue;
 import competition.subsystems.pose.PoseSubsystem;
@@ -53,8 +52,6 @@ public abstract class BaseRobotComponent extends BaseComponent {
     public abstract CoralScorerSubsystem coralScorerSubsystem();
 
     public abstract SuperstructureMechanismSubsystem superstructureMechanismSubsystem();
-
-    public abstract OracleSubsystem oracleSubsystem();
 
     public abstract ElectricalContract electricalContract();
 
