@@ -116,8 +116,8 @@ public class AlignCameraToAprilTagCalculator {
     private Translation2d coralStationPreShovePoint;
     boolean retryActive;
 
-    Map<Integer, DoubleProperty> branchAOffsetHashMap = new HashMap<>();
-    Map<Integer, DoubleProperty> branchBOffsetHashMap = new HashMap<>();
+    record BranchOffsetKey(Landmarks.Branch branch, Integer tagID) {}
+    Map<BranchOffsetKey, DoubleProperty> branchOffsetHashMap = new HashMap<>();
 
     public static Translation2d generateAlignmentPointOffset(Distance robotCenterToOuterBumperX, CameraInfo cameraInfo,
                                                              Distance offset, boolean isCameraBackwards) {
@@ -227,7 +227,8 @@ public class AlignCameraToAprilTagCalculator {
                 isCameraBackwards
         );
 
-        branchOffsetMeters = (targetCameraID == 0 ? branchBOffsetHashMap : branchAOffsetHashMap).get(targetAprilTagID).get();
+
+        branchOffsetMeters = branchOffsetHashMap.get(new BranchOffsetKey(targetCameraID == 0 ? Landmarks.Branch.B : Landmarks.Branch.A, targetAprilTagID)).get();
 
         this.alignmentPointOffset = new Translation2d(
                 alignmentPointOffset.getX(),
@@ -525,8 +526,8 @@ public class AlignCameraToAprilTagCalculator {
     private void initializeBranchOffsets(PropertyFactory pf) {
         int[] tagIds = {6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22};
         for (int tagId : tagIds) {
-            branchAOffsetHashMap.put(tagId, pf.createPersistentProperty("BranchAOffset-Tag" + tagId, 0.0));
-            branchBOffsetHashMap.put(tagId, pf.createPersistentProperty("BranchBOffset-Tag" + tagId, 0.0));
+            branchOffsetHashMap.put(new BranchOffsetKey(Landmarks.Branch.A, tagId), pf.createPersistentProperty("BranchAOffset-Tag" + tagId, 0.0));
+            branchOffsetHashMap.put(new BranchOffsetKey(Landmarks.Branch.B, tagId), pf.createPersistentProperty("BranchBOffset-Tag" + tagId, 0.0));
         }
     }
 
@@ -536,11 +537,8 @@ public class AlignCameraToAprilTagCalculator {
 
         aprilTagData.ifPresent(data -> {
             double offset = data.getY();
-            if (targetCameraID == 1) {
-                branchAOffsetHashMap.get(tagID).set(offset);
-            } else {
-                branchBOffsetHashMap.get(tagID).set(offset);
-            }
+
+            branchOffsetHashMap.get(new BranchOffsetKey(targetCameraID == 1 ? Landmarks.Branch.A : Landmarks.Branch.B, tagID)).set(offset);
         });
     }
 
