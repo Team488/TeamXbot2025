@@ -47,10 +47,6 @@ public class RoboxContract extends Contract2025 {
     public CameraInfo[] getCameraInfo() {
         return new CameraInfo[]{};
     }
-
-    @Override
-    public boolean isAlgaeCollectionReady() {
-        return false;
-    }
+    
 }
 
