@@ -65,8 +65,8 @@ public class Paths {
                                             .setY(7.0055379746835449)
                                             .build(),
                                     XTableValues.ControlPoint.newBuilder()
-                                            .setX(0.96)
-                                            .setY(7.25)
+                                            .setX(1.05)
+                                            .setY(7.13)
                                             .build()
                             ))
                             .build())
@@ -111,8 +111,8 @@ public class Paths {
                                             .setY(7.0055379746835449)
                                             .build(),
                                     XTableValues.ControlPoint.newBuilder()
-                                            .setX(0.96)
-                                            .setY(7.25)
+                                            .setX(1.05)
+                                            .setY(7.13)
                                             .build()
                             ))
                             .build())
@@ -134,8 +134,8 @@ public class Paths {
                                             .setY(7.0055379746835449)
                                             .build(),
                                     XTableValues.ControlPoint.newBuilder()
-                                            .setX(0.96)
-                                            .setY(7.25)
+                                            .setX(1.05)
+                                            .setY(7.13)
                                             .build()
                             ))
                             .build())
@@ -180,8 +180,8 @@ public class Paths {
                                             .setY(4.9420886075949371)
                                             .build(),
                                     XTableValues.ControlPoint.newBuilder()
-                                            .setX(0.96)
-                                            .setY(7.25)
+                                            .setX(1.05)
+                                            .setY(7.13)
                                             .build()
                             ))
                             .build())
