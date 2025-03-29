@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import org.kobe.xbot.Utilities.Entities.XTableValues;
+import xbot.common.command.NamedInstantCommand;
 
 public class PathToBestReefBranchLevelThenAlignAndPrepCommandGroupFactory {
     Provider<PathDriveToLocationCommandUntilAprilTagDetectionDynamic>
@@ -54,7 +55,7 @@ public class PathToBestReefBranchLevelThenAlignAndPrepCommandGroupFactory {
                 driveToReefFaceCommandUntilAprilTagDetection.get();
         return new SequentialCommandGroup(
                 // Step 1: Configure and Run Path Drive
-                new InstantCommand(() -> {
+                new NamedInstantCommand("ConfigureAndRunPathDrive", () -> {
                     // This will auto get overwritten by XTABLES Vision Coprocessor
                     // (ORIN).
                     pathDriveToLocationUntilAprilTagDetectionDynamic.setTarget(
@@ -71,11 +72,11 @@ public class PathToBestReefBranchLevelThenAlignAndPrepCommandGroupFactory {
                 pathDriveToLocationUntilAprilTagDetectionDynamic,
 
                 // Step 2: Extract data after driving is done
-                new InstantCommand(() -> {
-                    if (pathDriveToLocationUntilAprilTagDetectionDynamic.curves
-                            .hasAlignToReefAprilTagOptions()) {
+                new NamedInstantCommand("ExtractDataAfterDriving", () -> {
+                    XTableValues.BezierCurves curves = pathDriveToLocationUntilAprilTagDetectionDynamic.curves.get();
+                    if (curves != null && curves.hasAlignToReefAprilTagOptions()) {
                         int cameraIndex =
-                                pathDriveToLocationUntilAprilTagDetectionDynamic.curves
+                                curves
                                         .getAlignToReefAprilTagOptions()
                                         .getCamera()
                                         .equals(XTableValues.AprilTagCamera.FRONT_LEFT)
@@ -83,7 +84,7 @@ public class PathToBestReefBranchLevelThenAlignAndPrepCommandGroupFactory {
                                         : Cameras.FRONT_RIGHT_CAMERA.getIndex();
 
                         alignToReefWithAprilTagCommand.setConfigurations(cameraIndex,
-                                pathDriveToLocationUntilAprilTagDetectionDynamic.curves
+                                curves
                                         .getAlignToReefAprilTagOptions()
                                         .getAprilTagID(),
                                 false, -2);
@@ -99,7 +100,7 @@ public class PathToBestReefBranchLevelThenAlignAndPrepCommandGroupFactory {
                                         ()
                                                 -> toCoralLevel(
                                                 pathDriveToLocationUntilAprilTagDetectionDynamic
-                                                        .curves.getAlignToReefAprilTagOptions()
+                                                        .curves.get().getAlignToReefAprilTagOptions()
                                                         .getBranchLevel())),
                                 scoreWhenReadyProvider.get())));
     }

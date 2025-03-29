@@ -1,7 +1,11 @@
 package competition.subsystems.pose;
 
+import competition.electrical_contract.ElectricalContract;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -10,6 +14,7 @@ import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 import static edu.wpi.first.units.Units.Meters;
 
@@ -155,12 +160,42 @@ public class Landmarks {
         }
     }
 
+    // Get a position to the reef facing the correct branch & robot size.
+    public static Pose2d getReefFaceBranchPose(
+            AprilTagFieldLayout aprilTagFieldLayout,
+            ElectricalContract electricalContract,
+            Landmarks.ReefFace reefFace, Landmarks.Branch branch) {
+        var alliance =
+                DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
+        var reefSections = Landmarks.getAllianceReefFiducialIds(alliance);
+        int aprilTagID = alliance.equals(DriverStation.Alliance.Red)
+                ? reefFace.getRedAprilTagID()
+                : reefFace.getBlueAprilTagID();
+        Optional<Pose3d> optionalPose3d =
+                aprilTagFieldLayout.getTagPose(aprilTagID);
+        if (optionalPose3d.isPresent()) {
+            Pose2d reefPose = optionalPose3d.get().toPose2d();
+            Pose2d offsettedPose = reefPose.transformBy(new Transform2d(
+                    new Translation2d(electricalContract.getDistanceFromCenterToOuterBumperX().in(Meters),
+                            branch.getOffsetFromReefAprilTagCenter().in(Meters)),
+                    new Rotation2d(0)));
+            return new Pose2d(offsettedPose.getX(), offsettedPose.getY(),
+                    offsettedPose.getRotation().plus(Rotation2d.fromDegrees(180)));
+        } else {
+            return null;
+        }
+    }
+
     public enum CoralLevel {
-        COLLECTING,
+        CORAL_COLLECTING,
         ONE,
         TWO,
         THREE,
-        FOUR
+        FOUR,
+        HIGH_ALGAE,
+        LOW_ALGAE,
+        SCORE_ALGAE_NET,
+        SCORE_ALGAE_PROCESSOR
     }
 
     public enum CoralStation {

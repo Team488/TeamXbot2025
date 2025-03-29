@@ -48,17 +48,17 @@ deploy {
                 // Note - the commented block below has the various configuration settings suggested by
                 // the AdvantageKit team.
                 //frcJava(getArtifactTypeClass('FRCJavaArtifact')) {
-                    //jvmArgs.add("-XX:+UnlockExperimentalVMOptions")
-                    //jvmArgs.add("-XX:GCTimeRatio=5")
-                    //jvmArgs.add("-XX:+UseSerialGC")
-                    //jvmArgs.add("-XX:MaxGCPauseMillis=50")
+                //jvmArgs.add("-XX:+UnlockExperimentalVMOptions")
+                //jvmArgs.add("-XX:GCTimeRatio=5")
+                //jvmArgs.add("-XX:+UseSerialGC")
+                //jvmArgs.add("-XX:MaxGCPauseMillis=50")
 
-                    // The options below may improve performance, but should only be enabled on the RIO 2
-                    //
-                     //final MAX_JAVA_HEAP_SIZE_MB = 100;
-                     //jvmArgs.add("-Xmx" + MAX_JAVA_HEAP_SIZE_MB + "M")
-                     //jvmArgs.add("-Xms" + MAX_JAVA_HEAP_SIZE_MB + "M")
-                     //jvmArgs.add("-XX:+AlwaysPreTouch")
+                // The options below may improve performance, but should only be enabled on the RIO 2
+                //
+                //final MAX_JAVA_HEAP_SIZE_MB = 100;
+                //jvmArgs.add("-Xmx" + MAX_JAVA_HEAP_SIZE_MB + "M")
+                //jvmArgs.add("-Xms" + MAX_JAVA_HEAP_SIZE_MB + "M")
+                //jvmArgs.add("-XX:+AlwaysPreTouch")
                 //}
 
                 // Static files artifact
@@ -96,10 +96,10 @@ repositories {
     }
 
     mavenLocal()
-    
+
     flatDir {
-       dirs 'SeriouslyCommonLib/build/libs'
-   }
+        dirs 'SeriouslyCommonLib/build/libs'
+    }
 }
 
 configurations {
@@ -114,6 +114,7 @@ dependencies {
     annotationProcessor wpi.java.deps.wpilibAnnotations()
     implementation wpi.java.deps.wpilib()
     implementation wpi.java.vendor.java()
+    customAspectJ wpi.java.deps.wpilib().findAll { dep -> dep.get().matches(/.*wpilibj-java.*/) }
     customAspectJ wpi.java.vendor.java().findAll { dep -> dep.get().matches(/.*NewCommands.*/) }
 
     roborioDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.roborio)
@@ -136,7 +137,7 @@ dependencies {
 
     implementation project(':SeriouslyCommonLib')
     customAspectJ project(':SeriouslyCommonLib')
-    implementation group: 'org.json', name:'json', version: '20220924'
+    implementation group: 'org.json', name: 'json', version: '20220924'
 
     implementation 'org.apache.logging.log4j:log4j-api:2.19.0'
     implementation 'org.apache.logging.log4j:log4j-core:2.19.0'
@@ -148,20 +149,28 @@ dependencies {
     testImplementation "org.mockito:mockito-core:3.12.4"
 
     // xtables
-    implementation "org.kobe.xbot:xtables:5.4.4"
+    implementation "org.kobe.xbot:xtables:5.4.9"
 
     def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
     annotationProcessor "org.littletonrobotics.akit:akit-autolog:$akitJson.version"
 }
 
-compileJava.ajc.options.compilerArgs += "-showWeaveInfo"
+// Uncomment the line below if you need to troubleshoot AspectJ weaving
+//compileJava.ajc.options.compilerArgs += "-showWeaveInfo"
 compileJava.ajc.options.inpath.from(configurations.customAspectJ)
 
 wpi.sim.addGui().defaultEnabled = true
 wpi.sim.addDriverstation()
 
 jar {
-    from { configurations.runtimeClasspath.findAll({ p -> !p.name.matches(/.*NewCommands.*/) && !p.name.matches(/.*SeriouslyCommonLib.*/) }).collect { it.isDirectory() ? it : zipTree(it) } }
+    from {
+        configurations.runtimeClasspath.findAll({ p ->
+            !p.name.matches(/.*NewCommands.*/)
+                    && !p.name.matches(/.*SeriouslyCommonLib.*/)
+                    && !p.name.matches(/.*wpilibj-java.*/)
+        })
+                .collect { it.isDirectory() ? it : zipTree(it) }
+    }
     manifest edu.wpi.first.gradlerio.GradleRIOPlugin.javaManifest(ROBOT_MAIN_CLASS)
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
@@ -171,9 +180,16 @@ deployArtifact.jarTask = jar
 wpi.java.configureExecutableTasks(jar)
 wpi.java.configureTestTasks(test)
 
+// We need to clean out the cached aspectJ files or else
+// the aspectJ compiler will not respect SCL updates
+tasks.register('cleanPreviousAspectJRun', Delete) {
+    delete "$buildDir/classes/java/main/xbot/common"
+}
+
 // Configure string concat to always inline compile
 tasks.withType(JavaCompile) {
     options.compilerArgs.add '-XDstringConcat=inline'
+    dependsOn cleanPreviousAspectJRun
 }
 
 // Our custom gradle stuff after this line
@@ -207,7 +223,7 @@ checkstyle {
 task checkstyle(type: Checkstyle) {
     source 'src/main/java'
     configProperties.basedir = file('SeriouslyCommonLib')
-    
+
     // Empty classpath
     classpath = files()
 }
@@ -215,7 +231,7 @@ task checkstyle(type: Checkstyle) {
 test {
     reports {
         junitXml.required = true
-    }               
+    }
 }
 
 // Configuration for AdvantageKit
@@ -226,15 +242,15 @@ task(replayWatch, type: JavaExec) {
 
 tasks.withType(Test) {
     testLogging.showStandardStreams = true
-    
-    afterTest { desc, result -> 
+
+    afterTest { desc, result ->
         logger.quiet "Executed test ${desc.name} [${desc.className}] with result: ${result.resultType}"
     }
 
     afterSuite { desc, result ->
-      if (!desc.parent) { // will match the outermost suite
-        logger.quiet "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
-      }
+        if (!desc.parent) { // will match the outermost suite
+            logger.quiet "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
+        }
     }
 }
 

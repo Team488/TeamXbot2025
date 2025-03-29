@@ -7,7 +7,9 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import xbot.common.command.DelayViaSupplierCommand;
 import xbot.common.properties.DistanceProperty;
+import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 
 import javax.inject.Inject;
@@ -17,14 +19,15 @@ import static edu.wpi.first.units.Units.Meters;
 
 public class DriveToFaceAndScoreCommandGroupFactory {
 
-    DriveToReefFaceThenAlignCommandGroupFactory driveToReefFaceThenAlignCommandGroupFactory;
-    Provider<MeasureDistanceBeforeScoringCommand> measureDistanceBeforeScoringCommandProvider;
-    PrepCoralSystemCommandGroupFactory prepCoralSystemFactory;
-    Provider<ScoreWhenReadyCommand> scoreWhenReadyProvider;
+    final DriveToReefFaceThenAlignCommandGroupFactory driveToReefFaceThenAlignCommandGroupFactory;
+    final Provider<MeasureDistanceBeforeScoringCommand> measureDistanceBeforeScoringCommandProvider;
+    final PrepCoralSystemCommandGroupFactory prepCoralSystemFactory;
+    final Provider<ScoreWhenReadyCommand> scoreWhenReadyProvider;
 
-    DistanceProperty levelOneDistanceThreshold;
-    DistanceProperty levelTwoDistanceThreshold;
-    DistanceProperty levelFourDistanceThreshold;
+    final DistanceProperty levelOneDistanceThreshold;
+    final DistanceProperty levelTwoDistanceThreshold;
+    final DistanceProperty levelFourDistanceThreshold;
+    final DoubleProperty waitBeforeScoringInSeconds;
 
     @Inject
     public DriveToFaceAndScoreCommandGroupFactory(DriveToReefFaceThenAlignCommandGroupFactory driveToReefFaceThenAlignCommandGroupFactory,
@@ -41,6 +44,7 @@ public class DriveToFaceAndScoreCommandGroupFactory {
         levelOneDistanceThreshold = pf.createPersistentProperty("LevelOneDistanceThresholdInMeters", Meters.of(2));
         levelTwoDistanceThreshold = pf.createPersistentProperty("LevelTwoDistanceThresholdInMeters", Meters.of(2));
         levelFourDistanceThreshold = pf.createPersistentProperty("LevelFourDistanceThresholdInMeters",  Meters.of(1.5));
+        waitBeforeScoringInSeconds = pf.createPersistentProperty("WaitBeforeScoringInSeconds", 0.4);
 
     }
 
@@ -49,15 +53,18 @@ public class DriveToFaceAndScoreCommandGroupFactory {
                                          Landmarks.CoralLevel targetLevel) {
         // Overarching command group — drives to branch and preps coral system once the robot is close enough to the reef, scores when ready
         var driveToFaceAndScoreCommandGroup = new SequentialCommandGroup();
+        driveToFaceAndScoreCommandGroup.setName("DriveToFaceAndScore");
 
         // Drive to a branch while prepping the coral system once the robot is close enough
         var driveToBranchWhilePrepping = new ParallelCommandGroup();
+        driveToBranchWhilePrepping.setName("DriveToBranchWhilePrepping");
 
         // Terminally approach to branch
         var driveToReefFaceThenAlign = driveToReefFaceThenAlignCommandGroupFactory.create(targetReefFace, targetBranch);
 
         // Prep coral system once robot is within a distance threshold
         var measureDistanceThenPrep = new SequentialCommandGroup();
+        measureDistanceThenPrep.setName("MeasureDistanceThenPrep");
         Distance distanceThresholdInMeters = switch (targetLevel) { // Distance threshold may be much bigger for lower levels
             case ONE -> levelOneDistanceThreshold.get();
             case TWO -> levelTwoDistanceThreshold.get();
@@ -74,7 +81,7 @@ public class DriveToFaceAndScoreCommandGroupFactory {
         driveToBranchWhilePrepping.addCommands(driveToReefFaceThenAlign, measureDistanceThenPrep);
 
         var scoreWhenReady = scoreWhenReadyProvider.get();
-        var waitBeforeScoring = new WaitCommand(0.8); // Wait for the wobble to go away
+        var waitBeforeScoring = new DelayViaSupplierCommand(() -> waitBeforeScoringInSeconds.get()); // Wait for the wobble to go away
 
         driveToFaceAndScoreCommandGroup.addCommands(driveToBranchWhilePrepping, waitBeforeScoring, scoreWhenReady);
 

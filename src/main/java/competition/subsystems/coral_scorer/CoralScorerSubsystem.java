@@ -15,7 +15,7 @@ import xbot.common.properties.PropertyFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import static competition.subsystems.coral_scorer.CoralScorerSubsystem.CoralScorerState.SCORING;
+import static competition.subsystems.coral_scorer.CoralScorerSubsystem.CoralScorerState.SCORING_CORAL;
 import static competition.subsystems.coral_scorer.CoralScorerSubsystem.CoralScorerState.STOPPED;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
@@ -23,15 +23,19 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollectionInfoSource {
 
     public enum CoralScorerState {
-        INTAKING,
-        SCORING,
+        INTAKING_CORAL,
+        SCORING_CORAL,
+        INTAKING_ALGAE,
+        SCORING_ALGAE,
         STOPPED
     }
 
     public final XCANMotorController motor;
-    public final DoubleProperty intakePower;
+    public final DoubleProperty intakeCoralPower;
     public final DoubleProperty hasCoralIntakePower;
-    public final DoubleProperty scorePower;
+    public final DoubleProperty scoreCoralPower;
+    public final DoubleProperty intakeAlgaePower;
+    public final DoubleProperty scoreAlgaePower;
     public final XDigitalInput coralSensor;
     final Alert hasCoralAlert = new Alert("Confidently has coral", Alert.AlertType.kInfo);
     public final ElectricalContract electricalContract;
@@ -67,9 +71,11 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
 
         this.coralScorerState = STOPPED;
 
-        this.intakePower = propertyFactory.createPersistentProperty("intakePower", 0.3);
+        this.intakeCoralPower = propertyFactory.createPersistentProperty("intakeCoralPower", 0.3);
         this.hasCoralIntakePower = propertyFactory.createPersistentProperty("hasCoralIntakePower", 0.05);
-        this.scorePower = propertyFactory.createPersistentProperty("scorerPower", -0.8);
+        this.scoreCoralPower = propertyFactory.createPersistentProperty("scorerPower", -0.8);
+        this.intakeAlgaePower = propertyFactory.createPersistentProperty("intakeAlgaePower", 0.5);
+        this.scoreAlgaePower = propertyFactory.createPersistentProperty("scoreAlgaePower", -1);
         this.waitTimeAfterScoring = propertyFactory.createPersistentProperty("waitTimeAfterScoring", 0.2);
         this.waitTimeAfterCollection = propertyFactory.createPersistentProperty("waitTimeAfterCollection", 0.1);
 
@@ -81,7 +87,7 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
     }
 
     public void setCoralScorerState(CoralScorerState state) {
-        if (coralScorerState != SCORING && state == SCORING) {
+        if (coralScorerState != SCORING_CORAL && state == SCORING_CORAL) {
             lastScoredTime = XTimer.getFPGATimestamp();;
         }
         coralScorerState = state;
@@ -95,11 +101,11 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
 
     private void setPowerForState(CoralScorerState state) {
         switch (state) {
-            case INTAKING:
-                intake();
+            case INTAKING_CORAL:
+                intakeCoral();
                 break;
-            case SCORING:
-                score();
+            case SCORING_CORAL:
+                scoreCoral();
                 break;
             case STOPPED:
             default:
@@ -108,19 +114,30 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
         }
     }
 
-    private void intake() {
+    private void intakeCoral() {
         if (confidentlyHasCoral()) {
             setCoralScorerMotorPower(hasCoralIntakePower.get());
         } else {
-            setCoralScorerMotorPower(intakePower.get());
+            setCoralScorerMotorPower(intakeCoralPower.get());
         }
     }
 
-    private void score() {
-        setCoralScorerMotorPower(scorePower.get());
-        if (coralScorerState != SCORING) {
+    private void scoreCoral() {
+        setCoralScorerMotorPower(scoreCoralPower.get());
+        if (coralScorerState != SCORING_CORAL) {
             lastScoredTime = XTimer.getFPGATimestamp();
+        }
     }
+
+    private void intakeAlgae() {
+        setCoralScorerMotorPower(intakeAlgaePower.get());
+        if (coralScorerState != SCORING_CORAL) {
+            lastScoredTime = XTimer.getFPGATimestamp();
+        }
+    }
+
+    private void scoreAlgae() {
+        setCoralScorerMotorPower(scoreCoralPower.get());
     }
 
     private void stop() {
@@ -134,13 +151,13 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
         return false;
     }
     public double getSecondsSinceScoringStarted() {
-        if (coralScorerState != SCORING) {
+        if (coralScorerState != SCORING_CORAL) {
             return 0;
         }
         return XTimer.getFPGATimestamp() - lastScoredTime;
     }
     public boolean confidentlyHasScoredCoral() {
-        return (getSecondsSinceScoringStarted() > waitTimeAfterScoring.get() && coralScorerState == SCORING);
+        return (getSecondsSinceScoringStarted() > waitTimeAfterScoring.get() && coralScorerState == SCORING_CORAL);
     }
 
     @Override
@@ -154,7 +171,7 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
 
 
     private boolean coralLikelyJammed() {
-        return coralScorerState == CoralScorerState.INTAKING
+        return coralScorerState == CoralScorerState.INTAKING_CORAL
                 && Math.abs(motor.getVelocity().in(RotationsPerSecond)) < intakeFreeSpeedRPSProperty.get();
 
     }
@@ -173,11 +190,17 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
         }
 
         switch (coralScorerState) {
-            case INTAKING:
-                intake();
+            case INTAKING_CORAL:
+                intakeCoral();
                 break;
-            case SCORING:
-                score();
+            case SCORING_CORAL:
+                scoreCoral();
+                break;
+            case INTAKING_ALGAE:
+                intakeAlgae();
+                break;
+            case SCORING_ALGAE:
+                scoreAlgae();
                 break;
             case STOPPED:
             default:

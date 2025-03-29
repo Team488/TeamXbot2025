@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
 import xbot.common.controls.actuators.XCANMotorControllerPIDProperties;
-import xbot.common.controls.sensors.XAbsoluteEncoder;
 import xbot.common.controls.sensors.XDigitalInput;
 import xbot.common.controls.sensors.XDutyCycleEncoder;
 import xbot.common.math.MathUtils;
@@ -48,6 +47,10 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     public final DoubleProperty humanLoadAngleDegrees;
     public final DoubleProperty rangeOfMotionDegrees;
     public final DoubleProperty powerWhenNotCalibrated;
+    public final DoubleProperty autoCalibrationDegrees;
+    public final DoubleProperty algaeCollectAngleInDegrees;
+    public final DoubleProperty algaeScoreNetAngleInDegrees;
+    public final DoubleProperty algaeProcessorAngleInDegrees;
 
     public Landmarks.CoralLevel targetCoralLevel;
 
@@ -91,13 +94,20 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
             this.lowSensor = null;
         }
 
-        this.level123ScoringAngle = propertyFactory.createPersistentProperty("Level 1/2/3 Scoring Angle", 137);
-        this.level4ScoringAngle = propertyFactory.createPersistentProperty("Level 4 Scoring Angle", 162);
+        propertyFactory.setDefaultLevel(PropertyLevel.Important);
+        this.level123ScoringAngle = propertyFactory.createPersistentProperty("Level 1 2 3 Scoring Angle", 136);
+        this.level4ScoringAngle = propertyFactory.createPersistentProperty("Level 4 Scoring Angle", 166);
+        // NOTE: For now, the human loading angle is "vertical" with respect to the ground, which should also match
+        // the "AutoCalibrationDegrees" value.
+        this.humanLoadAngleDegrees = propertyFactory.createPersistentProperty("Human Loading Angle in Degrees", 13.8);
+        this.algaeCollectAngleInDegrees = propertyFactory.createPersistentProperty("Algae Collect Angle in Degrees", 65);
+        this.algaeScoreNetAngleInDegrees = propertyFactory.createPersistentProperty("Algae Score Net Angle in Degrees", 136);
+        this.algaeProcessorAngleInDegrees = propertyFactory.createPersistentProperty("Algae Score Processor Angle in Degrees", 65);
         propertyFactory.setDefaultLevel(PropertyLevel.Debug);
-        this.humanLoadAngleDegrees = propertyFactory.createPersistentProperty("Human Loading Angle in Degrees", 0);
         this.degreesPerRotations = propertyFactory.createPersistentProperty("Degrees Per Rotations", 5.790);
-        this.rangeOfMotionDegrees = propertyFactory.createPersistentProperty("Range of Motion in Degrees", 162);
+        this.rangeOfMotionDegrees = propertyFactory.createPersistentProperty("Range of Motion in Degrees", 170);
         this.powerWhenNotCalibrated = propertyFactory.createPersistentProperty("Power When Not Calibrated", 0.25);
+        this.autoCalibrationDegrees = propertyFactory.createPersistentProperty("AutoCalibrationDegrees", 13.8);
         propertyFactory.setDefaultLevel(PropertyLevel.Important);
     }
 
@@ -172,7 +182,17 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
             case FOUR:
                 setTargetValue(Degrees.of(level4ScoringAngle.get()));
                 break;
-            case COLLECTING:
+            case LOW_ALGAE:
+            case HIGH_ALGAE:
+                setTargetValue(Degrees.of(algaeCollectAngleInDegrees.get()));
+                break;
+            case SCORE_ALGAE_NET:
+                setTargetValue(Degrees.of(algaeScoreNetAngleInDegrees.get()));
+                break;
+            case SCORE_ALGAE_PROCESSOR:
+                setTargetValue(Degrees.of(algaeProcessorAngleInDegrees.get()));
+                break;
+            case CORAL_COLLECTING:
             default:
                 setTargetValue(Degrees.of(humanLoadAngleDegrees.get()));
                 break;
@@ -276,6 +296,14 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
         // convert from [0,1] position to arm angle in degrees
         return Degrees.of(armPosition * rangeOfMotionDegrees);
 
+    }
+
+    public void forceCalibrationAtAutonomous() {
+        if (electricalContract.isCoralArmMotorReady()) {
+            rotationsAtZero = getMotorPosition().in(Rotations)
+                    - (autoCalibrationDegrees.get() / (degreesPerRotations.get()));
+        }
+        isCalibrated = true;
     }
 
     public void forceCalibratedHere() {

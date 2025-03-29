@@ -13,8 +13,8 @@ import competition.subsystems.coral_arm.CoralArmSubsystem;
 import competition.subsystems.coral_scorer.CoralScorerSubsystem;
 import competition.subsystems.drive.commands.AlignToNearestCoralStationCommand;
 import competition.subsystems.drive.commands.EmergencyAutonomousCommand;
+import competition.subsystems.deadwheel.DeadWheelSubsystem;
 import competition.subsystems.elevator.ElevatorSubsystem;
-import competition.subsystems.oracle.OracleSubsystem;
 import competition.subsystems.oracle.ReefCoordinateGenerator;
 import competition.subsystems.oracle.ScoringQueue;
 import competition.subsystems.pose.PoseSubsystem;
@@ -25,7 +25,6 @@ import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import xbot.common.injection.components.BaseComponent;
 import xbot.common.injection.swerve.SwerveComponentHolder;
 import xbot.common.subsystems.drive.swerve.SwerveDefaultCommandMap;
-import xbot.common.subsystems.pose.BasePoseSubsystem;
 import xbot.common.subsystems.pose.GameField;
 
 public abstract class BaseRobotComponent extends BaseComponent {
@@ -54,8 +53,6 @@ public abstract class BaseRobotComponent extends BaseComponent {
 
     public abstract SuperstructureMechanismSubsystem superstructureMechanismSubsystem();
 
-    public abstract OracleSubsystem oracleSubsystem();
-
     public abstract ElectricalContract electricalContract();
 
     public abstract ReefCoordinateGenerator reefCoordinateGenerator();
@@ -74,9 +71,13 @@ public abstract class BaseRobotComponent extends BaseComponent {
 
     public abstract AlgaeArmSubsystem algaeArmSubsystem();
 
+    public abstract CoralArmSubsystem coralArmSubsystem();
+
     public abstract AlgaeCollectionSubsystem algaeCollectionSubsystem();
 
     public abstract EmergencyAutonomousCommand emergencyAutonomousCommand();
 
     public abstract AlignToNearestCoralStationCommand alignToNearestCoralStationCommand();
+
+    public abstract DeadWheelSubsystem deadWheelSubsystem();
 }

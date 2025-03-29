@@ -36,13 +36,15 @@ public class DriveToStationAndIntakeUntilCollectedCommandGroupFactory {
                                          boolean addPoint) {
         // Overarching command group — preps coral system and drives to coral station at the same time, command group stops if a coral is collected
         var driveUntilIntake = new ParallelDeadlineGroup(intakeUntilCoralCollectedCommandProv.get());
+        driveUntilIntake.setName("DriveToStationAndIntakeUntilCollectedCommandGroup");
 
         // Prep coral system to coral collection
-        var prepCoralSystem = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
+        var prepCoralSystem = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.CORAL_COLLECTING);
         driveUntilIntake.addCommands(prepCoralSystem);
 
         // Drive to coral station using terminal approach, have an interstitial point if needed
         var driveToCoralStation = new SequentialCommandGroup();
+        driveToCoralStation.setName("DriveToCoralStation");
         // We can add an interstitial point between scoring at the reef and terminally approaching to the coral station to avoid rotating into the reef
         if (addPoint) {
             var driveToCoralStationSectionCommand = driveToCoralStationSectionCommandProv.get();

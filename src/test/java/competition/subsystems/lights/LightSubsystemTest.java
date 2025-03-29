@@ -14,9 +14,11 @@ public class LightSubsystemTest extends BaseCompetitionTest {
         var subsystem = getInjectorComponent().lightSubsystem();
         var autonomous = getInjectorComponent().autonomousCommandSelector();
         var command = getInjectorComponent().alignToNearestCoralStationCommand();
+        var vision = getInjectorComponent().aprilTagVisionSubsystemExtended();
         assertNotNull(subsystem);
 
         autonomous.setCurrentAutonomousCommand(getInjectorComponent().emergencyAutonomousCommand());
+        vision.refreshDataFrame();
 
         subsystem.refreshDataFrame();
         subsystem.periodic();

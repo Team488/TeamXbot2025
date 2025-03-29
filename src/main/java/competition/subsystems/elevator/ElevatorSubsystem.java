@@ -18,6 +18,7 @@ import xbot.common.controls.actuators.XCANMotorControllerPIDProperties;
 import xbot.common.controls.sensors.XDigitalInput;
 import xbot.common.controls.sensors.XLaserCAN;
 import xbot.common.math.MathUtils;
+import xbot.common.properties.BooleanProperty;
 import xbot.common.properties.DistanceProperty;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
@@ -26,12 +27,14 @@ import xbot.common.properties.Property.PropertyLevel;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import java.util.Optional;
+
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Hertz;
 import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Second;
@@ -60,7 +63,10 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     public final DoubleProperty powerNearUpperLimitThreshold;
     public final DoubleProperty powerWhenBottomSensorHit;
 
+    public final DoubleProperty motionMagicAcceleration;
+    public final DoubleProperty motionMagicJerk;
 
+    public final BooleanProperty motionMagicEnabled;
 
     public XCANMotorController masterMotor;
 
@@ -72,9 +78,15 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     public final DistanceProperty l3Height;
     public final DistanceProperty l4Height;
     public final DistanceProperty humanLoadHeight;
+    public final DistanceProperty highAlgaeRemovalHeight;
+    public final DistanceProperty lowAlgaeRemovalHeight;
+    public final DistanceProperty scoreAlgaeNetHeight;
+    public final DistanceProperty scoreAlgaeProcessorHeight;
     public final DistanceProperty baseHeight;
     public final DistanceProperty trimValue;
     public final DistanceProperty trimChangeAmount;
+
+    public final DoubleProperty laserCanMaxMeasurementLatency;
 
     public final XDigitalInput bottomSensor;
     public final XLaserCAN distanceSensor;
@@ -94,15 +106,19 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
         pf.setPrefix(this);
 
-        l2Height = pf.createPersistentProperty("l2Height", Inches.of(0.5));
-        l3Height = pf.createPersistentProperty("l3Height", Inches.of(16.0));
-        l4Height = pf.createPersistentProperty("l4Height", Inches.of(46.0));
+        l2Height = pf.createPersistentProperty("l2Height", Inches.of(1.5));
+        l3Height = pf.createPersistentProperty("l3Height", Inches.of(16.25));
+        l4Height = pf.createPersistentProperty("l4Height", Inches.of(47.5));
         humanLoadHeight = pf.createPersistentProperty("humanLoadHeight", Inches.of(1));
+        highAlgaeRemovalHeight = pf.createPersistentProperty("highAlgaeRemovalHeight", Inches.of(30));
+        lowAlgaeRemovalHeight = pf.createPersistentProperty("lowAlgaeRemovalHeight", Inches.of(17));
+        scoreAlgaeNetHeight = pf.createPersistentProperty("scoreAlgaeNetHeight", Inches.of(47.5));
+        scoreAlgaeProcessorHeight = pf.createPersistentProperty("scoreAlgaeProcessorHeight", Inches.of(1));
         pf.setDefaultLevel(PropertyLevel.Debug);
         baseHeight = pf.createPersistentProperty("baseHeight", Inches.of(0));
         trimValue = pf.createPersistentProperty("trimValue",Inches.of(0));
         trimChangeAmount = pf.createPersistentProperty("TrimUpAmount", Inches.of(1));
-
+        laserCanMaxMeasurementLatency = pf.createPersistentProperty("laserCanMaxMeasurementLatency-S", 0.04);
 
 
         //to be tuned
@@ -121,6 +137,11 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         this.powerNearUpperLimitThreshold = pf.createPersistentProperty("powerNearUpperLimit", 0.0);
         this.powerNearLowerLimitThreshold = pf.createPersistentProperty("powerNearLowerLimit", 0.0);
         this.powerWhenBottomSensorHit = pf.createPersistentProperty("powerWhenBottomSensorHit", 0);
+
+        this.motionMagicAcceleration = pf.createPersistentProperty("motionMagicMaxAcceleration", 1);
+        this.motionMagicJerk = pf.createPersistentProperty("motionMagicMaxJerk", 0.1);
+
+        this.motionMagicEnabled = pf.createPersistentProperty("motionMagicEnabled", false);
         pf.setDefaultLevel(PropertyLevel.Important);
 
 
@@ -151,6 +172,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
                     );
             this.registerDataFrameRefreshable(masterMotor);
             masterMotor.setPositionAndVelocityUpdateFrequency(Hertz.of(50));
+            configureMotionMagicConstraints();
         }
 
         if (contract.isElevatorBottomSensorReady()) {
@@ -192,28 +214,59 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         }
     }
 
-    public void markElevatorAsCalibratedAgainstLowerLimit() {
-        isCalibrated = true;
-        if (this.masterMotor != null) {
-            laserCANPositionOffset.mut_replace(getRawLaserDistance());
-            elevatorMotorPositionOffset.mut_replace(getRawMotorAngle().copy());
-        } else {
-            laserCANPositionOffset.mut_replace(Meters.zero());
-            elevatorMotorPositionOffset.mut_replace(Rotations.zero());
-        }
+    /**
+     * This method sets the LaserCAN sensor offset if the sensor is reporting a
+     * valid value. This should only be called when the elevator is touching the
+     * bottom sensor.
+     * @return true if the offset was set successfully
+     */
+    private boolean trySetLaserCANOffset() {
+        var distance = getRawLaserDistance();
+        distance.ifPresent(laserCANPositionOffset::mut_replace);
+        return distance.isPresent();
     }
 
-    private void calibrateElevatorMotorOffsetViaLaserCAN() {
-        var laserDistance = getCalibratedLaserDistance();
+    private boolean trySetMotorOffset() {
         var motorRotations = getRawMotorAngle();
-        var motorRotationsToZero = Rotations.of(laserDistance.in(Meters) / getMetersPerRotation().in(Meters));
-        elevatorMotorPositionOffset.mut_replace(motorRotations.minus(motorRotationsToZero));
+        if (motorRotations != null) {
+            elevatorMotorPositionOffset.mut_replace(motorRotations);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * This method attempts to calibrate the elevator against the lower limit. It
+     * will set the laserCAN offset and the motor offset if the sensor is reporting a
+     * valid value. This should only be called when the elevator is touching the
+     * bottom sensor.
+     * @return true if the calibration was successful
+     */
+    public boolean tryMarkElevatorCalibratedAgainstLowerLimit() {
+        var success = trySetLaserCANOffset() && trySetMotorOffset();
+        if (success) {
+            isCalibrated = true;
+        }
+        return success;
+    }
+
+    private boolean tryCalibrateMotorOffsetViaLaserCAN() {
+        if (!isCalibrated) {
+            return false;
+        }
+        var laserDistance = getCalibratedLaserDistance();
+        laserDistance.ifPresent(d -> {
+            var motorRotations = getRawMotorAngle();
+            var motorRotationsToZero = Rotations.of(d.in(Meters) / getMetersPerRotation().in(Meters));
+            elevatorMotorPositionOffset.mut_replace(motorRotations.minus(motorRotationsToZero));
+        });
+        return laserDistance.isPresent();
     }
 
     @Override
     public Distance getCurrentValue() {
         return Meters.of(sensorFusionFilter.calculateFilteredValue(
-                getCalibratedLaserDistance().in(Meters),
+                getCalibratedLaserDistance().map(d -> d.in(Meters)).orElse(Double.MAX_VALUE),
                 getCalibratedMotorDistance().in(Meters)));
     }
 
@@ -240,7 +293,11 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
             case TWO -> setTargetValue(l2Height.get());
             case THREE -> setTargetValue(l3Height.get().plus(trimValue.get()));
             case FOUR -> setTargetValue(l4Height.get().plus(trimValue.get()));
-            case COLLECTING -> setTargetValue(humanLoadHeight.get());
+            case CORAL_COLLECTING -> setTargetValue(humanLoadHeight.get());
+            case HIGH_ALGAE -> setTargetValue(highAlgaeRemovalHeight.get());
+            case LOW_ALGAE -> setTargetValue(lowAlgaeRemovalHeight.get());
+            case SCORE_ALGAE_NET -> setTargetValue(scoreAlgaeNetHeight.get());
+            case SCORE_ALGAE_PROCESSOR -> setTargetValue(scoreAlgaeProcessorHeight.get());
             default -> setTargetValue(baseHeight.get());
         }
     }
@@ -265,18 +322,17 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         return isCalibrated;
     }
 
-    private Distance getCalibratedLaserDistance() {
-        return getRawLaserDistance().minus(laserCANPositionOffset);
+    private Optional<Distance> getCalibratedLaserDistance() {
+        return getRawLaserDistance().map(d -> d.minus(laserCANPositionOffset));
     }
 
-    private Distance getRawLaserDistance() {
+    private Optional<Distance> getRawLaserDistance() {
         if (contract.isElevatorDistanceSensorReady()) {
             var distance = distanceSensor.getDistance();
-            if (distance != null) {
-                return distance;
-            }
+            var latency = distanceSensor.getMeasurementLatency();
+            return distance.filter(d -> latency.lt(Seconds.of(laserCanMaxMeasurementLatency.get())));
         }
-        return Meter.of(0);
+        return Optional.empty();
     }
 
     private Angle getRawMotorAngle() {
@@ -315,7 +371,9 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         var deltaRotations = Rotations.of(heightDelta.in(Meters) * rotationsPerMeter.get());
         masterMotor.setPositionTarget(
                 masterMotor.getPosition().plus(deltaRotations),
-                XCANMotorController.MotorPidMode.Voltage);
+                motionMagicEnabled.get()
+                ? XCANMotorController.MotorPidMode.TrapezoidalVoltage
+                : XCANMotorController.MotorPidMode.Voltage);
     }
 
     /**
@@ -346,31 +404,48 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         trimValue.set(trimValue.get().minus((Inches.of(trimChangeAmount.get().in(Inches)))));
     }
 
+    public void toggleMotionMagic(){
+        motionMagicEnabled.set(!motionMagicEnabled.get());
+    }
+
+    public boolean isMotionMagicEnabled(){
+        return motionMagicEnabled.get();
+    }
+
+    public void configureMotionMagicConstraints(){
+        masterMotor.setTrapezoidalProfileAcceleration(RadiansPerSecondPerSecond.of(motionMagicAcceleration.get()));
+        masterMotor.setTrapezoidalProfileJerk(RadiansPerSecondPerSecond.of(motionMagicJerk.get()).per(Second));
+    }
+
     @Override
     public void periodic() {
         if (contract.isElevatorReady()) {
             masterMotor.periodic();
         }
+        if(motionMagicAcceleration.hasChangedSinceLastCheck() || motionMagicJerk.hasChangedSinceLastCheck()){
+            configureMotionMagicConstraints();
+        }
         //bandage case: isTouchingBottom flashes true for one tick on startup, investigate later?
         if (this.isTouchingBottom() && periodicTickCounter >= 3 && !isCalibrated()) {
-            markElevatorAsCalibratedAgainstLowerLimit();
-            setTargetValue(getCurrentValue());
+            // Calibration may fail if the LaserCAN is not reporting a valid value
+            if (tryMarkElevatorCalibratedAgainstLowerLimit()) {
+                setTargetValue(getCurrentValue());
+            }
         }
 
-        aKitLog.record("ElevatorTrimValue", trimValue.get().in(Inches));
-        aKitLog.record("ElevatorTargetHeight-m", elevatorTargetHeight.in(Inches));
-        aKitLog.record("ElevatorCurrentHeight-m", getCurrentValue().in(Inches));
+        aKitLog.record("ElevatorTrimValue", trimValue.get().in(Meters));
+        aKitLog.record("ElevatorTargetHeight-m", elevatorTargetHeight.in(Meters));
+        aKitLog.record("ElevatorCurrentHeight-m", getCurrentValue().in(Meters));
         aKitLog.record("ElevatorBottomSensor", this.isTouchingBottom());
         aKitLog.record("isElevatorCalibrated", isCalibrated());
         aKitLog.record("isElevatorMaintainerAtGoal", this.isMaintainerAtGoal());
         isNotCalibratedAlert.set(!isCalibrated());
-        aKitLog.record("ElevatorDistanceSensor-m", getRawLaserDistance().in(Meters));
-        aKitLog.record("CalibratedElevatorDistanceSensor-m", getCalibratedLaserDistance().in(Meters));
+        getRawLaserDistance().ifPresent(d -> aKitLog.record("ElevatorDistanceSensor-m", d.in(Meters)));
+        getCalibratedLaserDistance().ifPresent(d -> aKitLog.record("CalibratedElevatorDistanceSensor-m", d.in(Meters)));
         aKitLog.record("CalibratedElevatorMotorSensor-m", getCalibratedMotorDistance().in(Meters));
         aKitLog.record("MotorOffset-rotations", elevatorMotorPositionOffset.in(Rotations));
+        aKitLog.record("LaserCANOffset", laserCANPositionOffset.in(Meters));
 
         periodicTickCounter++;
     }
-
-
 }

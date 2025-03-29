@@ -7,7 +7,6 @@ import competition.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.units.measure.Distance;
 import xbot.common.advantage.AKitLogger;
 import xbot.common.command.BaseMaintainerCommand;
-import xbot.common.controls.actuators.XCANMotorController;
 import xbot.common.logic.CalibrationDecider;
 import xbot.common.logic.HumanVsMachineDecider;
 import xbot.common.math.MathUtils;
@@ -18,7 +17,6 @@ import xbot.common.properties.PropertyFactory;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Rotations;
 import static xbot.common.logic.CalibrationDecider.CalibrationMode.GaveUp;
 
 import javax.inject.Inject;
@@ -35,6 +33,8 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     final DoubleProperty humanMaxPowerGoingDown;
 
     final DoubleProperty gravityPIDConstantPower;
+
+    final DoubleProperty manualGravityPower;
 
     final TrapezoidProfileManager.Factory trapezoidProfileManagerFactory;
     TrapezoidProfileManager profileManager;
@@ -65,6 +65,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         this.humanMaxPowerGoingDown = pf.createPersistentProperty("humanMaxPowerGoingDown", -0.2);
 
         this.gravityPIDConstantPower = pf.createPersistentProperty("gravityPIDConstant", 0.07416666);
+        this.manualGravityPower = pf.createPersistentProperty("manualGravityPower", 0);
 
         decider.setDeadband(0.02);
     }
@@ -72,9 +73,9 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     private void createNewProfileManager(){
         profileManager = trapezoidProfileManagerFactory.create(
                 getPrefix() + "trapezoidMotion",
-                1, // 5 for competition
-                1, // 3.5 for competition
-                1000, //tune for real robot
+                5, // 5 for competition
+                3.5, // 3.5 for competition
+                0.16, //tune for real robot
                 elevator.getCurrentValue().in(Meters));
     }
 
@@ -99,7 +100,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
 
     @Override
     protected void coastAction() {
-        elevator.setPower(0);
+        elevator.setPower(manualGravityPower.get()); // Should help the elevator fall slower instead of falling really fast at 0 power
     }
 
     @Override
@@ -113,15 +114,20 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         aKitLog.record("PM-CurrentVelocity", elevator.getCurrentVelocity().in(MetersPerSecond));
         aKitLog.setLogLevel(AKitLogger.LogLevel.INFO);
 
-        profileManager.setTargetPosition(
-            elevator.getTargetValue().in(Meters),
-            currentValue.in(Meters),
-            elevator.getCurrentVelocity().in(MetersPerSecond)
-        );
-        var setpoint = profileManager.getRecommendedPositionForTime();
-        aKitLog.record("elevatorProfileTarget", setpoint);
+        if (elevator.isMotionMagicEnabled()){
+            elevator.setElevatorHeightGoalOnMotor(elevator.getTargetValue().in(Meters));
+        }
+        else {
+            profileManager.setTargetPosition(
+                    elevator.getTargetValue().in(Meters),
+                    currentValue.in(Meters),
+                    elevator.getCurrentVelocity().in(MetersPerSecond)
+            );
+            var setpoint = profileManager.getRecommendedPositionForTime();
+            aKitLog.record("elevatorProfileTarget", setpoint);
 
-        elevator.setElevatorHeightGoalOnMotor(setpoint);
+            elevator.setElevatorHeightGoalOnMotor(setpoint);
+        }
     }
 
     //defaults humanControlAction if there is no bottom sensor
@@ -140,14 +146,14 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         elevator.setPower(elevator.calibrationNegativePower.get());
 
         if (elevator.isTouchingBottom()) {
-            elevator.markElevatorAsCalibratedAgainstLowerLimit();
+            elevator.tryMarkElevatorCalibratedAgainstLowerLimit();
             elevator.setTargetValue(elevator.getCurrentValue());
         }
     }
 
     @Override
     protected void humanControlAction() {
-        super.humanControlAction();
+        elevator.setPower(getHumanInput() + manualGravityPower.get());
     }
 
     //returns error magnitude of elevator in inches

@@ -5,20 +5,19 @@ import xbot.common.command.BaseCommand;
 
 import javax.inject.Inject;
 
-//This command exists entirely for testing purposes
-public class ForceElevatorCalibratedCommand extends BaseCommand {
-
+public class ToggleElevatorMotionMagicCommand extends BaseCommand {
     ElevatorSubsystem elevator;
 
     @Inject
-    public ForceElevatorCalibratedCommand(ElevatorSubsystem elevator){
+    public ToggleElevatorMotionMagicCommand(ElevatorSubsystem elevator){
         this.elevator = elevator;
         addRequirements(elevator);
     }
+
     @Override
     public void initialize() {
         log.info("Initializing..");
-        elevator.tryMarkElevatorCalibratedAgainstLowerLimit();
+        elevator.toggleMotionMagic();
         elevator.setTargetValue(elevator.getCurrentValue());
         this.setRunsWhenDisabled(true);
     }
