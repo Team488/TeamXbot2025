@@ -31,7 +31,6 @@ import java.util.Optional;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Hertz;
-import static edu.wpi.first.units.Units.Inch;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
@@ -294,7 +293,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
             case TWO -> setTargetValue(l2Height.get());
             case THREE -> setTargetValue(l3Height.get().plus(trimValue.get()));
             case FOUR -> setTargetValue(l4Height.get().plus(trimValue.get()));
-            case COLLECTING -> setTargetValue(humanLoadHeight.get());
+            case CORAL_COLLECTING -> setTargetValue(humanLoadHeight.get());
             case HIGH_ALGAE -> setTargetValue(highAlgaeRemovalHeight.get());
             case LOW_ALGAE -> setTargetValue(lowAlgaeRemovalHeight.get());
             case SCORE_ALGAE_NET -> setTargetValue(scoreAlgaeNetHeight.get());

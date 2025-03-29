@@ -187,7 +187,7 @@ public class Landmarks {
     }
 
     public enum CoralLevel {
-        COLLECTING,
+        CORAL_COLLECTING,
         ONE,
         TWO,
         THREE,

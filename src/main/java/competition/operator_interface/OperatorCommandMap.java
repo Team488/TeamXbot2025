@@ -10,7 +10,6 @@ import competition.commandgroups.PrepAlgaeSystemCommandGroupFactory;
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
 import competition.commandgroups.vision_path.PathDriveToLocationForCoralStationFactory;
 import competition.simulation.commands.ResetSimulatedPose;
-import competition.subsystems.algae_arm.AlgaeArmSubsystem;
 import competition.subsystems.algae_arm.commands.ForceAlgaeArmCalibrated;
 import competition.subsystems.algae_arm.commands.RepositionAlgaeArmDown;
 import competition.subsystems.algae_arm.commands.RepositionAlgaeArmUp;
@@ -34,6 +33,8 @@ import competition.subsystems.elevator.ElevatorSubsystem;
 import competition.subsystems.elevator.commands.ForceElevatorCalibratedCommand;
 import competition.subsystems.elevator.commands.SetElevatorTargetHeightCommand;
 import competition.subsystems.elevator.commands.ToggleElevatorMotionMagicCommand;
+import competition.subsystems.elevator.commands.TrimElevatorDown;
+import competition.subsystems.elevator.commands.TrimElevatorUp;
 import competition.subsystems.oracle.commands.DriveAccordingToOracleCommand;
 import competition.subsystems.oracle.commands.SuperstructureAccordingToOracleCommand;
 import competition.subsystems.pose.Cameras;
@@ -154,19 +155,13 @@ public class OperatorCommandMap {
         var prepL2 = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.TWO);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(prepL2);
 
-        var homed = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
+        var homed = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.CORAL_COLLECTING);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeCoralCommand);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreCoralCommand);
 
-        var removeHighAlgaeHeight = setElevatorTargetHeightCommandProvider.get();
-        removeHighAlgaeHeight.setHeight(Landmarks.CoralLevel.HIGH_ALGAE);
 
-        var removeLowAlgaeHeight = setElevatorTargetHeightCommandProvider.get();
-        removeLowAlgaeHeight.setHeight(Landmarks.CoralLevel.LOW_ALGAE);
 
-        var scoreAlgaeInNetHeight = setElevatorTargetHeightCommandProvider.get();
-        scoreAlgaeInNetHeight.setHeight(Landmarks.CoralLevel.SCORE_ALGAE_NET);
 
         var calibrateAlgae = Commands.parallel(
                 forceAlgaeArmCalibrated).ignoringDisable(true);
@@ -178,17 +173,16 @@ public class OperatorCommandMap {
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightStick).onTrue(calibrateAlgae);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(calibrateSuperstructure);
         // Algae system buttons
-        var removeLowAlgae = prepAlgaeSystemCommandGroupFactory.create(AlgaeArmSubsystem.AlgaeArmPositions.ReefAlgaeLow);
-        oi.operatorGamepad.getPovIfAvailable(180).onTrue(removeLowAlgaeHeight);
+        
+        var removeLowAlgae = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.LOW_ALGAE);
+        
+        oi.operatorGamepad.getPovIfAvailable(180).onTrue(removeLowAlgae);
+        
+        var removeHighAlgae = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.HIGH_ALGAE);
+        oi.operatorGamepad.getPovIfAvailable(0).onTrue(removeHighAlgae);
 
-        var removeHighAlgae = prepAlgaeSystemCommandGroupFactory.create(AlgaeArmSubsystem.AlgaeArmPositions.ReefAlgaeHigh);
-        oi.operatorGamepad.getPovIfAvailable(0).onTrue(removeHighAlgaeHeight);
-
-        var collectGroundAlgae = prepAlgaeSystemCommandGroupFactory.create(AlgaeArmSubsystem.AlgaeArmPositions.GroundCollection);
+        var scoreAlgaeInNetHeight = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.SCORE_ALGAE_NET);
         oi.operatorGamepad.getPovIfAvailable(90).onTrue(scoreAlgaeInNetHeight);
-
-        var homeAlgaeArm = prepAlgaeSystemCommandGroupFactory.create(AlgaeArmSubsystem.AlgaeArmPositions.FullyRetracted);
-        oi.operatorGamepad.getPovIfAvailable(270).onTrue(homeAlgaeArm);
 
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(intakeAlgae);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(ejectAlgae);
@@ -216,7 +210,7 @@ public class OperatorCommandMap {
             ToggleElevatorMotionMagicCommand toggleElevatorMotionMagicCommand) {
 
         var returnToBase = setElevatorTargetHeightCommandProvider.get();
-        returnToBase.setHeight(Landmarks.CoralLevel.COLLECTING);
+        returnToBase.setHeight(Landmarks.CoralLevel.CORAL_COLLECTING);
         var riseToL2 = setElevatorTargetHeightCommandProvider.get();
         riseToL2.setHeight(Landmarks.CoralLevel.TWO);
         var riseToL3 = setElevatorTargetHeightCommandProvider.get();
@@ -227,7 +221,7 @@ public class OperatorCommandMap {
         var riseToScore = setArmTargetAngleCommandProvider.get();
         riseToScore.setAngle(Landmarks.CoralLevel.FOUR);
         var lowerToHumanLoad = setArmTargetAngleCommandProvider.get();
-        lowerToHumanLoad.setAngle(Landmarks.CoralLevel.COLLECTING);
+        lowerToHumanLoad.setAngle(Landmarks.CoralLevel.CORAL_COLLECTING);
 
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeCoralCommand);
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreCoralCommand);
@@ -249,13 +243,16 @@ public class OperatorCommandMap {
     }
 
     @Inject
-    public void setUpButtonCommands(OperatorInterface oi, CoralArmSubsystem coralArmSubsystem) {
+    public void setupNeoTrellis(OperatorInterface oi, CoralArmSubsystem coralArmSubsystem, TrimElevatorUp trimElevatorUp,
+                                TrimElevatorDown trimElevatorDown) {
         oi.neoTrellis.getifAvailable(9)
                 .onTrue(coralArmSubsystem.createSetTargetCoralLevelCommand(Landmarks.CoralLevel.TWO));
         oi.neoTrellis.getifAvailable(10)
                 .onTrue(coralArmSubsystem.createSetTargetCoralLevelCommand(Landmarks.CoralLevel.THREE));
         oi.neoTrellis.getifAvailable(11)
                 .onTrue(coralArmSubsystem.createSetTargetCoralLevelCommand(Landmarks.CoralLevel.FOUR));
+        oi.neoTrellis.getifAvailable(8).onTrue(trimElevatorUp);
+        oi.neoTrellis.getifAvailable(16).onTrue(trimElevatorDown);
     }
 
     @Inject

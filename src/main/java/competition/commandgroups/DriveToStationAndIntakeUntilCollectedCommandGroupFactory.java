@@ -39,7 +39,7 @@ public class DriveToStationAndIntakeUntilCollectedCommandGroupFactory {
         driveUntilIntake.setName("DriveToStationAndIntakeUntilCollectedCommandGroup");
 
         // Prep coral system to coral collection
-        var prepCoralSystem = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.COLLECTING);
+        var prepCoralSystem = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.CORAL_COLLECTING);
         driveUntilIntake.addCommands(prepCoralSystem);
 
         // Drive to coral station using terminal approach, have an interstitial point if needed

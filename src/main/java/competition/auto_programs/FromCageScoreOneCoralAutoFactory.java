@@ -49,7 +49,7 @@ public class FromCageScoreOneCoralAutoFactory {
                         auto.getDriveAndScoreStatusMessageCommand(targetReefFace, targetBranch, targetLevel));
         auto.addCommands(driveAndScore);
 
-        var homeCoralSystem = prepCoralSystemCommandGroupFact.create(() -> Landmarks.CoralLevel.COLLECTING);
+        var homeCoralSystem = prepCoralSystemCommandGroupFact.create(() -> Landmarks.CoralLevel.CORAL_COLLECTING);
         auto.addCommands(homeCoralSystem);
 
         return auto;
