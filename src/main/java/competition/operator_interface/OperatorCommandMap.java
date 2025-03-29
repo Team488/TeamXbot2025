@@ -28,7 +28,7 @@ import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.CalibrateDriveCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
-import competition.subsystems.drive.commands.DriveToNearestReefFaceWithPID;
+import competition.subsystems.drive.commands.AlignToNearestReefFaceForAlgaeCommand;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.drive.logic.AlignCameraToAprilTagCalculator;
 import competition.subsystems.elevator.ElevatorSubsystem;
@@ -71,7 +71,7 @@ public class OperatorCommandMap {
             DebugSwerveModuleCommand debugModule,
             ChangeActiveSwerveModuleCommand changeActiveModule,
             SwerveDriveWithJoysticksCommand typicalSwerveDrive,
-            DriveToNearestReefFaceWithPID driveToNearestReefFaceWithPID,
+            AlignToNearestReefFaceForAlgaeCommand alignToNearestReefFaceForAlgaeCommand,
             DriveSubsystem drive, PoseSubsystem pose,
             DriveToClosestStationCommandGroupFactory
                     driveToClosestStationCommandGroupFactory,
@@ -100,7 +100,7 @@ public class OperatorCommandMap {
 
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(pointAtNearestCoralStation)
                 .onFalse(clearPointAtHeading);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(driveToNearestReefFaceWithPID);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(alignToNearestReefFaceForAlgaeCommand);
 
 
         // Instantly drives to closest coral station
