@@ -100,9 +100,9 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
         // NOTE: For now, the human loading angle is "vertical" with respect to the ground, which should also match
         // the "AutoCalibrationDegrees" value.
         this.humanLoadAngleDegrees = propertyFactory.createPersistentProperty("Human Loading Angle in Degrees", 13.8);
-        this.algaeCollectAngleInDegrees = propertyFactory.createPersistentProperty("Algae Collect Angle in Degrees", 45);
+        this.algaeCollectAngleInDegrees = propertyFactory.createPersistentProperty("Algae Collect Angle in Degrees", 65);
         this.algaeScoreNetAngleInDegrees = propertyFactory.createPersistentProperty("Algae Score Net Angle in Degrees", 136);
-        this.algaeProcessorAngleInDegrees = propertyFactory.createPersistentProperty("Algae Score Processor Angle in Degrees", 136);
+        this.algaeProcessorAngleInDegrees = propertyFactory.createPersistentProperty("Algae Score Processor Angle in Degrees", 65);
         propertyFactory.setDefaultLevel(PropertyLevel.Debug);
         this.degreesPerRotations = propertyFactory.createPersistentProperty("Degrees Per Rotations", 5.790);
         this.rangeOfMotionDegrees = propertyFactory.createPersistentProperty("Range of Motion in Degrees", 170);

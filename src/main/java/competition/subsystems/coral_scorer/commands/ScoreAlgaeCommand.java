@@ -16,7 +16,7 @@ public class ScoreAlgaeCommand extends BaseCommand {
 
     @Override
     public void initialize() {
-        coral.setCoralScorerState(CoralScorerSubsystem.CoralScorerState.SCORING_CORAL);
+        coral.setCoralScorerState(CoralScorerSubsystem.CoralScorerState.SCORING_ALGAE);
     }
 
     @Override
