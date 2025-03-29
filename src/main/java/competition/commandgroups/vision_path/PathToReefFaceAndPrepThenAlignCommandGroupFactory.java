@@ -39,11 +39,11 @@ public class PathToReefFaceAndPrepThenAlignCommandGroupFactory {
         if (branch == Landmarks.Branch.A) {
             command.setConfigurations(Cameras.FRONT_RIGHT_CAMERA.getIndex(),
                     aprilTagVisionSubsystem.getTargetAprilTagID(reefFace), false, 1,
-                    AlignCameraToAprilTagCalculator.Activity.ApproachWhileCentering, false);
+                    AlignCameraToAprilTagCalculator.Activity.ApproachWhileCentering, false, true);
         } else {
             command.setConfigurations(Cameras.FRONT_LEFT_CAMERA.getIndex(),
                     aprilTagVisionSubsystem.getTargetAprilTagID(reefFace), false, 1,
-                    AlignCameraToAprilTagCalculator.Activity.ApproachWhileCentering, false);
+                    AlignCameraToAprilTagCalculator.Activity.ApproachWhileCentering, false, true);
         }
     }
 
