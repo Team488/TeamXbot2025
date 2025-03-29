@@ -29,6 +29,7 @@ import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.CalibrateDriveCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
 import competition.subsystems.drive.commands.AlignToNearestReefFaceForAlgaeCommand;
+import competition.subsystems.drive.commands.DriveToBargeCommand;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.drive.commands.vision_path.PathDriveToLocationCommand;
 import competition.subsystems.drive.logic.AlignCameraToAprilTagCalculator;
@@ -80,7 +81,7 @@ public class OperatorCommandMap {
             CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem,
             PathDriveToLocationForCoralStationFactory pathDriveToLocationForCoralStationFactory,
             AlignCameraToAprilTagCalculator.AlignCameraToAprilTagCalculatorFactory aprilTagCalculatorFactory,
-            Provider<PathDriveToLocationCommand> pathDriveToLocationCommandProvider) {
+            DriveToBargeCommand driveToBargeCommand) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
 
@@ -118,12 +119,11 @@ public class OperatorCommandMap {
                 () -> coprocessorCommunicationSubsystem.isCoralStationPathConfident(pose)
         ));
 
-        var driveToBarge = pathDriveToLocationCommandProvider.get();
-        driveToBarge.setTarget(Landmarks.BlueCageTwoStartingLine);
-        driveToBarge.setOptions(XTableValues.TraversalOptions.newBuilder()
+        // blue 180
+        driveToBargeCommand.setOptions(XTableValues.TraversalOptions.newBuilder()
                 .setAccelerationMetersPerSecond(2).setMetersPerSecond(4.5)
                 .build());
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(driveToBarge);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(driveToBargeCommand);
 
 //        operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
 //        operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(changeActiveModule);

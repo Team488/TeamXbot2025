@@ -53,9 +53,6 @@ public class PathDriveToNearestCoralStationSectionCommand
 
     private final DriveSubsystem driveSubsystem;
 
-    private Pose2d coralStationTarget;
-    private final ElectricalContract electricalContract;
-
     private final Distance goalThreshold = Meters.of(0.1016);
 
     /**
@@ -66,8 +63,6 @@ public class PathDriveToNearestCoralStationSectionCommand
      * @param pf                                The property factory.
      * @param headingModuleFactory              Factory for creating heading
      *                                          modules.
-     * @param aprilTagVisionSubsystem           Vision subsystem for detecting
-     *                                          AprilTags.
      * @param electricalContract                Electrical configuration of the
      *                                          robot.
      * @param aprilTagFieldLayout               Field layout containing AprilTag
@@ -80,18 +75,15 @@ public class PathDriveToNearestCoralStationSectionCommand
     public PathDriveToNearestCoralStationSectionCommand(
             DriveSubsystem drive, PoseSubsystem pose, PropertyFactory pf,
             HeadingModule.HeadingModuleFactory headingModuleFactory,
-            AprilTagVisionSubsystemExtended aprilTagVisionSubsystem,
             ElectricalContract electricalContract,
             AprilTagFieldLayout aprilTagFieldLayout,
             RobotAssertionManager robotAssertionManager,
             CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem) {
-        super(drive, pose, pf, headingModuleFactory, aprilTagVisionSubsystem,
-                robotAssertionManager, coprocessorCommunicationSubsystem);
+        super(drive, pose, pf, headingModuleFactory, robotAssertionManager, coprocessorCommunicationSubsystem);
         this.radiusOfRobot =
                 electricalContract.getDistanceFromCenterToOuterBumperX().in(Meters);
         this.aprilTagFieldLayout = aprilTagFieldLayout;
         this.driveSubsystem = drive;
-        this.electricalContract = electricalContract;
     }
 
     /**
