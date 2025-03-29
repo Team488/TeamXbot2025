@@ -338,8 +338,9 @@ public class OperatorCommandMap {
         setFromRightCageScoreRightFacesLevelFours.includeOnSmartDashboard("From Right Score Right Face Level Fours auto");
 
         var leftVisionAuto = setAutonomousCommandProvider.get();
-        leftVisionAuto.setAutoCommand(leftFourCoralAutoProvider.get());
+        leftVisionAuto.setAutoCommand(leftFourCoralAutoProvider.get(), Landmarks.BlueCageOneStartingLine);
         leftVisionAuto.includeOnSmartDashboard("Left Vision Auto");
+        
         var rightVisionAuto = setAutonomousCommandProvider.get();
         rightVisionAuto.setAutoCommand(rightFourCoralAuto.get(), Landmarks.BlueCageSixStartingLine);
         rightVisionAuto.includeOnSmartDashboard("Right Vision Auto");
