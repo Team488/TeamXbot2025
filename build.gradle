@@ -114,6 +114,7 @@ dependencies {
     annotationProcessor wpi.java.deps.wpilibAnnotations()
     implementation wpi.java.deps.wpilib()
     implementation wpi.java.vendor.java()
+    customAspectJ wpi.java.deps.wpilib().findAll { dep -> dep.get().matches(/.*wpilibj-java.*/) }
     customAspectJ wpi.java.vendor.java().findAll { dep -> dep.get().matches(/.*NewCommands.*/) }
 
     roborioDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.roborio)
@@ -136,7 +137,7 @@ dependencies {
 
     implementation project(':SeriouslyCommonLib')
     customAspectJ project(':SeriouslyCommonLib')
-    implementation group: 'org.json', name:'json', version: '20220924'
+    implementation group: 'org.json', name: 'json', version: '20220924'
 
     implementation 'org.apache.logging.log4j:log4j-api:2.19.0'
     implementation 'org.apache.logging.log4j:log4j-core:2.19.0'
@@ -162,7 +163,14 @@ wpi.sim.addGui().defaultEnabled = true
 wpi.sim.addDriverstation()
 
 jar {
-    from { configurations.runtimeClasspath.findAll({ p -> !p.name.matches(/.*NewCommands.*/) && !p.name.matches(/.*SeriouslyCommonLib.*/) }).collect { it.isDirectory() ? it : zipTree(it) } }
+    from {
+        configurations.runtimeClasspath.findAll({ p ->
+            !p.name.matches(/.*NewCommands.*/)
+                    && !p.name.matches(/.*SeriouslyCommonLib.*/)
+                    && !p.name.matches(/.*wpilibj-java.*/)
+        })
+                .collect { it.isDirectory() ? it : zipTree(it) }
+    }
     manifest edu.wpi.first.gradlerio.GradleRIOPlugin.javaManifest(ROBOT_MAIN_CLASS)
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
