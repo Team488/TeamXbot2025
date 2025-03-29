@@ -27,6 +27,7 @@ import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.CalibrateDriveCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
 import competition.subsystems.drive.commands.DriveToNearestReefFaceWithPID;
+import competition.subsystems.drive.commands.DriveToPose;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.drive.logic.AlignCameraToAprilTagCalculator;
 import competition.subsystems.elevator.ElevatorSubsystem;
@@ -79,7 +80,8 @@ public class OperatorCommandMap {
                     driveToClosestStationCommandGroupFactory,
             CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem,
             PathDriveToLocationForCoralStationFactory pathDriveToLocationForCoralStationFactory,
-            AlignCameraToAprilTagCalculator.AlignCameraToAprilTagCalculatorFactory aprilTagCalculatorFactory) {
+            AlignCameraToAprilTagCalculator.AlignCameraToAprilTagCalculatorFactory aprilTagCalculatorFactory,
+            DriveToPose driveToPose) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
 
@@ -113,11 +115,13 @@ public class OperatorCommandMap {
         );
         SequentialCommandGroup driveToClosestCoralStation =
                 driveToClosestStationCommandGroupFactory.createDriveOnly(true);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(new ConditionalCommand(
-                pathDriveToClosestCoralStation,
-                driveToClosestCoralStation,
-                () -> coprocessorCommunicationSubsystem.isCoralStationPathConfident(pose)
-        ));
+//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(new ConditionalCommand(
+//                pathDriveToClosestCoralStation,
+//                driveToClosestCoralStation,
+//                () -> coprocessorCommunicationSubsystem.isCoralStationPathConfident(pose)
+//        ));
+
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(driveToPose);
 
 //        operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
 //        operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(changeActiveModule);
