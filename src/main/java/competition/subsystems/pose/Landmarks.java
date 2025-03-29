@@ -199,8 +199,21 @@ public class Landmarks {
     }
 
     public enum CoralStation {
-        LEFT,
-        RIGHT
+        LEFT(BlueLeftTagFiducialId, RedLeftTagFiducialId),
+        RIGHT(BlueRightTagFiducialId, RedRightTagFiducialId);
+        private final int redID;
+        private final int blueID;
+        CoralStation(int blueAprilTagID, int redAprilTagID) {
+            this.blueID = blueAprilTagID;
+            this.redID = redAprilTagID;
+        }
+        public int getRedAprilTagID() {
+            return redID;
+        }
+
+        public int getBlueAprilTagID() {
+            return blueID;
+        }
     }
 
     public enum CoralStationSection {
