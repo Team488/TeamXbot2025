@@ -346,19 +346,6 @@ public class Contract2025 extends ElectricalContract {
     }
 
     @Override
-    public boolean isClimberMotorReady() { return false; }
-
-    @Override
-    public CANMotorControllerInfo getClimberMotor() {
-        return new CANMotorControllerInfo("ClimberMotor",
-                MotorControllerType.TalonFx,
-                CANBusId.RIO,
-                35,
-                new CANMotorControllerOutputConfig()
-                        .withStatorCurrentLimit(Amps.of(60)));
-    }
-
-    @Override
     public DeviceInfo getLightsDio0() {
         return new DeviceInfo("Lights0", 10);
     }
