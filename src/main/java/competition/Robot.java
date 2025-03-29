@@ -58,7 +58,6 @@ public class Robot extends BaseRobot {
         getInjectorComponent().operatorCommandMap();
         getInjectorComponent().swerveDefaultCommandMap();
         getInjectorComponent().superstructureMechanismSubsystem();
-        getInjectorComponent().oracleSubsystem();
         getInjectorComponent().lightSubsystem();
         oi = getInjectorComponent().operatorInterface();
         algaeArmSubsystem = getInjectorComponent().algaeArmSubsystem();
