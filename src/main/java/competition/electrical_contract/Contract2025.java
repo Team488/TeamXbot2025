@@ -77,6 +77,13 @@ public class Contract2025 extends ElectricalContract {
         return new DeviceInfo("CoralSensor", 0, true);
     }
 
+    public boolean isTopFunnelSensorReady() { return false; }
+
+    @Override
+    public DeviceInfo getTopFunnelSensor() {
+        return new DeviceInfo("TopFunnelSensor", 999, false);
+    }
+
     public boolean isElevatorBottomSensorReady() { return true; }
 
     @Override

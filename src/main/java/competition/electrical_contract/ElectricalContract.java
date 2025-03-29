@@ -62,6 +62,10 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
 
     public abstract DeviceInfo getCoralScorerSensor();
 
+    public abstract boolean isTopFunnelSensorReady();
+
+    public abstract DeviceInfo getTopFunnelSensor();
+
     public abstract boolean isElevatorBottomSensorReady();
 
     public abstract DeviceInfo getElevatorBottomSensor();

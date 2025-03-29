@@ -33,6 +33,7 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
     public final DoubleProperty hasCoralIntakePower;
     public final DoubleProperty scorePower;
     public final XDigitalInput coralSensor;
+    public final XDigitalInput topFunnelSensor;
     final Alert hasCoralAlert = new Alert("Confidently has coral", Alert.AlertType.kInfo);
     public final ElectricalContract electricalContract;
     private CoralScorerState coralScorerState;
@@ -63,6 +64,14 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
             this.registerDataFrameRefreshable(coralSensor);
         } else {
             this.coralSensor = null;
+        }
+
+        if (electricalContract.isTopFunnelSensorReady()) {
+            this.topFunnelSensor = xDigitalInputFactory.create(electricalContract.getTopFunnelSensor(),
+                    this.getPrefix());
+            this.registerDataFrameRefreshable(topFunnelSensor);
+        } else {
+            this.topFunnelSensor = null;
         }
 
         this.coralScorerState = STOPPED;
@@ -146,6 +155,13 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
     @Override
     public boolean confidentlyHasCoral() {
         return hasCoralValidator.peekStable();
+    }
+
+    public boolean hasCoralEnteredFunnel() {
+        if (electricalContract.isTopFunnelSensorReady()) {
+            return this.topFunnelSensor.get();
+        }
+        return false;
     }
 
     public CoralScorerState getCoralScorerState() {
