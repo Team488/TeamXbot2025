@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Angle;
 import xbot.common.command.BaseCommand;
+import xbot.common.math.MathUtils;
 import xbot.common.math.PIDDefaults;
 import xbot.common.math.PIDManager;
 import xbot.common.math.XYPair;
@@ -81,7 +82,10 @@ public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
         centeringVector = centeringVector.rotate(pose.getCurrentHeading().getDegrees());
 
         var fieldVectorTranslation2d = oi.driverGamepad.getLeftFieldOrientedVector();
-        XYPair fieldVectorXYPair = new XYPair(fieldVectorTranslation2d.getX(), fieldVectorTranslation2d.getY());
+        XYPair fieldVectorXYPair = new XYPair(
+                MathUtils.deadband(fieldVectorTranslation2d.getX(), 0.05),
+                MathUtils.deadband(fieldVectorTranslation2d.getY(), 0.05)
+        );
         double railsSimilarityToDriver = fieldVectorXYPair.dotProduct(
                 new XYPair(
                         Math.cos(idealFinalHeading.in(Radians) + Math.PI),
