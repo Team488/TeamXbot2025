@@ -5,7 +5,7 @@ import javax.inject.Inject;
 import competition.Robot;
 import competition.electrical_contract.ElectricalContract;
 import competition.simulation.MotorInternalPIDHelper;
-import competition.subsystems.coral_arm.CoralArmSubsystem;
+import competition.subsystems.stinger_arm.StingerArmSubsystem;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
@@ -31,15 +31,15 @@ public class CoralArmSimulator {
     final PIDManager pidManager;
     final AKitLogger aKitLog;
 
-    final CoralArmSubsystem armPivotSubsystem;
+    final StingerArmSubsystem armPivotSubsystem;
     final MockCANMotorController armMotor;
     final MockDutyCycleEncoder absoluteEncoder;
     final MockDigitalInput lowSensor;
     final ElectricalContract contract;
 
     @Inject
-    public CoralArmSimulator(CoralArmSubsystem armPivotSubsystem, PIDManager.PIDManagerFactory pidManagerFactory,
-            PropertyFactory pf, ElectricalContract contract) {
+    public CoralArmSimulator(StingerArmSubsystem armPivotSubsystem, PIDManager.PIDManagerFactory pidManagerFactory,
+                             PropertyFactory pf, ElectricalContract contract) {
         pf.setPrefix("CoralArmSimulator");
         this.aKitLog = new AKitLogger("FieldSimulation/CoralArm");
         this.contract = contract;

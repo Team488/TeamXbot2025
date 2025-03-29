@@ -1,4 +1,4 @@
-package competition.subsystems.coral_arm;
+package competition.subsystems.stinger_arm;
 
 import competition.electrical_contract.ElectricalContract;
 import competition.subsystems.pose.Landmarks;
@@ -28,7 +28,7 @@ import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 @Singleton
-public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
+public class StingerArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
     public final XCANMotorController armMotor;
     public final XDutyCycleEncoder armAbsoluteEncoder;
@@ -55,10 +55,10 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     public Landmarks.CoralLevel targetCoralLevel;
 
     @Inject
-    public CoralArmSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
-                             ElectricalContract electricalContract, PropertyFactory propertyFactory,
-                             XDutyCycleEncoder.XDutyCycleEncoderFactory xDutyCycleEncoderFactory,
-                             XDigitalInput.XDigitalInputFactory xDigitalInputFactory) {
+    public StingerArmSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
+                               ElectricalContract electricalContract, PropertyFactory propertyFactory,
+                               XDutyCycleEncoder.XDutyCycleEncoderFactory xDutyCycleEncoderFactory,
+                               XDigitalInput.XDigitalInputFactory xDigitalInputFactory) {
         propertyFactory.setPrefix(this);
 
         this.electricalContract = electricalContract;

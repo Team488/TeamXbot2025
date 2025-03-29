@@ -2,7 +2,7 @@ package competition.subsystems.elevator_mechanism;
 
 import javax.inject.Inject;
 
-import competition.subsystems.coral_arm.CoralArmSubsystem;
+import competition.subsystems.stinger_arm.StingerArmSubsystem;
 import competition.subsystems.coral_scorer.CoralScorerSubsystem;
 import competition.subsystems.elevator.SuperstructureMechanism;
 import competition.subsystems.elevator.ElevatorSubsystem;
@@ -13,14 +13,14 @@ import xbot.common.command.BaseSubsystem;
  */
 public class SuperstructureMechanismSubsystem extends BaseSubsystem {
     final ElevatorSubsystem elevatorSubsystem;
-    final CoralArmSubsystem armPivotSubsystem;
+    final StingerArmSubsystem armPivotSubsystem;
     final CoralScorerSubsystem coralScorerSubsystem;
 
     final SuperstructureMechanism superstructureMechanism;
 
     @Inject
     public SuperstructureMechanismSubsystem(ElevatorSubsystem elevatorSubsystem,
-                                            CoralArmSubsystem armPivotSubsystem, CoralScorerSubsystem coralScorerSubsystem) {
+                                            StingerArmSubsystem armPivotSubsystem, CoralScorerSubsystem coralScorerSubsystem) {
         this.elevatorSubsystem = elevatorSubsystem;
         this.armPivotSubsystem = armPivotSubsystem;
         this.coralScorerSubsystem = coralScorerSubsystem;

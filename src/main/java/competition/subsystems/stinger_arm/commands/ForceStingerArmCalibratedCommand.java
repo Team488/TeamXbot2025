@@ -1,16 +1,16 @@
-package competition.subsystems.coral_arm.commands;
+package competition.subsystems.stinger_arm.commands;
 
-import competition.subsystems.coral_arm.CoralArmSubsystem;
+import competition.subsystems.stinger_arm.StingerArmSubsystem;
 import xbot.common.command.BaseCommand;
 
 import javax.inject.Inject;
 
-public class ForceCoralArmCalibratedCommand extends BaseCommand {
+public class ForceStingerArmCalibratedCommand extends BaseCommand {
 
-    CoralArmSubsystem coralArmPivotSubsystem;
+    StingerArmSubsystem coralArmPivotSubsystem;
 
     @Inject
-    public ForceCoralArmCalibratedCommand(CoralArmSubsystem coralArmPivotSubsystem) {
+    public ForceStingerArmCalibratedCommand(StingerArmSubsystem coralArmPivotSubsystem) {
         this.coralArmPivotSubsystem = coralArmPivotSubsystem;
     }
 

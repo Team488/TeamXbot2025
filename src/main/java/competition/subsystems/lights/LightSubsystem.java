@@ -6,7 +6,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import competition.electrical_contract.ElectricalContract;
-import competition.subsystems.coral_arm.CoralArmSubsystem;
+import competition.subsystems.stinger_arm.StingerArmSubsystem;
 import competition.subsystems.coral_scorer.CoralScorerSubsystem;
 import competition.subsystems.drive.logic.AlignCameraToAprilTagCalculator;
 import competition.subsystems.elevator.ElevatorSubsystem;
@@ -31,7 +31,7 @@ public class LightSubsystem extends BaseSubsystem {
 
     final AutonomousCommandSelector autonomousCommandSelector;
     final CoralScorerSubsystem coralScorerSubsystem;
-    final CoralArmSubsystem coralArmSubsystem;
+    final StingerArmSubsystem coralArmSubsystem;
     final ElevatorSubsystem elevatorSubsystem;
     final AprilTagVisionSubsystemExtended visionSubsystem;
     private AlignCameraToAprilTagCalculator.Activity activity;
@@ -111,7 +111,7 @@ public class LightSubsystem extends BaseSubsystem {
                           ElectricalContract contract,
                           AutonomousCommandSelector autonomousCommandSelector,
                           CoralScorerSubsystem coralScorerSubsystem,
-                          CoralArmSubsystem coralArmSubsystem,
+                          StingerArmSubsystem coralArmSubsystem,
                           ElevatorSubsystem elevatorSubsystem,
                           AprilTagVisionSubsystemExtended visionSubsystem,
                           PropertyFactory pf) {

@@ -1,9 +1,9 @@
-package competition.subsystems.coral_arm.commands;
+package competition.subsystems.stinger_arm.commands;
 
 import competition.motion.TrapezoidProfileManager;
 import competition.operator_interface.OperatorInterface;
 import competition.subsystems.algae_arm.AlgaeArmSubsystem;
-import competition.subsystems.coral_arm.CoralArmSubsystem;
+import competition.subsystems.stinger_arm.StingerArmSubsystem;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.Alert;
@@ -23,9 +23,9 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Inches;
 
-public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
+public class StingerArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
 
-    final CoralArmSubsystem coralArm;
+    final StingerArmSubsystem coralArm;
     final AlgaeArmSubsystem algaeArm;
     final ElevatorSubsystem elevator;
 
@@ -43,11 +43,11 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
     final Alert collisionSafetiesEngaged = new Alert("Coral Arm: collision safeties engaged", Alert.AlertType.kWarning);
 
     @Inject
-    public CoralArmMaintainerCommand(CoralArmSubsystem armPivotSubsystem, ElevatorSubsystem elevator,
-                                     AlgaeArmSubsystem algaeArm, PropertyFactory pf,
-                                     HumanVsMachineDecider.HumanVsMachineDeciderFactory hvmFactory,
-                                     TrapezoidProfileManager.Factory trapzoidProfileManagerFactory,
-                                     OperatorInterface oi) {
+    public StingerArmMaintainerCommand(StingerArmSubsystem armPivotSubsystem, ElevatorSubsystem elevator,
+                                       AlgaeArmSubsystem algaeArm, PropertyFactory pf,
+                                       HumanVsMachineDecider.HumanVsMachineDeciderFactory hvmFactory,
+                                       TrapezoidProfileManager.Factory trapzoidProfileManagerFactory,
+                                       OperatorInterface oi) {
         super(armPivotSubsystem, pf, hvmFactory, 2, 0.10);
         this.coralArm = armPivotSubsystem;
         this.algaeArm = algaeArm;

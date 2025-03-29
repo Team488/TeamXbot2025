@@ -1,13 +1,12 @@
 package competition.commandgroups;
 
-import competition.subsystems.coral_arm.CoralArmSubsystem;
+import competition.subsystems.stinger_arm.StingerArmSubsystem;
 import competition.subsystems.coral_scorer.commands.ScoreWhenReadyCommand;
 import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.DriveToReefFaceFromAngleUntilDetectionCommand;
 import competition.subsystems.drive.commands.MeasureDistanceBeforeScoringCommand;
 import competition.subsystems.pose.Cameras;
 import competition.subsystems.pose.Landmarks;
-import competition.subsystems.pose.PoseSubsystem;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
@@ -19,7 +18,7 @@ import javax.inject.Provider;
 import static edu.wpi.first.units.Units.Meters;
 
 public class HeadingAssistedDriveAndScoreCommandGroup extends SequentialCommandGroup {
-    CoralArmSubsystem coralArmSubsystem;
+    StingerArmSubsystem coralArmSubsystem;
 
 
     @AssistedFactory
@@ -34,7 +33,7 @@ public class HeadingAssistedDriveAndScoreCommandGroup extends SequentialCommandG
                                                     ScoreWhenReadyCommand scoreWhenReadyCommand,
                                                     Provider<AlignToReefWithAprilTagCommand> alignToReefWithAprilTagCommandProvider,
                                                     MeasureDistanceBeforeScoringCommand measureDistanceBeforeScoringCommand,
-                                                    CoralArmSubsystem coralArmSubsystem) {
+                                                    StingerArmSubsystem coralArmSubsystem) {
         this.coralArmSubsystem = coralArmSubsystem;
         var prepCoralSystemCommandGroup = prepCoralSystemCommandGroupFactory.create(coralArmSubsystem::getTargetCoralLevel);
         var alignToReefWithAprilTagWithCameraCommand = alignToReefWithAprilTagCommandProvider.get();
