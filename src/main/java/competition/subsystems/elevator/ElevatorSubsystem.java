@@ -427,8 +427,9 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     }
 
     public void configurePIDForEachSlot(){
-        masterMotor.setPidDirectly(0,0,0,0,0,1); //update with tuned values from the robot
-        masterMotor.setPidDirectly(0,0,0,0,0,2);
+        //update with tuned values from the robot, for now just reduced P from 4 -> 2
+        masterMotor.setPidDirectly(2, 0, 0, 0, 0.750,1);
+        masterMotor.setPidDirectly(2, 0, 0, 0, 0.750,2);
     }
 
     @Override
