@@ -115,6 +115,7 @@ public class OperatorCommandMap {
                 () -> coprocessorCommunicationSubsystem.isCoralStationPathConfident(pose)
         ));
 
+
 //        operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
 //        operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(changeActiveModule);
 //        operatorInterface.driverGamepad.getPovIfAvailable(180).onTrue(typicalSwerveDrive);
