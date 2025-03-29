@@ -19,14 +19,16 @@ import competition.subsystems.algae_collection.commands.AlgaeCollectionOutputCom
 import competition.subsystems.coral_arm.CoralArmSubsystem;
 import competition.subsystems.coral_arm.commands.ForceCoralArmCalibratedCommand;
 import competition.subsystems.coral_arm.commands.SetCoralArmTargetAngleCommand;
+import competition.subsystems.coral_scorer.commands.IntakeAlgaeCommand;
 import competition.subsystems.coral_scorer.commands.IntakeCoralCommand;
+import competition.subsystems.coral_scorer.commands.ScoreAlgaeCommand;
 import competition.subsystems.coral_scorer.commands.ScoreCoralCommand;
 import competition.subsystems.coral_scorer.commands.ScoreWhenReadyCommand;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.CalibrateDriveCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
-import competition.subsystems.drive.commands.DriveToNearestReefFaceWithPID;
+import competition.subsystems.drive.commands.AlignToNearestReefFaceForAlgaeCommand;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.drive.logic.AlignCameraToAprilTagCalculator;
 import competition.subsystems.elevator.ElevatorSubsystem;
@@ -69,7 +71,7 @@ public class OperatorCommandMap {
             DebugSwerveModuleCommand debugModule,
             ChangeActiveSwerveModuleCommand changeActiveModule,
             SwerveDriveWithJoysticksCommand typicalSwerveDrive,
-            DriveToNearestReefFaceWithPID driveToNearestReefFaceWithPID,
+            AlignToNearestReefFaceForAlgaeCommand alignToNearestReefFaceForAlgaeCommand,
             DriveSubsystem drive, PoseSubsystem pose,
             DriveToClosestStationCommandGroupFactory
                     driveToClosestStationCommandGroupFactory,
@@ -98,7 +100,7 @@ public class OperatorCommandMap {
 
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(pointAtNearestCoralStation)
                 .onFalse(clearPointAtHeading);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(driveToNearestReefFaceWithPID);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(alignToNearestReefFaceForAlgaeCommand);
 
 
         // Instantly drives to closest coral station
@@ -138,7 +140,9 @@ public class OperatorCommandMap {
                                       Provider<SetElevatorTargetHeightCommand> setElevatorTargetHeightCommandProvider,
                                       CoralArmSubsystem coralArmSubsystem,
                                       IntakeCoralCommand intakeCoralCommand,
-                                      PrepAlgaeSystemCommandGroupFactory prepAlgaeSystemCommandGroupFactory) {
+                                      PrepAlgaeSystemCommandGroupFactory prepAlgaeSystemCommandGroupFactory,
+                                      IntakeAlgaeCommand intakeAlgaeCommand,
+                                      ScoreAlgaeCommand scoreAlgaeCommand) {
         // Coral system buttons
         var prepL4 = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.FOUR);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
@@ -178,8 +182,11 @@ public class OperatorCommandMap {
         var scoreAlgaeInNetHeight = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.SCORE_ALGAE_NET);
         oi.operatorGamepad.getPovIfAvailable(90).onTrue(scoreAlgaeInNetHeight);
 
-        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(intakeAlgae);
-        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(ejectAlgae);
+        var scoreAlgaeInProcessor = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.SCORE_ALGAE_PROCESSOR);
+        oi.operatorGamepad.getPovIfAvailable(270).onTrue(scoreAlgaeInProcessor);
+
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(intakeAlgaeCommand);
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(scoreAlgaeCommand);
     }
 
     @Inject

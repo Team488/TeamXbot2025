@@ -20,7 +20,6 @@ import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.autonomous.AutonomousCommandSelector;
 
-import java.sql.Time;
 import java.util.Objects;
 
 
@@ -165,7 +164,7 @@ public class LightSubsystem extends BaseSubsystem {
                     recentlyAligned = false;
                     isLastStateTimeSet = false;
                 }
-            } else if (coralScorerSubsystem.getCoralScorerState() == CoralScorerSubsystem.CoralScorerState.INTAKING) {
+            } else if (coralScorerSubsystem.getCoralScorerState() == CoralScorerSubsystem.CoralScorerState.INTAKING_CORAL) {
                 currentState = LightsStateMessage.RequestCoralFromHuman;
             } else if (!coralScorerSubsystem.confidentlyHasCoral()) {
                 currentState = LightsStateMessage.NoCoralPresent;
