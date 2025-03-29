@@ -32,11 +32,11 @@ public class DriveToBargeCommand extends PathDriveToLocationCommand {
 
     @Override
     public void initialize() {
-        boolean blue = DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red;
+        boolean blue = DriverStation.getAlliance().orElse(DriverStation.Alliance.Red) == DriverStation.Alliance.Blue;
         Pose2d goal = new Pose2d(
-                blue? midFieldX.get() - distanceFromBarge.get() : midFieldX.get() + distanceFromBarge.get(),
+                blue ? midFieldX.get() - distanceFromBarge.get() : midFieldX.get() + distanceFromBarge.get(),
                 pose.getCurrentPose2d().getY(),
-                blue? Rotation2d.fromDegrees(180) : Rotation2d.fromDegrees(0)
+                blue ? Rotation2d.fromDegrees(180) : Rotation2d.fromDegrees(0)
         );
         super.setTarget(goal);
         super.initialize();
