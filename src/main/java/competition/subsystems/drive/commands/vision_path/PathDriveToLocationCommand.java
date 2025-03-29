@@ -69,6 +69,7 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
 
     public PathDriveToLocationCommand setTarget(Pose2d target) {
         this.target = target;
+        this.failed.set(false);
         return this;
     }
 
@@ -199,6 +200,9 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
     @Override
     public boolean isFinished() {
         XTableValues.BezierCurves c = curves.get();
+        if(c==null) {
+            return super.isFinished();
+        }
         XTableValues.BezierCurve lastCurve = c.getCurves(c.getCurvesCount() - 1);
         XTableValues.ControlPoint lastPoint =
                 lastCurve.getControlPoints(lastCurve.getControlPointsCount() - 1);
