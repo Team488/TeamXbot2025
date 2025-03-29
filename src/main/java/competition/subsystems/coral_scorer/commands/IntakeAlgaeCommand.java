@@ -5,11 +5,11 @@ import xbot.common.command.BaseCommand;
 
 import javax.inject.Inject;
 
-public class ScoreCoralCommand extends BaseCommand {
+public class IntakeAlgaeCommand extends BaseCommand {
     CoralScorerSubsystem coral;
 
     @Inject
-    public ScoreCoralCommand (CoralScorerSubsystem coralScorerSubsystem){
+    public IntakeAlgaeCommand (CoralScorerSubsystem coralScorerSubsystem){
         coral = coralScorerSubsystem;
         this.addRequirements(coral);
     }
