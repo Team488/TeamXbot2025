@@ -10,7 +10,6 @@ import competition.commandgroups.PrepAlgaeSystemCommandGroupFactory;
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
 import competition.commandgroups.vision_path.PathDriveToLocationForCoralStationFactory;
 import competition.simulation.commands.ResetSimulatedPose;
-import competition.subsystems.algae_arm.AlgaeArmSubsystem;
 import competition.subsystems.algae_arm.commands.ForceAlgaeArmCalibrated;
 import competition.subsystems.algae_arm.commands.RepositionAlgaeArmDown;
 import competition.subsystems.algae_arm.commands.RepositionAlgaeArmUp;
@@ -34,8 +33,8 @@ import competition.subsystems.elevator.ElevatorSubsystem;
 import competition.subsystems.elevator.commands.ForceElevatorCalibratedCommand;
 import competition.subsystems.elevator.commands.SetElevatorTargetHeightCommand;
 import competition.subsystems.elevator.commands.ToggleElevatorMotionMagicCommand;
-import competition.subsystems.oracle.commands.DriveAccordingToOracleCommand;
-import competition.subsystems.oracle.commands.SuperstructureAccordingToOracleCommand;
+import competition.subsystems.elevator.commands.TrimElevatorDown;
+import competition.subsystems.elevator.commands.TrimElevatorUp;
 import competition.subsystems.pose.Cameras;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
@@ -67,8 +66,6 @@ public class OperatorCommandMap {
             OperatorInterface operatorInterface,
             SetRobotHeadingCommand resetHeading,
             Provider<AlignToReefWithAprilTagCommand> alignToReefWithAprilTagProvider,
-            DriveAccordingToOracleCommand driveAccordingToOracle,
-            SuperstructureAccordingToOracleCommand superstructureAccordingToOracle,
             DebugSwerveModuleCommand debugModule,
             ChangeActiveSwerveModuleCommand changeActiveModule,
             SwerveDriveWithJoysticksCommand typicalSwerveDrive,
@@ -98,8 +95,6 @@ public class OperatorCommandMap {
                 Cameras.FRONT_RIGHT_CAMERA.getIndex(), false, -2, true,
                 AlignCameraToAprilTagCalculator.Activity.ApproachWhileCentering, false);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(alignToReefWithAprilTagWithRightCamera);
-
-        var oracleControlsRobot = Commands.parallel(driveAccordingToOracle, superstructureAccordingToOracle);
 
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(pointAtNearestCoralStation)
                 .onFalse(clearPointAtHeading);
@@ -242,13 +237,16 @@ public class OperatorCommandMap {
     }
 
     @Inject
-    public void setUpButtonCommands(OperatorInterface oi, CoralArmSubsystem coralArmSubsystem) {
+    public void setupNeoTrellis(OperatorInterface oi, CoralArmSubsystem coralArmSubsystem, TrimElevatorUp trimElevatorUp,
+                                TrimElevatorDown trimElevatorDown) {
         oi.neoTrellis.getifAvailable(9)
                 .onTrue(coralArmSubsystem.createSetTargetCoralLevelCommand(Landmarks.CoralLevel.TWO));
         oi.neoTrellis.getifAvailable(10)
                 .onTrue(coralArmSubsystem.createSetTargetCoralLevelCommand(Landmarks.CoralLevel.THREE));
         oi.neoTrellis.getifAvailable(11)
                 .onTrue(coralArmSubsystem.createSetTargetCoralLevelCommand(Landmarks.CoralLevel.FOUR));
+        oi.neoTrellis.getifAvailable(8).onTrue(trimElevatorUp);
+        oi.neoTrellis.getifAvailable(16).onTrue(trimElevatorDown);
     }
 
     @Inject
