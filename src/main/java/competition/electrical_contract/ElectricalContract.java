@@ -38,10 +38,6 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
 
     public abstract DeviceInfo getElevatorDistanceSensor();
 
-    public abstract boolean isAlgaeCollectionReady();
-
-    public abstract CANMotorControllerInfo getAlgaeCollectionMotor();
-
     public abstract boolean isCoralCollectionMotorReady();
 
     public abstract CANMotorControllerInfo getCoralCollectionMotor();
@@ -67,15 +63,7 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
     public abstract DeviceInfo getElevatorBottomSensor();
 
     public abstract boolean isHumanLoadRampReady();
-
-    public abstract CANMotorControllerInfo getAlgaeArmPivotMotor();
-
-    public abstract boolean isAlgaeArmPivotMotorReady();
-
-    public abstract boolean isAlgaeArmBottomSensorReady();
-
-    public abstract DeviceInfo getAlgaeArmBottomSensor();
-
+    
     public abstract Distance getDistanceFromCenterToOuterBumperX();
 
     public Distance getRadiusOfRobot() {
