@@ -99,6 +99,7 @@ public class AlignCameraToAprilTagCalculator {
 
     final DoubleProperty globalHorizontalOffsetInches;
     private double globalTemporaryHorizontalOffsetInches;
+    private double branchOffsetMeters;
 
     double lastKnownHorizontalErrorMeters = 999999;
     double shoveStartTime = 0;
@@ -226,11 +227,7 @@ public class AlignCameraToAprilTagCalculator {
                 isCameraBackwards
         );
 
-
-        double branchOffsetMeters = 0;
         branchOffsetMeters = (targetCameraID == 0 ? branchBOffsetHashMap : branchAOffsetHashMap).get(targetAprilTagID).get();
-
-        akitLog.record("lastBranchOffset-M", branchOffsetMeters);
 
         this.alignmentPointOffset = new Translation2d(
                 alignmentPointOffset.getX(),
@@ -486,7 +483,7 @@ public class AlignCameraToAprilTagCalculator {
         Optional<Translation2d> aprilTagData = aprilTagVisionSubsystem.getRobotRelativeLocationOfAprilTag(targetCameraID, targetAprilTagID);
 
         if (aprilTagData.isPresent()) {
-            lastKnownHorizontalErrorMeters = aprilTagData.get().getY() + getHorizontalTrimAdjustmentMeters();
+            lastKnownHorizontalErrorMeters = aprilTagData.get().getY() + getHorizontalTrimAdjustmentMeters() + branchOffsetMeters;
         }
         akitLog.record("AprilTagData", aprilTagData.orElse(null));
 
@@ -525,7 +522,7 @@ public class AlignCameraToAprilTagCalculator {
         return stationLocation.getTranslation().plus(projectedDelta);
     }
 
-    public void initializeBranchOffsets(PropertyFactory pf) {
+    private void initializeBranchOffsets(PropertyFactory pf) {
         int[] tagIds = {6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22};
         for (int tagId : tagIds) {
             branchAOffsetHashMap.put(tagId, pf.createPersistentProperty("BranchAOffset-Tag" + tagId, 0.0));
