@@ -16,7 +16,7 @@ import javax.inject.Inject;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
 
-public class DriveToNearestReefFaceWithPID extends BaseCommand {
+public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
 
     final HeadingModule headingModule;
 
@@ -29,9 +29,9 @@ public class DriveToNearestReefFaceWithPID extends BaseCommand {
     Angle idealFinalHeading;
 
     @Inject
-    public DriveToNearestReefFaceWithPID(HeadingModule.HeadingModuleFactory headingModuleFactory,
-                                         DriveSubsystem drive, PoseSubsystem pose,
-                                         AprilTagVisionSubsystemExtended vision, OperatorInterface oi) {
+    public AlignToNearestReefFaceForAlgaeCommand(HeadingModule.HeadingModuleFactory headingModuleFactory,
+                                                 DriveSubsystem drive, PoseSubsystem pose,
+                                                 AprilTagVisionSubsystemExtended vision, OperatorInterface oi) {
         this.headingModule = headingModuleFactory.create(drive.getRotateToHeadingPid());
         this.vision = vision;
         this.drive = drive;
@@ -46,7 +46,7 @@ public class DriveToNearestReefFaceWithPID extends BaseCommand {
 
         Pose2d closestPose = pose.getClosestReefFacePose();
         idealFinalPosition = closestPose.getTranslation();
-        idealFinalHeading = closestPose.getRotation().getMeasure();
+        idealFinalHeading = closestPose.getRotation().getMeasure().plus(Degrees.of(180));
     }
 
     @Override
