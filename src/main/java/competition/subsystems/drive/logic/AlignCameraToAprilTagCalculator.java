@@ -383,15 +383,21 @@ public class AlignCameraToAprilTagCalculator {
                 }
 
                 // Now, drive to that final point with locked-on heading.
-                var powers = drive.getPowerToAchieveFieldPosition(currentTranslation, targetLocationOnField);
+                var powers = drive.getPowerToAchieveFieldPosition(currentTranslation, targetLocationOnField).times(approachSpeedFactor);
 
-                // If we are going too fast, cap the speed.
+                // // If we are going too fast, cap the speed.
                 if (powers.getNorm() > approachSpeedFactor) {
                     powers = new Translation2d(approachSpeedFactor, powers.getAngle());
                 }
-
-                driveIntent = new XYPair(powers.getX(), powers.getY()).scale(approachSpeedFactor);
+                // If we are going too slow, set a min speed to be moving towards the reef
+                if (powers.getNorm() < shovePower.get()) {
+                    powers = new Translation2d(shovePower.get(), powers.getAngle());
+                }
+                    
+                driveIntent = new XYPair(powers.getX(), powers.getY());
                 rotationIntent = headingModule.calculateHeadingPower(idealFinalHeadingDegrees);
+
+                akitLog.record("distanceToTargetLocationOnField", currentTranslation.getDistance(targetLocationOnField));
 
                 // If we're quite close to the final point, advance to shoving into the reef or coral station.
                 if (currentTranslation.getDistance(targetLocationOnField) < distanceToStartShoving.get()) {
@@ -411,10 +417,6 @@ public class AlignCameraToAprilTagCalculator {
                 // If we are going too fast, cap the speed.
                 if (noVisionPower.getNorm() > approachSpeedFactor) {
                     noVisionPower = new Translation2d(approachSpeedFactor, noVisionPower.getAngle());
-                }
-                // If we are going too slow, speed up
-                if (noVisionPower.getNorm() < shovePower.get()) {
-                    noVisionPower = new Translation2d(shovePower.get(), noVisionPower.getAngle());
                 }
 
                 driveIntent = new XYPair(noVisionPower.getX(), noVisionPower.getY()).scale(approachSpeedFactor);
@@ -459,6 +461,8 @@ public class AlignCameraToAprilTagCalculator {
         akitLog.record("TagAcquisitionState", tagAcquisitionState);
         akitLog.record("ErrorIsWithinBounds", isLastKnownErrorWithinBounds());
         akitLog.record("LastKnownHorizontalErrorMeters", lastKnownHorizontalErrorMeters);
+        akitLog.record("driveIntent-X", driveIntent.x);
+        akitLog.record("driveIntent-Y", driveIntent.y);
 
         return new AlignCameraToAprilTagAdvice(driveIntent, rotationIntent, tagAcquisitionState, activity);
     }
