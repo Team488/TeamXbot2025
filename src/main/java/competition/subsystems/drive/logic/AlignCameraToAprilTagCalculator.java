@@ -10,12 +10,14 @@ import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -344,6 +346,22 @@ public class AlignCameraToAprilTagCalculator {
                 var vectorTowardsInterstitial = interstitialPoint.getTranslation().minus(currentPose.getTranslation());
                 var normalizedVector = vectorTowardsInterstitial.div(vectorTowardsInterstitial.getNorm());
                 driveIntent = new XYPair(normalizedVector.getX(), normalizedVector.getY()).scale(approachSpeedFactor);
+
+//                Pose2d goal = getDriveTarget(currentPose, interstitialPoint);
+//                double dx = drive.getPositionalPid().calculate(goal.getX(), currentPose.getX());
+//                double dy = drive.getPositionalPid().calculate(goal.getY(), currentPose.getY());
+//                driveIntent = new XYPair(dx, dy);
+
+                // Calculate the goal position
+                Pose2d goal = getDriveTarget(currentPose, interstitialPoint);
+                double dx = goal.getX() - currentPose.getX();
+                double dy = goal.getY() - currentPose.getY();
+
+                // Calculate the velocity vector and scale it
+                double velocityX = dx * approachSpeedFactor;
+                double velocityY = dy * approachSpeedFactor;
+                driveIntent = new XYPair(velocityX, velocityY);
+
                 rotationIntent = headingModule.calculateHeadingPower(headingToPointAtAprilTag);
 
                 // Finally, a check to see if we're quite close and should advance to the next state.
@@ -514,5 +532,24 @@ public class AlignCameraToAprilTagCalculator {
 
         var projectedDelta = new Translation2d(0.25, stationLocation.getRotation());
         return stationLocation.getTranslation().plus(projectedDelta);
+    }
+
+    public static Pose2d getDriveTarget(Pose2d currentPose, Pose2d targetPose) {
+
+        // Final line up
+        var reefFaceLength = Units.inchesToMeters(36.792600);
+        var maxDistanceReefLineUp = 1.5;
+        var offset = currentPose.relativeTo(targetPose);
+        double yDistance = Math.abs(offset.getY());
+        double xDistance = Math.abs(offset.getX());
+        double shiftXT =
+                MathUtil.clamp(
+                        (yDistance / (reefFaceLength * 2)) + ((xDistance - 0.3) / (reefFaceLength * 3)),
+                        0.0,
+                        1.0);
+        double shiftYT = MathUtil.clamp(offset.getX() / reefFaceLength, 0.0, 1.0);
+        return targetPose.transformBy(
+                new Transform2d(-shiftXT * maxDistanceReefLineUp,
+                        Math.copySign(shiftYT * maxDistanceReefLineUp * 0.8, offset.getY()), new Rotation2d(0)));
     }
 }
