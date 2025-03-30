@@ -55,7 +55,7 @@ public class Contract2025 extends ElectricalContract {
                 CANBusId.RIO,
                 25,
                 new CANMotorControllerOutputConfig()
-                        .withStatorCurrentLimit(Amps.of(20))
+                        .withStatorCurrentLimit(Amps.of(28))
                         .withNeutralMode(CANMotorControllerOutputConfig.NeutralMode.Brake)
         );
     }
@@ -67,7 +67,7 @@ public class Contract2025 extends ElectricalContract {
                 MotorControllerType.TalonFx,
                 CANBusId.RIO,
                 24,
-                new CANMotorControllerOutputConfig().withStatorCurrentLimit(Amps.of(40)));
+                new CANMotorControllerOutputConfig().withStatorCurrentLimit(Amps.of(45)));
     }
 
     public boolean isCoralScorerSensorReady() { return true; }
@@ -332,17 +332,17 @@ public class Contract2025 extends ElectricalContract {
                 new CameraInfo("Apriltag_Back_Camera",
                         "AprilTagBack",
                         new Transform3d(new Translation3d(
-                                -12.75 / PoseSubsystem.INCHES_IN_A_METER,
-                                0,
-                                5.75 / PoseSubsystem.INCHES_IN_A_METER),
-                                new Rotation3d(0, Math.toRadians(-44.53), Math.PI)),
+                                0.25 / PoseSubsystem.INCHES_IN_A_METER,
+                                -0.55,
+                                6.3 / PoseSubsystem.INCHES_IN_A_METER),
+                                new Rotation3d(0, Math.toRadians(-14.5), Math.PI)),
                         EnumSet.of(CameraCapabilities.APRIL_TAG))
         };
     }
 
     @Override
     public Distance getDistanceFromCenterToOuterBumperX() {
-        return Inches.of(18);
+        return Inches.of(16);
     }
 
     @Override
