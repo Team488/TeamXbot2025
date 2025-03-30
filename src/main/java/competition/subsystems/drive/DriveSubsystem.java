@@ -112,8 +112,8 @@ public class DriveSubsystem extends BaseSwerveDriveSubsystem {
                 this.getPrefix() + "SnapToAlgaeHeadingPID",
         new PIDDefaults(
                 0.005, // P
-                0.000001, // I
-                0.02, // D
+                0, // I
+                0, // D
                 0.0, // F
                 0.75, // Max output
                 -0.75, // Min output
