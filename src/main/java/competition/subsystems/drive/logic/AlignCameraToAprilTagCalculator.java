@@ -385,7 +385,7 @@ public class AlignCameraToAprilTagCalculator {
                 // Now, drive to that final point with locked-on heading.
                 var powers = drive.getPowerToAchieveFieldPosition(currentTranslation, targetLocationOnField).times(approachSpeedFactor);
 
-                // // If we are going too fast, cap the speed.
+                // If we are going too fast, cap the speed.
                 if (powers.getNorm() > approachSpeedFactor) {
                     powers = new Translation2d(approachSpeedFactor, powers.getAngle());
                 }
