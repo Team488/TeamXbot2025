@@ -49,6 +49,7 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
     public PathDriveToLocationCommand(BaseSwerveDriveSubsystem drive,
                                       PoseSubsystem pose, PropertyFactory pf,
                                       HeadingModule.HeadingModuleFactory headingModuleFactory,
+                                      AprilTagVisionSubsystemExtended aprilTagVisionSubsystem,
                                       RobotAssertionManager robotAssertionManager,
                                       CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem) {
         super(drive, pose, pf, headingModuleFactory, robotAssertionManager,
@@ -199,7 +200,7 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
     @Override
     public boolean isFinished() {
         XTableValues.BezierCurves c = curves.get();
-        if(c==null) {
+        if (c == null) {
             return super.isFinished();
         }
         XTableValues.BezierCurve lastCurve = c.getCurves(c.getCurvesCount() - 1);
