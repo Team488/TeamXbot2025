@@ -49,7 +49,6 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
     public PathDriveToLocationCommand(BaseSwerveDriveSubsystem drive,
                                       PoseSubsystem pose, PropertyFactory pf,
                                       HeadingModule.HeadingModuleFactory headingModuleFactory,
-                                      AprilTagVisionSubsystemExtended aprilTagVisionSubsystem,
                                       RobotAssertionManager robotAssertionManager,
                                       CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem) {
         super(drive, pose, pf, headingModuleFactory, robotAssertionManager,
