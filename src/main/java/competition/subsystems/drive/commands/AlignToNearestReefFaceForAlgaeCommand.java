@@ -32,7 +32,7 @@ public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
     public AlignToNearestReefFaceForAlgaeCommand(HeadingModule.HeadingModuleFactory headingModuleFactory,
                                                  DriveSubsystem drive, PoseSubsystem pose,
                                                  AprilTagVisionSubsystemExtended vision, OperatorInterface oi) {
-        this.headingModule = headingModuleFactory.create(drive.getRotateToHeadingPid());
+        this.headingModule = headingModuleFactory.create(drive.getSnapToAlgaePIDManager());
         this.vision = vision;
         this.drive = drive;
         this.pose = pose;
