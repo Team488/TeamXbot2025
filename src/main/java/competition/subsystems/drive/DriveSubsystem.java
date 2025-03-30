@@ -49,8 +49,6 @@ public class DriveSubsystem extends BaseSwerveDriveSubsystem {
     private final DoubleProperty driveToWaypointsSpeed;
     private final DoubleProperty driveToWaypointsDurationPerPoint;
 
-    private final PIDManager driveToAlgaePidManager;
-    private final PIDManager snapToAlgaePIDManager;
 
     @Inject
     public DriveSubsystem(PIDManagerFactory pidFactory, PropertyFactory pf,
@@ -90,47 +88,6 @@ public class DriveSubsystem extends BaseSwerveDriveSubsystem {
 
         driveToWaypointsSpeed = pf.createPersistentProperty("Speed to drive to waypoints", 2); // meters/s
         driveToWaypointsDurationPerPoint = pf.createPersistentProperty("Time to drive to waypoints", 0.1); // seconds
-
-
-        driveToAlgaePidManager = pidFactory.create(
-                this.getPrefix() + "DriveToAlgaePositionalPID",
-                new PIDDefaults(
-                0.75, // P
-                0, // I
-                4.0, // D
-                0.0, // F
-                0.6, // Max output
-                -0.6, // Min output
-                0.05, // Error threshold
-                0.005, // Derivative threshold
-                0.2) // Time threshold
-        );
-        driveToAlgaePidManager.setEnableErrorThreshold(true);
-        driveToAlgaePidManager.setEnableTimeThreshold(true);
-
-        snapToAlgaePIDManager = pidFactory.create(
-                this.getPrefix() + "SnapToAlgaeHeadingPID",
-        new PIDDefaults(
-                0.005, // P
-                0, // I
-                0, // D
-                0.0, // F
-                0.75, // Max output
-                -0.75, // Min output
-                2.0, // Error threshold
-                0.2, // Derivative threshold
-                0.2) // Time threshold
-        );
-        snapToAlgaePIDManager.setEnableErrorThreshold(true);
-        snapToAlgaePIDManager.setEnableTimeThreshold(true);
-    }
-
-    public PIDManager getDriveToAlgaePidManager() {
-        return driveToAlgaePidManager;
-    }
-
-    public PIDManager getSnapToAlgaePIDManager() {
-        return snapToAlgaePIDManager;
     }
 
     public Translation2d getLookAtPointTarget() {

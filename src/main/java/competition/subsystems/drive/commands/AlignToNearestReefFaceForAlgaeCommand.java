@@ -9,6 +9,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Angle;
 import xbot.common.command.BaseCommand;
 import xbot.common.math.MathUtils;
+import xbot.common.math.PIDDefaults;
+import xbot.common.math.PIDManager;
 import xbot.common.math.XYPair;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
 
@@ -29,16 +31,53 @@ public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
     Translation2d idealFinalPosition;
     Angle idealFinalHeading;
 
+    private final PIDManager driveToAlgaePidManager;
+    private final PIDManager snapToAlgaePIDManager;
+
     @Inject
     public AlignToNearestReefFaceForAlgaeCommand(HeadingModule.HeadingModuleFactory headingModuleFactory,
                                                  DriveSubsystem drive, PoseSubsystem pose,
-                                                 AprilTagVisionSubsystemExtended vision, OperatorInterface oi) {
-        this.headingModule = headingModuleFactory.create(drive.getSnapToAlgaePIDManager());
+                                                 AprilTagVisionSubsystemExtended vision, OperatorInterface oi,
+                                                 PIDManager.PIDManagerFactory pidFactory) {
         this.vision = vision;
         this.drive = drive;
         this.pose = pose;
         this.oi = oi;
         this.addRequirements(drive);
+
+        driveToAlgaePidManager = pidFactory.create(
+                this.getPrefix() + "DriveToAlgaePositionalPID",
+                new PIDDefaults(
+                        0.75, // P
+                        0, // I
+                        4.0, // D
+                        0.0, // F
+                        0.6, // Max output
+                        -0.6, // Min output
+                        0.05, // Error threshold
+                        0.005, // Derivative threshold
+                        0.2) // Time threshold
+        );
+        driveToAlgaePidManager.setEnableErrorThreshold(true);
+        driveToAlgaePidManager.setEnableTimeThreshold(true);
+
+        snapToAlgaePIDManager = pidFactory.create(
+                this.getPrefix() + "SnapToAlgaeHeadingPID",
+                new PIDDefaults(
+                        0.005, // P
+                        0, // I
+                        0, // D
+                        0.0, // F
+                        0.75, // Max output
+                        -0.75, // Min output
+                        2.0, // Error threshold
+                        0.2, // Derivative threshold
+                        0.2) // Time threshold
+        );
+        snapToAlgaePIDManager.setEnableErrorThreshold(true);
+        snapToAlgaePIDManager.setEnableTimeThreshold(true);
+
+        this.headingModule = headingModuleFactory.create(snapToAlgaePIDManager);
     }
 
     @Override
@@ -97,7 +136,7 @@ public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
         }
         Translation2d normalizedGoalVector = goalPosition.div(goalMagnitude);
 
-        double power = -drive.getDriveToAlgaePidManager().calculate(0, goalMagnitude);
+        double power = -driveToAlgaePidManager.calculate(0, goalMagnitude);
 
         return normalizedGoalVector.times(power);
     }
