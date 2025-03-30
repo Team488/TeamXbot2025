@@ -81,9 +81,14 @@ public class DriveToFaceAndScoreCommandGroupFactory {
         driveToBranchWhilePrepping.addCommands(driveToReefFaceThenAlign, measureDistanceThenPrep);
 
         var scoreWhenReady = scoreWhenReadyProvider.get();
+
         var waitBeforeScoring = new DelayViaSupplierCommand(() -> waitBeforeScoringInSeconds.get()); // Wait for the wobble to go away
 
-        driveToFaceAndScoreCommandGroup.addCommands(driveToBranchWhilePrepping, waitBeforeScoring, scoreWhenReady);
+        driveToFaceAndScoreCommandGroup.addCommands(driveToBranchWhilePrepping);
+        if (targetLevel == Landmarks.CoralLevel.FOUR) {
+            driveToFaceAndScoreCommandGroup.addCommands(waitBeforeScoring);
+        }
+        driveToFaceAndScoreCommandGroup.addCommands(scoreWhenReady);
 
         return driveToFaceAndScoreCommandGroup;
     }
