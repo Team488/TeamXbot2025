@@ -412,6 +412,10 @@ public class AlignCameraToAprilTagCalculator {
                 if (noVisionPower.getNorm() > approachSpeedFactor) {
                     noVisionPower = new Translation2d(approachSpeedFactor, noVisionPower.getAngle());
                 }
+                // If we are going too slow, speed up
+                if (noVisionPower.getNorm() < shovePower.get()) {
+                    noVisionPower = new Translation2d(shovePower.get(), noVisionPower.getAngle());
+                }
 
                 driveIntent = new XYPair(noVisionPower.getX(), noVisionPower.getY()).scale(approachSpeedFactor);
                 rotationIntent = headingModule.calculateHeadingPower(idealFinalHeadingDegrees);

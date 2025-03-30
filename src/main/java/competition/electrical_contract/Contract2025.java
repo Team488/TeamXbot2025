@@ -342,7 +342,7 @@ public class Contract2025 extends ElectricalContract {
 
     @Override
     public Distance getDistanceFromCenterToOuterBumperX() {
-        return Inches.of(18);
+        return Inches.of(16);
     }
 
     @Override
