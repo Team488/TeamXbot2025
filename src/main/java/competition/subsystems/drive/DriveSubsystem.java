@@ -20,6 +20,7 @@ import xbot.common.injection.swerve.FrontRightDrive;
 import xbot.common.injection.swerve.RearLeftDrive;
 import xbot.common.injection.swerve.RearRightDrive;
 import xbot.common.injection.swerve.SwerveComponent;
+import xbot.common.math.PIDDefaults;
 import xbot.common.math.PIDManager;
 import xbot.common.math.PIDManager.PIDManagerFactory;
 import xbot.common.math.XYPair;
@@ -47,6 +48,8 @@ public class DriveSubsystem extends BaseSwerveDriveSubsystem {
     private final SysIdRoutine sysIdRotation;
     private final DoubleProperty driveToWaypointsSpeed;
     private final DoubleProperty driveToWaypointsDurationPerPoint;
+
+    private final PIDManager driveToAlgaePidManager;
 
     @Inject
     public DriveSubsystem(PIDManagerFactory pidFactory, PropertyFactory pf,
@@ -86,6 +89,27 @@ public class DriveSubsystem extends BaseSwerveDriveSubsystem {
 
         driveToWaypointsSpeed = pf.createPersistentProperty("Speed to drive to waypoints", 2); // meters/s
         driveToWaypointsDurationPerPoint = pf.createPersistentProperty("Time to drive to waypoints", 0.1); // seconds
+
+
+        driveToAlgaePidManager = pidFactory.create(
+                this.getPrefix() + "DriveToAlgaePID",
+                new PIDDefaults(
+                1.08, // P
+                0, // I
+                4.0, // D
+                0.0, // F
+                0.6, // Max output
+                -0.6, // Min output
+                0.05, // Error threshold
+                0.005, // Derivative threshold
+                0.2) // Time threshold
+        );
+        driveToAlgaePidManager.setEnableErrorThreshold(true);
+        driveToAlgaePidManager.setEnableTimeThreshold(true);
+    }
+
+    public PIDManager getDriveToAlgaePidManager() {
+        return driveToAlgaePidManager;
     }
 
     public Translation2d getLookAtPointTarget() {
