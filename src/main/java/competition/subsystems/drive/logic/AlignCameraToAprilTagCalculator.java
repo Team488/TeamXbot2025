@@ -150,9 +150,9 @@ public class AlignCameraToAprilTagCalculator {
         distanceFromInterstitialToAdvanceFast = pf.createPersistentProperty("DistanceFromInterstitialToAdvanceFast-m", 0.4);
         distanceFromInterstitialToAdvanceSlow = pf.createPersistentProperty("DistanceFromInterstitialToAdvanceSlow-m", 0.2);
         approachSpeedFactor = pf.createPersistentProperty("ApproachSpeedFactor", 0.65);
-        distanceToStartShoving = pf.createPersistentProperty("DistanceToStartShoving-m", 0.0762); // 3 inches
-        shovePower = pf.createPersistentProperty("ShovePower", 0.25);
-        shoveDuration = pf.createPersistentProperty("ShoveDuration-s", 0.15);
+        distanceToStartShoving = pf.createPersistentProperty("DistanceToStartShoving-m", Inches.of(2).in(Meters));
+        shovePower = pf.createPersistentProperty("ShovePower", 0.2);
+        shoveDuration = pf.createPersistentProperty("ShoveDuration-s", 0.1);
         maxTagAmbiguity = pf.createPersistentProperty("MaxTagAmbiguity", 0.5);
         maxHorizontalErrorMeters = pf.createPersistentProperty("MaxHorizontalError-m", 0.0508); // 2 inches
 
