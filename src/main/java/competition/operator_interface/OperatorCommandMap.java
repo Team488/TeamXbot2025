@@ -113,7 +113,7 @@ public class OperatorCommandMap {
                 null, null
         );
         SequentialCommandGroup driveToClosestCoralStation =
-                driveToClosestStationCommandGroupFactory.createDriveOnly(true);
+                driveToClosestStationCommandGroupFactory.createDriveOnly();
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(new ConditionalCommand(
                 pathDriveToClosestCoralStation,
                 driveToClosestCoralStation,
