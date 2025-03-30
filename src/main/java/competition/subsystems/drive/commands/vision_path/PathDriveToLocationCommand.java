@@ -38,7 +38,7 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
     private final ReefRoutingCircle routingCircle;
     private XTableValues.AdditionalArguments additionalArguments;
 
-    private CoprocessorCommunicationSubsystem coprocessor;
+    protected CoprocessorCommunicationSubsystem coprocessor;
     public AtomicReference<Boolean> failed = new AtomicReference<>(false);
     public AtomicReference<XTableValues.BezierCurves> curves =
             new AtomicReference<>(null);

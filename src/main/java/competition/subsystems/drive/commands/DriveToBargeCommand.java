@@ -1,48 +1,102 @@
 package competition.subsystems.drive.commands;
 
-import competition.subsystems.drive.commands.vision_path.PathDriveToLocationCommand;
+import static edu.wpi.first.units.Units.Meters;
+
+import competition.electrical_contract.ElectricalContract;
+import competition.subsystems.oracle.ReefRoutingCircle;
+import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
-import org.kobe.xbot.Utilities.Entities.XTableValues;
+import java.util.List;
+import javax.inject.Inject;
 import xbot.common.logging.RobotAssertionManager;
+import xbot.common.properties.DistanceProperty;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.drive.BaseSwerveDriveSubsystem;
+import xbot.common.subsystems.drive.SwervePointKinematics;
+import xbot.common.subsystems.drive.SwerveSimpleTrajectoryCommand;
+import xbot.common.subsystems.drive.SwerveSimpleTrajectoryMode;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
+import xbot.common.trajectory.XbotSwervePoint;
 
-import javax.inject.Inject;
-
-public class DriveToBargeCommand extends PathDriveToLocationCommand {
-
-    public DoubleProperty midFieldX;
+public class DriveToBargeCommand extends SwerveSimpleTrajectoryCommand {
     public DoubleProperty distanceFromBarge;
+    public DoubleProperty blueRobotMin;
+    public DoubleProperty redRobotMin;
+    private final ReefRoutingCircle routingCircleBlue;
+    private final ReefRoutingCircle routingCircleRed;
+    private final ElectricalContract electricalContract;
 
     @Inject
-    public DriveToBargeCommand(BaseSwerveDriveSubsystem drive,
-                               PoseSubsystem pose, PropertyFactory pf,
+    public DriveToBargeCommand(BaseSwerveDriveSubsystem drive, PoseSubsystem pose,
+                               PropertyFactory pf,
                                HeadingModule.HeadingModuleFactory headingModuleFactory,
                                RobotAssertionManager robotAssertionManager,
-                               CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem) {
-        super(drive, pose, pf, headingModuleFactory, robotAssertionManager, coprocessorCommunicationSubsystem);
+                               CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem,
+                               ElectricalContract electricalContract) {
+        super(drive, pose, pf, headingModuleFactory, robotAssertionManager);
+        this.electricalContract = electricalContract;
         pf.setPrefix("DriveToBargeCommand");
+        Translation2d center = Landmarks.BlueCenterOfReef.getTranslation();
+
+        routingCircleBlue = new ReefRoutingCircle(center, 2);
+        routingCircleRed = new ReefRoutingCircle(PoseSubsystem.convertBlueToRed(center), 2);
+
         distanceFromBarge = pf.createPersistentProperty("distanceFromBarge-m", 1);
-        midFieldX = pf.createPersistentProperty("midFieldX-m", 8.75665);
+        blueRobotMin = pf.createPersistentProperty("blueRobotMin-m", 4.20);
+        redRobotMin = pf.createPersistentProperty("redRobotMin-m", 3.85);
+    }
+    public Pose2d getNearestPoint(
+            double startY, DriverStation.Alliance alliance) {
+        // Snap startY to the nearest boundary if it falls between the red and blue
+        // minimum values.
+        if (redRobotMin.get() < startY && startY < blueRobotMin.get()) {
+            if (Math.abs(startY - redRobotMin.get())
+                    < Math.abs(blueRobotMin.get() - startY)) {
+                startY = redRobotMin.get() + electricalContract.getDistanceFromCenterToOuterBumperX().in(Meters);
+            } else {
+                startY = blueRobotMin.get()+ electricalContract.getDistanceFromCenterToOuterBumperX().in(Meters);;
+            }
+        }
+
+        // Determine if the alliance is BLUE.
+        boolean isBlue = alliance == DriverStation.Alliance.Blue;
+
+        // Compute the X coordinate based on the alliance.
+        double x = isBlue ? PoseSubsystem.fieldXMidpointInMeters
+                .in(Meters) -distanceFromBarge.get()
+                : PoseSubsystem.fieldXMidpointInMeters.in(Meters)
+                + distanceFromBarge.get();
+
+        // Set heading to 180 if blue, otherwise 0.
+        double heading = isBlue ? 180 : 0;
+
+        // Return the computed Pose2d.
+        return new Pose2d(x, startY, Rotation2d.fromDegrees(heading));
     }
 
     @Override
     public void initialize() {
-        boolean blue = DriverStation.getAlliance().orElse(DriverStation.Alliance.Red) == DriverStation.Alliance.Blue;
-        Pose2d goal = new Pose2d(
-                blue ? midFieldX.get() - distanceFromBarge.get() : midFieldX.get() + distanceFromBarge.get(),
-                pose.getCurrentPose2d().getY(),
-                Rotation2d.fromDegrees(0)
-        );
-        super.setOptions(XTableValues.TraversalOptions.newBuilder()
-                .setFinalRotationDegrees(blue ? 180 : 0).build());
-        super.setTarget(goal);
+        DriverStation.Alliance alliance = DriverStation.getAlliance().orElse(DriverStation.Alliance.Red);
+        Pose2d goal = getNearestPoint(pose.getCurrentPose2d().getY(),
+                alliance
+               );
+
+        List<XbotSwervePoint> swervePoints =
+                alliance.equals(DriverStation.Alliance.Blue) ?
+                        routingCircleBlue.generateSwervePoints(pose.getCurrentPose2d(), goal) :
+                        routingCircleRed.generateSwervePoints(pose.getCurrentPose2d(), goal);
+        super.logic.setPrioritizeRotationIfCloseToGoal(true);
+        super.logic.setKeyPoints(swervePoints);
+        super.logic.setVelocityMode(
+                SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
+        super.logic.setGlobalKinematicValues(
+                new SwervePointKinematics(2, 0, 0, 4.5));
         super.initialize();
     }
 }
