@@ -20,7 +20,6 @@ import xbot.common.injection.swerve.FrontRightDrive;
 import xbot.common.injection.swerve.RearLeftDrive;
 import xbot.common.injection.swerve.RearRightDrive;
 import xbot.common.injection.swerve.SwerveComponent;
-import xbot.common.math.PIDDefaults;
 import xbot.common.math.PIDManager;
 import xbot.common.math.PIDManager.PIDManagerFactory;
 import xbot.common.math.XYPair;
@@ -48,7 +47,6 @@ public class DriveSubsystem extends BaseSwerveDriveSubsystem {
     private final SysIdRoutine sysIdRotation;
     private final DoubleProperty driveToWaypointsSpeed;
     private final DoubleProperty driveToWaypointsDurationPerPoint;
-
 
     @Inject
     public DriveSubsystem(PIDManagerFactory pidFactory, PropertyFactory pf,
