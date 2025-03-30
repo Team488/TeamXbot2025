@@ -89,8 +89,8 @@ public class DriveToBargeCommand extends SwerveSimpleTrajectoryCommand {
         );
 
         List<XbotSwervePoint> swervePoints =
-                alliance.equals(DriverStation.Alliance.Blue) ?
-                        routingCircleBlue.generateSwervePoints(pose.getCurrentPose2d(), goal) :
+                alliance.equals(DriverStation.Alliance.Blue)
+                        ? routingCircleBlue.generateSwervePoints(pose.getCurrentPose2d(), goal) :
                         routingCircleRed.generateSwervePoints(pose.getCurrentPose2d(), goal);
         super.logic.setPrioritizeRotationIfCloseToGoal(true);
         super.logic.setKeyPoints(swervePoints);

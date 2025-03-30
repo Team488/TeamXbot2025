@@ -25,7 +25,6 @@ public class DriveToCoralStationCommand extends SwerveSimpleTrajectoryCommand {
     public Landmarks.CoralStation coralStation = Landmarks.CoralStation.LEFT;
     private final ReefRoutingCircle routingCircleBlue;
     private final ReefRoutingCircle routingCircleRed;
-    private final PoseSubsystem poseSubsystem;
 
     @Inject
     public DriveToCoralStationCommand(BaseSwerveDriveSubsystem drive, PoseSubsystem pose,
@@ -35,7 +34,6 @@ public class DriveToCoralStationCommand extends SwerveSimpleTrajectoryCommand {
                                       CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem,
                                       ElectricalContract electricalContract) {
         super(drive, pose, pf, headingModuleFactory, robotAssertionManager);
-        this.poseSubsystem = pose;
         pf.setPrefix("DriveToCoralStationCommand");
         Translation2d center = Landmarks.BlueCenterOfReef.getTranslation();
         routingCircleBlue = new ReefRoutingCircle(center, 2);
@@ -55,8 +53,8 @@ public class DriveToCoralStationCommand extends SwerveSimpleTrajectoryCommand {
                 PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueRightCoralStationMid);
 
         List<XbotSwervePoint> swervePoints =
-                alliance.equals(DriverStation.Alliance.Blue) ?
-                        routingCircleBlue.generateSwervePoints(pose.getCurrentPose2d(), goal) :
+                alliance.equals(DriverStation.Alliance.Blue)
+                        ? routingCircleBlue.generateSwervePoints(pose.getCurrentPose2d(), goal) :
                         routingCircleRed.generateSwervePoints(pose.getCurrentPose2d(), goal);
             super.logic.setKeyPoints(swervePoints);
         super.logic.setVelocityMode(
