@@ -1,7 +1,5 @@
 package competition.subsystems.drive.commands;
 
-import static edu.wpi.first.units.Units.Meters;
-
 import competition.electrical_contract.ElectricalContract;
 import competition.subsystems.oracle.ReefRoutingCircle;
 import competition.subsystems.pose.Landmarks;
@@ -11,10 +9,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
-import java.util.List;
-import javax.inject.Inject;
 import xbot.common.logging.RobotAssertionManager;
-import xbot.common.properties.DistanceProperty;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.drive.BaseSwerveDriveSubsystem;
@@ -23,6 +18,11 @@ import xbot.common.subsystems.drive.SwerveSimpleTrajectoryCommand;
 import xbot.common.subsystems.drive.SwerveSimpleTrajectoryMode;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
 import xbot.common.trajectory.XbotSwervePoint;
+
+import javax.inject.Inject;
+import java.util.List;
+
+import static edu.wpi.first.units.Units.Meters;
 
 public class DriveToBargeCommand extends SwerveSimpleTrajectoryCommand {
     public DoubleProperty distanceFromBarge;
@@ -51,6 +51,7 @@ public class DriveToBargeCommand extends SwerveSimpleTrajectoryCommand {
         blueRobotMin = pf.createPersistentProperty("blueRobotMin-m", 4.20);
         redRobotMin = pf.createPersistentProperty("redRobotMin-m", 3.85);
     }
+
     public Pose2d getNearestPoint(
             double startY, DriverStation.Alliance alliance) {
         // Snap startY to the nearest boundary if it falls between the red and blue
@@ -58,9 +59,9 @@ public class DriveToBargeCommand extends SwerveSimpleTrajectoryCommand {
         if (redRobotMin.get() < startY && startY < blueRobotMin.get()) {
             if (Math.abs(startY - redRobotMin.get())
                     < Math.abs(blueRobotMin.get() - startY)) {
-                startY = redRobotMin.get() + electricalContract.getDistanceFromCenterToOuterBumperX().in(Meters);
+                startY = redRobotMin.get() + electricalContract.getRadiusOfRobot().div(2).in(Meters);
             } else {
-                startY = blueRobotMin.get()+ electricalContract.getDistanceFromCenterToOuterBumperX().in(Meters);;
+                startY = blueRobotMin.get() + electricalContract.getRadiusOfRobot().div(2).in(Meters);
             }
         }
 
@@ -69,7 +70,7 @@ public class DriveToBargeCommand extends SwerveSimpleTrajectoryCommand {
 
         // Compute the X coordinate based on the alliance.
         double x = isBlue ? PoseSubsystem.fieldXMidpointInMeters
-                .in(Meters) -distanceFromBarge.get()
+                .in(Meters) - distanceFromBarge.get()
                 : PoseSubsystem.fieldXMidpointInMeters.in(Meters)
                 + distanceFromBarge.get();
 
@@ -85,7 +86,7 @@ public class DriveToBargeCommand extends SwerveSimpleTrajectoryCommand {
         DriverStation.Alliance alliance = DriverStation.getAlliance().orElse(DriverStation.Alliance.Red);
         Pose2d goal = getNearestPoint(pose.getCurrentPose2d().getY(),
                 alliance
-               );
+        );
 
         List<XbotSwervePoint> swervePoints =
                 alliance.equals(DriverStation.Alliance.Blue) ?
@@ -96,7 +97,7 @@ public class DriveToBargeCommand extends SwerveSimpleTrajectoryCommand {
         super.logic.setVelocityMode(
                 SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
         super.logic.setGlobalKinematicValues(
-                new SwervePointKinematics(2, 0, 0, 4.5));
+                new SwervePointKinematics(2, 1, 0, 4.5));
         super.initialize();
     }
 }
