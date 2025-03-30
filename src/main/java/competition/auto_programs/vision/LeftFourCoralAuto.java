@@ -26,7 +26,6 @@ public class LeftFourCoralAuto extends BaseAutonomousSequentialCommandGroup {
             Provider<PathDriveToLocationForCoralStationFactory> pathDriveToLocationAndIntakeUntilCollectedProvider) {
         super(autoSelector);
 
-        this.addCommands(new WaitCommand(2.0));
 
         // Score 1
         getDriveAndScoreStatusMessageCommand(Landmarks.ReefFace.FAR_LEFT,
