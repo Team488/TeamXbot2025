@@ -7,6 +7,7 @@ import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.DriverStation;
 import xbot.common.command.BaseCommand;
 import xbot.common.math.MathUtils;
 import xbot.common.math.PIDDefaults;
@@ -17,6 +18,7 @@ import xbot.common.subsystems.drive.control_logic.HeadingModule;
 import javax.inject.Inject;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 
 public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
@@ -84,7 +86,15 @@ public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
     public void initialize() {
         log.info("Initializing");
 
-        Pose2d closestPose = pose.getClosestReefFacePose();
+        // Firstly, figure out if we are on red/blue side of the field, and we'll center accordingly
+        Pose2d currentPose = pose.getCurrentPose2d();
+
+        DriverStation.Alliance alliance = DriverStation.Alliance.Blue;
+        if (currentPose.getTranslation().getX() > PoseSubsystem.fieldXMidpointInMeters.in(Meters)) {
+            alliance = DriverStation.Alliance.Red;
+        }
+
+        Pose2d closestPose = pose.getClosestReefFacePoseByAlliance(alliance);
         idealFinalPosition = closestPose.getTranslation();
         idealFinalHeading = closestPose.getRotation().getMeasure().plus(Degrees.of(180));
     }
