@@ -7,6 +7,7 @@ import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -100,6 +101,7 @@ public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
 
         this.headingModule = headingModuleFactory.create(snapToAlgaePIDManager);
 
+        pf.setPrefix(this.getPrefix());
         interstitialThresholdToRailDrive = pf.createPersistentProperty("InterstitialThresholdToRailDrive-m", 0.2);
         interstitialDistance = pf.createPersistentProperty("InterstitialDistance-m", 1.75);
         interstitialApproachSpeedFactor = pf.createPersistentProperty("InterstitialApproachSpeedFactor", 0.5);
@@ -134,6 +136,12 @@ public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
                     Meters.of(interstitialDistance.get()),
                     Meters.zero()
             );
+
+            // Recall how we are aligning backwards
+            interstitialPoint = new Pose2d(
+                    interstitialPoint.getTranslation(),
+                    interstitialPoint.getRotation().plus(new Rotation2d(Math.PI))
+            );
         }
     }
 
@@ -151,6 +159,7 @@ public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
             case RailDrive -> railDrive();
             default -> {}
         }
+        aKitLog.record("AlignmentState", currentAlignmentState);
     }
 
     public void driveToInterstitial() {
