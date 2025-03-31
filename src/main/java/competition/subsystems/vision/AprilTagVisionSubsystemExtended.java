@@ -96,6 +96,19 @@ public class AprilTagVisionSubsystemExtended extends AprilTagVisionSubsystem {
         return getTargetAprilTagID(targetReefFacePose);
     }
 
+    public int getClosestTagIdFromTranslation(Translation2d translation) {
+        double minDistance = Double.MAX_VALUE;
+        int closestTagId = -1;
+        for (Pose2d reefFacePose : aprilTagIDHashMap.keySet()) {
+            if (translation.getDistance(reefFacePose.getTranslation()) < minDistance) {
+                minDistance = translation.getDistance(reefFacePose.getTranslation());
+                closestTagId = aprilTagIDHashMap.get(reefFacePose);
+            }
+        }
+
+        return closestTagId;
+    }
+
     public boolean areAllCamerasConnected() {
         for (int i = 0; i < cameras.length; i++) {
             if (!isCameraConnected(i)) {
