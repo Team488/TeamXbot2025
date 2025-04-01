@@ -98,7 +98,7 @@ public class CoprocessorCommunicationSubsystem
                     }
                 }));
         this.orinVisionCoprocessorCommander =
-                new VisionCoprocessorCommander(VisionCoprocessor.LOCALHOST);
+                new VisionCoprocessorCommander(VisionCoprocessor.ORIN3_STATIC);
     }
 
     public boolean isUseBackupPointToPointForPathplanning() {
