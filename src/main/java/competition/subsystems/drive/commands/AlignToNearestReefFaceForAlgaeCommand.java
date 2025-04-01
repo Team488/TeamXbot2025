@@ -16,6 +16,7 @@ import xbot.common.math.MathUtils;
 import xbot.common.math.PIDDefaults;
 import xbot.common.math.PIDManager;
 import xbot.common.math.XYPair;
+import xbot.common.properties.DistanceProperty;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
@@ -42,8 +43,8 @@ public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
     private final PIDManager driveToAlgaePidManager;
     private final PIDManager snapToAlgaePIDManager;
 
-    final DoubleProperty interstitialThresholdToRailDrive;
-    final DoubleProperty interstitialDistance;
+    final DistanceProperty interstitialThresholdToRailDrive;
+    final DistanceProperty interstitialDistance;
     final DoubleProperty interstitialApproachSpeedFactor;
 
     public enum AlignmentState {
@@ -102,18 +103,18 @@ public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
         this.headingModule = headingModuleFactory.create(snapToAlgaePIDManager);
 
         pf.setPrefix(this.getPrefix());
-        interstitialThresholdToRailDrive = pf.createPersistentProperty("InterstitialThresholdToRailDrive-m", 0.2);
-        interstitialDistance = pf.createPersistentProperty("InterstitialDistance-m", 1.75);
+        interstitialThresholdToRailDrive = pf.createPersistentProperty("InterstitialThresholdToRailDrive", Meters.of(0.2));
+        interstitialDistance = pf.createPersistentProperty("InterstitialDistance", Meters.of(1.75));
         interstitialApproachSpeedFactor = pf.createPersistentProperty("InterstitialApproachSpeedFactor", 0.5);
     }
 
     @Override
     public void initialize() {
         log.info("Initializing");
-
-        // Firstly, figure out if we are on red/blue side of the field, and we'll center accordingly
         Pose2d currentPose = pose.getCurrentPose2d();
 
+        // Firstly, figure out if we are on red/blue side of the field, and we'll center accordingly
+        // There exist a possibility that we want to steal algae on the opposition's reef (although it goes both ways)
         DriverStation.Alliance alliance = DriverStation.Alliance.Blue;
         if (currentPose.getTranslation().getX() > PoseSubsystem.fieldXMidpointInMeters.in(Meters)) {
             alliance = DriverStation.Alliance.Red;
@@ -126,14 +127,14 @@ public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
         double distanceToClosestReefFace = currentPose.getTranslation().getDistance(idealFinalPosition);
 
         // Determine our starting state, do we need to drive to an interstitial?
-        if (distanceToClosestReefFace < interstitialDistance.get()) {
+        if (distanceToClosestReefFace < interstitialDistance.get().in(Meters)) {
             currentAlignmentState = AlignmentState.RailDrive;
         } else {
             currentAlignmentState = AlignmentState.ToInterstitial;
             interstitialPoint = reefCoordinateGenerator.getPoseRelativeToReefFace(
                     alliance,
-                    Landmarks.getReefFaceFromTagId(vision.getClosestTagIdFromTranslation(idealFinalPosition)),
-                    Meters.of(interstitialDistance.get()),
+                    Landmarks.getReefFaceFromTagId(vision.getClosestReefTagIdFromTranslation(idealFinalPosition)),
+                    interstitialDistance.get(),
                     Meters.zero()
             );
 
@@ -152,7 +153,7 @@ public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
                 driveToInterstitial();
                 var currentTranslation = pose.getCurrentPose2d().getTranslation();
                 double distanceFromInterstitial = currentTranslation.getDistance(interstitialPoint.getTranslation());
-                if (distanceFromInterstitial < interstitialThresholdToRailDrive.get()) {
+                if (distanceFromInterstitial < interstitialThresholdToRailDrive.get().in(Meters)) {
                     currentAlignmentState = AlignmentState.RailDrive;
                 }
             }

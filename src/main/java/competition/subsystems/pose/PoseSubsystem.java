@@ -14,7 +14,6 @@ import competition.subsystems.deadwheel.DeadWheelSubsystem;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
-import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
 import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -40,7 +39,6 @@ import xbot.common.properties.BooleanProperty;
 import xbot.common.properties.Property;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.pose.BasePoseSubsystem;
-import xbot.common.subsystems.vision.AprilTagVisionSubsystem;
 
 @Singleton
 public class PoseSubsystem extends BasePoseSubsystem {
@@ -399,7 +397,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
         this.simulatedModulePositions = Optional.of(positions);
     }
 
-    public static List<Pose2d> getReefFacePoses() {
+    public static List<Pose2d> getBlueReefFacePoses() {
         return Arrays.asList(
                 Landmarks.BlueCloseAlgae,
                 Landmarks.BlueCloseLeftAlgae,
@@ -412,7 +410,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
     public Pose2d getClosestReefFacePose() {
         Pose2d currentPose = getCurrentPose2d();
 
-        List<Pose2d> reefFacePoses = getReefFacePoses();
+        List<Pose2d> reefFacePoses = getBlueReefFacePoses();
         reefFacePoses.replaceAll(PoseSubsystem::convertBlueToRedIfNeeded);
 
         return currentPose.nearest(reefFacePoses);
@@ -421,7 +419,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
     public Pose2d getClosestReefFacePoseByAlliance(DriverStation.Alliance alliance) {
         Pose2d currentPose = getCurrentPose2d();
 
-        List<Pose2d> reefFacePoses = getReefFacePoses();
+        List<Pose2d> reefFacePoses = getBlueReefFacePoses();
         if (alliance == DriverStation.Alliance.Red) {
             reefFacePoses.replaceAll(PoseSubsystem::convertBluetoRed);
         }
