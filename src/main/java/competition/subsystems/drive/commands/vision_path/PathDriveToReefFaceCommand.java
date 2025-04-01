@@ -33,10 +33,8 @@ public class PathDriveToReefFaceCommand extends PathDriveToLocationCommand {
                                HeadingModule.HeadingModuleFactory headingModuleFactory,
                                RobotAssertionManager assertionManager,
                                ElectricalContract electricalContract,
-                               AprilTagFieldLayout aprilTagFieldLayout,
-                               AprilTagVisionSubsystemExtended aprilTagVisionSubsystem) {
-        super(drive, pose, pf, headingModuleFactory, aprilTagVisionSubsystem,
-                assertionManager, coprocessorComms);
+                               AprilTagFieldLayout aprilTagFieldLayout) {
+        super(drive, pose, pf, headingModuleFactory, assertionManager, coprocessorComms);
         this.aprilTagFieldLayout = aprilTagFieldLayout;
         this.driveSubsystem = drive;
         this.electricalContract = electricalContract;
