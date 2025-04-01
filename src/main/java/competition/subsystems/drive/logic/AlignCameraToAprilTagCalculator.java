@@ -20,6 +20,7 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj.Timer;
 import xbot.common.advantage.AKitLogger;
 import xbot.common.controls.sensors.XTimer;
 import xbot.common.injection.electrical_contract.CameraInfo;
@@ -114,13 +115,12 @@ public class AlignCameraToAprilTagCalculator {
     boolean retryActive;
 
     public static Translation2d generateAlignmentPointOffset(Distance robotCenterToOuterBumperX, CameraInfo cameraInfo,
-                                                             Distance offset, boolean isCameraBackwards) {
+            Distance offset, boolean isCameraBackwards) {
         return new Translation2d(
                 robotCenterToOuterBumperX.times(isCameraBackwards ? -1 : 1)
                         .minus(cameraInfo.position().getMeasureX())
-                        .plus(offset.times(isCameraBackwards? -1 : 1)),
-                Meters.zero()
-        );
+                        .plus(offset.times(isCameraBackwards ? -1 : 1)),
+                Meters.zero());
     }
 
     String prefix = "AlignCameraToAprilTagCalculator/";
@@ -132,9 +132,9 @@ public class AlignCameraToAprilTagCalculator {
 
     @AssistedInject
     public AlignCameraToAprilTagCalculator(AprilTagVisionSubsystemExtended vision, DriveSubsystem drive,
-                                           ElectricalContract electricalContract, PoseSubsystem pose,
-                                           HeadingModule.HeadingModuleFactory headingModuleFactory, ReefCoordinateGenerator reefCoordinateGenerator,
-                                           PropertyFactory pf, OperatorInterface oi, LightSubsystem lights) {
+            ElectricalContract electricalContract, PoseSubsystem pose,
+            HeadingModule.HeadingModuleFactory headingModuleFactory, ReefCoordinateGenerator reefCoordinateGenerator,
+            PropertyFactory pf, OperatorInterface oi, LightSubsystem lights) {
         this.aprilTagVisionSubsystem = vision;
         this.headingModule = headingModuleFactory.create(drive.getRotateToHeadingPid());
         this.drive = drive;
@@ -147,8 +147,10 @@ public class AlignCameraToAprilTagCalculator {
 
         pf.setPrefix(prefix);
         interstitialDistance = pf.createPersistentProperty("InterstitialDistance-m", 1.75);
-        distanceFromInterstitialToAdvanceFast = pf.createPersistentProperty("DistanceFromInterstitialToAdvanceFast-m", 0.4);
-        distanceFromInterstitialToAdvanceSlow = pf.createPersistentProperty("DistanceFromInterstitialToAdvanceSlow-m", 0.2);
+        distanceFromInterstitialToAdvanceFast = pf.createPersistentProperty("DistanceFromInterstitialToAdvanceFast-m",
+                0.4);
+        distanceFromInterstitialToAdvanceSlow = pf.createPersistentProperty("DistanceFromInterstitialToAdvanceSlow-m",
+                0.2);
         approachSpeedFactor = pf.createPersistentProperty("ApproachSpeedFactor", 0.65);
         distanceToStartShoving = pf.createPersistentProperty("DistanceToStartShoving-m", 0.0762); // 3 inches
         shovePower = pf.createPersistentProperty("ShovePower", 0.25);
@@ -189,13 +191,13 @@ public class AlignCameraToAprilTagCalculator {
     }
 
     public void configureAndReset(int targetAprilTagID, int targetCameraID, Distance offset,
-                                  boolean isCameraBackwards) {
+            boolean isCameraBackwards) {
         configureAndReset(targetAprilTagID, targetCameraID, offset, isCameraBackwards, Activity.Searching, true);
     }
 
     public void configureAndReset(int targetAprilTagID, int targetCameraID, Distance offset,
-                                  boolean isCameraBackwards, Activity startingActivity,
-                                    boolean requireExcellentAlignment) {
+            boolean isCameraBackwards, Activity startingActivity,
+            boolean requireExcellentAlignment) {
         this.startingActivity = startingActivity;
         this.requireExcellentAlignment = requireExcellentAlignment;
         this.targetAprilTagID = targetAprilTagID;
@@ -216,24 +218,25 @@ public class AlignCameraToAprilTagCalculator {
                 electricalContract.getDistanceFromCenterToOuterBumperX(),
                 cameraInfo,
                 offset,
-                isCameraBackwards
-        );
+                isCameraBackwards);
 
         this.alignmentPointOffset = new Translation2d(
                 alignmentPointOffset.getX(),
-                -getHorizontalTrimAdjustmentMeters()
-        );
+                -getHorizontalTrimAdjustmentMeters());
 
         // Now for some other one-time calculations about the tag itself
         Optional<Pose3d> aprilTagPose = aprilTagVisionSubsystem.getAprilTagFieldOrientedPose(targetAprilTagID);
-        aprilTagPositionInGlobalFieldCoordinates = aprilTagPose.map((p) -> p.getTranslation().toTranslation2d()).orElse(new Translation2d(0, 0));
+        aprilTagPositionInGlobalFieldCoordinates = aprilTagPose.map((p) -> p.getTranslation().toTranslation2d())
+                .orElse(new Translation2d(0, 0));
         aprilTagZRotationRadians = aprilTagPose.map((p) -> p.getRotation().getZ()).orElse(0.0);
         idealFinalHeadingDegrees = Radians.of(Math.PI + aprilTagZRotationRadians - cameraRotation.getZ()).in(Degrees);
 
-        // We can also calculate our ideal interstitial point, since that's a one-time calculation
+        // We can also calculate our ideal interstitial point, since that's a one-time
+        // calculation
         // First, we need to see if we are using the left or right camera.
         boolean isLeft = cameraInfo.friendlyName().toLowerCase().contains("left");
-        // When using the left camera, that means we are aligning on the right branch, aka, the B branch.
+        // When using the left camera, that means we are aligning on the right branch,
+        // aka, the B branch.
         // Now we have enough information to find the interstitial point.
 
         interstitialPoint = new Pose2d();
@@ -247,15 +250,13 @@ public class AlignCameraToAprilTagCalculator {
                     Landmarks.getReefFaceFromTagId(targetAprilTagID),
                     isLeft ? Landmarks.Branch.B : Landmarks.Branch.A,
                     Meters.of(interstitialDistance.get()),
-                    Meters.zero()
-            );
+                    Meters.zero());
             var closePoint = reefCoordinateGenerator.getPoseRelativeToReefFaceAndBranch(
                     alliance,
                     Landmarks.getReefFaceFromTagId(targetAprilTagID),
                     isLeft ? Landmarks.Branch.B : Landmarks.Branch.A,
                     Meters.of(closeInterstitialDistance.get()),
-                    Meters.zero()
-            );
+                    Meters.zero());
 
             double farDistance = farPoint.getTranslation().getDistance(currentPose.getTranslation());
             double closeDistance = closePoint.getTranslation().getDistance(currentPose.getTranslation());
@@ -271,50 +272,58 @@ public class AlignCameraToAprilTagCalculator {
             // From the Tag ID, figure out which coral station this is
             var station = Landmarks.getCoralStationFromTagId(targetAprilTagID);
             // From the station, get its pose
-            var coralStationPose = PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.getCoralStationSectionPose(station, Landmarks.CoralStationSection.MID));
+            var coralStationPose = PoseSubsystem.convertBlueToRedIfNeeded(
+                    Landmarks.getCoralStationSectionPose(station, Landmarks.CoralStationSection.MID));
             // From the pose, project a point in front of it
-            var vectorToInterstitialPoint = new Translation2d(interstitialDistance.get(), coralStationPose.getRotation());
+            var vectorToInterstitialPoint = new Translation2d(interstitialDistance.get(),
+                    coralStationPose.getRotation());
             interstitialPoint = new Pose2d(
                     coralStationPose.getTranslation().plus(vectorToInterstitialPoint),
-                    coralStationPose.getRotation()
-            );
+                    coralStationPose.getRotation());
         }
-
 
         akitLog.record("InterstitialPoint", interstitialPoint);
     }
 
-
     public AlignCameraToAprilTagAdvice getXYPowersAlignToAprilTag(Pose2d currentPose) {
 
-        // First, let's get any evergreen information we will need in almost all state machines.
-        // Mostly, this is about where we should be pointing - and we generally point at the tag unless we are fairly close.
-        Optional<AprilTagVisionIO.TargetObservation> targetObservation = aprilTagVisionSubsystem.getTargetObservation(targetCameraID, targetAprilTagID);
-        boolean doWeSeeOurTargetTag = targetObservation.isPresent() && targetObservation.get().ambiguity() < maxTagAmbiguity.get();
+        // First, let's get any evergreen information we will need in almost all state
+        // machines.
+        // Mostly, this is about where we should be pointing - and we generally point at
+        // the tag unless we are fairly close.
+        Optional<AprilTagVisionIO.TargetObservation> targetObservation = aprilTagVisionSubsystem
+                .getTargetObservation(targetCameraID, targetAprilTagID);
+        boolean doWeSeeOurTargetTag = targetObservation.isPresent()
+                && targetObservation.get().ambiguity() < maxTagAmbiguity.get() && !targetObservation.get().stale();
         hasEverSeenAprilTag |= doWeSeeOurTargetTag;
+        akitLog.record("TargetObservationStaleness", targetObservation.isPresent() ? Timer.getFPGATimestamp() - targetObservation.get().timestamp() : 0);
 
         Translation2d currentTranslation = pose.getCurrentPose2d().getTranslation();
         double headingToPointAtAprilTag = Radians.of(
-                currentTranslation.minus(aprilTagPositionInGlobalFieldCoordinates).getAngle().getRadians() + Math.PI
-        ).plus(Radians.of(isCameraBackwards ? Math.PI : 0)).in(Degrees);
+                currentTranslation.minus(aprilTagPositionInGlobalFieldCoordinates).getAngle().getRadians() + Math.PI)
+                .plus(Radians.of(isCameraBackwards ? Math.PI : 0)).in(Degrees);
 
         double approachSpeedFactor = (approachMode == ApproachMode.Close)
                 ? closeApproachSpeedFactor.get()
                 : this.approachSpeedFactor.get();
 
-        // Eventually we need to return these - they will likely be mutated by later steps.
+        // Eventually we need to return these - they will likely be mutated by later
+        // steps.
         XYPair driveIntent = new XYPair(0, 0);
         double rotationIntent = 0;
 
-        // To allow for quick drop-through, we will have the first step of the state machine be an "if" statement
+        // To allow for quick drop-through, we will have the first step of the state
+        // machine be an "if" statement
         // so that if we see the tag we can jump right into the meat of the machine.
         if (activity == Activity.Searching) {
             // We see the tag. Begin the approach.
             if (doWeSeeOurTargetTag) {
                 activity = Activity.ApproachWhileCentering;
             } else {
-                // We don't see the tag, so point at where it might be. Nothing else can be done,
-                // so tell the caller to point at the april tag. Maybe we will see it in future loops.
+                // We don't see the tag, so point at where it might be. Nothing else can be
+                // done,
+                // so tell the caller to point at the april tag. Maybe we will see it in future
+                // loops.
                 return new AlignCameraToAprilTagAdvice(
                         driveIntent,
                         headingModule.calculateHeadingPower(headingToPointAtAprilTag),
@@ -324,7 +333,8 @@ public class AlignCameraToAprilTagCalculator {
 
         switch (activity) {
             case ApproachWhileCentering -> {
-                // First, let's try and update our final position with any camera data, in case we lose it later.
+                // First, let's try and update our final position with any camera data, in case
+                // we lose it later.
                 if (doWeSeeOurTargetTag) {
                     tagAcquisitionState = TagAcquisitionState.LockedOn;
                     updateFinalTargetState(currentPose);
@@ -333,20 +343,26 @@ public class AlignCameraToAprilTagCalculator {
                 }
 
                 // We have seen the tag at least once. We will approach it in stages.
-                // First, we want to approach a point that's a bit far away from the tag, but straight in line with it.
+                // First, we want to approach a point that's a bit far away from the tag, but
+                // straight in line with it.
                 // So, we head to the interstitial point while pointing at the april tag
 
-                // We want to hit the interstitial point at speed, so rather than using some kind of PID, we just
-                // drive straight at it with a commanded velocity. For that, we need to get a vector in the direction
-                // of the interstitial point, then normalize it and multiply by the speed we want to go.
-                // This should work since the drive subsystem takes in "drive intents" from 0-1 representing 0-100% velocity,
+                // We want to hit the interstitial point at speed, so rather than using some
+                // kind of PID, we just
+                // drive straight at it with a commanded velocity. For that, we need to get a
+                // vector in the direction
+                // of the interstitial point, then normalize it and multiply by the speed we
+                // want to go.
+                // This should work since the drive subsystem takes in "drive intents" from 0-1
+                // representing 0-100% velocity,
                 // so this will automatically scale with the robot's max speed.
                 var vectorTowardsInterstitial = interstitialPoint.getTranslation().minus(currentPose.getTranslation());
                 var normalizedVector = vectorTowardsInterstitial.div(vectorTowardsInterstitial.getNorm());
                 driveIntent = new XYPair(normalizedVector.getX(), normalizedVector.getY()).scale(approachSpeedFactor);
                 rotationIntent = headingModule.calculateHeadingPower(headingToPointAtAprilTag);
 
-                // Finally, a check to see if we're quite close and should advance to the next state.
+                // Finally, a check to see if we're quite close and should advance to the next
+                // state.
 
                 var distanceThresholdToAdvance = (approachMode == ApproachMode.Close)
                         ? distanceFromInterstitialToAdvanceSlow.get()
@@ -356,7 +372,7 @@ public class AlignCameraToAprilTagCalculator {
                     activity = Activity.TerminalApproach;
 
                     // We should not do TerminalApproach if vision stuff is abnormal
-                    if (!hasEverSeenAprilTag || !aprilTagVisionSubsystem.isCameraConnected(targetCameraID)) {
+                    if (!hasEverSeenAprilTag || !aprilTagVisionSubsystem.isCameraConnected(targetCameraID) || targetObservation.get().stale()) {
                         if (isCameraBackwards) {
                             // Trying to approach coral station but found no tag? We'll just use pure pose
                             activity = Activity.TerminalApproachWithoutVision;
@@ -371,8 +387,10 @@ public class AlignCameraToAprilTagCalculator {
                 }
             }
             case TerminalApproach -> {
-                // We are effectively at the interstitial point. We now lock our heading to the final heading and try to approach
-                // the final point with some caution, meaning we will use the Drive PID to decelerate.
+                // We are effectively at the interstitial point. We now lock our heading to the
+                // final heading and try to approach
+                // the final point with some caution, meaning we will use the Drive PID to
+                // decelerate.
 
                 // As before, first we see if we can get any fresh data:
                 if (doWeSeeOurTargetTag) {
@@ -393,9 +411,11 @@ public class AlignCameraToAprilTagCalculator {
                 driveIntent = new XYPair(powers.getX(), powers.getY()).scale(approachSpeedFactor);
                 rotationIntent = headingModule.calculateHeadingPower(idealFinalHeadingDegrees);
 
-                // If we're quite close to the final point, advance to shoving into the reef or coral station.
+                // If we're quite close to the final point, advance to shoving into the reef or
+                // coral station.
                 if (currentTranslation.getDistance(targetLocationOnField) < distanceToStartShoving.get()) {
-                    // We need to make a decision. If our error is small enough, we should advance to shove.
+                    // We need to make a decision. If our error is small enough, we should advance
+                    // to shove.
                     // However, if our error is large, we should retreat and try again.
                     if (isLastKnownErrorWithinBounds() || !requireExcellentAlignment) {
                         activity = Activity.Shove;
@@ -425,12 +445,16 @@ public class AlignCameraToAprilTagCalculator {
                 }
             }
             case Shove -> {
-                // We are so very close to our destination, but it's very hard to get perfect alignment -- the PID
-                // will bring us close, but error in the dive might mean we are off by a few inches. We are also
-                // so close to the april tag that it's no longer guaranteed to be in view. So, we will just try and
+                // We are so very close to our destination, but it's very hard to get perfect
+                // alignment -- the PID
+                // will bring us close, but error in the dive might mean we are off by a few
+                // inches. We are also
+                // so close to the april tag that it's no longer guaranteed to be in view. So,
+                // we will just try and
                 // drive straight into the reef.
 
-                // We know the ideal angle the robot will be pointing at, so we can quickly construct a shove vector
+                // We know the ideal angle the robot will be pointing at, so we can quickly
+                // construct a shove vector
                 // in that direction.
 
                 double shoveDirection = idealFinalHeadingDegrees;
@@ -448,10 +472,14 @@ public class AlignCameraToAprilTagCalculator {
                     oi.driverGamepad.getRumbleManager().rumbleGamepad(1, .75);
                 }
             }
-            case Stall -> {}
-            case Complete -> {}
-            case GaveUp -> {}
-            default -> {} // We're done! We don't need to do anything.
+            case Stall -> {
+            }
+            case Complete -> {
+            }
+            case GaveUp -> {
+            }
+            default -> {
+            } // We're done! We don't need to do anything.
         }
 
         lights.updateFromCalculator(activity, targetCameraID);
@@ -464,7 +492,8 @@ public class AlignCameraToAprilTagCalculator {
     }
 
     private boolean isLastKnownErrorWithinBounds() {
-        // We have to at least be in an Approach/Shove phase for this to be possibly true.
+        // We have to at least be in an Approach/Shove phase for this to be possibly
+        // true.
         // If we're in the searching phase, error isn't relevant, so we return false.
         return switch (activity) {
             case ApproachWhileCentering, TerminalApproach, Shove ->
@@ -474,28 +503,32 @@ public class AlignCameraToAprilTagCalculator {
     }
 
     private void updateFinalTargetState(Pose2d currentPose) {
-        Optional<Translation2d> aprilTagData = aprilTagVisionSubsystem.getRobotRelativeLocationOfAprilTag(targetCameraID, targetAprilTagID);
+        Optional<Translation2d> aprilTagData = aprilTagVisionSubsystem
+                .getRobotRelativeLocationOfAprilTag(targetCameraID, targetAprilTagID);
 
         if (aprilTagData.isPresent()) {
             lastKnownHorizontalErrorMeters = aprilTagData.get().getY() + getHorizontalTrimAdjustmentMeters();
         }
         akitLog.record("AprilTagData", aprilTagData.orElse(null));
 
-        // This transform will always be at rotation 0, since in its own frame, the robot is always facing forward.
+        // This transform will always be at rotation 0, since in its own frame, the
+        // robot is always facing forward.
 
         if (aprilTagData.isEmpty()) {
             tagAcquisitionState = TagAcquisitionState.Lost;
             return;
         }
 
-        // The aprilTagData has the robot-relative location of the AprilTag, but if we tried to drive into it we would crash
-        // into the Reef/Coral station, since the robot has some width/depth. We will create a transform that includes an
+        // The aprilTagData has the robot-relative location of the AprilTag, but if we
+        // tried to drive into it we would crash
+        // into the Reef/Coral station, since the robot has some width/depth. We will
+        // create a transform that includes an
         // X-offset (since X is the forward/backward direction) to account for this.
         Transform2d relativeGoalTransform = new Transform2d(
                 aprilTagData.get().minus(alignmentPointOffset),
-                new Rotation2d()
-        );
-        // Use WPI libraries to transform the relative goal into a field-oriented goal. That way, if we ever lose the tag,
+                new Rotation2d());
+        // Use WPI libraries to transform the relative goal into a field-oriented goal.
+        // That way, if we ever lose the tag,
         // we can still attempt to move to this target location
         targetLocationOnField = currentPose.transformBy(relativeGoalTransform).getTranslation();
 
