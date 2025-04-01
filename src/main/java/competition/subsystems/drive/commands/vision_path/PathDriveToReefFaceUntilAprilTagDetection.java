@@ -39,8 +39,7 @@ public class PathDriveToReefFaceUntilAprilTagDetection
                                               AprilTagFieldLayout aprilTagFieldLayout,
                                               AprilTagVisionSubsystemExtended aprilTagVisionSubsystem) {
         super(pose, drive, coprocessorComms, pf, headingModuleFactory,
-                assertionManager, electricalContract, aprilTagFieldLayout,
-                aprilTagVisionSubsystem);
+                assertionManager, electricalContract, aprilTagFieldLayout);
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
         pf.setPrefix("PathDriveToReefFaceUntilAprilTagDetection/");
         this.distanceProperty = pf.createPersistentProperty("AprilTagDistanceThreshold", Meters.of(1.2));

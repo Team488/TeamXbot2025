@@ -38,7 +38,7 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
     private final ReefRoutingCircle routingCircle;
     private XTableValues.AdditionalArguments additionalArguments;
 
-    private CoprocessorCommunicationSubsystem coprocessor;
+    protected CoprocessorCommunicationSubsystem coprocessor;
     public AtomicReference<Boolean> failed = new AtomicReference<>(false);
     public AtomicReference<XTableValues.BezierCurves> curves =
             new AtomicReference<>(null);
@@ -49,7 +49,6 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
     public PathDriveToLocationCommand(BaseSwerveDriveSubsystem drive,
                                       PoseSubsystem pose, PropertyFactory pf,
                                       HeadingModule.HeadingModuleFactory headingModuleFactory,
-                                      AprilTagVisionSubsystemExtended aprilTagVisionSubsystem,
                                       RobotAssertionManager robotAssertionManager,
                                       CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem) {
         super(drive, pose, pf, headingModuleFactory, robotAssertionManager,
@@ -69,6 +68,7 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
 
     public PathDriveToLocationCommand setTarget(Pose2d target) {
         this.target = target;
+        this.failed.set(false);
         return this;
     }
 
