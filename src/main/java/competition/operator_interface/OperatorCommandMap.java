@@ -103,7 +103,7 @@ public class OperatorCommandMap {
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(pointAtNearestCoralStation)
                 .onFalse(clearPointAtHeading);
         // operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(alignToNearestReefFaceForAlgaeCommand);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(alignWithCreeperCalculatorCommandFactory.create(Cameras.FRONT_LEFT_CAMERA));
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(alignWithCreeperCalculatorCommandFactory.create());
 
 
         // Instantly drives to closest coral station

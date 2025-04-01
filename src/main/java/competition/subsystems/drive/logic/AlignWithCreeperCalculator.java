@@ -34,15 +34,10 @@ public class AlignWithCreeperCalculator {
 
     private final String tableLeftDistance = "verticalEdgeLeftDistancePx";
     private final String tableRightDistance = "verticalEdgeRightDistancePx";
-    private final String tableHres = "cameraHres";
-    private final String tableVres = "cameraVres";
-
-    private final StringProperty photonVisionFrontLeftHostname;
-    private final StringProperty photonVisionFrontRightHostname;
+    private final String tableHres = "alignmentCameraHres";
+    private final String tableVres = "alignmentCameraVres";
 
     private final DoubleProperty driveGain;
-    private final DoubleProperty errorSlope;
-    private final DoubleProperty maxError;
     private final DoubleProperty errorThreshold;
     private final DoubleProperty pushForce;
 
@@ -51,9 +46,6 @@ public class AlignWithCreeperCalculator {
     private CachedSubscriber hresSubscriber;
     private CachedSubscriber vresSubscriber;
 
-
-    private String hostname;
-    private Cameras camera;
 
     // set defaults for now
     private int currentCamHres = this.tunedWidth;
@@ -76,12 +68,6 @@ public class AlignWithCreeperCalculator {
 
         pf.setPrefix("AlignWithCreeperCommand/");
         this.driveGain = pf.createPersistentProperty("Drive Gain", 0.18);
-        this.errorSlope = pf.createPersistentProperty("Cost Function Error slope", 1);
-        this.maxError = pf.createPersistentProperty("Max Error", 0.2);
-        this.photonVisionFrontLeftHostname = pf.createPersistentProperty(
-                "Photon Vision Front Left Hostname", "photonvisionfrontleft");
-        this.photonVisionFrontRightHostname = pf.createPersistentProperty(
-                "Photon Vision Front Right Hostname", "photonvisionfrontright");
         this.errorThreshold = pf.createPersistentProperty(
                 "error Threshold [0-1]", 0.1);
         this.pushForce = pf.createPersistentProperty("Creeper push force", 0);
@@ -104,30 +90,20 @@ public class AlignWithCreeperCalculator {
             return false;
         }
 
-        // Determine active camera and retrieve its corresponding resolution and hostname.
-        if (camera.equals(Cameras.FRONT_LEFT_CAMERA)) {
-            this.hostname = photonVisionFrontLeftHostname.get();
-        } else if (camera.equals(Cameras.FRONT_RIGHT_CAMERA)) {
-            this.hostname = photonVisionFrontRightHostname.get();
-        } else {
-            log.warn("Encountered an unrecognized camera value. Aborting to avoid unintended drive behavior.");
-            return false;
-        }
-
         if(this.leftOffsetPixelsSubscriber == null){
-            this.leftOffsetPixelsSubscriber = new CachedSubscriber(hostname + "." + tableLeftDistance, client,5);
+            this.leftOffsetPixelsSubscriber = new CachedSubscriber(tableLeftDistance, client,5);
         }
 
         if(this.rightOffsetPixelsSubscriber == null){
-            this.rightOffsetPixelsSubscriber = new CachedSubscriber(hostname + "." + tableRightDistance, client,5);
+            this.rightOffsetPixelsSubscriber = new CachedSubscriber(tableRightDistance, client,5);
         }
 
         if(this.hresSubscriber == null){
-            this.hresSubscriber = new CachedSubscriber(hostname + "." + tableHres, client,2);
+            this.hresSubscriber = new CachedSubscriber(tableHres, client,2);
         }
 
         if(this.vresSubscriber == null){
-            this.vresSubscriber = new CachedSubscriber(hostname + "." + tableVres, client,2);
+            this.vresSubscriber = new CachedSubscriber(tableVres, client,2);
         }
         initalized = true;
         return true;
@@ -232,15 +208,6 @@ public class AlignWithCreeperCalculator {
             // if we want to immediately stop
             return forceStop || isRegularFinish;
         }
-    }
-
-
-    public Cameras getCamera() {
-        return camera;
-    }
-
-    public void setCamera(Cameras camera) {
-        this.camera = camera;
     }
 
 }
