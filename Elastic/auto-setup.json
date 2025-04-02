@@ -329,19 +329,6 @@
               "data_type": "double",
               "show_submit_button": false
             }
-          },
-          {
-            "title": "SetHorizontalBranchAOffset",
-            "x": 896.0,
-            "y": 384.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Command",
-            "properties": {
-              "topic": "/SmartDashboard/SetHorizontalBranchAOffset",
-              "period": 0.06,
-              "show_type": true
-            }
           }
         ]
       }
@@ -517,19 +504,6 @@
               "period": 0.06,
               "data_type": "double",
               "show_submit_button": false
-            }
-          },
-          {
-            "title": "SetHorizontalBranchBOffset",
-            "x": 896.0,
-            "y": 384.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Command",
-            "properties": {
-              "topic": "/SmartDashboard/SetHorizontalBranchBOffset",
-              "period": 0.06,
-              "show_type": true
             }
           }
         ]

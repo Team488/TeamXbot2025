@@ -228,7 +228,8 @@ public class AlignCameraToAprilTagCalculator {
         );
 
 
-        branchOffsetMeters = branchOffsetHashMap.get(new BranchOffsetKey(targetCameraID == 0 ? Landmarks.Branch.B : Landmarks.Branch.A, targetAprilTagID)).get();
+        branchOffsetMeters = branchOffsetHashMap.get(
+                new BranchOffsetKey(targetCameraID == 0 ? Landmarks.Branch.B : Landmarks.Branch.A, targetAprilTagID)).get();
 
         this.alignmentPointOffset = new Translation2d(
                 alignmentPointOffset.getX(),
@@ -530,24 +531,10 @@ public class AlignCameraToAprilTagCalculator {
     private void initializeBranchOffsets(PropertyFactory pf) {
         int[] tagIds = {6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22};
         for (int tagId : tagIds) {
-            branchOffsetHashMap.put(new BranchOffsetKey(Landmarks.Branch.A, tagId), pf.createPersistentProperty("BranchAOffset-Tag" + tagId, 0.0));
-            branchOffsetHashMap.put(new BranchOffsetKey(Landmarks.Branch.B, tagId), pf.createPersistentProperty("BranchBOffset-Tag" + tagId, 0.0));
+            branchOffsetHashMap.put(new BranchOffsetKey(Landmarks.Branch.A, tagId),
+                    pf.createPersistentProperty("BranchAOffset-Tag" + tagId, 0.0));
+            branchOffsetHashMap.put(new BranchOffsetKey(Landmarks.Branch.B, tagId),
+                    pf.createPersistentProperty("BranchBOffset-Tag" + tagId, 0.0));
         }
     }
-
-    private void setBranchOffsetMeters(int targetCameraID) {
-        int tagID = aprilTagVisionSubsystem.getTargetAprilTagID(pose.getClosestReefFacePose());
-        Optional<Translation2d> aprilTagData = aprilTagVisionSubsystem.getRobotRelativeLocationOfAprilTag(targetCameraID, tagID);
-
-        aprilTagData.ifPresent(data -> {
-            double offset = data.getY();
-
-            branchOffsetHashMap.get(new BranchOffsetKey(targetCameraID == 1 ? Landmarks.Branch.A : Landmarks.Branch.B, tagID)).set(offset);
-        });
-    }
-
-    public Command createSetHorizontalBranchOffsetMeters(int targetCameraID) {
-        return new InstantCommand(() -> setBranchOffsetMeters(targetCameraID)).ignoringDisable(true);
-    }
-
 }

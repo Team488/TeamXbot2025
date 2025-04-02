@@ -136,14 +136,6 @@ public class OperatorCommandMap {
 
         var aprilTagCalculator = aprilTagCalculatorFactory.create();
 
-        var setHorizontalBranchAOffsetMeters = aprilTagCalculator.createSetHorizontalBranchOffsetMeters(1);
-        setHorizontalBranchAOffsetMeters.setName("SetHorizontalBranchAOffset");
-        SmartDashboard.putData(setHorizontalBranchAOffsetMeters);
-
-        var setHorizontalBranchBOffsetMeters = aprilTagCalculator.createSetHorizontalBranchOffsetMeters(0);
-        setHorizontalBranchBOffsetMeters.setName("SetHorizontalBranchBOffset");
-        SmartDashboard.putData(setHorizontalBranchBOffsetMeters);
-
         operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(aprilTagCalculator.createDecreaseOffsetByOneInchCommand());
         operatorInterface.driverGamepad.getPovIfAvailable(270).onTrue(aprilTagCalculator.createIncreaseOffsetByOneInchCommand());
     }
