@@ -61,7 +61,7 @@ public class DriveToCoralStationCommand extends SwerveSimpleTrajectoryCommand {
                 SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
         // End at coral station with some velocity
         super.logic.setGlobalKinematicValues(
-                new SwervePointKinematics(3, 3, 0.5, 4.5));
+                new SwervePointKinematics(3, 3, 0.25, 4.5));
         super.initialize();
     }
 }
