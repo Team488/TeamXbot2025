@@ -91,6 +91,12 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     public final XDigitalInput bottomSensor;
     public final XLaserCAN distanceSensor;
 
+    public final DoubleProperty laserCanOffsetThreshold;
+    private boolean useDistanceSensor = false;
+    public int badMotorLaserCanHarmonyCount = 0;
+    public int harmonyThreshold = 3;
+    private Distance previousLaserCanDistance;
+
     private final SysIdRoutine sysId;
 
     private final ComplimentaryFilter sensorFusionFilter;
@@ -120,7 +126,6 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         trimChangeAmount = pf.createPersistentProperty("TrimUpAmount", Inches.of(1));
         laserCanMaxMeasurementLatency = pf.createPersistentProperty("laserCanMaxMeasurementLatency-S", 0.04);
 
-
         //to be tuned
         // based on some initial experiments:
         // Elevator raises 36.375 inches (0.923925 meters) after 42.6535 revolutions
@@ -142,8 +147,9 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         this.motionMagicJerk = pf.createPersistentProperty("motionMagicMaxJerk", 0.1);
 
         this.motionMagicEnabled = pf.createPersistentProperty("motionMagicEnabled", false);
-        pf.setDefaultLevel(PropertyLevel.Important);
 
+        this.laserCanOffsetThreshold = pf.createPersistentProperty("laserCanOffsetThreshold-m", 0.0254); // 1 Inch
+        pf.setDefaultLevel(PropertyLevel.Important);
 
         this.sysId = new SysIdRoutine(
                 new SysIdRoutine.Config(
@@ -184,6 +190,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
         if (contract.isElevatorDistanceSensorReady()) {
             this.distanceSensor = xLaserCANFactory.create(contract.getElevatorDistanceSensor(), this.getPrefix());
+            useDistanceSensor = true;
             registerDataFrameRefreshable(distanceSensor);
         } else {
             this.distanceSensor = null;
@@ -327,7 +334,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     }
 
     private Optional<Distance> getRawLaserDistance() {
-        if (contract.isElevatorDistanceSensorReady()) {
+        if (contract.isElevatorDistanceSensorReady() && useDistanceSensor) {
             var distance = distanceSensor.getDistance();
             var latency = distanceSensor.getMeasurementLatency();
             return distance.filter(d -> latency.lt(Seconds.of(laserCanMaxMeasurementLatency.get())));
@@ -417,12 +424,16 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         masterMotor.setTrapezoidalProfileJerk(RadiansPerSecondPerSecond.of(motionMagicJerk.get()).per(Second));
     }
 
+    public void setUseDistanceSensor(boolean value) {
+        useDistanceSensor = value;
+    }
+
     @Override
     public void periodic() {
         if (contract.isElevatorReady()) {
             masterMotor.periodic();
         }
-        if(motionMagicAcceleration.hasChangedSinceLastCheck() || motionMagicJerk.hasChangedSinceLastCheck()){
+        if (motionMagicAcceleration.hasChangedSinceLastCheck() || motionMagicJerk.hasChangedSinceLastCheck()){
             configureMotionMagicConstraints();
         }
         //bandage case: isTouchingBottom flashes true for one tick on startup, investigate later?
@@ -440,7 +451,28 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         aKitLog.record("isElevatorCalibrated", isCalibrated());
         aKitLog.record("isElevatorMaintainerAtGoal", this.isMaintainerAtGoal());
         isNotCalibratedAlert.set(!isCalibrated());
-        getRawLaserDistance().ifPresent(d -> aKitLog.record("ElevatorDistanceSensor-m", d.in(Meters)));
+        getRawLaserDistance().ifPresent(d -> {
+            aKitLog.record("ElevatorDistanceSensor-m", d.in(Meters));
+
+            if (previousLaserCanDistance == null) {
+                previousLaserCanDistance = d;
+            }
+
+            // If our laser can distance is dropping above a certain threshold, for three times
+            // All while our master motor thinks that it has positive velocity (up I am assuming) then
+            // We are in a state of not good stuff and should disable the distance sensor
+            if (previousLaserCanDistance.minus(d).in(Meters) > laserCanOffsetThreshold.get()
+                    && masterMotor.getRawVelocity().baseUnitMagnitude() > 0) {
+                if (badMotorLaserCanHarmonyCount < harmonyThreshold) {
+                    badMotorLaserCanHarmonyCount++;
+                } else {
+                    badMotorLaserCanHarmonyCount = 0;
+                    useDistanceSensor = false;
+                }
+            }
+
+            previousLaserCanDistance = d;
+        });
         getCalibratedLaserDistance().ifPresent(d -> aKitLog.record("CalibratedElevatorDistanceSensor-m", d.in(Meters)));
         aKitLog.record("CalibratedElevatorMotorSensor-m", getCalibratedMotorDistance().in(Meters));
         aKitLog.record("MotorOffset-rotations", elevatorMotorPositionOffset.in(Rotations));
