@@ -38,7 +38,7 @@ public class RoboxContract extends Contract2025 {
     }
 
     @Override
-    public boolean isCoralArmMotorReady() {
+    public boolean isStingerArmMotorReady() {
         return false;
     }
 

@@ -60,9 +60,9 @@ public class Contract2025 extends ElectricalContract {
         );
     }
 
-    public boolean isCoralArmMotorReady() { return true; }
+    public boolean isStingerArmMotorReady() { return true; }
 
-    public CANMotorControllerInfo getCoralArmPivotMotor() {
+    public CANMotorControllerInfo getStingerArmPivotMotor() {
         return new CANMotorControllerInfo("ArmPivotMotor",
                 MotorControllerType.TalonFx,
                 CANBusId.RIO,
@@ -112,16 +112,16 @@ public class Contract2025 extends ElectricalContract {
         return true;
     }
 
-    public DeviceInfo getCoralArmPivotAbsoluteEncoder() {
+    public DeviceInfo getStingerArmPivotAbsoluteEncoder() {
         return new DeviceInfo("ArmPivotAbsoluteEncoder", 29);
     }
 
-    public boolean isCoralArmPivotAbsoluteEncoderReady() { return false; }
+    public boolean isStingerArmPivotAbsoluteEncoderReady() { return false; }
 
-    public DeviceInfo getCoralArmLowSensor() {
+    public DeviceInfo getStingerArmLowSensor() {
         return new DeviceInfo("ArmPivotLowSensor", 1, true);
     }
-    public boolean isCoralArmLowSensorReady() { return true; }
+    public boolean isStingerArmLowSensorReady() { return true; }
 
     @Override
     public boolean isElevatorReady() {

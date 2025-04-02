@@ -80,7 +80,7 @@ public class CoralArmSimulator {
         var armMotorRotations = armRelativeAngle.in(Radians) / CoralArmSimConstants.armEncoderAnglePerRotation.in(Radians);
         armMotor.setPosition(Rotations.of(armMotorRotations));
 
-        if(contract.isCoralArmPivotAbsoluteEncoderReady()) {
+        if(contract.isStingerArmPivotAbsoluteEncoderReady()) {
             absoluteEncoder.setRawPosition(getAbsoluteEncoderPosition(getArmAngle(), 0.0,
                     armPivotSubsystem.rangeOfMotionDegrees.get() / 360).in(Rotations) + 0.5);
         }
