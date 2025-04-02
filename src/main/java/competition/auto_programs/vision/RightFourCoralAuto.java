@@ -25,8 +25,6 @@ public class RightFourCoralAuto extends BaseAutonomousSequentialCommandGroup {
             Provider<PathDriveToLocationForCoralStationFactory> pathDriveToLocationAndIntakeUntilCollectedProvider) {
         super(autoSelector);
 
-        // When we see loop overruns at the start of auto, adding a wait seemed to help
-        // this.addCommands(new WaitCommand(1.0));
 
         // Score 1
         getDriveAndScoreStatusMessageCommand(Landmarks.ReefFace.FAR_RIGHT,

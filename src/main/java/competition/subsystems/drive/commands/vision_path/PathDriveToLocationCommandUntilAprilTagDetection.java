@@ -30,8 +30,7 @@ public class PathDriveToLocationCommandUntilAprilTagDetection
             AprilTagVisionSubsystemExtended aprilTagVisionSubsystem,
             RobotAssertionManager robotAssertionManager,
             CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem) {
-        super(drive, pose, pf, headingModuleFactory, aprilTagVisionSubsystem,
-                robotAssertionManager, coprocessorCommunicationSubsystem);
+        super(drive, pose, pf, headingModuleFactory, robotAssertionManager, coprocessorCommunicationSubsystem);
         this.aprilTagVisionSubsystem = aprilTagVisionSubsystem;
     }
 

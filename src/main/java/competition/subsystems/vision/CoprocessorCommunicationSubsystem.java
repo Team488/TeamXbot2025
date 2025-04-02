@@ -38,6 +38,8 @@ public class CoprocessorCommunicationSubsystem
     final StringProperty xtablesTargetPose;
     final DoubleProperty lastCoralStationConfidentTimeInterval;
     final DistanceProperty lastCoralStationConfidentDistance;
+    final DoubleProperty lastBargePathConfidentTimeInterval;
+    final DistanceProperty lastBargePathConfidentDistance;
     final StringProperty xtablesCoordinateLocation;
     final StringProperty xtablesHeadingLocation;
 
@@ -52,6 +54,8 @@ public class CoprocessorCommunicationSubsystem
 
     public XTableValues.BezierCurves lastCoralStationPath;
     private Double lastCoralStationTimestamp;
+    public XTableValues.BezierCurves lastBargePath;
+    private Double lastBargePathTimestamp;
     @Inject
     public CoprocessorCommunicationSubsystem(
             PropertyFactory pf, RobotAssertionManager assertionManager) {
@@ -60,6 +64,10 @@ public class CoprocessorCommunicationSubsystem
         lastCoralStationConfidentTimeInterval = pf.createPersistentProperty(
                 "lastCoralStationConfidentTimeInterval-in-seconds", 3);
         lastCoralStationConfidentDistance = pf.createPersistentProperty(
+                "lastCoralStationConfidentDistance", Meters.of(1.5));
+        lastBargePathConfidentTimeInterval = pf.createPersistentProperty(
+                "lastCoralStationConfidentTimeInterval-in-seconds", 3);
+        lastBargePathConfidentDistance = pf.createPersistentProperty(
                 "lastCoralStationConfidentDistance", Meters.of(1.5));
         xtablesTargetPose =
                 pf.createPersistentProperty("Xtables Target Pose", "target_pose");
@@ -77,6 +85,16 @@ public class CoprocessorCommunicationSubsystem
                     if (curves != null) {
                         lastCoralStationTimestamp = XTimer.getFPGATimestamp();
                         lastCoralStationPath = curves;
+                    }
+                }));
+        xTablesClientManager.getClientFuture().thenAccept(client
+                -> client.subscribe(
+                "BEZIER_PATH_TO_NEAREST_BARGE", (update) -> {
+                    XTableValues.BezierCurves curves =
+                            XTablesByteUtils.unpack_bezier_curves(update.getValue());
+                    if (curves != null) {
+                        lastBargePathTimestamp = XTimer.getFPGATimestamp();
+                        lastBargePath = curves;
                     }
                 }));
         this.orinVisionCoprocessorCommander =
@@ -126,11 +144,30 @@ public class CoprocessorCommunicationSubsystem
 
         return timeElapsed < maxTime && distance <= maxDistance;
     }
+    public boolean isBargePathConfident(BasePoseSubsystem poseSubsystem) {
+        if (lastBargePath == null || lastBargePathTimestamp == null) {
+            return false;
+        }
+
+        XTableValues.ControlPoint start = lastBargePath.getCurves(0).getControlPoints(0);
+        double timeElapsed = XTimer.getFPGATimestamp() - lastBargePathTimestamp;
+        double maxTime = lastBargePathConfidentTimeInterval.get();
+
+        double distance = new Translation2d(start.getX(), start.getY())
+                .getDistance(poseSubsystem.getCurrentPose2d().getTranslation());
+        double maxDistance = lastBargePathConfidentDistance.get().in(Meters);
+
+        return timeElapsed < maxTime && distance <= maxDistance;
+    }
 
 
     public XTableValues.BezierCurves getLastCoralStationPath() {
         return lastCoralStationPath;
     }
+    public XTableValues.BezierCurves getLastBargePath() {
+        return lastBargePath;
+    }
+
 
     public String getXtablesCoordinateLocation() {
         return xtablesCoordinateLocation.get();
