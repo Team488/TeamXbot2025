@@ -29,6 +29,8 @@ import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.CalibrateDriveCommand;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
 import competition.subsystems.drive.commands.AlignToNearestReefFaceForAlgaeCommand;
+import competition.subsystems.drive.commands.DriveToBargeCommand;
+import competition.subsystems.drive.commands.vision_path.PathDriveToBargeCommand;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.drive.logic.AlignCameraToAprilTagCalculator;
 import competition.subsystems.elevator.ElevatorSubsystem;
@@ -45,6 +47,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import org.kobe.xbot.Utilities.Entities.XTableValues;
 import xbot.common.controls.sensors.XXboxController;
 import xbot.common.subsystems.autonomous.SetAutonomousCommand;
 import xbot.common.subsystems.drive.swerve.commands.ChangeActiveSwerveModuleCommand;
@@ -78,7 +81,9 @@ public class OperatorCommandMap {
                     driveToClosestStationCommandGroupFactory,
             CoprocessorCommunicationSubsystem coprocessorCommunicationSubsystem,
             PathDriveToLocationForCoralStationFactory pathDriveToLocationForCoralStationFactory,
-            AlignCameraToAprilTagCalculator.AlignCameraToAprilTagCalculatorFactory aprilTagCalculatorFactory) {
+            AlignCameraToAprilTagCalculator.AlignCameraToAprilTagCalculatorFactory aprilTagCalculatorFactory,
+            PathDriveToBargeCommand pathDriveToBargeCommand,
+            DriveToBargeCommand driveToBargeCommand) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
 
@@ -109,12 +114,21 @@ public class OperatorCommandMap {
                 null, null
         );
         SequentialCommandGroup driveToClosestCoralStation =
-                driveToClosestStationCommandGroupFactory.createDriveOnly(true);
+                driveToClosestStationCommandGroupFactory.createDriveOnly();
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(new ConditionalCommand(
                 pathDriveToClosestCoralStation,
                 driveToClosestCoralStation,
                 () -> coprocessorCommunicationSubsystem.isCoralStationPathConfident(pose)
         ));
+
+
+
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(new ConditionalCommand(
+                pathDriveToBargeCommand,
+                driveToBargeCommand,
+                () -> coprocessorCommunicationSubsystem.isBargePathConfident(pose)
+        ));
+
 
 //        operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
 //        operatorInterface.driverGamepad.getPovIfAvailable(90).onTrue(changeActiveModule);

@@ -12,6 +12,7 @@ import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.drive.BaseSwerveDriveSubsystem;
 import xbot.common.subsystems.drive.SwervePointKinematics;
 import xbot.common.subsystems.drive.SwerveSimpleBezierCommand;
+import xbot.common.subsystems.drive.SwerveSimpleTrajectoryCommand;
 import xbot.common.subsystems.drive.SwerveSimpleTrajectoryMode;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
 import xbot.common.subsystems.pose.BasePoseSubsystem;
@@ -26,8 +27,8 @@ public class SwerveBezierTrajectoryBase extends SwerveSimpleBezierCommand {
 
     // --- NEW CONSTANTS ---
     private static final int STEPS_PER_SEGMENT = 13;
-    private static final double DEFAULT_ACCELERATION = 1.0;
-    private static final double DEFAULT_METERS_PER_SECOND_VELOCITY = 2.0;
+    private static final double DEFAULT_ACCELERATION = 3;
+    private static final double DEFAULT_METERS_PER_SECOND_VELOCITY = 4.5;
     private final AprilTagFieldLayout layout;
 
     @Inject
