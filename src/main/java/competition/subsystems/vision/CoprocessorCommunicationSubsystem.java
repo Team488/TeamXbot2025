@@ -1,5 +1,6 @@
 package competition.subsystems.vision;
 
+import competition.Robot;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -97,8 +98,15 @@ public class CoprocessorCommunicationSubsystem
                         lastBargePath = curves;
                     }
                 }));
-        this.orinVisionCoprocessorCommander =
-                new VisionCoprocessorCommander(VisionCoprocessor.ORIN3_STATIC);
+
+        // If current instance is a simulation then use local host (if you are running the orin code locally!)
+        if(Robot.isSimulation()) {
+            this.orinVisionCoprocessorCommander =
+                    new VisionCoprocessorCommander(VisionCoprocessor.LOCALHOST);
+        } else {
+            this.orinVisionCoprocessorCommander =
+                    new VisionCoprocessorCommander(VisionCoprocessor.ORIN3_STATIC);
+        }
     }
 
     public boolean isUseBackupPointToPointForPathplanning() {
