@@ -191,9 +191,12 @@ public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
         double deltaY = idealFinalPosition.getY() - currentTranslation.getY();
         double robotRelativeTagLocationY = deltaX * Math.sin(-currentHeading) + deltaY * Math.cos(-currentHeading);
 
-        // Everything below here can and will be extracted because it is repeated code with
+        // Everything below here can and should be extracted because it is repeated code with
         // DriveWithSnapToReefTagCommand
-        var centeringTranslation2d = getPowerForRelativePositionChange(new Translation2d(0, robotRelativeTagLocationY));
+        var centeringTranslation2d = drive.getPowerForRelativePositionChange(
+                driveToAlgaePidManager,
+                new Translation2d(0, robotRelativeTagLocationY)
+        );
         XYPair centeringVector = new XYPair(centeringTranslation2d.getX(), centeringTranslation2d.getY());
         centeringVector = centeringVector.rotate(pose.getCurrentHeading().getDegrees());
 
@@ -219,18 +222,5 @@ public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
                 pose.getCurrentHeading().getDegrees(),
                 new XYPair()
         );
-    }
-
-    public Translation2d getPowerForRelativePositionChange(Translation2d goalPosition) {
-        double goalMagnitude = goalPosition.getNorm();
-
-        if (Math.abs(goalMagnitude) <  0.0001) {
-            goalMagnitude = 0.0001;
-        }
-        Translation2d normalizedGoalVector = goalPosition.div(goalMagnitude);
-
-        double power = -driveToAlgaePidManager.calculate(0, goalMagnitude);
-
-        return normalizedGoalVector.times(power);
     }
 }
