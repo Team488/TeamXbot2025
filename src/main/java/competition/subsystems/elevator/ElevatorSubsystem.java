@@ -116,7 +116,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         scoreAlgaeProcessorHeight = pf.createPersistentProperty("scoreAlgaeProcessorHeight", Inches.of(1));
 
         this.motionMagicAcceleration = pf.createPersistentProperty("motionMagicMaxAcceleration", 1);
-        this.motionMagicJerk = pf.createPersistentProperty("motionMagicMaxJerk", 0.1);
+        this.motionMagicJerk = pf.createPersistentProperty("motionMagicMaxJerk", 1);
         this.motionMagicEnabled = pf.createPersistentProperty("motionMagicEnabled", false);
 
         pf.setDefaultLevel(PropertyLevel.Debug);
