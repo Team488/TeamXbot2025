@@ -75,7 +75,7 @@ public class AlignToReefWithAprilTagCommand extends AlignToTagGlobalMovementWith
         } else {
             super.setConfigurations(
                     cameraToUse,
-                    aprilTagVisionSubsystem.getTargetAprilTagID(pose.getClosestReefFacePose()),
+                    aprilTagVisionSubsystem.getTargetAprilTagID(pose.getReefFaceFromAngle()),
                     isCameraBackwards,
                     offsetInInches,
                     startingActivity,

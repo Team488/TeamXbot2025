@@ -2,15 +2,17 @@ package competition.commandgroups;
 
 import competition.subsystems.coral_scorer.commands.IntakeUntilCoralCollectedCommand;
 import competition.subsystems.drive.commands.AlignToSpecificHumanLoadingStationCommand;
+import competition.subsystems.drive.commands.DriveToCoralStationCommand;
 import competition.subsystems.drive.commands.DriveToCoralStationInterstitialCommand;
 import competition.subsystems.drive.commands.ShoveCoralStationCommand;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import xbot.common.command.NamedInstantCommand;
+
 import javax.inject.Inject;
 import javax.inject.Provider;
-import xbot.common.command.NamedInstantCommand;
 
 public class DriveToClosestStationCommandGroupFactory {
     private final Provider<DriveToCoralStationInterstitialCommand>
@@ -21,10 +23,12 @@ public class DriveToClosestStationCommandGroupFactory {
             intakeUntilCoralCollectedCommandProv;
     private final Provider<ShoveCoralStationCommand> shoveCoralStationCommandProv;
     private final PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory;
+    private final Provider<DriveToCoralStationCommand> driveToCoralStationCommandProv;
     private final PoseSubsystem poseSubsystem;
 
     @Inject
     public DriveToClosestStationCommandGroupFactory(PoseSubsystem poseSubsystem,
+                                                    Provider<DriveToCoralStationCommand> driveToCoralStationCommandProv,
                                                     Provider<DriveToCoralStationInterstitialCommand>
                                                             driveToCoralStationSectionCommandProv,
                                                     Provider<AlignToSpecificHumanLoadingStationCommand>
@@ -42,38 +46,23 @@ public class DriveToClosestStationCommandGroupFactory {
                 intakeUntilCoralCollectedCommandProv;
         this.shoveCoralStationCommandProv = shoveCoralStationCommandProv;
         this.poseSubsystem = poseSubsystem;
+        this.driveToCoralStationCommandProv = driveToCoralStationCommandProv;
     }
 
-    public SequentialCommandGroup createDriveOnly(boolean addPoint) {
-        // Drive to coral station using terminal approach, have an interstitial
-        // point if needed
+    public SequentialCommandGroup createDriveOnly() {
+
         var driveToCoralStation = new SequentialCommandGroup();
         driveToCoralStation.setName("DriveToCoralStation");
-        var alignToCoralStationCommand = alignToCoralStationCommandProv.get();
+        var driveToCoralStationCommand = driveToCoralStationCommandProv.get();
         var shoveCoralStationCommand = shoveCoralStationCommandProv.get();
-
-        // We can add an interstitial point between scoring at the reef and
-        // terminally approaching to the coral station to avoid rotating into the
-        // reef
-        var driveToCoralStationSectionCommand =
-                driveToCoralStationSectionCommandProv.get();
         driveToCoralStation.addCommands(
                 new NamedInstantCommand("GetNearestCoralStation", () -> {
                     Landmarks.CoralStation station =
                             poseSubsystem.getClosestCoralStation();
-                    System.out.println("CLOSEST CORAL STATION: " + station);
-                    if (addPoint) {
-                        driveToCoralStationSectionCommand.setTargetCoralStationSection(
-                                station);
-                    }
-                    alignToCoralStationCommand.setCoralStation(station);
+                    driveToCoralStationCommand.setCoralStation(station);
                     shoveCoralStationCommand.setShoveAngle(station);
                 }));
-        if(addPoint) {
-            driveToCoralStation.addCommands(
-                    driveToCoralStationSectionCommand.withTimeout(2.0));
-        }
-        driveToCoralStation.addCommands(alignToCoralStationCommand);
+        driveToCoralStation.addCommands(driveToCoralStationCommand);
         return driveToCoralStation.andThen(shoveCoralStationCommand.withTimeout(4));
     }
 
