@@ -65,8 +65,19 @@ public class PoseSubsystem extends BasePoseSubsystem {
 
     protected Optional<SwerveModulePosition[]> simulatedModulePositions = Optional.empty();
 
-    @Inject
+    public final List<Pose2d> blueReefFacePoses = Arrays.asList(
+            Landmarks.BlueCloseAlgae,
+            Landmarks.BlueCloseLeftAlgae,
+            Landmarks.BlueCloseRightAlgae,
+            Landmarks.BlueFarLeftAlgae,
+            Landmarks.BlueFarAlgae,
+            Landmarks.BlueFarRightAlgae);
 
+    public final List<Pose2d> redReefFacePoses = blueReefFacePoses.stream()
+            .map(PoseSubsystem::convertBluetoRed)
+            .toList();
+
+    @Inject
     public PoseSubsystem(XGyroFactory gyroFactory,
             ElectricalContract electricalContract,
             PropertyFactory propManager, DriveSubsystem drive,
@@ -397,33 +408,13 @@ public class PoseSubsystem extends BasePoseSubsystem {
         this.simulatedModulePositions = Optional.of(positions);
     }
 
-    public static List<Pose2d> getBlueReefFacePoses() {
-        return Arrays.asList(
-                Landmarks.BlueCloseAlgae,
-                Landmarks.BlueCloseLeftAlgae,
-                Landmarks.BlueCloseRightAlgae,
-                Landmarks.BlueFarLeftAlgae,
-                Landmarks.BlueFarAlgae,
-                Landmarks.BlueFarRightAlgae);
-    }
-
     public Pose2d getClosestReefFacePose() {
-        Pose2d currentPose = getCurrentPose2d();
-
-        List<Pose2d> reefFacePoses = getBlueReefFacePoses();
-        reefFacePoses.replaceAll(PoseSubsystem::convertBlueToRedIfNeeded);
-
-        return currentPose.nearest(reefFacePoses);
+        return getClosestReefFacePoseByAlliance(getAlliance());
     }
 
     public Pose2d getClosestReefFacePoseByAlliance(DriverStation.Alliance alliance) {
         Pose2d currentPose = getCurrentPose2d();
-
-        List<Pose2d> reefFacePoses = getBlueReefFacePoses();
-        if (alliance == DriverStation.Alliance.Red) {
-            reefFacePoses.replaceAll(PoseSubsystem::convertBluetoRed);
-        }
-
+        List<Pose2d> reefFacePoses = (alliance == DriverStation.Alliance.Blue) ? blueReefFacePoses : redReefFacePoses;
         return currentPose.nearest(reefFacePoses);
     }
 
