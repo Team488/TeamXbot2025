@@ -1,17 +1,17 @@
-package competition.subsystems.coral_scorer.commands;
+package competition.subsystems.stinger_collection.commands;
 
 import competition.operator_interface.OperatorInterface;
-import competition.subsystems.coral_scorer.CoralScorerSubsystem;
+import competition.subsystems.stinger_collection.StingerCollectionSubsystem;
 import xbot.common.command.BaseCommand;
 
 import javax.inject.Inject;
 
 public class IntakeCoralCommand extends BaseCommand {
-    final CoralScorerSubsystem coral;
+    final StingerCollectionSubsystem coral;
     final OperatorInterface oi;
 
     @Inject
-    public IntakeCoralCommand(CoralScorerSubsystem coralScorerSubsystem, OperatorInterface oi) {
+    public IntakeCoralCommand(StingerCollectionSubsystem coralScorerSubsystem, OperatorInterface oi) {
         coral = coralScorerSubsystem;
         this.oi = oi;
         this.addRequirements(coral);
@@ -19,7 +19,7 @@ public class IntakeCoralCommand extends BaseCommand {
 
     @Override
     public void initialize() {
-        coral.setCoralScorerState(CoralScorerSubsystem.CoralScorerState.INTAKING_CORAL);
+        coral.setStingerCollectionState(StingerCollectionSubsystem.StingerCollectionState.INTAKING_CORAL);
     }
 
 

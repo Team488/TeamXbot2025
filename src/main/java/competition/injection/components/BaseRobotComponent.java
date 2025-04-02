@@ -10,7 +10,7 @@ import competition.subsystems.SubsystemDefaultCommandMap;
 import competition.subsystems.algae_arm.AlgaeArmSubsystem;
 import competition.subsystems.algae_collection.AlgaeCollectionSubsystem;
 import competition.subsystems.stinger_arm.StingerArmSubsystem;
-import competition.subsystems.coral_scorer.CoralScorerSubsystem;
+import competition.subsystems.stinger_collection.StingerCollectionSubsystem;
 import competition.subsystems.drive.commands.AlignToNearestCoralStationCommand;
 import competition.subsystems.drive.commands.EmergencyAutonomousCommand;
 import competition.subsystems.deadwheel.DeadWheelSubsystem;
@@ -49,7 +49,7 @@ public abstract class BaseRobotComponent extends BaseComponent {
 
     public abstract ElevatorSubsystem elevatorSubsystem();
 
-    public abstract CoralScorerSubsystem coralScorerSubsystem();
+    public abstract StingerCollectionSubsystem coralScorerSubsystem();
 
     public abstract SuperstructureMechanismSubsystem superstructureMechanismSubsystem();
 

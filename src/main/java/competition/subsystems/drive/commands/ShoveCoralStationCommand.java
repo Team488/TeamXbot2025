@@ -1,6 +1,6 @@
 package competition.subsystems.drive.commands;
 
-import competition.subsystems.coral_scorer.CoralScorerSubsystem;
+import competition.subsystems.stinger_collection.StingerCollectionSubsystem;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
@@ -19,7 +19,7 @@ public class ShoveCoralStationCommand extends BaseCommand {
 
     final DriveSubsystem drive;
     final PoseSubsystem pose;
-    final CoralScorerSubsystem coralScorer;
+    final StingerCollectionSubsystem coralScorer;
 
     final DoubleProperty shovePower;
 
@@ -27,7 +27,7 @@ public class ShoveCoralStationCommand extends BaseCommand {
     Angle shoveAngleActual;
 
     @Inject
-    public ShoveCoralStationCommand(DriveSubsystem drive, PoseSubsystem pose, PropertyFactory pf, CoralScorerSubsystem coralScorer) {
+    public ShoveCoralStationCommand(DriveSubsystem drive, PoseSubsystem pose, PropertyFactory pf, StingerCollectionSubsystem coralScorer) {
         this.drive = drive;
         this.pose = pose;
         this.coralScorer = coralScorer;

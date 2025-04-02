@@ -3,18 +3,18 @@ package competition.simulation.coral_scorer;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import competition.subsystems.coral_scorer.CoralScorerSubsystem;
+import competition.subsystems.stinger_collection.StingerCollectionSubsystem;
 import edu.wpi.first.wpilibj.MockDigitalInput;
 import xbot.common.controls.actuators.mock_adapters.MockCANMotorController;
 
 @Singleton
 public class CoralScorerSimulator {
-    final CoralScorerSubsystem coralScorerSubsystem;
+    final StingerCollectionSubsystem coralScorerSubsystem;
     final MockCANMotorController coralScorerMotor;
     final MockDigitalInput coralSensor;
 
     @Inject
-    public CoralScorerSimulator(CoralScorerSubsystem coralScorerSubsystem) {
+    public CoralScorerSimulator(StingerCollectionSubsystem coralScorerSubsystem) {
         this.coralScorerSubsystem = coralScorerSubsystem;
         this.coralScorerMotor = (MockCANMotorController) coralScorerSubsystem.motor;
         this.coralSensor = (MockDigitalInput) coralScorerSubsystem.coralSensor;

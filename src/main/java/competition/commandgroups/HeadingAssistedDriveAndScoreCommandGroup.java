@@ -1,7 +1,7 @@
 package competition.commandgroups;
 
 import competition.subsystems.stinger_arm.StingerArmSubsystem;
-import competition.subsystems.coral_scorer.commands.ScoreWhenReadyCommand;
+import competition.subsystems.stinger_collection.commands.ScoreWhenReadyCommand;
 import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.DriveToReefFaceFromAngleUntilDetectionCommand;
 import competition.subsystems.drive.commands.MeasureDistanceBeforeScoringCommand;

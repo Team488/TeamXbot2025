@@ -1,7 +1,7 @@
 package competition.commandgroups.vision_path;
 
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
-import competition.subsystems.coral_scorer.commands.ScoreWhenReadyCommand;
+import competition.subsystems.stinger_collection.commands.ScoreWhenReadyCommand;
 import competition.subsystems.drive.commands.MeasureDistanceBeforeScoringCommand;
 import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.units.measure.Distance;

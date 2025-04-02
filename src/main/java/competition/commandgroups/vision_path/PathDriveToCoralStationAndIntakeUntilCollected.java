@@ -1,7 +1,7 @@
 package competition.commandgroups.vision_path;
 
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
-import competition.subsystems.coral_scorer.commands.IntakeUntilCoralCollectedCommand;
+import competition.subsystems.stinger_collection.commands.IntakeUntilCoralCollectedCommand;
 import competition.subsystems.drive.commands.vision_path.DriveVectorSmallCommand;
 import competition.subsystems.drive.commands.vision_path.PathDriveToNearestCoralStationSectionCommand;
 import competition.subsystems.pose.Landmarks;

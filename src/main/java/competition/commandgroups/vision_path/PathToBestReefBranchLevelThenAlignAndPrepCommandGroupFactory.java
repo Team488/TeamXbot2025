@@ -4,7 +4,7 @@ import static competition.subsystems.vision.CoprocessorCommunicationSubsystem.fr
 import static edu.wpi.first.units.Units.Meters;
 
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
-import competition.subsystems.coral_scorer.commands.ScoreWhenReadyCommand;
+import competition.subsystems.stinger_collection.commands.ScoreWhenReadyCommand;
 import competition.subsystems.drive.commands.AlignToTagGlobalMovementWithCalculator;
 import competition.subsystems.drive.commands.MeasureDistanceBeforeScoringCommand;
 import competition.subsystems.drive.commands.vision_path.PathDriveToLocationCommandUntilAprilTagDetectionDynamic;
@@ -13,7 +13,6 @@ import competition.subsystems.pose.Landmarks;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import javax.inject.Inject;
