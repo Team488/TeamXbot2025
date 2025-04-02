@@ -32,8 +32,8 @@ public class PathDriveToBargeCommand extends PathDriveToLocationCommand {
             XTableValues.BezierCurves path = coprocessor.getLastBargePath();
             super.setOverriddenPath(path);
             super.setOptions(path.getOptions());
-            super.initialize();
             super.logic.setPrioritizeRotationIfCloseToGoal(true);
+            super.initialize();
         } else {
             log.warn("Barge path could not be determined. Cancelling.");
             cancel();

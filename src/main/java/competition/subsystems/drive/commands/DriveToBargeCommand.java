@@ -54,19 +54,23 @@ public class DriveToBargeCommand extends SwerveSimpleTrajectoryCommand {
 
     public Pose2d getNearestPoint(
             double startY, DriverStation.Alliance alliance) {
-        // Snap startY to the nearest boundary if it falls between the red and blue
-        // minimum values.
-        if (redRobotMin.get() < startY && startY < blueRobotMin.get()) {
-            if (Math.abs(startY - redRobotMin.get())
-                    < Math.abs(blueRobotMin.get() - startY)) {
-                startY = redRobotMin.get() + electricalContract.getRadiusOfRobot().div(2).in(Meters);
-            } else {
-                startY = blueRobotMin.get() + electricalContract.getRadiusOfRobot().div(2).in(Meters);
-            }
-        }
+
 
         // Determine if the alliance is BLUE.
         boolean isBlue = alliance == DriverStation.Alliance.Blue;
+
+        // Snap startY to the nearest boundary if it falls between the red and blue
+        // minimum values.
+        double radiusOfRobotFromCenter = electricalContract.getRadiusOfRobot().div(2).in(Meters);
+        if (isBlue) {
+            double blueMinimumWithBumper = blueRobotMin.get() + radiusOfRobotFromCenter;
+            if (startY <= blueMinimumWithBumper) {
+                startY = blueMinimumWithBumper;
+
+            }
+        } else if (startY >= (redRobotMin.get() - radiusOfRobotFromCenter)) {
+            startY = redRobotMin.get() - radiusOfRobotFromCenter;
+        }
 
         // Compute the X coordinate based on the alliance.
         double x = isBlue ? PoseSubsystem.fieldXMidpointInMeters
