@@ -1,17 +1,17 @@
-package competition.subsystems.coral_arm.commands;
+package competition.subsystems.stinger_arm.commands;
 
-import competition.subsystems.coral_arm.CoralArmSubsystem;
+import competition.subsystems.stinger_arm.StingerArmSubsystem;
 import xbot.common.command.BaseCommand;
 
 import javax.inject.Inject;
 
 //toggles isCalibrated on and off in coralArmSubsystem for testing
-public class ToggleCoralArmCalibratedCommand extends BaseCommand {
-    CoralArmSubsystem coralArm;
+public class ToggleStingerArmCalibratedCommand extends BaseCommand {
+    StingerArmSubsystem coralArm;
     boolean calibrationSwitch;
 
     @Inject
-    public ToggleCoralArmCalibratedCommand(CoralArmSubsystem coralArm){
+    public ToggleStingerArmCalibratedCommand(StingerArmSubsystem coralArm){
         this.coralArm = coralArm;
         addRequirements(coralArm);
     }

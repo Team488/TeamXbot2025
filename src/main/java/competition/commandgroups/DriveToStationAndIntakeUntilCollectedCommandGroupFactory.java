@@ -1,6 +1,6 @@
 package competition.commandgroups;
 
-import competition.subsystems.coral_scorer.commands.IntakeUntilCoralCollectedCommand;
+import competition.subsystems.stinger_collection.commands.IntakeUntilCoralCollectedCommand;
 import competition.subsystems.drive.commands.AlignToSpecificHumanLoadingStationCommand;
 import competition.subsystems.drive.commands.DriveToCoralStationInterstitialCommand;
 import competition.subsystems.drive.commands.ShoveCoralStationCommand;

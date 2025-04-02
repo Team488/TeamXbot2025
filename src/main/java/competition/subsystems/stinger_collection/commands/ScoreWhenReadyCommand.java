@@ -1,19 +1,19 @@
-package competition.subsystems.coral_scorer.commands;
+package competition.subsystems.stinger_collection.commands;
 
-import competition.subsystems.coral_arm.CoralArmSubsystem;
-import competition.subsystems.coral_scorer.CoralScorerSubsystem;
+import competition.subsystems.stinger_arm.StingerArmSubsystem;
+import competition.subsystems.stinger_collection.StingerCollectionSubsystem;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import xbot.common.command.BaseCommand;
 
 import javax.inject.Inject;
 
 public class ScoreWhenReadyCommand extends BaseCommand {
-    CoralScorerSubsystem coralScorerSubsystem;
-    CoralArmSubsystem coralArmSubsystem;
+    StingerCollectionSubsystem coralScorerSubsystem;
+    StingerArmSubsystem coralArmSubsystem;
     ElevatorSubsystem elevatorSubsystem;
 
     @Inject
-    public ScoreWhenReadyCommand(CoralScorerSubsystem coralScorerSubsystem, CoralArmSubsystem coralArmSubsystem,
+    public ScoreWhenReadyCommand(StingerCollectionSubsystem coralScorerSubsystem, StingerArmSubsystem coralArmSubsystem,
                                  ElevatorSubsystem elevatorSubsystem) {
         this.coralScorerSubsystem = coralScorerSubsystem;
         this.coralArmSubsystem = coralArmSubsystem;
@@ -33,7 +33,7 @@ public class ScoreWhenReadyCommand extends BaseCommand {
         var armMaintainerAtGoal = coralArmSubsystem.isMaintainerAtGoal();
         var elevatorMaintainerAtGoal = elevatorSubsystem.isMaintainerAtGoal();
         if (hasCoral && getIsTargetAngleScoring && armMaintainerAtGoal && elevatorMaintainerAtGoal) {
-            coralScorerSubsystem.setCoralScorerState(CoralScorerSubsystem.CoralScorerState.SCORING_CORAL);
+            coralScorerSubsystem.setStingerCollectionState(StingerCollectionSubsystem.StingerCollectionState.SCORING_CORAL);
         }
         aKitLog.record("isTargetAngleScoring", getIsTargetAngleScoring);
         aKitLog.record("armPrepped", armMaintainerAtGoal);

@@ -4,7 +4,7 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Seconds;
 
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
-import competition.subsystems.coral_scorer.commands.IntakeUntilCoralCollectedCommand;
+import competition.subsystems.stinger_collection.commands.IntakeUntilCoralCollectedCommand;
 import competition.subsystems.drive.commands.vision_path.DriveVectorSmallCommand;
 import competition.subsystems.drive.commands.vision_path.PathDriveToLocationCommand;
 import competition.subsystems.pose.Landmarks;

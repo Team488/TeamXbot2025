@@ -9,8 +9,8 @@ import competition.simulation.BaseSimulator;
 import competition.subsystems.SubsystemDefaultCommandMap;
 import competition.subsystems.algae_arm.AlgaeArmSubsystem;
 import competition.subsystems.algae_collection.AlgaeCollectionSubsystem;
-import competition.subsystems.coral_arm.CoralArmSubsystem;
-import competition.subsystems.coral_scorer.CoralScorerSubsystem;
+import competition.subsystems.stinger_arm.StingerArmSubsystem;
+import competition.subsystems.stinger_collection.StingerCollectionSubsystem;
 import competition.subsystems.drive.commands.AlignToNearestCoralStationCommand;
 import competition.subsystems.drive.commands.EmergencyAutonomousCommand;
 import competition.subsystems.deadwheel.DeadWheelSubsystem;
@@ -45,11 +45,11 @@ public abstract class BaseRobotComponent extends BaseComponent {
 
     public abstract BaseSimulator simulator();
 
-    public abstract CoralArmSubsystem armPivotSubsystem();
+    public abstract StingerArmSubsystem armPivotSubsystem();
 
     public abstract ElevatorSubsystem elevatorSubsystem();
 
-    public abstract CoralScorerSubsystem coralScorerSubsystem();
+    public abstract StingerCollectionSubsystem coralScorerSubsystem();
 
     public abstract SuperstructureMechanismSubsystem superstructureMechanismSubsystem();
 
@@ -71,7 +71,7 @@ public abstract class BaseRobotComponent extends BaseComponent {
 
     public abstract AlgaeArmSubsystem algaeArmSubsystem();
 
-    public abstract CoralArmSubsystem coralArmSubsystem();
+    public abstract StingerArmSubsystem coralArmSubsystem();
 
     public abstract AlgaeCollectionSubsystem algaeCollectionSubsystem();
 

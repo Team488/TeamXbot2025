@@ -1,19 +1,19 @@
-package competition.subsystems.coral_arm.commands;
+package competition.subsystems.stinger_arm.commands;
 
-import competition.subsystems.coral_arm.CoralArmSubsystem;
+import competition.subsystems.stinger_arm.StingerArmSubsystem;
 import competition.subsystems.pose.Landmarks;
 import xbot.common.command.BaseSetpointCommand;
 
 import javax.inject.Inject;
 import java.util.function.Supplier;
 
-public class SetCoralArmTargetAngleCommand extends BaseSetpointCommand {
+public class SetStingerArmTargetAngleCommand extends BaseSetpointCommand {
 
-    CoralArmSubsystem coralArm;
+    StingerArmSubsystem coralArm;
     private Supplier<Landmarks.CoralLevel> angleSupplier;
 
     @Inject
-    public SetCoralArmTargetAngleCommand(CoralArmSubsystem coralArm) {
+    public SetStingerArmTargetAngleCommand(StingerArmSubsystem coralArm) {
         super(coralArm);
         this.coralArm = coralArm;
     }

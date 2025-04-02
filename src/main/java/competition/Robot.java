@@ -12,11 +12,9 @@ import competition.injection.components.DaggerSimulationComponent;
 import competition.operator_interface.OperatorInterface;
 import competition.simulation.BaseSimulator;
 import competition.subsystems.algae_arm.AlgaeArmSubsystem;
-import competition.subsystems.coral_arm.CoralArmSubsystem;
-import competition.subsystems.pose.Landmarks;
+import competition.subsystems.stinger_arm.StingerArmSubsystem;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.wpilibj.Preferences;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -40,7 +38,7 @@ public class Robot extends BaseRobot {
     ElectricalContract simulatorContract = new UnitTestContract2025();
     OperatorInterface oi;
     AlgaeArmSubsystem algaeArmSubsystem;
-    CoralArmSubsystem coralArmSubsystem;
+    StingerArmSubsystem coralArmSubsystem;
 
     Robot() {
         // We currently can't keep up with 0.02s loop times, and the error reporting about loop

@@ -1,4 +1,4 @@
-package competition.subsystems.coral_arm;
+package competition.subsystems.stinger_arm;
 
 import competition.electrical_contract.ElectricalContract;
 import competition.subsystems.pose.Landmarks;
@@ -28,7 +28,7 @@ import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 @Singleton
-public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
+public class StingerArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
     public final XCANMotorController armMotor;
     public final XDutyCycleEncoder armAbsoluteEncoder;
@@ -39,7 +39,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     double periodicTickCounter;
     double rotationsAtZero = 0;
     boolean isCalibrated = false;
-    final Alert isNotCalibratedAlert = new Alert("CoralArm: not calibrated", Alert.AlertType.kWarning);
+    final Alert isNotCalibratedAlert = new Alert("StingerArm: not calibrated", Alert.AlertType.kWarning);
 
     private final DoubleProperty degreesPerRotations;
     public final DoubleProperty level123ScoringAngle;
@@ -55,16 +55,16 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     public Landmarks.CoralLevel targetCoralLevel;
 
     @Inject
-    public CoralArmSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
-                             ElectricalContract electricalContract, PropertyFactory propertyFactory,
-                             XDutyCycleEncoder.XDutyCycleEncoderFactory xDutyCycleEncoderFactory,
-                             XDigitalInput.XDigitalInputFactory xDigitalInputFactory) {
+    public StingerArmSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
+                               ElectricalContract electricalContract, PropertyFactory propertyFactory,
+                               XDutyCycleEncoder.XDutyCycleEncoderFactory xDutyCycleEncoderFactory,
+                               XDigitalInput.XDigitalInputFactory xDigitalInputFactory) {
         propertyFactory.setPrefix(this);
 
         this.electricalContract = electricalContract;
 
-        if (electricalContract.isCoralArmMotorReady()) {
-            this.armMotor = xcanMotorControllerFactory.create(electricalContract.getCoralArmPivotMotor(),
+        if (electricalContract.isStingerArmMotorReady()) {
+            this.armMotor = xcanMotorControllerFactory.create(electricalContract.getStingerArmPivotMotor(),
                     getPrefix(), "ArmPivotMotor", new XCANMotorControllerPIDProperties(
                             2,
                             0,
@@ -79,15 +79,15 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
             this.armMotor = null;
         }
 
-        if (electricalContract.isCoralArmPivotAbsoluteEncoderReady()) {
-            this.armAbsoluteEncoder = xDutyCycleEncoderFactory.create(electricalContract.getCoralArmPivotAbsoluteEncoder());
+        if (electricalContract.isStingerArmPivotAbsoluteEncoderReady()) {
+            this.armAbsoluteEncoder = xDutyCycleEncoderFactory.create(electricalContract.getStingerArmPivotAbsoluteEncoder());
             this.registerDataFrameRefreshable(this.armAbsoluteEncoder);
         } else {
             this.armAbsoluteEncoder = null;
         }
 
-        if (electricalContract.isCoralArmLowSensorReady()) {
-            this.lowSensor = xDigitalInputFactory.create(electricalContract.getCoralArmLowSensor(),
+        if (electricalContract.isStingerArmLowSensorReady()) {
+            this.lowSensor = xDigitalInputFactory.create(electricalContract.getStingerArmLowSensor(),
                     this.getPrefix());
             this.registerDataFrameRefreshable(this.lowSensor);
         } else {
@@ -114,7 +114,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     @Override
     public Angle getCurrentValue() {
         double currentAngle = 0;
-        if (electricalContract.isCoralArmMotorReady()) {
+        if (electricalContract.isStingerArmMotorReady()) {
             currentAngle = getCalibratedPosition().in(Rotations) * degreesPerRotations.get();
         }
         return Degrees.of(currentAngle);
@@ -122,7 +122,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
     private Angle getAbsoluteAngle() {
         Angle currentAngle = Degrees.of(0);
-        if (electricalContract.isCoralArmMotorReady()) {
+        if (electricalContract.isStingerArmMotorReady()) {
             currentAngle = Degrees.of(
                     (getCalibratedPosition().in(Rotations)) * degreesPerRotations.get());
         }
@@ -130,7 +130,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     }
 
     private Angle getMotorRotations() {
-        if (electricalContract.isCoralArmMotorReady()) {
+        if (electricalContract.isStingerArmMotorReady()) {
             return getMotorPosition();
         }
         return Rotations.of(0);
@@ -141,7 +141,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     }
 
     private Angle getMotorPosition() {
-        if (electricalContract.isCoralArmMotorReady()) {
+        if (electricalContract.isStingerArmMotorReady()) {
             return this.armMotor.getPosition();
         }
         return Rotations.of(0);
@@ -161,7 +161,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     }
 
     private AngularVelocity getMotorVelocity() {
-        if (electricalContract.isCoralArmMotorReady()) {
+        if (electricalContract.isStingerArmMotorReady()) {
             return this.armMotor.getVelocity();
         }
         return RadiansPerSecond.zero();
@@ -200,7 +200,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     }
 
     public boolean isTouchingBottom() {
-        if (electricalContract.isCoralArmLowSensorReady()) {
+        if (electricalContract.isStingerArmLowSensorReady()) {
             return this.lowSensor.get();
         }
         return false;
@@ -208,7 +208,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
     @Override
     public void setPower(double power) {
-        if (electricalContract.isCoralArmMotorReady()) {
+        if (electricalContract.isStingerArmMotorReady()) {
             if (isCalibrated) {
                 double currentLocationInDegrees = getCurrentValue().in(Degrees);
 
@@ -242,7 +242,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     }
 
     public Angle getArmAngle() {
-        if (electricalContract.isCoralArmPivotAbsoluteEncoderReady() && electricalContract.isCoralArmLowSensorReady()) {
+        if (electricalContract.isStingerArmPivotAbsoluteEncoderReady() && electricalContract.isStingerArmLowSensorReady()) {
             return getArmAngle(0, rangeOfMotionDegrees.get() / 360,
                     Degrees.of(armAbsoluteEncoder.getAbsoluteDegrees()), lowSensor.get(), rangeOfMotionDegrees.get());
         }
@@ -299,7 +299,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     }
 
     public void forceCalibrationAtAutonomous() {
-        if (electricalContract.isCoralArmMotorReady()) {
+        if (electricalContract.isStingerArmMotorReady()) {
             rotationsAtZero = getMotorPosition().in(Rotations)
                     - (autoCalibrationDegrees.get() / (degreesPerRotations.get()));
         }
@@ -307,7 +307,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     }
 
     public void forceCalibratedHere() {
-        if (electricalContract.isCoralArmMotorReady()) {
+        if (electricalContract.isStingerArmMotorReady()) {
             rotationsAtZero = getMotorPosition().in(Rotations);
         }
         isCalibrated = true;
@@ -321,7 +321,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
     @Override
     public void periodic() {
-        if (electricalContract.isCoralArmMotorReady()) {
+        if (electricalContract.isStingerArmMotorReady()) {
             armMotor.periodic();
         }
 
@@ -339,7 +339,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
         aKitLog.record("IsAtTargetAngle", this.getIsTargetAngleScoring());
         aKitLog.record("IsAtMaintainerGoal", this.isMaintainerAtGoal());
         isNotCalibratedAlert.set(!isCalibrated());
-        if (electricalContract.isCoralArmPivotAbsoluteEncoderReady()) {
+        if (electricalContract.isStingerArmPivotAbsoluteEncoderReady()) {
             aKitLog.record("Current Angle using AbsEncoder", this.getArmAngle().in(Degrees));
         }
         if(electricalContract.isAlgaeArmBottomSensorReady()) {

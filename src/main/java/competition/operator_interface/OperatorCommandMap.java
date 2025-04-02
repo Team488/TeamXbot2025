@@ -16,14 +16,14 @@ import competition.subsystems.algae_arm.commands.RepositionAlgaeArmUp;
 import competition.subsystems.algae_arm.commands.SetAlgaeArmSetpointToTargetPosition;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionIntakeCommand;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionOutputCommand;
-import competition.subsystems.coral_arm.CoralArmSubsystem;
-import competition.subsystems.coral_arm.commands.ForceCoralArmCalibratedCommand;
-import competition.subsystems.coral_arm.commands.SetCoralArmTargetAngleCommand;
-import competition.subsystems.coral_scorer.commands.IntakeAlgaeCommand;
-import competition.subsystems.coral_scorer.commands.IntakeCoralCommand;
-import competition.subsystems.coral_scorer.commands.ScoreAlgaeCommand;
-import competition.subsystems.coral_scorer.commands.ScoreCoralCommand;
-import competition.subsystems.coral_scorer.commands.ScoreWhenReadyCommand;
+import competition.subsystems.stinger_arm.StingerArmSubsystem;
+import competition.subsystems.stinger_arm.commands.ForceStingerArmCalibratedCommand;
+import competition.subsystems.stinger_arm.commands.SetStingerArmTargetAngleCommand;
+import competition.subsystems.stinger_collection.commands.IntakeAlgaeCommand;
+import competition.subsystems.stinger_collection.commands.IntakeCoralCommand;
+import competition.subsystems.stinger_collection.commands.ScoreAlgaeCommand;
+import competition.subsystems.stinger_collection.commands.ScoreCoralCommand;
+import competition.subsystems.stinger_collection.commands.ScoreWhenReadyCommand;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.CalibrateDriveCommand;
@@ -46,7 +46,6 @@ import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import org.kobe.xbot.Utilities.Entities.XTableValues;
 import xbot.common.controls.sensors.XXboxController;
 import xbot.common.subsystems.autonomous.SetAutonomousCommand;
 import xbot.common.subsystems.drive.swerve.commands.ChangeActiveSwerveModuleCommand;
@@ -146,13 +145,13 @@ public class OperatorCommandMap {
                                       ScoreCoralCommand scoreCoralCommand,
                                       ScoreWhenReadyCommand scoreWhenReadyCommand,
                                       ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
-                                      ForceCoralArmCalibratedCommand forceCoralPivotCalibratedCommand,
+                                      ForceStingerArmCalibratedCommand forceCoralPivotCalibratedCommand,
                                       ForceAlgaeArmCalibrated forceAlgaeArmCalibrated,
                                       Provider<SetAlgaeArmSetpointToTargetPosition> setAlgaeArmProvider,
                                       AlgaeCollectionIntakeCommand intakeAlgae,
                                       AlgaeCollectionOutputCommand ejectAlgae,
                                       Provider<SetElevatorTargetHeightCommand> setElevatorTargetHeightCommandProvider,
-                                      CoralArmSubsystem coralArmSubsystem,
+                                      StingerArmSubsystem coralArmSubsystem,
                                       IntakeCoralCommand intakeCoralCommand,
                                       PrepAlgaeSystemCommandGroupFactory prepAlgaeSystemCommandGroupFactory,
                                       IntakeAlgaeCommand intakeAlgaeCommand,
@@ -216,10 +215,10 @@ public class OperatorCommandMap {
             OperatorInterface oi,
             IntakeCoralCommand intakeCoralCommand,
             ScoreCoralCommand scoreCoralCommand,
-            Provider<SetCoralArmTargetAngleCommand> setArmTargetAngleCommandProvider,
+            Provider<SetStingerArmTargetAngleCommand> setArmTargetAngleCommandProvider,
             Provider<SetElevatorTargetHeightCommand> setElevatorTargetHeightCommandProvider,
             ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
-            ForceCoralArmCalibratedCommand forceCoralArmCalibratedCommand,
+            ForceStingerArmCalibratedCommand forceCoralArmCalibratedCommand,
             RepositionAlgaeArmDown repositionAlgaeArmDown,
             RepositionAlgaeArmUp repositionAlgaeArmUp,
             ToggleElevatorMotionMagicCommand toggleElevatorMotionMagicCommand) {
@@ -258,7 +257,7 @@ public class OperatorCommandMap {
     }
 
     @Inject
-    public void setupNeoTrellis(OperatorInterface oi, CoralArmSubsystem coralArmSubsystem, TrimElevatorUp trimElevatorUp,
+    public void setupNeoTrellis(OperatorInterface oi, StingerArmSubsystem coralArmSubsystem, TrimElevatorUp trimElevatorUp,
                                 TrimElevatorDown trimElevatorDown) {
         oi.neoTrellis.getifAvailable(9)
                 .onTrue(coralArmSubsystem.createSetTargetCoralLevelCommand(Landmarks.CoralLevel.TWO));

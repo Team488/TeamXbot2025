@@ -4,8 +4,8 @@ import competition.subsystems.algae_arm.AlgaeArmSubsystem;
 import competition.subsystems.algae_arm.commands.AlgaeArmMaintainerCommand;
 import competition.subsystems.algae_collection.AlgaeCollectionSubsystem;
 import competition.subsystems.algae_collection.commands.AlgaeCollectionStopCommand;
-import competition.subsystems.coral_arm.CoralArmSubsystem;
-import competition.subsystems.coral_arm.commands.CoralArmMaintainerCommand;
+import competition.subsystems.stinger_arm.StingerArmSubsystem;
+import competition.subsystems.stinger_arm.commands.StingerArmMaintainerCommand;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.elevator.ElevatorSubsystem;
@@ -39,7 +39,7 @@ public class SubsystemDefaultCommandMap {
     }
 
     @Inject
-    public void setupCoralArmPivotSubsystem(CoralArmSubsystem coralArmPivotSubsystem, CoralArmMaintainerCommand command){
+    public void setupCoralArmPivotSubsystem(StingerArmSubsystem coralArmPivotSubsystem, StingerArmMaintainerCommand command){
         coralArmPivotSubsystem.setDefaultCommand(command);
     }
 

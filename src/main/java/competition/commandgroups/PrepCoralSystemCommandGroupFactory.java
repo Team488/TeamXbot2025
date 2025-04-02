@@ -1,6 +1,6 @@
 package competition.commandgroups;
 
-import competition.subsystems.coral_arm.commands.SetCoralArmTargetAngleCommand;
+import competition.subsystems.stinger_arm.commands.SetStingerArmTargetAngleCommand;
 import competition.subsystems.elevator.commands.SetElevatorTargetHeightCommand;
 import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
@@ -12,12 +12,12 @@ import java.util.function.Supplier;
 public class PrepCoralSystemCommandGroupFactory {
 
     Provider<SetElevatorTargetHeightCommand> setElevatorTargetHeightCommandProvider;
-    Provider<SetCoralArmTargetAngleCommand> setCoralArmTargetAngleCommandProvider;
+    Provider<SetStingerArmTargetAngleCommand> setCoralArmTargetAngleCommandProvider;
 
 
     @Inject
     public PrepCoralSystemCommandGroupFactory(Provider<SetElevatorTargetHeightCommand> setElevatorTargetHeightCommandProvider,
-                                              Provider<SetCoralArmTargetAngleCommand> setCoralArmTargetAngleCommandProvider) {
+                                              Provider<SetStingerArmTargetAngleCommand> setCoralArmTargetAngleCommandProvider) {
         this.setElevatorTargetHeightCommandProvider = setElevatorTargetHeightCommandProvider;
         this.setCoralArmTargetAngleCommandProvider = setCoralArmTargetAngleCommandProvider;
     }

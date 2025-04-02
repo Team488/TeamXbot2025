@@ -6,8 +6,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import competition.electrical_contract.ElectricalContract;
-import competition.subsystems.coral_arm.CoralArmSubsystem;
-import competition.subsystems.coral_scorer.CoralScorerSubsystem;
+import competition.subsystems.stinger_arm.StingerArmSubsystem;
+import competition.subsystems.stinger_collection.StingerCollectionSubsystem;
 import competition.subsystems.drive.logic.AlignCameraToAprilTagCalculator;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
@@ -30,8 +30,8 @@ public class LightSubsystem extends BaseSubsystem {
     static final int maxValue = (int)(Math.pow(2, numBits) - 1);
 
     final AutonomousCommandSelector autonomousCommandSelector;
-    final CoralScorerSubsystem coralScorerSubsystem;
-    final CoralArmSubsystem coralArmSubsystem;
+    final StingerCollectionSubsystem coralScorerSubsystem;
+    final StingerArmSubsystem coralArmSubsystem;
     final ElevatorSubsystem elevatorSubsystem;
     final AprilTagVisionSubsystemExtended visionSubsystem;
     private AlignCameraToAprilTagCalculator.Activity activity;
@@ -110,8 +110,8 @@ public class LightSubsystem extends BaseSubsystem {
     public LightSubsystem(XDigitalOutputFactory digitalOutputFactory,
                           ElectricalContract contract,
                           AutonomousCommandSelector autonomousCommandSelector,
-                          CoralScorerSubsystem coralScorerSubsystem,
-                          CoralArmSubsystem coralArmSubsystem,
+                          StingerCollectionSubsystem coralScorerSubsystem,
+                          StingerArmSubsystem coralArmSubsystem,
                           ElevatorSubsystem elevatorSubsystem,
                           AprilTagVisionSubsystemExtended visionSubsystem,
                           PropertyFactory pf) {
@@ -164,7 +164,7 @@ public class LightSubsystem extends BaseSubsystem {
                     recentlyAligned = false;
                     isLastStateTimeSet = false;
                 }
-            } else if (coralScorerSubsystem.getCoralScorerState() == CoralScorerSubsystem.CoralScorerState.INTAKING_CORAL) {
+            } else if (coralScorerSubsystem.getStingerCollectionState() == StingerCollectionSubsystem.StingerCollectionState.INTAKING_CORAL) {
                 currentState = LightsStateMessage.RequestCoralFromHuman;
             } else if (!coralScorerSubsystem.confidentlyHasCoral()) {
                 currentState = LightsStateMessage.NoCoralPresent;

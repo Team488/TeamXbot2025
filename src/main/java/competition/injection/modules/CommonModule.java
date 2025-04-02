@@ -1,7 +1,7 @@
 package competition.injection.modules;
 
 import competition.electrical_contract.ElectricalContract;
-import competition.subsystems.coral_scorer.CoralScorerSubsystem;
+import competition.subsystems.stinger_collection.StingerCollectionSubsystem;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.oracle.contracts.CoralCollectionInfoSource;
 import competition.subsystems.pose.PoseSubsystem;
@@ -107,5 +107,5 @@ public abstract class CommonModule {
 
     @Binds
     @Singleton
-    public abstract CoralCollectionInfoSource getCoralCollectionInfoSource(CoralScorerSubsystem impl);
+    public abstract CoralCollectionInfoSource getCoralCollectionInfoSource(StingerCollectionSubsystem impl);
 }
