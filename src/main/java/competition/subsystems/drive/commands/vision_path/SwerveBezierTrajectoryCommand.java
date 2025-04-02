@@ -82,7 +82,7 @@ public class SwerveBezierTrajectoryCommand extends SwerveBezierTrajectoryBase {
 
     @Override
     public boolean isFinished() {
-        return getAlternativeIsFinishedSupplier().getAsBoolean();
+        return getAlternativeIsFinishedSupplier().get();
     }
 
     @Override
