@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import xbot.common.controls.sensors.XGyro.XGyroFactory;
 import xbot.common.injection.electrical_contract.XCameraElectricalContract;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.vision.AprilTagVisionIO;
@@ -23,8 +24,9 @@ public class AprilTagVisionSubsystemExtended extends AprilTagVisionSubsystem {
     @Inject
     public AprilTagVisionSubsystemExtended(PropertyFactory pf,
                                            AprilTagFieldLayout fieldLayout, XCameraElectricalContract contract,
-                                           AprilTagVisionIOFactory visionIOFactory) {
-        super(pf, fieldLayout, contract, visionIOFactory);
+                                           AprilTagVisionIOFactory visionIOFactory, 
+                                           XGyroFactory gyroFactory) {
+        super(pf, fieldLayout, contract, visionIOFactory, gyroFactory);
 
         // Note: flipped april tag IDs across the y-midpoint of the field for blue alliance
         // map both blue and red alliance poses
