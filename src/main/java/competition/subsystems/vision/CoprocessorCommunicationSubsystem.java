@@ -67,9 +67,9 @@ public class CoprocessorCommunicationSubsystem
         lastCoralStationConfidentDistance = pf.createPersistentProperty(
                 "lastCoralStationConfidentDistance", Meters.of(1.5));
         lastBargePathConfidentTimeInterval = pf.createPersistentProperty(
-                "lastCoralStationConfidentTimeInterval-in-seconds", 2);
+                "lastBargeConfidentTimeInterval-in-seconds", 2);
         lastBargePathConfidentDistance = pf.createPersistentProperty(
-                "lastCoralStationConfidentDistance", Meters.of(1.5));
+                "lastBargeConfidentDistance", Meters.of(1.5));
         xtablesTargetPose =
                 pf.createPersistentProperty("Xtables Target Pose", "target_pose");
         xtablesCoordinateLocation = pf.createPersistentProperty(
