@@ -238,7 +238,7 @@ public class MapleSimulator implements BaseSimulator {
         aKitLog.record("RobotVelocity", swerveDriveSimulation.getActualSpeedsFieldRelative());
 
         // update gyro reading from sim
-        ((MockGyro) pose.imu).setYaw(this.swerveDriveSimulation.getOdometryEstimatedPose().getRotation().getDegrees());
+        ((MockGyro) pose.imu).setYaw(this.swerveDriveSimulation.getOdometryEstimatedPose().getRotation().getMeasure());
     }
 
     @Override

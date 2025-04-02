@@ -75,10 +75,6 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
         return getRadiusOfRobot().minus(this.getDistanceFromCenterToOuterBumperX());
     }
 
-    public abstract CANMotorControllerInfo getClimberMotor();
-
-    public abstract  boolean isClimberMotorReady();
-
     public abstract DeviceInfo getLightsDio0();
 
     public abstract DeviceInfo getLightsDio1();
