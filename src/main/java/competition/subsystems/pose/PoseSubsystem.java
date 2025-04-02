@@ -14,7 +14,6 @@ import competition.subsystems.deadwheel.DeadWheelSubsystem;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
-import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
 import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -25,6 +24,7 @@ import edu.wpi.first.units.measure.Distance;
 
 import static edu.wpi.first.units.Units.Meters;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -39,7 +39,6 @@ import xbot.common.properties.BooleanProperty;
 import xbot.common.properties.Property;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.pose.BasePoseSubsystem;
-import xbot.common.subsystems.vision.AprilTagVisionSubsystem;
 
 @Singleton
 public class PoseSubsystem extends BasePoseSubsystem {
@@ -66,8 +65,19 @@ public class PoseSubsystem extends BasePoseSubsystem {
 
     protected Optional<SwerveModulePosition[]> simulatedModulePositions = Optional.empty();
 
-    @Inject
+    public final List<Pose2d> blueReefFacePoses = Arrays.asList(
+            Landmarks.BlueCloseAlgae,
+            Landmarks.BlueCloseLeftAlgae,
+            Landmarks.BlueCloseRightAlgae,
+            Landmarks.BlueFarLeftAlgae,
+            Landmarks.BlueFarAlgae,
+            Landmarks.BlueFarRightAlgae);
 
+    public final List<Pose2d> redReefFacePoses = blueReefFacePoses.stream()
+            .map(PoseSubsystem::convertBluetoRed)
+            .toList();
+
+    @Inject
     public PoseSubsystem(XGyroFactory gyroFactory,
             ElectricalContract electricalContract,
             PropertyFactory propManager, DriveSubsystem drive,
@@ -399,16 +409,12 @@ public class PoseSubsystem extends BasePoseSubsystem {
     }
 
     public Pose2d getClosestReefFacePose() {
+        return getClosestReefFacePoseByAlliance(getAlliance());
+    }
+
+    public Pose2d getClosestReefFacePoseByAlliance(DriverStation.Alliance alliance) {
         Pose2d currentPose = getCurrentPose2d();
-
-        List<Pose2d> reefFacePoses = Arrays.asList(
-                convertBlueToRedIfNeeded(Landmarks.BlueCloseAlgae),
-                convertBlueToRedIfNeeded(Landmarks.BlueCloseLeftAlgae),
-                convertBlueToRedIfNeeded(Landmarks.BlueCloseRightAlgae),
-                convertBlueToRedIfNeeded(Landmarks.BlueFarLeftAlgae),
-                convertBlueToRedIfNeeded(Landmarks.BlueFarAlgae),
-                convertBlueToRedIfNeeded(Landmarks.BlueFarRightAlgae));
-
+        List<Pose2d> reefFacePoses = (alliance == DriverStation.Alliance.Blue) ? blueReefFacePoses : redReefFacePoses;
         return currentPose.nearest(reefFacePoses);
     }
 

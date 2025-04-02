@@ -106,14 +106,19 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
         pf.setPrefix(this);
 
-        l2Height = pf.createPersistentProperty("l2Height", Inches.of(1.5));
-        l3Height = pf.createPersistentProperty("l3Height", Inches.of(16.25));
+        l2Height = pf.createPersistentProperty("l2Height", Inches.of(0.25));
+        l3Height = pf.createPersistentProperty("l3Height", Inches.of(15.25));
         l4Height = pf.createPersistentProperty("l4Height", Inches.of(47.5));
         humanLoadHeight = pf.createPersistentProperty("humanLoadHeight", Inches.of(1));
         highAlgaeRemovalHeight = pf.createPersistentProperty("highAlgaeRemovalHeight", Inches.of(30));
         lowAlgaeRemovalHeight = pf.createPersistentProperty("lowAlgaeRemovalHeight", Inches.of(17));
         scoreAlgaeNetHeight = pf.createPersistentProperty("scoreAlgaeNetHeight", Inches.of(49.5));
         scoreAlgaeProcessorHeight = pf.createPersistentProperty("scoreAlgaeProcessorHeight", Inches.of(1));
+
+        this.motionMagicAcceleration = pf.createPersistentProperty("motionMagicMaxAcceleration", 1);
+        this.motionMagicJerk = pf.createPersistentProperty("motionMagicMaxJerk", 2);
+        this.motionMagicEnabled = pf.createPersistentProperty("motionMagicEnabled", false);
+
         pf.setDefaultLevel(PropertyLevel.Debug);
         baseHeight = pf.createPersistentProperty("baseHeight", Inches.of(0));
         trimValue = pf.createPersistentProperty("trimValue",Inches.of(0));
@@ -137,11 +142,6 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         this.powerNearUpperLimitThreshold = pf.createPersistentProperty("powerNearUpperLimit", 0.0);
         this.powerNearLowerLimitThreshold = pf.createPersistentProperty("powerNearLowerLimit", 0.0);
         this.powerWhenBottomSensorHit = pf.createPersistentProperty("powerWhenBottomSensorHit", 0);
-
-        this.motionMagicAcceleration = pf.createPersistentProperty("motionMagicMaxAcceleration", 1);
-        this.motionMagicJerk = pf.createPersistentProperty("motionMagicMaxJerk", 0.1);
-
-        this.motionMagicEnabled = pf.createPersistentProperty("motionMagicEnabled", false);
         pf.setDefaultLevel(PropertyLevel.Important);
 
 
