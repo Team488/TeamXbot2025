@@ -106,8 +106,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
 
         pf.setPrefix(this);
 
-        l2Height = pf.createPersistentProperty("l2Height", Inches.of(1.5));
-        l3Height = pf.createPersistentProperty("l3Height", Inches.of(16.25));
+        l2Height = pf.createPersistentProperty("l2Height", Inches.of(0.25));
+        l3Height = pf.createPersistentProperty("l3Height", Inches.of(15.25));
         l4Height = pf.createPersistentProperty("l4Height", Inches.of(47.5));
         humanLoadHeight = pf.createPersistentProperty("humanLoadHeight", Inches.of(1));
         highAlgaeRemovalHeight = pf.createPersistentProperty("highAlgaeRemovalHeight", Inches.of(30));
