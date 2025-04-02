@@ -61,15 +61,11 @@ public class DriveToBargeCommand extends SwerveSimpleTrajectoryCommand {
 
         // Snap startY to the nearest boundary if it falls between the red and blue
         // minimum values.
-        double radiusOfRobotFromCenter = electricalContract.getRadiusOfRobot().div(2).in(Meters);
+        double radius = electricalContract.getRadiusOfRobot().div(2).in(Meters);
         if (isBlue) {
-            double blueMinimumWithBumper = blueRobotMin.get() + radiusOfRobotFromCenter;
-            if (startY <= blueMinimumWithBumper) {
-                startY = blueMinimumWithBumper;
-
-            }
-        } else if (startY >= (redRobotMin.get() - radiusOfRobotFromCenter)) {
-            startY = redRobotMin.get() - radiusOfRobotFromCenter;
+            startY = Math.max(startY, blueRobotMin.get() + radius);
+        } else {
+            startY = Math.min(startY, redRobotMin.get() - radius);
         }
 
         // Compute the X coordinate based on the alliance.
@@ -101,7 +97,7 @@ public class DriveToBargeCommand extends SwerveSimpleTrajectoryCommand {
         super.logic.setVelocityMode(
                 SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
         super.logic.setGlobalKinematicValues(
-                new SwervePointKinematics(2, 1, 0, 4.5));
+                new SwervePointKinematics(3, 2, 0, 4.5));
         super.initialize();
     }
 }
