@@ -63,11 +63,11 @@ public class CoprocessorCommunicationSubsystem
         this.assertionManager = assertionManager;
         pf.setPrefix(this);
         lastCoralStationConfidentTimeInterval = pf.createPersistentProperty(
-                "lastCoralStationConfidentTimeInterval-in-seconds", 3);
+                "lastCoralStationConfidentTimeInterval-in-seconds", 2);
         lastCoralStationConfidentDistance = pf.createPersistentProperty(
                 "lastCoralStationConfidentDistance", Meters.of(1.5));
         lastBargePathConfidentTimeInterval = pf.createPersistentProperty(
-                "lastCoralStationConfidentTimeInterval-in-seconds", 3);
+                "lastCoralStationConfidentTimeInterval-in-seconds", 2);
         lastBargePathConfidentDistance = pf.createPersistentProperty(
                 "lastCoralStationConfidentDistance", Meters.of(1.5));
         xtablesTargetPose =
