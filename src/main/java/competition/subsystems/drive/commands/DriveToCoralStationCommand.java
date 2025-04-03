@@ -20,6 +20,8 @@ import xbot.common.trajectory.XbotSwervePoint;
 import javax.inject.Inject;
 import java.util.List;
 
+import static edu.wpi.first.units.Units.Meters;
+
 public class DriveToCoralStationCommand extends SwerveSimpleTrajectoryCommand {
 
     public Landmarks.CoralStation coralStation = Landmarks.CoralStation.LEFT;
@@ -53,14 +55,15 @@ public class DriveToCoralStationCommand extends SwerveSimpleTrajectoryCommand {
                 PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueRightCoralStationMid);
 
         List<XbotSwervePoint> swervePoints =
-                alliance.equals(DriverStation.Alliance.Blue)
+                pose.getCurrentPose2d() .getX() < PoseSubsystem.fieldXMidpointInMeters.in(Meters)
                         ? routingCircleBlue.generateSwervePoints(pose.getCurrentPose2d(), goal) :
                         routingCircleRed.generateSwervePoints(pose.getCurrentPose2d(), goal);
             super.logic.setKeyPoints(swervePoints);
         super.logic.setVelocityMode(
                 SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
+        // End at coral station with some velocity
         super.logic.setGlobalKinematicValues(
-                new SwervePointKinematics(2, 2, 0, 4.5));
+                new SwervePointKinematics(3, 3, 0.25, 4.5));
         super.initialize();
     }
 }

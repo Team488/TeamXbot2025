@@ -53,51 +53,56 @@ public class DriveToBargeCommand extends SwerveSimpleTrajectoryCommand {
     }
 
     public Pose2d getNearestPoint(
-            double startY, DriverStation.Alliance alliance) {
-        // Snap startY to the nearest boundary if it falls between the red and blue
-        // minimum values.
-        if (redRobotMin.get() < startY && startY < blueRobotMin.get()) {
-            if (Math.abs(startY - redRobotMin.get())
-                    < Math.abs(blueRobotMin.get() - startY)) {
-                startY = redRobotMin.get() + electricalContract.getRadiusOfRobot().div(2).in(Meters);
-            } else {
-                startY = blueRobotMin.get() + electricalContract.getRadiusOfRobot().div(2).in(Meters);
-            }
-        }
+           double startX, double startY, DriverStation.Alliance alliance) {
+
 
         // Determine if the alliance is BLUE.
         boolean isBlue = alliance == DriverStation.Alliance.Blue;
 
-        // Compute the X coordinate based on the alliance.
-        double x = isBlue ? PoseSubsystem.fieldXMidpointInMeters
-                .in(Meters) - distanceFromBarge.get()
-                : PoseSubsystem.fieldXMidpointInMeters.in(Meters)
-                + distanceFromBarge.get();
+        // Snap startY to the nearest boundary if it falls between the red and blue
+        // minimum values.
+        double radius = electricalContract.getRadiusOfRobot().div(2).in(Meters);
+        if (isBlue) {
+            startY = Math.max(startY, blueRobotMin.get() + radius);
+        } else {
+            startY = Math.min(startY, redRobotMin.get() - radius);
+        }
 
         // Set heading to 180 if blue, otherwise 0.
-        double heading = isBlue ? 180 : 0;
+        double heading;
+        if(startX < PoseSubsystem.fieldXMidpointInMeters
+                .in(Meters)) {
+            startX = PoseSubsystem.fieldXMidpointInMeters.in(Meters) - distanceFromBarge.get();
+            heading = 180;
+        } else {
+            startX = PoseSubsystem.fieldXMidpointInMeters.in(Meters) + distanceFromBarge.get();
+            heading = 0;
+        }
+
 
         // Return the computed Pose2d.
-        return new Pose2d(x, startY, Rotation2d.fromDegrees(heading));
+        return new Pose2d(startX, startY, Rotation2d.fromDegrees(heading));
     }
 
     @Override
     public void initialize() {
         DriverStation.Alliance alliance = DriverStation.getAlliance().orElse(DriverStation.Alliance.Red);
-        Pose2d goal = getNearestPoint(pose.getCurrentPose2d().getY(),
+        Pose2d currentPose = pose.getCurrentPose2d();
+        Pose2d goal = getNearestPoint(currentPose.getX(), currentPose.getY(),
                 alliance
         );
 
         List<XbotSwervePoint> swervePoints =
-                alliance.equals(DriverStation.Alliance.Blue)
+                 currentPose.getX() < PoseSubsystem.fieldXMidpointInMeters.in(Meters)
                         ? routingCircleBlue.generateSwervePoints(pose.getCurrentPose2d(), goal) :
                         routingCircleRed.generateSwervePoints(pose.getCurrentPose2d(), goal);
         super.logic.setPrioritizeRotationIfCloseToGoal(true);
         super.logic.setKeyPoints(swervePoints);
+        super.logic.setRotationPrioritizationScaleback(0.5);
         super.logic.setVelocityMode(
                 SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
         super.logic.setGlobalKinematicValues(
-                new SwervePointKinematics(2, 1, 0, 4.5));
+                new SwervePointKinematics(3, 2, 0, 4.5));
         super.initialize();
     }
 }

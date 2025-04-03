@@ -2,6 +2,7 @@ package competition.subsystems.vision;
 
 import competition.subsystems.drive.logic.AlignWithCreeperCalculator;
 import competition.subsystems.drive.logic.AlignWithCreeperLogger;
+import competition.Robot;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -67,13 +68,13 @@ public class CoprocessorCommunicationSubsystem
         this.assertionManager = assertionManager;
         pf.setPrefix(this);
         lastCoralStationConfidentTimeInterval = pf.createPersistentProperty(
-                "lastCoralStationConfidentTimeInterval-in-seconds", 3);
+                "lastCoralStationConfidentTimeInterval-in-seconds", 2);
         lastCoralStationConfidentDistance = pf.createPersistentProperty(
                 "lastCoralStationConfidentDistance", Meters.of(1.5));
         lastBargePathConfidentTimeInterval = pf.createPersistentProperty(
-                "lastCoralStationConfidentTimeInterval-in-seconds", 3);
+                "lastBargeConfidentTimeInterval-in-seconds", 2);
         lastBargePathConfidentDistance = pf.createPersistentProperty(
-                "lastCoralStationConfidentDistance", Meters.of(1.5));
+                "lastBargeConfidentDistance", Meters.of(1.5));
         xtablesTargetPose =
                 pf.createPersistentProperty("Xtables Target Pose", "target_pose");
         xtablesCoordinateLocation = pf.createPersistentProperty(
@@ -102,9 +103,15 @@ public class CoprocessorCommunicationSubsystem
                         lastBargePath = curves;
                     }
                 }));
-        this.orinVisionCoprocessorCommander =
-                new VisionCoprocessorCommander(VisionCoprocessor.ORIN3_STATIC);
-    
+
+        // If current instance is a simulation then use local host (if you are running the orin code locally!)
+        if(Robot.isSimulation()) {
+            this.orinVisionCoprocessorCommander =
+                    new VisionCoprocessorCommander(VisionCoprocessor.LOCALHOST);
+        } else {
+            this.orinVisionCoprocessorCommander =
+                    new VisionCoprocessorCommander(VisionCoprocessor.ORIN3_STATIC);
+        }
     }
 
     public boolean isUseBackupPointToPointForPathplanning() {
@@ -232,6 +239,6 @@ public class CoprocessorCommunicationSubsystem
 
 
 
-        
+
     }
 }
