@@ -136,6 +136,7 @@ public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
             }
             double desiredHeading = currentTranslation.minus(targetPose.get().toPose2d().getTranslation())
                     .getAngle().getDegrees();
+            aKitLog.record("desiredHeading", desiredHeading);
 
             drive.fieldOrientedDrive(
                     new XYPair(),
@@ -148,6 +149,7 @@ public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
 
         var currentHeading = pose.getCurrentHeading().getRadians();
         double robotRelativeTagLocationY = vision.getRobotRelativeLocationOfBestDetectedAprilTag(2).getY() - 0.55;
+        aKitLog.record("robotRelativeTagLocationY", robotRelativeTagLocationY);
 
         // Everything below here can and should be extracted because it is repeated code with
         // DriveWithSnapToReefTagCommand
@@ -173,6 +175,10 @@ public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
         double rotateIntent = headingModule.calculateHeadingPower(idealFinalHeading.in(Degrees));
         XYPair onRailsVector = XYPair.fromPolar(idealFinalHeading.in(Degrees), railsSimilarityToDriver);
         var combinedVector = onRailsVector.add(centeringVector);
+        aKitLog.record("rotateIntent", rotateIntent);
+        aKitLog.record("onRailsVector", onRailsVector);
+        aKitLog.record("centeringVector", centeringVector);
+        aKitLog.record("combinedVector", combinedVector);
 
         drive.fieldOrientedDrive(
                 combinedVector,
