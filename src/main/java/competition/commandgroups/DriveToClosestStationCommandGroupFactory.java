@@ -5,6 +5,7 @@ import competition.subsystems.drive.commands.AlignToSpecificHumanLoadingStationC
 import competition.subsystems.drive.commands.DriveToCoralStationCommand;
 import competition.subsystems.drive.commands.DriveToCoralStationInterstitialCommand;
 import competition.subsystems.drive.commands.ShoveCoralStationCommand;
+import competition.subsystems.drive.commands.vision_path.DriveVectorSmallCommand;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
@@ -14,6 +15,8 @@ import xbot.common.command.NamedInstantCommand;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
+import static edu.wpi.first.units.Units.Seconds;
+
 public class DriveToClosestStationCommandGroupFactory {
     private final Provider<DriveToCoralStationInterstitialCommand>
             driveToCoralStationSectionCommandProv;
@@ -22,6 +25,8 @@ public class DriveToClosestStationCommandGroupFactory {
     private final Provider<IntakeUntilCoralCollectedCommand>
             intakeUntilCoralCollectedCommandProv;
     private final Provider<ShoveCoralStationCommand> shoveCoralStationCommandProv;
+    private final Provider<DriveVectorSmallCommand> driveVectorSmallCommandProv;
+
     private final PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory;
     private final Provider<DriveToCoralStationCommand> driveToCoralStationCommandProv;
     private final PoseSubsystem poseSubsystem;
@@ -36,6 +41,7 @@ public class DriveToClosestStationCommandGroupFactory {
                                                     PrepCoralSystemCommandGroupFactory prepCoralSystemCommandGroupFactory,
                                                     Provider<IntakeUntilCoralCollectedCommand>
                                                             intakeUntilCoralCollectedCommandProv,
+                                                    Provider<DriveVectorSmallCommand> driveVectorSmallCommandProvider,
                                                     Provider<ShoveCoralStationCommand> shoveCoralStationCommandProv) {
         this.driveToCoralStationSectionCommandProv =
                 driveToCoralStationSectionCommandProv;
@@ -47,6 +53,7 @@ public class DriveToClosestStationCommandGroupFactory {
         this.shoveCoralStationCommandProv = shoveCoralStationCommandProv;
         this.poseSubsystem = poseSubsystem;
         this.driveToCoralStationCommandProv = driveToCoralStationCommandProv;
+        this.driveVectorSmallCommandProv = driveVectorSmallCommandProvider;
     }
 
     public SequentialCommandGroup createDriveOnly() {
@@ -54,16 +61,18 @@ public class DriveToClosestStationCommandGroupFactory {
         var driveToCoralStation = new SequentialCommandGroup();
         driveToCoralStation.setName("DriveToCoralStation");
         var driveToCoralStationCommand = driveToCoralStationCommandProv.get();
-        var shoveCoralStationCommand = shoveCoralStationCommandProv.get();
+        var driveVectorSmallCommand = driveVectorSmallCommandProv.get();
         driveToCoralStation.addCommands(
                 new NamedInstantCommand("GetNearestCoralStation", () -> {
                     Landmarks.CoralStation station =
                             poseSubsystem.getClosestCoralStation();
                     driveToCoralStationCommand.setCoralStation(station);
-                    shoveCoralStationCommand.setShoveAngle(station);
+                    // Constant backward drive force until command interruption or timeout
+                    driveVectorSmallCommand.setBackwards(true);
+                    driveVectorSmallCommand.setLast(Seconds.of(-1));
                 }));
         driveToCoralStation.addCommands(driveToCoralStationCommand);
-        return driveToCoralStation.andThen(shoveCoralStationCommand.withTimeout(4));
+        return driveToCoralStation.andThen(driveVectorSmallCommand.withTimeout(4));
     }
 
     public ParallelDeadlineGroup createWithIntakeUntilCollected(
