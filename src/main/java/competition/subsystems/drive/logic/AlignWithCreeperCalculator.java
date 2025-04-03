@@ -34,16 +34,11 @@ public class AlignWithCreeperCalculator {
 
     private final String tableLeftDistance = "verticalEdgeLeftDistancePx";
     private final String tableRightDistance = "verticalEdgeRightDistancePx";
-    private final String tableHres = "cameraHres";
-    private final String tableVres = "cameraVres";
-
-    private final StringProperty photonVisionFrontLeftHostname;
-    private final StringProperty photonVisionFrontRightHostname;
+    private final String tableHres = "alignmentCameraHres";
+    private final String tableVres = "alignmentCameraVres";
 
     private final DoubleProperty driveGain;
-    private final DoubleProperty errorSlope;
-    private final DoubleProperty maxError;
-    private final DoubleProperty errorThresholdPixels;
+    private final DoubleProperty errorThreshold;
     private final DoubleProperty pushForce;
 
     private CachedSubscriber leftOffsetPixelsSubscriber;
@@ -51,9 +46,6 @@ public class AlignWithCreeperCalculator {
     private CachedSubscriber hresSubscriber;
     private CachedSubscriber vresSubscriber;
 
-
-    private String hostname;
-    private Cameras camera;
 
     // set defaults for now
     private int currentCamHres = this.tunedWidth;
@@ -76,15 +68,9 @@ public class AlignWithCreeperCalculator {
 
         pf.setPrefix("AlignWithCreeperCommand/");
         this.driveGain = pf.createPersistentProperty("Drive Gain", 0.18);
-        this.errorSlope = pf.createPersistentProperty("Cost Function Error slope", 1);
-        this.maxError = pf.createPersistentProperty("Max Error", 0.2);
-        this.photonVisionFrontLeftHostname = pf.createPersistentProperty(
-                "Photon Vision Front Left Hostname", "photonvisionfrontleft");
-        this.photonVisionFrontRightHostname = pf.createPersistentProperty(
-                "Photon Vision Front Right Hostname", "photonvisionfrontright");
-        this.errorThresholdPixels = pf.createPersistentProperty(
-                "Pixel error Threshold", 35);
-        this.pushForce = pf.createPersistentProperty("Creeper push force", 0.05);
+        this.errorThreshold = pf.createPersistentProperty(
+                "error Threshold [0-1]", 0.1);
+        this.pushForce = pf.createPersistentProperty("Creeper push force", 0);
     }
 
 
@@ -104,30 +90,20 @@ public class AlignWithCreeperCalculator {
             return false;
         }
 
-        // Determine active camera and retrieve its corresponding resolution and hostname.
-        if (camera.equals(Cameras.FRONT_LEFT_CAMERA)) {
-            this.hostname = photonVisionFrontLeftHostname.get();
-        } else if (camera.equals(Cameras.FRONT_RIGHT_CAMERA)) {
-            this.hostname = photonVisionFrontRightHostname.get();
-        } else {
-            log.warn("Encountered an unrecognized camera value. Aborting to avoid unintended drive behavior.");
-            return false;
-        }
-
         if(this.leftOffsetPixelsSubscriber == null){
-            this.leftOffsetPixelsSubscriber = new CachedSubscriber(hostname + "." + tableLeftDistance, client,5);
+            this.leftOffsetPixelsSubscriber = new CachedSubscriber(tableLeftDistance, client,5);
         }
 
         if(this.rightOffsetPixelsSubscriber == null){
-            this.rightOffsetPixelsSubscriber = new CachedSubscriber(hostname + "." + tableRightDistance, client,5);
+            this.rightOffsetPixelsSubscriber = new CachedSubscriber(tableRightDistance, client,5);
         }
 
         if(this.hresSubscriber == null){
-            this.hresSubscriber = new CachedSubscriber(hostname + "." + tableHres, client,2);
+            this.hresSubscriber = new CachedSubscriber(tableHres, client,2);
         }
 
         if(this.vresSubscriber == null){
-            this.vresSubscriber = new CachedSubscriber(hostname + "." + tableVres, client,2);
+            this.vresSubscriber = new CachedSubscriber(tableVres, client,2);
         }
         initalized = true;
         return true;
@@ -150,7 +126,7 @@ public class AlignWithCreeperCalculator {
             return false;
         }
 
-
+        // get network distances
         Integer leftDistance = this.leftOffsetPixelsSubscriber.getAsInteger(null);
         Integer rightDistance = this.rightOffsetPixelsSubscriber.getAsInteger(null);
 
@@ -173,66 +149,39 @@ public class AlignWithCreeperCalculator {
             return false;
         }
 
+        // find error
+        double error;
         if(leftDistance == -1 || rightDistance == -1){
-            this.isCenteredConfidently = false;
+            error = 1;
         }
         else{
-            double resAdjustedDiff = normalizeWidth(Math.abs(leftDistance - rightDistance));
-            this.isCenteredConfidently = resAdjustedDiff < this.errorThresholdPixels.get();
+            error = costFunc(leftDistance, rightDistance);
         }
+
+        boolean offToTheLeft = error < 0;
+
+
+        aKitLog.record("creeper error",error);   
+        aKitLog.record("Off to the left",offToTheLeft);   
+
+        this.isCenteredConfidently = Math.abs(error) < this.errorThreshold.get();
 
 
         aKitLog.record("Is Centered confidently", this.isCenteredConfidently);
         aKitLog.record("Left Distance Pixels Adjusted", leftDistance);
         aKitLog.record("Right Distance Pixels Adjusted", rightDistance);
 
-        double error;
-        if (isCenteredConfidently) {
-            // Alignment is achieved; stop any drive movement.
-            log.info("Vision is saying we are centered confidently!");
-            // If the error is within the acceptable range, act as a "deadband"
-            error = 0;
+        if (!isCenteredConfidently) {
+            double drivePower = driveGain.get() * pidManager.calculate(0, error);
+            aKitLog.record("Creeper Drive Power", drivePower);
+
+
+            double push = this.pushForce.get();
+
+            XYPair pair = new XYPair(push, drivePower);
+
+            this.drive.drive(pair, 0.0, true);
         }
-        else{
-            // Determine which side the misalignment error should be taken from.
-            boolean offToTheLeft;
-
-            if (leftDistance == -1) {
-                offToTheLeft = false; // we dont see left edge, means right side is "too" visible eg off to the right
-            } else if (rightDistance == -1) {
-                offToTheLeft = true; // we dont see right  edge, means left side is "too" visible eg off to the left
-            } else {
-                // Choose the pixel error value from the side indicating misalignment.
-                offToTheLeft = leftDistance < rightDistance; // we see both edges, so the one that is "closer to the center" is the one we are off by
-            }
-
-            aKitLog.record("Off to the left?: ",offToTheLeft);
-
-            // Calculate the error as a function of the left and right distance from the center.
-            error = costFunc(leftDistance, rightDistance);
-
-            // add sign
-            // if we are off to the right (!offtotheleft) and we want to minimize our error in the right direction,
-            // we need to invert
-            if (!offToTheLeft) {
-                error = -error;
-            }
-
-
-        }
-
-        aKitLog.record("creeper error from cost function: ",error);
-
-        // power.
-        double drivePower = driveGain.get() * pidManager.calculate(0, error);
-        aKitLog.record("Creeper Drive Power", drivePower);
-
-
-        double push = Math.max(Math.min(this.pushForce.get(),1),0);  // clip to range 0-1
-
-        XYPair pair = new XYPair(push, drivePower);
-
-        this.drive.drive(pair, 0.0, true);
 
         return true;
 
@@ -240,19 +189,13 @@ public class AlignWithCreeperCalculator {
 
 
     // scaled cost function
-    private double costFunc(int leftErrPX, int rightErrPX){
-        if(leftErrPX == -1 || rightErrPX == -1){
-            // much too off aligned
-            return maxError.get();
-        }
-        // abs error
-        double err = normalizeWidth(Math.abs(leftErrPX-rightErrPX));
+    private double costFunc(int leftSidePx, int rightSidePx){
+        double screenCenter = this.currentCamHres/2;
+        double midPix = (leftSidePx + rightSidePx) /2;
 
-//       /**Linear Error**/
-        double errFunc = err*errorSlope.get();
+        double err = midPix-screenCenter;
 
-
-        return Math.max(-maxError.get(), Math.min(errFunc, maxError.get())); // clip
+        return err/screenCenter; // this will normalize to range [-1, 1]
     }
 
     public boolean isFinished(boolean waitUntilStop) {
@@ -267,20 +210,4 @@ public class AlignWithCreeperCalculator {
         }
     }
 
-
-    public Cameras getCamera() {
-        return camera;
-    }
-
-    public void setCamera(Cameras camera) {
-        this.camera = camera;
-    }
-
-    private double normalizeWidth(double width){
-        return width * this.currentCamHres / this.tunedWidth;
-    }
-
-    private double normalizeHeight(double height){
-        return height * this.currentCamVres / this.tunedHeight;
-    }
 }
