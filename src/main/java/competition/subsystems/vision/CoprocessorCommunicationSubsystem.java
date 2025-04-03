@@ -78,11 +78,11 @@ public class CoprocessorCommunicationSubsystem
         xtablesTargetPose =
                 pf.createPersistentProperty("Xtables Target Pose", "target_pose");
         xtablesCoordinateLocation = pf.createPersistentProperty(
-                "Xtables Coordinate LocatiogetDefaultClientAsynchronouslyn", "target_waypoints");
+                "Xtables Coordinate Location", "target_waypoints");
         xtablesHeadingLocation = pf.createPersistentProperty(
                 "Xtables Heading Location", "target_heading");
         XTablesLogger.setLoggingLevel(Level.OFF);
-        xTablesClientManager = XTablesClient.getClientAsynchronously("localhost");
+        xTablesClientManager = XTablesClient.getDefaultClientAsynchronously();
         xTablesClientManager.getClientFuture().thenAccept(client
                 -> client.subscribe(
                 "BEZIER_PATH_TO_NEAREST_CORAL_STATION", (update) -> {
