@@ -33,6 +33,7 @@ public class PathDriveToBargeCommand extends PathDriveToLocationCommand {
             super.setOverriddenPath(path);
             super.setOptions(path.getOptions());
             super.logic.setPrioritizeRotationIfCloseToGoal(true);
+            super.logic.setRotationPrioritizationScaleback(0.5);
             super.setInstantRotation(true);
             super.initialize();
         } else {

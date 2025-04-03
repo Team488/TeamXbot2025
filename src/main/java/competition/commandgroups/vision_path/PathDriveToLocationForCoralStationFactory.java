@@ -74,6 +74,7 @@ public class PathDriveToLocationForCoralStationFactory {
                                     ? curves.getOptions().getFinalRotationDegrees()
                                     : 0
                                     : 0);
+                            pathDriveToLocationCommand.logic.setRotationPrioritizationScaleback(0.1);
                             pathDriveToLocationCommand.setOptions(
                                     XTableValues.TraversalOptions.newBuilder()
                                             .setFinalRotationDegrees(finalDegrees.in(Degrees))
