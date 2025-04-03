@@ -1,5 +1,7 @@
 package competition.subsystems.vision;
 
+import competition.subsystems.drive.logic.AlignWithCreeperCalculator;
+import competition.subsystems.drive.logic.AlignWithCreeperLogger;
 import competition.Robot;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -57,6 +59,9 @@ public class CoprocessorCommunicationSubsystem
     private Double lastCoralStationTimestamp;
     public XTableValues.BezierCurves lastBargePath;
     private Double lastBargePathTimestamp;
+
+    private AlignWithCreeperLogger alignWithCreeperLogger;
+
     @Inject
     public CoprocessorCommunicationSubsystem(
             PropertyFactory pf, RobotAssertionManager assertionManager) {
@@ -218,5 +223,22 @@ public class CoprocessorCommunicationSubsystem
                             .orElse(DriverStation.Alliance.Blue)
                             .name());
         }
+
+        if(alignWithCreeperLogger == null){
+            alignWithCreeperLogger = new AlignWithCreeperLogger(this.xTablesClientManager, this.aKitLog);
+        }
+
+        if(!alignWithCreeperLogger.isInitalized()){
+            boolean creeperInitalized = alignWithCreeperLogger.initialize();
+
+            aKitLog.record("Creeper logger Initialized", creeperInitalized);
+        }
+        else{
+            alignWithCreeperLogger.logAlignment();
+        }
+
+
+
+
     }
 }
