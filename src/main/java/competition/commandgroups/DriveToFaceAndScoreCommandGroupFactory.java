@@ -44,7 +44,7 @@ public class DriveToFaceAndScoreCommandGroupFactory {
         levelOneDistanceThreshold = pf.createPersistentProperty("LevelOneDistanceThresholdInMeters", Meters.of(2));
         levelTwoDistanceThreshold = pf.createPersistentProperty("LevelTwoDistanceThresholdInMeters", Meters.of(2));
         levelFourDistanceThreshold = pf.createPersistentProperty("LevelFourDistanceThresholdInMeters",  Meters.of(1.5));
-        waitBeforeScoringInSeconds = pf.createPersistentProperty("WaitBeforeScoringInSeconds", 0.4);
+        waitBeforeScoringInSeconds = pf.createPersistentProperty("WaitBeforeScoringInSeconds", 0.5);
 
     }
 
