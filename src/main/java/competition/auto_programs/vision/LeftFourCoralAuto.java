@@ -7,6 +7,7 @@ import static competition.subsystems.pose.vision.Paths.farLeftBToCoralStationBlu
 
 import competition.auto_programs.BaseAutonomousSequentialCommandGroup;
 import competition.commandgroups.DriveToFaceAndScoreCommandGroupFactory;
+import competition.commandgroups.DriveToReefFaceThenAlignCommandGroupFactory;
 import competition.commandgroups.vision_path.PathDriveToLocationForCoralStationFactory;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.vision.Paths;
@@ -23,6 +24,7 @@ public class LeftFourCoralAuto extends BaseAutonomousSequentialCommandGroup {
     public LeftFourCoralAuto(
             AutonomousCommandSelector autoSelector,
             DriveToFaceAndScoreCommandGroupFactory driveToFaceAndScoreFact,
+            DriveToReefFaceThenAlignCommandGroupFactory driveToReefFaceThenAlignCommandGroupFactory,
             Provider<PathDriveToLocationForCoralStationFactory> pathDriveToLocationAndIntakeUntilCollectedProvider) {
         super(autoSelector);
 
@@ -68,41 +70,46 @@ public class LeftFourCoralAuto extends BaseAutonomousSequentialCommandGroup {
                                 Landmarks.CoralStationSection.MID));
         this.addCommands(driveToRightStationAndIntakeSecond);
 
-        // Score 3
-        var driveAndScoreCloseLeftBranchALevelFour =
-                driveToFaceAndScoreFact
-                        .create(Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.A,
-                                Landmarks.CoralLevel.FOUR)
-                        .alongWith(getDriveAndScoreStatusMessageCommand(
-                                Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.A,
-                                Landmarks.CoralLevel.FOUR));
-        this.addCommands(driveAndScoreCloseLeftBranchALevelFour);
+        // Go to 3, but not score it
+        var driveToCloseLeftBranchALevelFour = driveToReefFaceThenAlignCommandGroupFactory.create(
+                Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.A);
+        this.addCommands(driveToCloseLeftBranchALevelFour);
 
-        // Coral Station
-        var driveToLeftStationAndIntakeSecond =
-                pathDriveToLocationAndIntakeUntilCollectedProvider.get()
-                        .create(Paths.Side.LEFT, blueCloseLeftBranchAToLeftCoralStation)
-                        .alongWith(getDriveAndIntakeStatusMessageCommand(
-                                Landmarks.CoralStation.LEFT,
-                                Landmarks.CoralStationSection.MID));
-        this.addCommands(driveToLeftStationAndIntakeSecond);
-
-        // Score 4
-        var driveAndScoreCloseBranchALevelFour =
-                driveToFaceAndScoreFact
-                        .create(Landmarks.ReefFace.CLOSE, Landmarks.Branch.A,
-                                Landmarks.CoralLevel.FOUR)
-                        .alongWith(
-                                getDriveAndScoreStatusMessageCommand(Landmarks.ReefFace.CLOSE,
-                                        Landmarks.Branch.A, Landmarks.CoralLevel.FOUR));
-        this.addCommands(driveAndScoreCloseBranchALevelFour);
-
-        // Back to coral station
-        var homed = pathDriveToLocationAndIntakeUntilCollectedProvider.get()
-                .create(Paths.Side.LEFT, blueCloseBranchAToLeftCoralStation)
-                .alongWith(getDriveAndIntakeStatusMessageCommand(
-                        Landmarks.CoralStation.LEFT,
-                        Landmarks.CoralStationSection.MID));
-        this.addCommands(homed);
+//        // Score 3
+//        var driveAndScoreCloseLeftBranchALevelFour =
+//                driveToFaceAndScoreFact
+//                        .create(Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.A,
+//                                Landmarks.CoralLevel.FOUR)
+//                        .alongWith(getDriveAndScoreStatusMessageCommand(
+//                                Landmarks.ReefFace.CLOSE_LEFT, Landmarks.Branch.A,
+//                                Landmarks.CoralLevel.FOUR));
+//        this.addCommands(driveAndScoreCloseLeftBranchALevelFour);
+//
+//        // Coral Station
+//        var driveToLeftStationAndIntakeSecond =
+//                pathDriveToLocationAndIntakeUntilCollectedProvider.get()
+//                        .create(Paths.Side.LEFT, blueCloseLeftBranchAToLeftCoralStation)
+//                        .alongWith(getDriveAndIntakeStatusMessageCommand(
+//                                Landmarks.CoralStation.LEFT,
+//                                Landmarks.CoralStationSection.MID));
+//        this.addCommands(driveToLeftStationAndIntakeSecond);
+//
+//        // Score 4
+//        var driveAndScoreCloseBranchALevelFour =
+//                driveToFaceAndScoreFact
+//                        .create(Landmarks.ReefFace.CLOSE, Landmarks.Branch.A,
+//                                Landmarks.CoralLevel.FOUR)
+//                        .alongWith(
+//                                getDriveAndScoreStatusMessageCommand(Landmarks.ReefFace.CLOSE,
+//                                        Landmarks.Branch.A, Landmarks.CoralLevel.FOUR));
+//        this.addCommands(driveAndScoreCloseBranchALevelFour);
+//
+//        // Back to coral station
+//        var homed = pathDriveToLocationAndIntakeUntilCollectedProvider.get()
+//                .create(Paths.Side.LEFT, blueCloseBranchAToLeftCoralStation)
+//                .alongWith(getDriveAndIntakeStatusMessageCommand(
+//                        Landmarks.CoralStation.LEFT,
+//                        Landmarks.CoralStationSection.MID));
+//        this.addCommands(homed);
     }
 }
