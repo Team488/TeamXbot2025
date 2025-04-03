@@ -53,7 +53,7 @@ public class DriveToBargeCommand extends SwerveSimpleTrajectoryCommand {
     }
 
     public Pose2d getNearestPoint(
-            double startY, DriverStation.Alliance alliance) {
+           double startX, double startY, DriverStation.Alliance alliance) {
 
 
         // Determine if the alliance is BLUE.
@@ -68,28 +68,32 @@ public class DriveToBargeCommand extends SwerveSimpleTrajectoryCommand {
             startY = Math.min(startY, redRobotMin.get() - radius);
         }
 
-        // Compute the X coordinate based on the alliance.
-        double x = isBlue ? PoseSubsystem.fieldXMidpointInMeters
-                .in(Meters) - distanceFromBarge.get()
-                : PoseSubsystem.fieldXMidpointInMeters.in(Meters)
-                + distanceFromBarge.get();
-
         // Set heading to 180 if blue, otherwise 0.
-        double heading = isBlue ? 180 : 0;
+        double heading;
+        if(startX < PoseSubsystem.fieldXMidpointInMeters
+                .in(Meters)) {
+            startX = PoseSubsystem.fieldXMidpointInMeters.in(Meters) - distanceFromBarge.get();
+            heading = 180;
+        } else {
+            startX = PoseSubsystem.fieldXMidpointInMeters.in(Meters) + distanceFromBarge.get();
+            heading = 0;
+        }
+
 
         // Return the computed Pose2d.
-        return new Pose2d(x, startY, Rotation2d.fromDegrees(heading));
+        return new Pose2d(startX, startY, Rotation2d.fromDegrees(heading));
     }
 
     @Override
     public void initialize() {
         DriverStation.Alliance alliance = DriverStation.getAlliance().orElse(DriverStation.Alliance.Red);
-        Pose2d goal = getNearestPoint(pose.getCurrentPose2d().getY(),
+        Pose2d currentPose = pose.getCurrentPose2d();
+        Pose2d goal = getNearestPoint(currentPose.getX(), currentPose.getY(),
                 alliance
         );
 
         List<XbotSwervePoint> swervePoints =
-                alliance.equals(DriverStation.Alliance.Blue)
+                 currentPose.getX() < PoseSubsystem.fieldXMidpointInMeters.in(Meters)
                         ? routingCircleBlue.generateSwervePoints(pose.getCurrentPose2d(), goal) :
                         routingCircleRed.generateSwervePoints(pose.getCurrentPose2d(), goal);
         super.logic.setPrioritizeRotationIfCloseToGoal(true);
