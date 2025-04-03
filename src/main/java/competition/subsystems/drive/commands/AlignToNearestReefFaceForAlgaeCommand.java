@@ -2,6 +2,7 @@ package competition.subsystems.drive.commands;
 
 import competition.operator_interface.OperatorInterface;
 import competition.subsystems.drive.DriveSubsystem;
+import competition.subsystems.drive.logic.ManualSwerveDriveLogic;
 import competition.subsystems.oracle.ReefCoordinateGenerator;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
@@ -42,18 +43,9 @@ public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
 
     private final PIDManager driveToAlgaePidManager;
     private final PIDManager snapToAlgaePIDManager;
-
-    final DistanceProperty interstitialThresholdToRailDrive;
-    final DistanceProperty interstitialDistance;
-    final DoubleProperty interstitialApproachSpeedFactor;
-
-    public enum AlignmentState {
-        ToInterstitial,
-        RailDrive,
-    }
-
-    public AlignmentState currentAlignmentState;
     public Pose2d interstitialPoint;
+    int targetTagID;
+    boolean hasEverSeenTag = false;
 
     @Inject
     public AlignToNearestReefFaceForAlgaeCommand(HeadingModule.HeadingModuleFactory headingModuleFactory,
@@ -103,9 +95,6 @@ public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
         this.headingModule = headingModuleFactory.create(snapToAlgaePIDManager);
 
         pf.setPrefix(this.getPrefix());
-        interstitialThresholdToRailDrive = pf.createPersistentProperty("InterstitialThresholdToRailDrive", Meters.of(0.2));
-        interstitialDistance = pf.createPersistentProperty("InterstitialDistance", Meters.of(1.75));
-        interstitialApproachSpeedFactor = pf.createPersistentProperty("InterstitialApproachSpeedFactor", 0.5);
     }
 
     @Override
@@ -121,75 +110,44 @@ public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
         }
 
         Pose2d closestPose = pose.getClosestReefFacePoseByAlliance(alliance);
+        targetTagID = vision.getTargetAprilTagID(closestPose);
+
         idealFinalPosition = closestPose.getTranslation();
         idealFinalHeading = closestPose.getRotation().getMeasure().plus(Degrees.of(180)); // Aligning backwards
-
-        double distanceToClosestReefFace = currentPose.getTranslation().getDistance(idealFinalPosition);
-
-        // Determine our starting state, do we need to drive to an interstitial?
-        if (distanceToClosestReefFace < interstitialDistance.get().in(Meters)) {
-            currentAlignmentState = AlignmentState.RailDrive;
-        } else {
-            currentAlignmentState = AlignmentState.ToInterstitial;
-            interstitialPoint = reefCoordinateGenerator.getPoseRelativeToReefFace(
-                    alliance,
-                    Landmarks.getReefFaceFromTagId(vision.getClosestReefTagIdFromTranslation(idealFinalPosition)),
-                    interstitialDistance.get(),
-                    Meters.zero()
-            );
-
-            // Recall how we are aligning backwards
-            interstitialPoint = new Pose2d(
-                    interstitialPoint.getTranslation(),
-                    interstitialPoint.getRotation().plus(new Rotation2d(Math.PI))
-            );
-        }
     }
 
     @Override
     public void execute() {
-        switch (currentAlignmentState) {
-            case ToInterstitial -> {
-                driveToInterstitial();
-                var currentTranslation = pose.getCurrentPose2d().getTranslation();
-                double distanceFromInterstitial = currentTranslation.getDistance(interstitialPoint.getTranslation());
-                if (distanceFromInterstitial < interstitialThresholdToRailDrive.get().in(Meters)) {
-                    currentAlignmentState = AlignmentState.RailDrive;
-                }
-            }
-            case RailDrive -> railDrive();
-            default -> {}
-        }
-        aKitLog.record("AlignmentState", currentAlignmentState);
-    }
-
-    public void driveToInterstitial() {
-        Pose2d currentPose = pose.getCurrentPose2d();
-
-        // Same interstitial driving logic as AlignCameraToAprilTagCalculator
-        var vectorTowardsInterstitial = interstitialPoint.getTranslation().minus(currentPose.getTranslation());
-        var normalizedVector = vectorTowardsInterstitial.div(vectorTowardsInterstitial.getNorm());
-        var driveIntent = new XYPair(
-                normalizedVector.getX(),
-                normalizedVector.getY()).scale(interstitialApproachSpeedFactor.get()
-        );
-        var rotationIntent = headingModule.calculateHeadingPower(interstitialPoint.getRotation());
-
-        drive.fieldOrientedDrive(
-                driveIntent,
-                rotationIntent,
-                pose.getCurrentHeading().getDegrees(),
-                new XYPair()
-        );
+        railDrive();
     }
 
     private void railDrive() {
         // Calculate the vector to center our robot on "rails"
+        boolean targetInSight = vision.doesCameraBestObservationHaveAprilTagId(2, targetTagID);
+        hasEverSeenTag |= targetInSight;
+        aKitLog.record("targetInSight", targetInSight);
         var currentTranslation = pose.getCurrentPose2d().getTranslation();
+        if (!targetInSight) {
+            // Try and look at the thingy based off of pose
+            var targetPose = vision.getAprilTagFieldOrientedPose(targetTagID);
+            if (targetPose.isEmpty()) {
+                log.info("Stuff happened");
+                return;
+            }
+            double desiredHeading = currentTranslation.minus(targetPose.get().toPose2d().getTranslation())
+                    .getAngle().getDegrees();
+
+            drive.fieldOrientedDrive(
+                    new XYPair(),
+                    headingModule.calculateHeadingPower(desiredHeading),
+                    pose.getCurrentHeading().getDegrees(),
+                    new XYPair()
+            );
+            return;
+        }
+
         var currentHeading = pose.getCurrentHeading().getRadians();
-        double deltaX = idealFinalPosition.getX() - currentTranslation.getX();
-        double deltaY = idealFinalPosition.getY() - currentTranslation.getY();
-        double robotRelativeTagLocationY = deltaX * Math.sin(-currentHeading) + deltaY * Math.cos(-currentHeading);
+        double robotRelativeTagLocationY = vision.getRobotRelativeLocationOfBestDetectedAprilTag(2).getY() - 0.55;
 
         // Everything below here can and should be extracted because it is repeated code with
         // DriveWithSnapToReefTagCommand
