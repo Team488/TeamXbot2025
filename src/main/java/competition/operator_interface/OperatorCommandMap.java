@@ -91,7 +91,7 @@ public class OperatorCommandMap {
                         .getRotation()));
         var clearPointAtHeading = drive.createClearAllHeadingTargetsCommand();
 
-        double alignToCoralOffsetInches = -1;
+        double alignToCoralOffsetInches = -0.25;
         var alignToReefWithAprilTagWithLeftCamera = alignToReefWithAprilTagProvider.get();
         alignToReefWithAprilTagWithLeftCamera.setConfigurations(
                 Cameras.FRONT_LEFT_CAMERA.getIndex(), false, alignToCoralOffsetInches, true,
