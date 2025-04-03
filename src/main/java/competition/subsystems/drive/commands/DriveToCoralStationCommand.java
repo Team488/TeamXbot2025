@@ -55,7 +55,7 @@ public class DriveToCoralStationCommand extends SwerveSimpleTrajectoryCommand {
                 PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.BlueRightCoralStationMid);
 
         List<XbotSwervePoint> swervePoints =
-                pose.getCurrentPose2d().getX() < PoseSubsystem.fieldXMidpointInMeters.in(Meters)
+                pose.getCurrentPose2d() .getX() < PoseSubsystem.fieldXMidpointInMeters.in(Meters)
                         ? routingCircleBlue.generateSwervePoints(pose.getCurrentPose2d(), goal) :
                         routingCircleRed.generateSwervePoints(pose.getCurrentPose2d(), goal);
             super.logic.setKeyPoints(swervePoints);
