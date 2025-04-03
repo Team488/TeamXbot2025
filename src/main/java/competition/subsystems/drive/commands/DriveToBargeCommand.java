@@ -98,6 +98,7 @@ public class DriveToBargeCommand extends SwerveSimpleTrajectoryCommand {
                         routingCircleRed.generateSwervePoints(pose.getCurrentPose2d(), goal);
         super.logic.setPrioritizeRotationIfCloseToGoal(true);
         super.logic.setKeyPoints(swervePoints);
+        super.logic.setRotationPrioritizationScaleback(0.1);
         super.logic.setVelocityMode(
                 SwerveSimpleTrajectoryMode.GlobalKinematicsValue);
         super.logic.setGlobalKinematicValues(
