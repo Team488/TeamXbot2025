@@ -92,15 +92,16 @@ public class OperatorCommandMap {
                         .getRotation()));
         var clearPointAtHeading = drive.createClearAllHeadingTargetsCommand();
 
+        double alignToCoralOffsetInches = -2;
         var alignToReefWithAprilTagWithLeftCamera = alignToReefWithAprilTagProvider.get();
         alignToReefWithAprilTagWithLeftCamera.setConfigurations(
-                Cameras.FRONT_LEFT_CAMERA.getIndex(), false, -2, true,
+                Cameras.FRONT_LEFT_CAMERA.getIndex(), false, alignToCoralOffsetInches, true,
                 AlignCameraToAprilTagCalculator.Activity.ApproachWhileCentering, false);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(alignToReefWithAprilTagWithLeftCamera);
 
         var alignToReefWithAprilTagWithRightCamera = alignToReefWithAprilTagProvider.get();
         alignToReefWithAprilTagWithRightCamera.setConfigurations(
-                Cameras.FRONT_RIGHT_CAMERA.getIndex(), false, -2, true,
+                Cameras.FRONT_RIGHT_CAMERA.getIndex(), false, alignToCoralOffsetInches, true,
                 AlignCameraToAprilTagCalculator.Activity.ApproachWhileCentering, false);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(alignToReefWithAprilTagWithRightCamera);
 

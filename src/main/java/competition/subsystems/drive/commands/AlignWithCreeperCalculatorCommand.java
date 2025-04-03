@@ -11,7 +11,6 @@ import javax.inject.Inject;
 public class AlignWithCreeperCalculatorCommand extends BaseCommand {
     private DriveSubsystem drive;
     private AlignWithCreeperCalculator calculator;
-    private Cameras camera;
 
     @Inject
     public AlignWithCreeperCalculatorCommand(DriveSubsystem drive, AlignWithCreeperCalculator calculator) {
@@ -22,7 +21,6 @@ public class AlignWithCreeperCalculatorCommand extends BaseCommand {
 
     @Override
     public void initialize() {
-        this.calculator.setCamera(this.camera);
         if(!this.calculator.initialize()){
             log.warn("Failed to initialize Calculator.");
             cancel();
@@ -52,12 +50,4 @@ public class AlignWithCreeperCalculatorCommand extends BaseCommand {
         drive.stop();
     }
 
-    public Cameras getCamera() {
-        return camera;
-    }
-
-    public AlignWithCreeperCalculatorCommand setCamera(Cameras camera) {
-        this.camera = camera;
-        return this;
-    }
 }
