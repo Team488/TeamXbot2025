@@ -22,9 +22,8 @@ public class AlignWithCreeperCalculatorCommandFactory {
         this.alignWithCreeperWCalcCommandProvider = alignWithCreeperWCalcCommandProvider;
     }
 
-    public Command create(Cameras camera) {
+    public Command create() {
         AlignWithCreeperCalculatorCommand alignWithCreeperCommand = alignWithCreeperWCalcCommandProvider.get();
-        alignWithCreeperCommand.setCamera(camera);
         return alignWithCreeperCommand;
     }
 }
