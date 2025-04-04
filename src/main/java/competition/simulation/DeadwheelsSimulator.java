@@ -25,7 +25,6 @@ public class DeadwheelsSimulator {
 
     @Inject
     public DeadwheelsSimulator(DeadWheelSubsystem deadWheelSubsystem, PoseSubsystem pose) {
-        super();
         this.pose = pose;
         this.deadWheelSubsystem = deadWheelSubsystem;
     }
@@ -47,12 +46,7 @@ public class DeadwheelsSimulator {
     }
 
     public void resetPose(Pose2d currentPose) {
-        this.lastReadPose = this.pose.getCurrentPose2d();
-
-        this.getLeftEncoder().setDistance(0);
-        this.getRightEncoder().setDistance(0);
-        this.getFrontEncoder().setDistance(0);
-        this.getRearEncoder().setDistance(0);
+        this.lastReadPose = currentPose;
     }
         
 
@@ -64,7 +58,7 @@ public class DeadwheelsSimulator {
         var deltaTranslation = new Translation2d(deltaXGlobal, deltaYGlobal);
         var deltaRobotRelative = deltaTranslation.rotateBy(this.lastReadPose.getRotation().times(-1));
 
-        var deltaFinalRelative = new Translation2d(deltaRobotRelative.getX(), deltaRobotRelative.getY()).rotateBy(Rotation2d.fromRadians(-deltaTheta));
+        var deltaFinalRelative = new Translation2d(deltaRobotRelative.getX(), deltaRobotRelative.getY()).rotateBy(Rotation2d.fromRadians((deltaTheta * -1) / 2.0));
         var deltaXFinal = deltaFinalRelative.getX();
         var pulsesInX = (deltaXFinal / 0.032) * 500;
         var deltaYFinal = deltaFinalRelative.getY();
