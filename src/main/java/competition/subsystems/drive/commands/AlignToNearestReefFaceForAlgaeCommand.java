@@ -1,14 +1,12 @@
 package competition.subsystems.drive.commands;
 
+import competition.electrical_contract.ElectricalContract;
 import competition.operator_interface.OperatorInterface;
 import competition.subsystems.drive.DriveSubsystem;
-import competition.subsystems.drive.logic.ManualSwerveDriveLogic;
 import competition.subsystems.oracle.ReefCoordinateGenerator;
-import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -17,8 +15,6 @@ import xbot.common.math.MathUtils;
 import xbot.common.math.PIDDefaults;
 import xbot.common.math.PIDManager;
 import xbot.common.math.XYPair;
-import xbot.common.properties.DistanceProperty;
-import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
 
@@ -43,14 +39,17 @@ public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
 
     private final PIDManager driveToAlgaePidManager;
     private final PIDManager snapToAlgaePIDManager;
+    int cameraToUse = 2;
     int targetTagID;
+    double yOffset = 0;
 
     @Inject
     public AlignToNearestReefFaceForAlgaeCommand(HeadingModule.HeadingModuleFactory headingModuleFactory,
                                                  DriveSubsystem drive, PoseSubsystem pose,
                                                  AprilTagVisionSubsystemExtended vision, OperatorInterface oi,
                                                  PIDManager.PIDManagerFactory pidFactory, PropertyFactory pf,
-                                                 ReefCoordinateGenerator reefCoordinateGenerator) {
+                                                 ReefCoordinateGenerator reefCoordinateGenerator,
+                                                 ElectricalContract electricalContract) {
         this.vision = vision;
         this.drive = drive;
         this.pose = pose;
@@ -91,6 +90,7 @@ public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
         snapToAlgaePIDManager.setEnableTimeThreshold(true);
 
         this.headingModule = headingModuleFactory.create(snapToAlgaePIDManager);
+        yOffset = electricalContract.getCameraInfo()[cameraToUse].position().getY();
 
         pf.setPrefix(this.getPrefix());
     }
@@ -121,7 +121,7 @@ public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
 
     private void railDrive() {
         // Calculate the vector to center our robot on "rails"
-        boolean targetInSight = vision.doesCameraBestObservationHaveAprilTagId(2, targetTagID);
+        boolean targetInSight = vision.doesCameraBestObservationHaveAprilTagId(cameraToUse, targetTagID);
         aKitLog.record("targetInSight", targetInSight);
         var currentTranslation = pose.getCurrentPose2d().getTranslation();
         if (!targetInSight) {
@@ -145,7 +145,7 @@ public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
         }
 
         // -0.55 is our back camera y-offset, this in the sim allows us to line up straight and properly
-        double robotRelativeTagLocationY = vision.getRobotRelativeLocationOfBestDetectedAprilTag(2).getY() - 0.55;
+        double robotRelativeTagLocationY = vision.getRobotRelativeLocationOfBestDetectedAprilTag(cameraToUse).getY() + yOffset;
         aKitLog.record("robotRelativeTagLocationY", robotRelativeTagLocationY);
 
         // We'll get the centeringVector (robot-relative), then rotate to be field relative
