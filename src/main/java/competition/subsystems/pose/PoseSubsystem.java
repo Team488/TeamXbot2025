@@ -364,6 +364,14 @@ public class PoseSubsystem extends BasePoseSubsystem {
                 this.deadWheelSubsystem.getRightAdjustedDistance(),
                 this.deadWheelSubsystem.getFrontAdjustedDistance(),
                 this.deadWheelSubsystem.getRearAdjustedDistance());
+
+        this.onlyDeadwheelOdometry.resetPosition(
+                heading,
+                deadwheelPositions,
+                new Pose2d(
+                        newXPositionMeters,
+                        newYPositionMeters,
+                        this.getCurrentHeadingGyroOnly()));
         fullDeadwheelOdometry.resetPosition(
                 heading,
                 deadwheelPositions,

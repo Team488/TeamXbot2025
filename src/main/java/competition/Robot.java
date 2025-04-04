@@ -69,7 +69,6 @@ public class Robot extends BaseRobot {
 
         autonomousCommandSelector.setCurrentAutonomousCommand(getInjectorComponent().emergencyAutonomousCommand());
 
-
         dataFrameRefreshables.add(getInjectorComponent().driveSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().poseSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().coprocessorCommunicationSubsystem());

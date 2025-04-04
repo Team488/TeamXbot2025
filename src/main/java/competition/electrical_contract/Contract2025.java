@@ -168,13 +168,13 @@ public class Contract2025 extends ElectricalContract {
     CANMotorControllerOutputConfig regularDriveMotorConfig =
             new CANMotorControllerOutputConfig()
                     .withInversionType(CANMotorControllerOutputConfig.InversionType.Normal)
-                    .withStatorCurrentLimit(Amps.of(60))
+                    .withStatorCurrentLimit(Amps.of(80))
                     .withNeutralMode(CANMotorControllerOutputConfig.NeutralMode.Brake);
 
     CANMotorControllerOutputConfig invertedDriveMotorConfig =
             new CANMotorControllerOutputConfig()
                     .withInversionType(CANMotorControllerOutputConfig.InversionType.Inverted)
-                    .withStatorCurrentLimit(Amps.of(60))
+                    .withStatorCurrentLimit(Amps.of(80))
                     .withNeutralMode(CANMotorControllerOutputConfig.NeutralMode.Brake);
 
     @Override
@@ -332,8 +332,8 @@ public class Contract2025 extends ElectricalContract {
                 new CameraInfo("Apriltag_Back_Camera",
                         "AprilTagBack",
                         new Transform3d(new Translation3d(
-                                0.25 / PoseSubsystem.INCHES_IN_A_METER,
-                                -0.55,
+                                -0.55 / PoseSubsystem.INCHES_IN_A_METER,
+                                -0.25 / PoseSubsystem.INCHES_IN_A_METER,
                                 6.3 / PoseSubsystem.INCHES_IN_A_METER),
                                 new Rotation3d(0, Math.toRadians(-14.5), Math.PI)),
                         EnumSet.of(CameraCapabilities.APRIL_TAG))
