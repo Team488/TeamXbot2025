@@ -41,13 +41,13 @@ public class FromCageScoreOneCoralAutoFactory {
         var auto = new BaseAutonomousSequentialCommandGroup(autoSelector);
         auto.setName("FromCageScoreOneCoralAuto");
 
-        auto.addCommands(new WaitCommand(Seconds.of(1)));
-
         var initializeStateCommand = pose.createSetPositionCommand(
                         () -> PoseSubsystem.convertBlueToRedIfNeeded(startingLocation)
                 )
                 .alongWith(new InstantCommand(() -> simulator.resetPosition(PoseSubsystem.convertBlueToRedIfNeeded(startingLocation))));
         auto.addCommands(initializeStateCommand);
+
+        auto.addCommands(new WaitCommand(Seconds.of(1)));
 
         var driveAndScore = driveToFaceAndScoreCommandGroupFact.create(targetReefFace, targetBranch, targetLevel)
                 .alongWith(
