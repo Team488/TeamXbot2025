@@ -43,6 +43,11 @@ public class CoprocessorCommunicationSubsystem
     final DistanceProperty lastCoralStationConfidentDistance;
     final DoubleProperty lastBargePathConfidentTimeInterval;
     final DistanceProperty lastBargePathConfidentDistance;
+
+    final DoubleProperty lastNearestReefBranchAPathConfidentTimeInterval;
+    final DistanceProperty lastNearestReefBranchAPathConfidentDistance;
+    final DoubleProperty lastNearestReefBranchBPathConfidentTimeInterval;
+    final DistanceProperty lastNearestReefBranchBPathConfidentDistance;
     final StringProperty xtablesCoordinateLocation;
     final StringProperty xtablesHeadingLocation;
 
@@ -60,6 +65,13 @@ public class CoprocessorCommunicationSubsystem
     public XTableValues.BezierCurves lastBargePath;
     private Double lastBargePathTimestamp;
 
+    public XTableValues.BezierCurves pathToNearestReefBranchACurves;
+    private Double pathToNearestReefBranchATimestamp;
+    public XTableValues.BezierCurves pathToNearestReefBranchBCurves;
+    private Double pathToNearestReefBranchBTimestamp;
+
+
+
     private AlignWithCreeperLogger alignWithCreeperLogger;
 
     @Inject
@@ -75,6 +87,16 @@ public class CoprocessorCommunicationSubsystem
                 "lastBargeConfidentTimeInterval-in-seconds", 2);
         lastBargePathConfidentDistance = pf.createPersistentProperty(
                 "lastBargeConfidentDistance", Meters.of(1.5));
+
+
+        lastNearestReefBranchAPathConfidentTimeInterval = pf.createPersistentProperty(
+                "lastNearestReefBranchAPathConfidentTimeInterval-in-seconds", 1.5);
+        lastNearestReefBranchAPathConfidentDistance = pf.createPersistentProperty(
+                "lastNearestReefBranchAPathConfidentDistance", Meters.of(1.5));
+        lastNearestReefBranchBPathConfidentTimeInterval = pf.createPersistentProperty(
+                "lastNearestReefBranchBPathConfidentTimeInterval-in-seconds", 1.5);
+        lastNearestReefBranchBPathConfidentDistance = pf.createPersistentProperty(
+                "lastNearestReefBranchBPathConfidentDistance", Meters.of(1.5));
         xtablesTargetPose =
                 pf.createPersistentProperty("Xtables Target Pose", "target_pose");
         xtablesCoordinateLocation = pf.createPersistentProperty(
@@ -101,6 +123,26 @@ public class CoprocessorCommunicationSubsystem
                     if (curves != null) {
                         lastBargePathTimestamp = XTimer.getFPGATimestamp();
                         lastBargePath = curves;
+                    }
+                }));
+        xTablesClientManager.getClientFuture().thenAccept(client
+                -> client.subscribe(
+                "BEZIER_PATH_TO_NEAREST_REEF_BRANCH_A", (update) -> {
+                    XTableValues.BezierCurves curves =
+                            XTablesByteUtils.unpack_bezier_curves(update.getValue());
+                    if (curves != null) {
+                        pathToNearestReefBranchATimestamp = XTimer.getFPGATimestamp();
+                        pathToNearestReefBranchACurves = curves;
+                    }
+                }));
+        xTablesClientManager.getClientFuture().thenAccept(client
+                -> client.subscribe(
+                "BEZIER_PATH_TO_NEAREST_REEF_BRANCH_B", (update) -> {
+                    XTableValues.BezierCurves curves =
+                            XTablesByteUtils.unpack_bezier_curves(update.getValue());
+                    if (curves != null) {
+                        pathToNearestReefBranchBTimestamp = XTimer.getFPGATimestamp();
+                        pathToNearestReefBranchBCurves = curves;
                     }
                 }));
 
@@ -173,6 +215,44 @@ public class CoprocessorCommunicationSubsystem
         return timeElapsed < maxTime && distance <= maxDistance;
     }
 
+    public boolean isNearestReefBranchAPathConfident(BasePoseSubsystem poseSubsystem) {
+        if (pathToNearestReefBranchACurves == null || pathToNearestReefBranchATimestamp == null) {
+            return false;
+        }
+
+        XTableValues.ControlPoint start = pathToNearestReefBranchACurves.getCurves(0).getControlPoints(0);
+        double timeElapsed = XTimer.getFPGATimestamp() - lastBargePathTimestamp;
+        double maxTime = lastNearestReefBranchAPathConfidentTimeInterval.get();
+
+        double distance = new Translation2d(start.getX(), start.getY())
+                .getDistance(poseSubsystem.getCurrentPose2d().getTranslation());
+        double maxDistance = lastNearestReefBranchAPathConfidentDistance.get().in(Meters);
+
+        return timeElapsed < maxTime && distance <= maxDistance;
+    }
+    public boolean isNearestReefBranchBPathConfident(BasePoseSubsystem poseSubsystem) {
+        if (pathToNearestReefBranchBCurves == null || pathToNearestReefBranchBTimestamp == null) {
+            return false;
+        }
+
+        XTableValues.ControlPoint start = pathToNearestReefBranchBCurves.getCurves(0).getControlPoints(0);
+        double timeElapsed = XTimer.getFPGATimestamp() - lastBargePathTimestamp;
+        double maxTime = lastNearestReefBranchBPathConfidentTimeInterval.get();
+
+        double distance = new Translation2d(start.getX(), start.getY())
+                .getDistance(poseSubsystem.getCurrentPose2d().getTranslation());
+        double maxDistance = lastNearestReefBranchBPathConfidentDistance.get().in(Meters);
+
+        return timeElapsed < maxTime && distance <= maxDistance;
+    }
+
+    public XTableValues.BezierCurves getPathToNearestReefBranchACurves() {
+        return pathToNearestReefBranchACurves;
+    }
+
+    public XTableValues.BezierCurves getPathToNearestReefBranchBCurves() {
+        return pathToNearestReefBranchBCurves;
+    }
 
     public XTableValues.BezierCurves getLastCoralStationPath() {
         return lastCoralStationPath;
