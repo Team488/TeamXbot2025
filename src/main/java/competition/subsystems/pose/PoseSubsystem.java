@@ -99,7 +99,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
         propManager.setPrefix(this);
         propManager.setDefaultLevel(Property.PropertyLevel.Important);
         useVisionAssistedPose = propManager.createPersistentProperty("UseVisionAssistedPose", true);
-        useDeadwheelAssistedPose = propManager.createPersistentProperty("useDeadwheelAssistedPose", true);
+        useDeadwheelAssistedPose = propManager.createPersistentProperty("useDeadwheelAssistedPose", false);
         continueUpdatingSwerveTelemetry = propManager.createPersistentProperty("continueUpdatingSwerveTelemetry", true);
         reportCameraPoses = propManager.createPersistentProperty("ReportCameraPoses", false);
     }
