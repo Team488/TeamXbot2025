@@ -336,7 +336,8 @@ public class Contract2025 extends ElectricalContract {
                                 -0.25 / PoseSubsystem.INCHES_IN_A_METER,
                                 6.3 / PoseSubsystem.INCHES_IN_A_METER),
                                 new Rotation3d(0, Math.toRadians(-14.5), Math.PI)),
-                        EnumSet.of(CameraCapabilities.APRIL_TAG))
+                        EnumSet.of(CameraCapabilities.APRIL_TAG),
+                        false)
         };
     }
 
