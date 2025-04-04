@@ -99,7 +99,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
         propManager.setPrefix(this);
         propManager.setDefaultLevel(Property.PropertyLevel.Important);
         useVisionAssistedPose = propManager.createPersistentProperty("UseVisionAssistedPose", true);
-        useDeadwheelAssistedPose = propManager.createPersistentProperty("useDeadwheelAssistedPose", false);
+        useDeadwheelAssistedPose = propManager.createPersistentProperty("useDeadwheelAssistedPose", true);
         continueUpdatingSwerveTelemetry = propManager.createPersistentProperty("continueUpdatingSwerveTelemetry", true);
         reportCameraPoses = propManager.createPersistentProperty("ReportCameraPoses", false);
     }
@@ -516,9 +516,5 @@ public class PoseSubsystem extends BasePoseSubsystem {
             hasCameraFlippedDriverRelative = false;
         }
         return new DriverRelativeCameraValues(hasCameraFlippedDriverRelative, cameraToUse);
-    }
-
-    public void setUseDeadwheelAssisstedPose(boolean value) {
-        this.useDeadwheelAssistedPose.set(value);
     }
 }

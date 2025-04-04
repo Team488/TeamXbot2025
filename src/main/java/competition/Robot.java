@@ -69,11 +69,8 @@ public class Robot extends BaseRobot {
 
         autonomousCommandSelector.setCurrentAutonomousCommand(getInjectorComponent().emergencyAutonomousCommand());
 
-        var poseSub = getInjectorComponent().poseSubsystem();
-        poseSub.setUseDeadwheelAssisstedPose(false);
-
         dataFrameRefreshables.add(getInjectorComponent().driveSubsystem());
-        dataFrameRefreshables.add(poseSub);
+        dataFrameRefreshables.add(getInjectorComponent().poseSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().coprocessorCommunicationSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().aprilTagVisionSubsystemExtended());
         dataFrameRefreshables.add(getInjectorComponent().armPivotSubsystem());
@@ -180,7 +177,6 @@ public class Robot extends BaseRobot {
     @Override
     public void autonomousInit() {
         var poseSub = getInjectorComponent().poseSubsystem();
-        poseSub.setUseDeadwheelAssisstedPose(false);
         if (autonomousCommandSelector.getCurrentAutonomousStartingPosition() != null){
             if(Robot.isSimulation()) {
                 simulator.ifPresent((nullSafeSimulator) -> nullSafeSimulator.resetPosition(PoseSubsystem.convertBlueToRedIfNeeded(
@@ -198,13 +194,6 @@ public class Robot extends BaseRobot {
         if (!coralArmSubsystem.isCalibrated()) {
             coralArmSubsystem.forceCalibrationAtAutonomous();
         }
-    }
-
-    @Override
-    public void teleopInit() {
-        super.teleopInit();
-        var poseSub = getInjectorComponent().poseSubsystem();
-        poseSub.setUseDeadwheelAssisstedPose(true);
     }
 
     public XScheduler getScheduler() {
