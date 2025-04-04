@@ -128,7 +128,6 @@ public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
             // Try and look at the thingy based off of pose
             var targetPose = vision.getAprilTagFieldOrientedPose(targetTagID);
             if (targetPose.isEmpty()) {
-                log.info("Stuff happened");
                 return;
             }
             double desiredHeading = currentTranslation.minus(targetPose.get().toPose2d().getTranslation())
