@@ -17,10 +17,10 @@ import javax.inject.Singleton;
 @Singleton
 public class DeadWheelSubsystem extends BaseSubsystem {
 
-    private final XEncoder leftEncoder;
-    private final XEncoder rightEncoder;
-    private final XEncoder frontEncoder;
-    private final XEncoder rearEncoder;
+    public final XEncoder leftEncoder;
+    public final XEncoder rightEncoder;
+    public final XEncoder frontEncoder;
+    public final XEncoder rearEncoder;
 
     private final DoubleProperty wheelDiameterMeters;
     private final DoubleProperty pulsesPerRevolution;
@@ -93,8 +93,8 @@ public class DeadWheelSubsystem extends BaseSubsystem {
         frontEncoder.setDistancePerPulseSupplier(() -> distancePerPulse);
         rearEncoder.setDistancePerPulseSupplier(() -> distancePerPulse);
 
-        this.aKitLog.record("DeadWheelLeftAdjusted", leftEncoder.getAdjustedDistance());
-        this.aKitLog.record("DeadWheelRgithAdjusted", rightEncoder.getAdjustedDistance());
+        this.aKitLog.record("DeadWheelLeftAdjusted", leftEncoder.getAdjustedDistance());        
+        this.aKitLog.record("DeadWheelRightAdjusted", rightEncoder.getAdjustedDistance());
         this.aKitLog.record("DeadWheelFrontAdjusted", frontEncoder.getAdjustedDistance());
         this.aKitLog.record("DeadWheelRearAdjusted", rearEncoder.getAdjustedDistance());
     }

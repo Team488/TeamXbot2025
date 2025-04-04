@@ -1,6 +1,7 @@
 package competition.simulation;
 
 import competition.Robot;
+import competition.simulation.DeadwheelsSimulator;
 import competition.simulation.algae_arm.AlgaeArmSimulator;
 import competition.simulation.coral_arm.CoralArmSimulator;
 import competition.simulation.coral_scorer.CoralScorerSimulator;
@@ -52,6 +53,7 @@ public class MapleSimulator implements BaseSimulator {
     final CoralScorerSimulator coralScorerSimulator;
     final AlgaeArmSimulator algaeArmSimulator;
     final LightsSimulator lightsSimulator;
+    final DeadwheelsSimulator deadwheelsSimulator;
 
     final Distance humanLoadingDistanceThreshold = Meters.of(0.2);
     final TimeStableValidator humanLoadValidator = new TimeStableValidator(1);
@@ -65,7 +67,7 @@ public class MapleSimulator implements BaseSimulator {
     public MapleSimulator(PoseSubsystem pose, DriveSubsystem drive, ElevatorSimulator elevatorSimulator,
                           CoralArmSimulator armSimulator, ReefSimulator reefSimulator, 
                           CoralScorerSimulator coralScorerSimulator, AlgaeArmSimulator algaeArmSimulator,
-                          LightsSimulator lightsSimulator) {
+                          LightsSimulator lightsSimulator, DeadwheelsSimulator deadwheelsSimulator) {
         this.pose = pose;
         this.drive = drive;
         this.elevatorSimulator = elevatorSimulator;
@@ -76,6 +78,7 @@ public class MapleSimulator implements BaseSimulator {
         this.algaeArmSimulator = algaeArmSimulator;
         this.lightsSimulator = lightsSimulator;
         this.superstructureMechanism = new SuperstructureMechanism();
+        this.deadwheelsSimulator = deadwheelsSimulator;
 
         aKitLog = new AKitLogger("Simulator/");
 
@@ -114,6 +117,7 @@ public class MapleSimulator implements BaseSimulator {
                 new SwerveDriveSimulation(config, startingPose));
         // Tell the robot it's starting in the same spot
         pose.setCurrentPoseInMeters(startingPose);
+        this.deadwheelsSimulator.resetPose(startingPose);
 
         arena.addDriveTrainSimulation(swerveDriveSimulation.getDriveTrainSimulation());
 
@@ -130,6 +134,7 @@ public class MapleSimulator implements BaseSimulator {
         this.updateCoralLoadFromHumanPlayer();
         this.updateCoralScorerSensor();
         this.updateSuperstructureMechanism();
+        this.deadwheelsSimulator.update(this.swerveDriveSimulation.getOdometryEstimatedPose());
     }
     
     void updateSuperstructureMechanism() {
