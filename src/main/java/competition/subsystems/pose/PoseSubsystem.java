@@ -517,8 +517,4 @@ public class PoseSubsystem extends BasePoseSubsystem {
         }
         return new DriverRelativeCameraValues(hasCameraFlippedDriverRelative, cameraToUse);
     }
-
-    public void setUseDeadwheelAssisstedPose(boolean value) {
-        this.useDeadwheelAssistedPose.set(value);
-    }
 }
