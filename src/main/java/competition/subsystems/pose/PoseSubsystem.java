@@ -364,6 +364,14 @@ public class PoseSubsystem extends BasePoseSubsystem {
                 this.deadWheelSubsystem.getRightAdjustedDistance(),
                 this.deadWheelSubsystem.getFrontAdjustedDistance(),
                 this.deadWheelSubsystem.getRearAdjustedDistance());
+
+        this.onlyDeadwheelOdometry.resetPosition(
+                heading,
+                deadwheelPositions,
+                new Pose2d(
+                        newXPositionMeters,
+                        newYPositionMeters,
+                        this.getCurrentHeadingGyroOnly()));
         fullDeadwheelOdometry.resetPosition(
                 heading,
                 deadwheelPositions,
@@ -484,7 +492,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
             // This is because we will be using the odometry estimate while vision is being
             // supresse, and we need
             // to avoid any callers of the PoseSubsystem experiencing discontinuities.
-            resetPoseEstimator(fullSwerveOdometry.getEstimatedPosition());
+            resetPoseEstimator(getPrimaryPoseEstimator().getEstimatedPosition());
         }
     }
 
