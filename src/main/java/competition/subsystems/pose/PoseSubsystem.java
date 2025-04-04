@@ -484,7 +484,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
             // This is because we will be using the odometry estimate while vision is being
             // supresse, and we need
             // to avoid any callers of the PoseSubsystem experiencing discontinuities.
-            resetPoseEstimator(fullSwerveOdometry.getEstimatedPosition());
+            resetPoseEstimator(getPrimaryPoseEstimator().getEstimatedPosition());
         }
     }
 
