@@ -1,16 +1,14 @@
 package competition.commandgroups;
 
 import competition.subsystems.drive.DriveSubsystem;
-import competition.subsystems.drive.commands.AlignToReefWithAprilTagCommand;
 import competition.subsystems.drive.commands.AlignToTagGlobalMovementWithCalculator;
-import competition.subsystems.drive.commands.DriveToReefFaceUntilDetectionCommand;
 import competition.subsystems.drive.logic.AlignCameraToAprilTagCalculator;
 import competition.subsystems.pose.Cameras;
 import competition.subsystems.pose.Landmarks;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import xbot.common.controls.sensors.XXboxController;
+import edu.wpi.first.wpilibj2.command.ProxyCommand;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -44,10 +42,7 @@ public class DriveToReefFaceThenAlignCommandGroupFactory {
         }
     }
 
-    public SequentialCommandGroup create(Landmarks.ReefFace targetReefFace, Landmarks.Branch targetBranch) {
-        var group = new SequentialCommandGroup();
-        group.setName("DriveToReefFaceThenAlignCommandGroup");
-
+    public Command create(Landmarks.ReefFace targetReefFace, Landmarks.Branch targetBranch) {
         var alignToReefCommand = new DeferredCommand(
                 () -> {
                     var alignToReefWithAprilTagCommand = alignToReefWithAprilTagCommandProvider.get();
@@ -55,9 +50,8 @@ public class DriveToReefFaceThenAlignCommandGroupFactory {
                     return alignToReefWithAprilTagCommand;
                 }, Set.of(drive)
         );
-        group.addCommands(
-                alignToReefCommand);
+        alignToReefCommand.setName("DriveToReefFaceThenAlignCommandGroup");
 
-        return group;
+        return alignToReefCommand;
     }
 }
