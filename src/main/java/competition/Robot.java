@@ -69,9 +69,11 @@ public class Robot extends BaseRobot {
 
         autonomousCommandSelector.setCurrentAutonomousCommand(getInjectorComponent().emergencyAutonomousCommand());
 
+        var poseSub = getInjectorComponent().poseSubsystem();
+        poseSub.setUseDeadwheelAssisstedPose(false);
 
         dataFrameRefreshables.add(getInjectorComponent().driveSubsystem());
-        dataFrameRefreshables.add(getInjectorComponent().poseSubsystem());
+        dataFrameRefreshables.add(poseSub);
         dataFrameRefreshables.add(getInjectorComponent().coprocessorCommunicationSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().aprilTagVisionSubsystemExtended());
         dataFrameRefreshables.add(getInjectorComponent().armPivotSubsystem());
@@ -178,6 +180,7 @@ public class Robot extends BaseRobot {
     @Override
     public void autonomousInit() {
         var poseSub = getInjectorComponent().poseSubsystem();
+        poseSub.setUseDeadwheelAssisstedPose(false);
         if (autonomousCommandSelector.getCurrentAutonomousStartingPosition() != null){
             if(Robot.isSimulation()) {
                 simulator.ifPresent((nullSafeSimulator) -> nullSafeSimulator.resetPosition(PoseSubsystem.convertBlueToRedIfNeeded(
@@ -195,7 +198,6 @@ public class Robot extends BaseRobot {
         if (!coralArmSubsystem.isCalibrated()) {
             coralArmSubsystem.forceCalibrationAtAutonomous();
         }
-        poseSub.setUseDeadwheelAssisstedPose(false);
     }
 
     @Override
