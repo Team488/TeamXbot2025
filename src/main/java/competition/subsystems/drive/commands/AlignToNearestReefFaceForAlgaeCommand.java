@@ -1,13 +1,12 @@
 package competition.subsystems.drive.commands;
 
+import competition.electrical_contract.ElectricalContract;
 import competition.operator_interface.OperatorInterface;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.oracle.ReefCoordinateGenerator;
-import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -16,8 +15,6 @@ import xbot.common.math.MathUtils;
 import xbot.common.math.PIDDefaults;
 import xbot.common.math.PIDManager;
 import xbot.common.math.XYPair;
-import xbot.common.properties.DistanceProperty;
-import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
 
@@ -42,25 +39,17 @@ public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
 
     private final PIDManager driveToAlgaePidManager;
     private final PIDManager snapToAlgaePIDManager;
-
-    final DistanceProperty interstitialThresholdToRailDrive;
-    final DistanceProperty interstitialDistance;
-    final DoubleProperty interstitialApproachSpeedFactor;
-
-    public enum AlignmentState {
-        ToInterstitial,
-        RailDrive,
-    }
-
-    public AlignmentState currentAlignmentState;
-    public Pose2d interstitialPoint;
+    int cameraToUse = 2;
+    int targetTagID;
+    double yOffset = 0;
 
     @Inject
     public AlignToNearestReefFaceForAlgaeCommand(HeadingModule.HeadingModuleFactory headingModuleFactory,
                                                  DriveSubsystem drive, PoseSubsystem pose,
                                                  AprilTagVisionSubsystemExtended vision, OperatorInterface oi,
                                                  PIDManager.PIDManagerFactory pidFactory, PropertyFactory pf,
-                                                 ReefCoordinateGenerator reefCoordinateGenerator) {
+                                                 ReefCoordinateGenerator reefCoordinateGenerator,
+                                                 ElectricalContract electricalContract) {
         this.vision = vision;
         this.drive = drive;
         this.pose = pose;
@@ -101,11 +90,9 @@ public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
         snapToAlgaePIDManager.setEnableTimeThreshold(true);
 
         this.headingModule = headingModuleFactory.create(snapToAlgaePIDManager);
+        yOffset = electricalContract.getCameraInfo()[cameraToUse].position().getY();
 
         pf.setPrefix(this.getPrefix());
-        interstitialThresholdToRailDrive = pf.createPersistentProperty("InterstitialThresholdToRailDrive", Meters.of(0.2));
-        interstitialDistance = pf.createPersistentProperty("InterstitialDistance", Meters.of(1.75));
-        interstitialApproachSpeedFactor = pf.createPersistentProperty("InterstitialApproachSpeedFactor", 0.5);
     }
 
     @Override
@@ -121,78 +108,46 @@ public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
         }
 
         Pose2d closestPose = pose.getClosestReefFacePoseByAlliance(alliance);
+        targetTagID = vision.getTargetAprilTagID(closestPose);
+
         idealFinalPosition = closestPose.getTranslation();
         idealFinalHeading = closestPose.getRotation().getMeasure().plus(Degrees.of(180)); // Aligning backwards
-
-        double distanceToClosestReefFace = currentPose.getTranslation().getDistance(idealFinalPosition);
-
-        // Determine our starting state, do we need to drive to an interstitial?
-        if (distanceToClosestReefFace < interstitialDistance.get().in(Meters)) {
-            currentAlignmentState = AlignmentState.RailDrive;
-        } else {
-            currentAlignmentState = AlignmentState.ToInterstitial;
-            interstitialPoint = reefCoordinateGenerator.getPoseRelativeToReefFace(
-                    alliance,
-                    Landmarks.getReefFaceFromTagId(vision.getClosestReefTagIdFromTranslation(idealFinalPosition)),
-                    interstitialDistance.get(),
-                    Meters.zero()
-            );
-
-            // Recall how we are aligning backwards
-            interstitialPoint = new Pose2d(
-                    interstitialPoint.getTranslation(),
-                    interstitialPoint.getRotation().plus(new Rotation2d(Math.PI))
-            );
-        }
     }
 
     @Override
     public void execute() {
-        switch (currentAlignmentState) {
-            case ToInterstitial -> {
-                driveToInterstitial();
-                var currentTranslation = pose.getCurrentPose2d().getTranslation();
-                double distanceFromInterstitial = currentTranslation.getDistance(interstitialPoint.getTranslation());
-                if (distanceFromInterstitial < interstitialThresholdToRailDrive.get().in(Meters)) {
-                    currentAlignmentState = AlignmentState.RailDrive;
-                }
-            }
-            case RailDrive -> railDrive();
-            default -> {}
-        }
-        aKitLog.record("AlignmentState", currentAlignmentState);
-    }
-
-    public void driveToInterstitial() {
-        Pose2d currentPose = pose.getCurrentPose2d();
-
-        // Same interstitial driving logic as AlignCameraToAprilTagCalculator
-        var vectorTowardsInterstitial = interstitialPoint.getTranslation().minus(currentPose.getTranslation());
-        var normalizedVector = vectorTowardsInterstitial.div(vectorTowardsInterstitial.getNorm());
-        var driveIntent = new XYPair(
-                normalizedVector.getX(),
-                normalizedVector.getY()).scale(interstitialApproachSpeedFactor.get()
-        );
-        var rotationIntent = headingModule.calculateHeadingPower(interstitialPoint.getRotation());
-
-        drive.fieldOrientedDrive(
-                driveIntent,
-                rotationIntent,
-                pose.getCurrentHeading().getDegrees(),
-                new XYPair()
-        );
+        railDrive();
     }
 
     private void railDrive() {
         // Calculate the vector to center our robot on "rails"
+        boolean targetInSight = vision.doesCameraBestObservationHaveAprilTagId(cameraToUse, targetTagID);
+        aKitLog.record("targetInSight", targetInSight);
         var currentTranslation = pose.getCurrentPose2d().getTranslation();
-        var currentHeading = pose.getCurrentHeading().getRadians();
-        double deltaX = idealFinalPosition.getX() - currentTranslation.getX();
-        double deltaY = idealFinalPosition.getY() - currentTranslation.getY();
-        double robotRelativeTagLocationY = deltaX * Math.sin(-currentHeading) + deltaY * Math.cos(-currentHeading);
+        if (!targetInSight) {
+            // Try and look at the thingy based off of pose
+            var targetPose = vision.getAprilTagFieldOrientedPose(targetTagID);
+            if (targetPose.isEmpty()) {
+                return;
+            }
+            double desiredHeading = currentTranslation.minus(targetPose.get().toPose2d().getTranslation())
+                    .getAngle().getDegrees();
+            aKitLog.record("desiredHeading", desiredHeading);
 
-        // Everything below here can and should be extracted because it is repeated code with
-        // DriveWithSnapToReefTagCommand
+            drive.fieldOrientedDrive(
+                    new XYPair(),
+                    headingModule.calculateHeadingPower(desiredHeading),
+                    pose.getCurrentHeading().getDegrees(),
+                    new XYPair()
+            );
+            return;
+        }
+
+        // -0.55 is our back camera y-offset, this in the sim allows us to line up straight and properly
+        double robotRelativeTagLocationY = vision.getRobotRelativeLocationOfBestDetectedAprilTag(cameraToUse).getY() + yOffset;
+        aKitLog.record("robotRelativeTagLocationY", robotRelativeTagLocationY);
+
+        // We'll get the centeringVector (robot-relative), then rotate to be field relative
         var centeringTranslation2d = drive.getPowerForRelativePositionChange(
                 driveToAlgaePidManager,
                 new Translation2d(0, robotRelativeTagLocationY)
@@ -215,6 +170,10 @@ public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
         double rotateIntent = headingModule.calculateHeadingPower(idealFinalHeading.in(Degrees));
         XYPair onRailsVector = XYPair.fromPolar(idealFinalHeading.in(Degrees), railsSimilarityToDriver);
         var combinedVector = onRailsVector.add(centeringVector);
+        aKitLog.record("rotateIntent", rotateIntent);
+        aKitLog.record("onRailsVector", onRailsVector);
+        aKitLog.record("centeringVector", centeringVector);
+        aKitLog.record("combinedVector", combinedVector);
 
         drive.fieldOrientedDrive(
                 combinedVector,
