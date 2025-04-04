@@ -32,6 +32,7 @@ import competition.subsystems.drive.commands.AlignToNearestReefFaceForAlgaeComma
 import competition.subsystems.drive.commands.DriveToBargeCommand;
 import competition.subsystems.drive.commands.vision_path.PathDriveToBargeCommand;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
+import competition.subsystems.drive.commands.vision_path.PathDriveToNearestReefBranch;
 import competition.subsystems.drive.logic.AlignCameraToAprilTagCalculator;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import competition.subsystems.elevator.commands.ForceElevatorCalibratedCommand;
@@ -82,6 +83,7 @@ public class OperatorCommandMap {
             PathDriveToLocationForCoralStationFactory pathDriveToLocationForCoralStationFactory,
             AlignCameraToAprilTagCalculator.AlignCameraToAprilTagCalculatorFactory aprilTagCalculatorFactory,
             PathDriveToBargeCommand pathDriveToBargeCommand,
+            Provider<PathDriveToNearestReefBranch> pathDriveToNearestReefBranchProvider,
             DriveToBargeCommand driveToBargeCommand) {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
@@ -96,13 +98,19 @@ public class OperatorCommandMap {
         alignToReefWithAprilTagWithLeftCamera.setConfigurations(
                 Cameras.FRONT_LEFT_CAMERA.getIndex(), false, alignToCoralOffsetInches, true,
                 AlignCameraToAprilTagCalculator.Activity.ApproachWhileCentering, false);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(alignToReefWithAprilTagWithLeftCamera);
+//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(alignToReefWithAprilTagWithLeftCamera);
+        PathDriveToNearestReefBranch pathDriveToNearestReefBranchB = pathDriveToNearestReefBranchProvider.get();
+        pathDriveToNearestReefBranchB.setBranch(Landmarks.Branch.B);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(pathDriveToNearestReefBranchB);
+        PathDriveToNearestReefBranch pathDriveToNearestReefBranchA = pathDriveToNearestReefBranchProvider.get();
+        pathDriveToNearestReefBranchA.setBranch(Landmarks.Branch.A);
+        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(pathDriveToNearestReefBranchA);
 
         var alignToReefWithAprilTagWithRightCamera = alignToReefWithAprilTagProvider.get();
         alignToReefWithAprilTagWithRightCamera.setConfigurations(
                 Cameras.FRONT_RIGHT_CAMERA.getIndex(), false, alignToCoralOffsetInches, true,
                 AlignCameraToAprilTagCalculator.Activity.ApproachWhileCentering, false);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(alignToReefWithAprilTagWithRightCamera);
+//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(alignToReefWithAprilTagWithRightCamera);
 
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(pointAtNearestCoralStation)
                 .onFalse(clearPointAtHeading);

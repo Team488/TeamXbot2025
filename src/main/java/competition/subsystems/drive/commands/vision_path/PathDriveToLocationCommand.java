@@ -8,6 +8,7 @@ import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import org.kobe.xbot.JClient.XTablesClient;
 import org.kobe.xbot.Utilities.Entities.XTableValues;
@@ -34,7 +35,7 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
     private XTableValues.TraversalOptions traversalOptions;
     private final DistanceProperty safeDistance;
 
-    private final DistanceProperty distanceToGoalAndFinish;
+    private Distance distanceToGoalAndFinish;
     private final ReefRoutingCircle routingCircle;
     private XTableValues.AdditionalArguments additionalArguments;
 
@@ -62,8 +63,7 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
         pf.setPrefix("PathDriveToLocationCommand");
         this.safeDistance =
                 pf.createPersistentProperty("SafeDistanceInches", Inches.of(0.5));
-        this.distanceToGoalAndFinish =
-                pf.createPersistentProperty("DistanceToGoalThenFinish", Inches.of(5));
+        this.distanceToGoalAndFinish = Inches.of(5);
     }
 
     public PathDriveToLocationCommand setTarget(Pose2d target) {
@@ -89,6 +89,11 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
         this.curves.set(curves);
         this.failed.set(null);
         this.side = side;
+        return this;
+    }
+
+    public PathDriveToLocationCommand setDistanceToGoalAndFinish(Distance distanceToGoalAndFinish) {
+        this.distanceToGoalAndFinish = distanceToGoalAndFinish;
         return this;
     }
 
@@ -208,6 +213,6 @@ public class PathDriveToLocationCommand extends SwerveBezierTrajectoryBase {
         return super.isFinished()
                 || pose.getCurrentPose2d().getTranslation().getDistance(
                 new Translation2d(lastPoint.getX(), lastPoint.getY()))
-                <= distanceToGoalAndFinish.get().in(Meters);
+                <= distanceToGoalAndFinish.in(Meters);
     }
 }

@@ -104,7 +104,7 @@ public class CoprocessorCommunicationSubsystem
         xtablesHeadingLocation = pf.createPersistentProperty(
                 "Xtables Heading Location", "target_heading");
         XTablesLogger.setLoggingLevel(Level.OFF);
-        xTablesClientManager = XTablesClient.getDefaultClientAsynchronously();
+        xTablesClientManager = XTablesClient.getClientAsynchronously("localhost");
         xTablesClientManager.getClientFuture().thenAccept(client
                 -> client.subscribe(
                 "BEZIER_PATH_TO_NEAREST_CORAL_STATION", (update) -> {
@@ -221,7 +221,7 @@ public class CoprocessorCommunicationSubsystem
         }
 
         XTableValues.ControlPoint start = pathToNearestReefBranchACurves.getCurves(0).getControlPoints(0);
-        double timeElapsed = XTimer.getFPGATimestamp() - lastBargePathTimestamp;
+        double timeElapsed = XTimer.getFPGATimestamp() - pathToNearestReefBranchATimestamp;
         double maxTime = lastNearestReefBranchAPathConfidentTimeInterval.get();
 
         double distance = new Translation2d(start.getX(), start.getY())
@@ -236,7 +236,7 @@ public class CoprocessorCommunicationSubsystem
         }
 
         XTableValues.ControlPoint start = pathToNearestReefBranchBCurves.getCurves(0).getControlPoints(0);
-        double timeElapsed = XTimer.getFPGATimestamp() - lastBargePathTimestamp;
+        double timeElapsed = XTimer.getFPGATimestamp() - pathToNearestReefBranchBTimestamp;
         double maxTime = lastNearestReefBranchBPathConfidentTimeInterval.get();
 
         double distance = new Translation2d(start.getX(), start.getY())
