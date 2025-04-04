@@ -148,8 +148,7 @@ public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
         double robotRelativeTagLocationY = vision.getRobotRelativeLocationOfBestDetectedAprilTag(2).getY() - 0.55;
         aKitLog.record("robotRelativeTagLocationY", robotRelativeTagLocationY);
 
-        // Everything below here can and should be extracted because it is repeated code with
-        // DriveWithSnapToReefTagCommand
+        // We'll get the centeringVector (robot-relative), then rotate to be field relative
         var centeringTranslation2d = drive.getPowerForRelativePositionChange(
                 driveToAlgaePidManager,
                 new Translation2d(0, robotRelativeTagLocationY)
