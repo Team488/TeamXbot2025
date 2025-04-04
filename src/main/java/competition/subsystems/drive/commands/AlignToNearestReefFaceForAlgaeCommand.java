@@ -144,6 +144,7 @@ public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
             return;
         }
 
+        // -0.55 is our back camera y-offset, this in the sim allows us to line up straight and properly
         double robotRelativeTagLocationY = vision.getRobotRelativeLocationOfBestDetectedAprilTag(2).getY() - 0.55;
         aKitLog.record("robotRelativeTagLocationY", robotRelativeTagLocationY);
 
