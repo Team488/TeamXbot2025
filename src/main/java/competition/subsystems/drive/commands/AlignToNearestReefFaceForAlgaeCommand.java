@@ -43,9 +43,7 @@ public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
 
     private final PIDManager driveToAlgaePidManager;
     private final PIDManager snapToAlgaePIDManager;
-    public Pose2d interstitialPoint;
     int targetTagID;
-    boolean hasEverSeenTag = false;
 
     @Inject
     public AlignToNearestReefFaceForAlgaeCommand(HeadingModule.HeadingModuleFactory headingModuleFactory,
@@ -124,7 +122,6 @@ public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
     private void railDrive() {
         // Calculate the vector to center our robot on "rails"
         boolean targetInSight = vision.doesCameraBestObservationHaveAprilTagId(2, targetTagID);
-        hasEverSeenTag |= targetInSight;
         aKitLog.record("targetInSight", targetInSight);
         var currentTranslation = pose.getCurrentPose2d().getTranslation();
         if (!targetInSight) {
@@ -147,7 +144,6 @@ public class AlignToNearestReefFaceForAlgaeCommand extends BaseCommand {
             return;
         }
 
-        var currentHeading = pose.getCurrentHeading().getRadians();
         double robotRelativeTagLocationY = vision.getRobotRelativeLocationOfBestDetectedAprilTag(2).getY() - 0.55;
         aKitLog.record("robotRelativeTagLocationY", robotRelativeTagLocationY);
 
