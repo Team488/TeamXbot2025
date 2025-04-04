@@ -195,6 +195,14 @@ public class Robot extends BaseRobot {
         if (!coralArmSubsystem.isCalibrated()) {
             coralArmSubsystem.forceCalibrationAtAutonomous();
         }
+        poseSub.setUseDeadwheelAssisstedPose(false);
+    }
+
+    @Override
+    public void teleopInit() {
+        super.teleopInit();
+        var poseSub = getInjectorComponent().poseSubsystem();
+        poseSub.setUseDeadwheelAssisstedPose(true);
     }
 
     public XScheduler getScheduler() {
