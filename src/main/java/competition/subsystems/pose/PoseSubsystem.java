@@ -128,12 +128,14 @@ public class PoseSubsystem extends BasePoseSubsystem {
     }
     @SuppressWarnings("unchecked")
     private <T> PoseEstimator<T> getPrimaryPoseEstimator() {
-        return (PoseEstimator<T>) (this.useDeadwheelAssistedPose.get() ? this.fullDeadwheelOdometry
+        return (PoseEstimator<T>) (this.useDeadwheelAssistedPose.get()
+                ? this.fullDeadwheelOdometry
                 : this.fullSwerveOdometry);
     }
     @SuppressWarnings("unchecked")
     private <T> PoseEstimator<T> getPrimaryOdometryOnlyPoseEstimator() {
-        return (PoseEstimator<T>) (this.useDeadwheelAssistedPose.get() ? this.onlyWheelsGyroSwerveOdometry
+        return (PoseEstimator<T>) (this.useDeadwheelAssistedPose.get()
+                ? this.onlyWheelsGyroSwerveOdometry
                 : this.onlyDeadwheelOdometry);
     }
 
@@ -201,11 +203,11 @@ public class PoseSubsystem extends BasePoseSubsystem {
         aKitLog.record("FullVisionDeadwheelEstimate", fullDeadwheelOdometry.getEstimatedPosition());
 
         // Report poses
-        Pose2d estimatedPosition = new Pose2d(
+        Pose2d swerveOnlyPosition = new Pose2d(
                 onlyWheelsGyroSwerveOdometry.getEstimatedPosition().getTranslation(),
                 getCurrentHeadingGyroOnly());
-        aKitLog.record("OdometryOnlyRobotPose", estimatedPosition);
-        batchedPushRequests.putPose2d(xtablesPrefix + ".OdometryOnlyRobotPose", estimatedPosition);
+        aKitLog.record("OdometryOnlyRobotPose", swerveOnlyPosition);
+        batchedPushRequests.putPose2d(xtablesPrefix + ".OdometryOnlyRobotPose", swerveOnlyPosition);
 
         Pose2d fullSwervePosiiton = new Pose2d(
                 fullSwerveOdometry.getEstimatedPosition().getTranslation(),
@@ -222,8 +224,10 @@ public class PoseSubsystem extends BasePoseSubsystem {
         aKitLog.record("DeadWheelPosition", deadWheelPosition);
         batchedPushRequests.putPose2d(xtablesPrefix + ".DeadWheelPose", deadWheelPosition);
 
-        Pose2d robotPose = this.useVisionAssistedPose.get() && !preferOdometryToVision ? visionEnhancedPosition
-                : estimatedPosition;
+        Pose2d robotPose = this.useVisionAssistedPose.get() && !preferOdometryToVision
+                ? getPrimaryPoseEstimator().getEstimatedPosition()
+                : getPrimaryOdometryOnlyPoseEstimator().getEstimatedPosition();
+
         batchedPushRequests.putDouble(xtablesPrefix + ".DeadWheelPose.Right",
                 this.deadWheelSubsystem.getRightAdjustedDistance().in(Meters));
         batchedPushRequests.putDouble(xtablesPrefix + ".DeadWheelPose.Left",
