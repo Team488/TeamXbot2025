@@ -169,10 +169,6 @@ public class OperatorCommandMap {
         var removeLowAlgaeHeight = setElevatorTargetHeightCommandProvider.get();
         removeLowAlgaeHeight.setHeight(Landmarks.CoralLevel.LOW_ALGAE);
 
-        var scoreAlgaeInNetHeight = setElevatorTargetHeightCommandProvider.get();
-        scoreAlgaeInNetHeight.setHeight(Landmarks.CoralLevel.SCORE_ALGAE_NET);
-
-
         var calibrateSuperstructure = Commands.parallel(
                 forceElevatorCalibratedCommand,
                 forceCoralPivotCalibratedCommand
@@ -182,7 +178,14 @@ public class OperatorCommandMap {
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(calibrateSuperstructure);
         // Algae system buttons
 
+        var removeLowAlgae = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.LOW_ALGAE);
+        oi.operatorGamepad.getPovIfAvailable(180).onTrue(removeLowAlgae);
 
+        var removeHighAlgae = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.HIGH_ALGAE);
+        oi.operatorGamepad.getPovIfAvailable(0).onTrue(removeHighAlgae);
+
+        var scoreAlgaeInNetHeight = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.SCORE_ALGAE_NET);
+        oi.operatorGamepad.getPovIfAvailable(90).onTrue(scoreAlgaeInNetHeight);
 
         var scoreAlgaeInProcessor = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.SCORE_ALGAE_PROCESSOR);
         oi.operatorGamepad.getPovIfAvailable(270).onTrue(scoreAlgaeInProcessor);
