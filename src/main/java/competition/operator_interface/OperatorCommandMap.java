@@ -143,7 +143,9 @@ public class OperatorCommandMap {
                                       ForceCoralArmCalibratedCommand forceCoralPivotCalibratedCommand,
                                       Provider<SetElevatorTargetHeightCommand> setElevatorTargetHeightCommandProvider,
                                       CoralArmSubsystem coralArmSubsystem,
-                                      IntakeCoralCommand intakeCoralCommand) {
+                                      IntakeCoralCommand intakeCoralCommand,
+                                      IntakeAlgaeCommand intakeAlgaeCommand,
+                                      ScoreAlgaeCommand scoreAlgaeCommand) {
 
 
 
@@ -190,8 +192,8 @@ public class OperatorCommandMap {
         var scoreAlgaeInProcessor = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.SCORE_ALGAE_PROCESSOR);
         oi.operatorGamepad.getPovIfAvailable(270).onTrue(scoreAlgaeInProcessor);
 
-
-
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(intakeAlgaeCommand);
+        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(scoreAlgaeCommand);
     }
 
     @Inject
