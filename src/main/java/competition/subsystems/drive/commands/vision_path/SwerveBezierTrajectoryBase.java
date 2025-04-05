@@ -25,6 +25,12 @@ import java.util.List;
 public class SwerveBezierTrajectoryBase extends SwerveSimpleBezierCommand {
     private final CoprocessorCommunicationSubsystem coprocessor;
 
+    private boolean instantRotation = false;
+
+    // This value is tuned for general use for avoiding reef
+    private double rotationThreshold = 1.4;
+
+
     // --- NEW CONSTANTS ---
     private static final int STEPS_PER_SEGMENT = 13;
     private static final double DEFAULT_ACCELERATION = 3;
@@ -56,6 +62,17 @@ public class SwerveBezierTrajectoryBase extends SwerveSimpleBezierCommand {
                 getSegmentedBezierCurveSwervePoints(bezierCurves, options));
     }
 
+    // Instantly start rotating and ignore if it is near a reef or any obstacle[[
+    public SwerveBezierTrajectoryBase setInstantRotation(boolean instantRotation) {
+        this.instantRotation = instantRotation;
+        return this;
+    }
+    // The rotation will start after the distance from start to goal divided by rotationThreshold is met.
+    // Short terms the higher the value the later it will rotate
+    public SwerveBezierTrajectoryBase setRotationThreshold(double rotationThreshold) {
+        this.rotationThreshold = rotationThreshold;
+        return this;
+    }
 
     public List<XbotSwervePoint> getSegmentedBezierCurveSwervePoints(
             XTableValues.BezierCurves bezierCurves,
@@ -68,7 +85,7 @@ public class SwerveBezierTrajectoryBase extends SwerveSimpleBezierCommand {
         XTableValues.ControlPoint lastPoint = lastCurve.getControlPoints(lastCurve.getControlPointsCount() - 1);
         Translation2d endPoint = new Translation2d( lastPoint.getX(), lastPoint.getY());
         double distanceFromEnd = currentStartPoint.getDistance(endPoint);
-        double halfDistanceFromEnd = distanceFromEnd / 1.4;
+        double halfDistanceFromEnd = distanceFromEnd / rotationThreshold;
 
 
         final Rotation2d overallStartRotation =
@@ -132,7 +149,7 @@ public class SwerveBezierTrajectoryBase extends SwerveSimpleBezierCommand {
                 Translation2d pointTranslation =
                         deCasteljauIterative(allPoints, lerpFraction);
                 Rotation2d targetRotation = overallStartRotation;
-                if(pointTranslation.getDistance(endPoint) <= halfDistanceFromEnd) {
+                if(instantRotation ||  pointTranslation.getDistance(endPoint) <= halfDistanceFromEnd) {
                     targetRotation = finalRotation;
                 }
 

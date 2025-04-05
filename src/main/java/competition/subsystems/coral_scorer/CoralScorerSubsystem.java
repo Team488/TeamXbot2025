@@ -76,7 +76,7 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
         this.scoreCoralPower = propertyFactory.createPersistentProperty("scorerPower", -0.8);
         this.intakeAlgaePower = propertyFactory.createPersistentProperty("intakeAlgaePower", 1);
         this.scoreAlgaePower = propertyFactory.createPersistentProperty("scoreAlgaePower", -1);
-        this.waitTimeAfterScoring = propertyFactory.createPersistentProperty("waitTimeAfterScoring", 0.2);
+        this.waitTimeAfterScoring = propertyFactory.createPersistentProperty("waitTimeAfterScoring", 0.3);
         this.waitTimeAfterCollection = propertyFactory.createPersistentProperty("waitTimeAfterCollection", 0.1);
 
         this.intakeFreeSpeedRPSProperty = propertyFactory.createPersistentProperty("intakeFreeSpeedRPS", 3);
