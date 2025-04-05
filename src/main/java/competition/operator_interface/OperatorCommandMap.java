@@ -146,10 +146,6 @@ public class OperatorCommandMap {
                                       IntakeCoralCommand intakeCoralCommand,
                                       IntakeAlgaeCommand intakeAlgaeCommand,
                                       ScoreAlgaeCommand scoreAlgaeCommand) {
-
-
-
-
         // Coral system buttons
         var prepL4 = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.FOUR);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(prepL4);
@@ -164,12 +160,6 @@ public class OperatorCommandMap {
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.B).onTrue(homed);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeCoralCommand);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreCoralCommand);
-
-        var removeHighAlgaeHeight = setElevatorTargetHeightCommandProvider.get();
-        removeHighAlgaeHeight.setHeight(Landmarks.CoralLevel.HIGH_ALGAE);
-
-        var removeLowAlgaeHeight = setElevatorTargetHeightCommandProvider.get();
-        removeLowAlgaeHeight.setHeight(Landmarks.CoralLevel.LOW_ALGAE);
 
         var calibrateSuperstructure = Commands.parallel(
                 forceElevatorCalibratedCommand,
