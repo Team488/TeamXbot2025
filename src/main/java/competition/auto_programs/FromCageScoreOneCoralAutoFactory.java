@@ -7,6 +7,7 @@ import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import xbot.common.subsystems.autonomous.AutonomousCommandSelector;
 
 import javax.inject.Inject;
@@ -44,10 +45,18 @@ public class FromCageScoreOneCoralAutoFactory {
                 .alongWith(new InstantCommand(() -> simulator.resetPosition(PoseSubsystem.convertBlueToRedIfNeeded(startingLocation))));
         auto.addCommands(initializeStateCommand);
 
+        // Wait before we move...
+        var waitBeforeMoving = new WaitCommand(1);
+        auto.addCommands(waitBeforeMoving);
+
         var driveAndScore = driveToFaceAndScoreCommandGroupFact.create(targetReefFace, targetBranch, targetLevel)
                 .alongWith(
                         auto.getDriveAndScoreStatusMessageCommand(targetReefFace, targetBranch, targetLevel));
         auto.addCommands(driveAndScore);
+
+        // Wait after scoring; before we home the stinger and elevator...
+        var waitAfterScoring = new WaitCommand(1);
+        auto.addCommands(waitAfterScoring);
 
         var homeCoralSystem = prepCoralSystemCommandGroupFact.create(() -> Landmarks.CoralLevel.CORAL_COLLECTING);
         auto.addCommands(homeCoralSystem);
