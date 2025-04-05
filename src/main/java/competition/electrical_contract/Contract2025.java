@@ -82,30 +82,12 @@ public class Contract2025 extends ElectricalContract {
     @Override
     public DeviceInfo getElevatorBottomSensor() { return new DeviceInfo("ElevatorBottomSensor",3, true); }
 
-    @Override
-    public boolean isAlgaeArmPivotMotorReady() {return true;}
-
-    public boolean isAlgaeArmBottomSensorReady(){return false;}
-
-    public DeviceInfo getAlgaeArmBottomSensor() {return new DeviceInfo("AlgaeArmBottomSensor",2, true); }
 
     @Override
     public boolean isHumanLoadRampReady() {
         return false;
     }
 
-    @Override
-    public CANMotorControllerInfo getAlgaeArmPivotMotor() {
-        return new CANMotorControllerInfo("AlgaeArmPivotMotor",
-                MotorControllerType.TalonFx,
-                CANBusId.RIO,
-                33,
-                new CANMotorControllerOutputConfig()
-                        .withStatorCurrentLimit(Amps.of(20))
-                        .withInversionType(CANMotorControllerOutputConfig.InversionType.Inverted)
-                        .withNeutralMode(CANMotorControllerOutputConfig.NeutralMode.Brake)
-        );
-    }
 
     @Override
     public boolean areCanCodersReady() {

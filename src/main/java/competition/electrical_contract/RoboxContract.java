@@ -10,7 +10,8 @@ import static edu.wpi.first.units.Units.Amps;
 
 public class RoboxContract extends Contract2025 {
     @Inject
-    public RoboxContract() {}
+    public RoboxContract() {
+    }
 
     @Override
     public boolean isDriveReady() {
@@ -44,16 +45,8 @@ public class RoboxContract extends Contract2025 {
 
     @Override
     public CameraInfo[] getCameraInfo() {
-        return new CameraInfo[] {};
+        return new CameraInfo[]{};
     }
-
-    @Override
-    public boolean isAlgaeCollectionReady() {
-        return false;
-    }
-
-    @Override
-    public boolean isAlgaeArmPivotMotorReady() {
-        return false;
-    }
+    
 }
+

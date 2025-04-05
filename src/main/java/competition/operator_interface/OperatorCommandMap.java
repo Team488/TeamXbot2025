@@ -6,16 +6,9 @@ import competition.auto_programs.FromRightCageScoreRightFacesLevelFours;
 import competition.auto_programs.vision.LeftFourCoralAuto;
 import competition.auto_programs.vision.RightFourCoralAuto;
 import competition.commandgroups.DriveToClosestStationCommandGroupFactory;
-import competition.commandgroups.PrepAlgaeSystemCommandGroupFactory;
 import competition.commandgroups.PrepCoralSystemCommandGroupFactory;
 import competition.commandgroups.vision_path.PathDriveToLocationForCoralStationFactory;
 import competition.simulation.commands.ResetSimulatedPose;
-import competition.subsystems.algae_arm.commands.ForceAlgaeArmCalibrated;
-import competition.subsystems.algae_arm.commands.RepositionAlgaeArmDown;
-import competition.subsystems.algae_arm.commands.RepositionAlgaeArmUp;
-import competition.subsystems.algae_arm.commands.SetAlgaeArmSetpointToTargetPosition;
-import competition.subsystems.algae_collection.commands.AlgaeCollectionIntakeCommand;
-import competition.subsystems.algae_collection.commands.AlgaeCollectionOutputCommand;
 import competition.subsystems.coral_arm.CoralArmSubsystem;
 import competition.subsystems.coral_arm.commands.ForceCoralArmCalibratedCommand;
 import competition.subsystems.coral_arm.commands.SetCoralArmTargetAngleCommand;
@@ -148,14 +141,9 @@ public class OperatorCommandMap {
                                       ScoreWhenReadyCommand scoreWhenReadyCommand,
                                       ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
                                       ForceCoralArmCalibratedCommand forceCoralPivotCalibratedCommand,
-                                      ForceAlgaeArmCalibrated forceAlgaeArmCalibrated,
-                                      Provider<SetAlgaeArmSetpointToTargetPosition> setAlgaeArmProvider,
-                                      AlgaeCollectionIntakeCommand intakeAlgae,
-                                      AlgaeCollectionOutputCommand ejectAlgae,
                                       Provider<SetElevatorTargetHeightCommand> setElevatorTargetHeightCommandProvider,
                                       CoralArmSubsystem coralArmSubsystem,
                                       IntakeCoralCommand intakeCoralCommand,
-                                      PrepAlgaeSystemCommandGroupFactory prepAlgaeSystemCommandGroupFactory,
                                       IntakeAlgaeCommand intakeAlgaeCommand,
                                       ScoreAlgaeCommand scoreAlgaeCommand) {
         // Coral system buttons
@@ -173,24 +161,18 @@ public class OperatorCommandMap {
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftTrigger).whileTrue(intakeCoralCommand);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightTrigger).whileTrue(scoreCoralCommand);
 
-
-
-
-        var calibrateAlgae = Commands.parallel(
-                forceAlgaeArmCalibrated).ignoringDisable(true);
         var calibrateSuperstructure = Commands.parallel(
                 forceElevatorCalibratedCommand,
                 forceCoralPivotCalibratedCommand
         ).ignoringDisable(true);
 
-        oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightStick).onTrue(calibrateAlgae);
+
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(calibrateSuperstructure);
         // Algae system buttons
-        
+
         var removeLowAlgae = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.LOW_ALGAE);
-        
         oi.operatorGamepad.getPovIfAvailable(180).onTrue(removeLowAlgae);
-        
+
         var removeHighAlgae = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.HIGH_ALGAE);
         oi.operatorGamepad.getPovIfAvailable(0).onTrue(removeHighAlgae);
 
@@ -221,8 +203,7 @@ public class OperatorCommandMap {
             Provider<SetElevatorTargetHeightCommand> setElevatorTargetHeightCommandProvider,
             ForceElevatorCalibratedCommand forceElevatorCalibratedCommand,
             ForceCoralArmCalibratedCommand forceCoralArmCalibratedCommand,
-            RepositionAlgaeArmDown repositionAlgaeArmDown,
-            RepositionAlgaeArmUp repositionAlgaeArmUp,
+
             ToggleElevatorMotionMagicCommand toggleElevatorMotionMagicCommand) {
 
         var returnToBase = setElevatorTargetHeightCommandProvider.get();
