@@ -148,20 +148,14 @@ public class Contract2024 extends Contract2025 {
         };
     }
 
-    public DeviceInfo getLightsDio0() {
-        return new DeviceInfo("Lights0", 0);
+    @Override
+    public double getSteeringGearRatio() {
+        return 12.8; // Documented for Swerve Specialties MK4
     }
 
-    public DeviceInfo getLightsDio1() {
-        return new DeviceInfo("Lights1", 1);
-    }
-
-    public DeviceInfo getLightsDio2() {
-        return new DeviceInfo("Lights2", 2);
-    }
-
-    public DeviceInfo getLightsDio3() {
-        return new DeviceInfo("Lights3", 3);
+    @Override
+    public double getDriveGearRatio() {
+        return 6.12; // Documented value for Swerve Specialties MK4 with L3 ratio.
     }
 
     private static double aprilCameraXDisplacement = 13.153 / PoseSubsystem.INCHES_IN_A_METER;
@@ -170,13 +164,15 @@ public class Contract2024 extends Contract2025 {
     private static double aprilCameraPitch = Math.toRadians(-55.5);
     private static double aprilCameraYaw = Math.toRadians(10);
 
+    private static double rearAprilCameraPitch = Math.toRadians(0);
+    private static double rearAprilCameraYaw = Math.toRadians(180);
+
     public static String rearLeftNoteCameraName = "NoteRearLeft";
     public static String rearRightNoteCameraName = "NoteRearRight";
     public static String rearCenterNoteCameraName= "NoteRearCenter"; //TODO - one of these cameras
 
     public CameraInfo[] getCameraInfo() {
         return new CameraInfo[] {
-                /*
                 new CameraInfo("Apriltag_FrontLeft_Camera",
                         "AprilTagFrontLeft",
                         new Transform3d(new Translation3d(
@@ -192,14 +188,14 @@ public class Contract2024 extends Contract2025 {
                                 -aprilCameraYDisplacement,
                                 aprilCameraZDisplacement),
                                 new Rotation3d(0, aprilCameraPitch, -aprilCameraYaw)),
-                        EnumSet.of(CameraCapabilities.APRIL_TAG)),*/
+                        EnumSet.of(CameraCapabilities.APRIL_TAG)),
                 new CameraInfo("Apriltag_RearLeft_Camera",
                         "AprilTagRearLeft",
                         new Transform3d(new Translation3d(
                                 -aprilCameraXDisplacement,
                                 aprilCameraYDisplacement,
                                 aprilCameraZDisplacement),
-                                new Rotation3d(0, aprilCameraPitch, Math.toRadians(180) - aprilCameraYaw)),
+                                new Rotation3d(0, rearAprilCameraPitch, rearAprilCameraYaw)),
                         EnumSet.of(CameraCapabilities.APRIL_TAG)),
                 new CameraInfo("Apriltag_RearRight_Camera",
                         "AprilTagRearRight",
@@ -207,8 +203,9 @@ public class Contract2024 extends Contract2025 {
                                 -aprilCameraXDisplacement,
                                 -aprilCameraYDisplacement,
                                 aprilCameraZDisplacement),
-                                new Rotation3d(0, aprilCameraPitch, Math.toRadians(180) + aprilCameraYaw)),
-                        EnumSet.of(CameraCapabilities.APRIL_TAG))/*,
+                                new Rotation3d(0, rearAprilCameraPitch, rearAprilCameraYaw)),
+                        EnumSet.of(CameraCapabilities.APRIL_TAG))
+                        /* ,
                 new CameraInfo("GamePiece_FrontLeft_Camera",
                         rearCenterNoteCameraName,
                         new Transform3d(new Translation3d(), new Rotation3d()),
@@ -227,4 +224,7 @@ public class Contract2024 extends Contract2025 {
                         EnumSet.of(CameraCapabilities.GAME_SPECIFIC))*/
         };
     }
+
+    @Override
+    public boolean isDeadWheelOdometryReady() { return false; }
 }

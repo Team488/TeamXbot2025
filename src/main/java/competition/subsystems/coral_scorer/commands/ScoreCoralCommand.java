@@ -2,7 +2,6 @@ package competition.subsystems.coral_scorer.commands;
 
 import competition.subsystems.coral_scorer.CoralScorerSubsystem;
 import xbot.common.command.BaseCommand;
-import xbot.common.properties.DoubleProperty;
 
 import javax.inject.Inject;
 
@@ -17,6 +16,11 @@ public class ScoreCoralCommand extends BaseCommand {
 
     @Override
     public void initialize() {
-        coral.scorer();
+        coral.setCoralScorerState(CoralScorerSubsystem.CoralScorerState.SCORING_CORAL);
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        coral.setCoralScorerState(CoralScorerSubsystem.CoralScorerState.STOPPED);
     }
 }

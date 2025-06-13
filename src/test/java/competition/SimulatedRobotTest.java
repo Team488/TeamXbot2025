@@ -2,10 +2,12 @@ package competition;
 
 import competition.electrical_contract.UnitTestContract2025;
 import edu.wpi.first.wpilibj.RobotBase;
+import org.apache.logging.log4j.LogManager;
 import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -20,11 +22,14 @@ public class SimulatedRobotTest {
             robotThread.start();
 
             try {
-                var passDisabledInit = robot.reachedDisabledInit.tryAcquire(5, TimeUnit.SECONDS);
-                assertTrue("Robot did not reach disabled init", passDisabledInit);
+                var passDisabledInit = robot.reachedDisabledInit.await(5, TimeUnit.SECONDS);
+                assertTrue("Robot did not reach disabled init. Exception: " + robot.initException, passDisabledInit);
 
-                var passDisabledPeriodic = robot.reachedDisabledPeriodic.tryAcquire(5, TimeUnit.SECONDS);
-                assertTrue("Robot did not reach disabled periodic", passDisabledPeriodic);
+                var passExecutionLoops = robot.reachedEndOfLoop.await(5, TimeUnit.SECONDS);
+                assertTrue("Robot did not complete enough execution loops. Scheduler exception: "
+                        + robot.getScheduler().getLastException(), passExecutionLoops);
+
+                assertEquals(0, robot.getScheduler().getNumberOfCrashes());
             } catch (InterruptedException e) {
                 fail("Robot test was interrupted");
             } finally {

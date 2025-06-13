@@ -1,6 +1,6 @@
 package competition.subsystems.coral_scorer.commands;
 
-import competition.subsystems.coral_arm_pivot.CoralArmPivotSubsystem;
+import competition.subsystems.coral_arm.CoralArmSubsystem;
 import competition.subsystems.coral_scorer.CoralScorerSubsystem;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import xbot.common.command.BaseCommand;
@@ -9,14 +9,14 @@ import javax.inject.Inject;
 
 public class ScoreWhenReadyCommand extends BaseCommand {
     CoralScorerSubsystem coralScorerSubsystem;
-    CoralArmPivotSubsystem armPivotSubsystem;
+    CoralArmSubsystem coralArmSubsystem;
     ElevatorSubsystem elevatorSubsystem;
 
     @Inject
-    public ScoreWhenReadyCommand(CoralScorerSubsystem coralScorerSubsystem, CoralArmPivotSubsystem armPivotSubsystem,
+    public ScoreWhenReadyCommand(CoralScorerSubsystem coralScorerSubsystem, CoralArmSubsystem coralArmSubsystem,
                                  ElevatorSubsystem elevatorSubsystem) {
         this.coralScorerSubsystem = coralScorerSubsystem;
-        this.armPivotSubsystem = armPivotSubsystem;
+        this.coralArmSubsystem = coralArmSubsystem;
         this.elevatorSubsystem = elevatorSubsystem;
         addRequirements(coralScorerSubsystem);
     }
@@ -28,10 +28,16 @@ public class ScoreWhenReadyCommand extends BaseCommand {
 
     @Override
     public void execute() {
-        if (coralScorerSubsystem.hasCoral() && armPivotSubsystem.getIsTargetAngleScoring()
-                && armPivotSubsystem.isMaintainerAtGoal() && elevatorSubsystem.isMaintainerAtGoal()) {
-            coralScorerSubsystem.scorer();
+        var hasCoral = coralScorerSubsystem.hasCoral();
+        var getIsTargetAngleScoring = coralArmSubsystem.getIsTargetAngleScoring();
+        var armMaintainerAtGoal = coralArmSubsystem.isMaintainerAtGoal();
+        var elevatorMaintainerAtGoal = elevatorSubsystem.isMaintainerAtGoal();
+        if (hasCoral && getIsTargetAngleScoring && armMaintainerAtGoal && elevatorMaintainerAtGoal) {
+            coralScorerSubsystem.setCoralScorerState(CoralScorerSubsystem.CoralScorerState.SCORING_CORAL);
         }
+        aKitLog.record("isTargetAngleScoring", getIsTargetAngleScoring);
+        aKitLog.record("armPrepped", armMaintainerAtGoal);
+        aKitLog.record("elevatorPrepped", elevatorMaintainerAtGoal);
     }
 
     @Override

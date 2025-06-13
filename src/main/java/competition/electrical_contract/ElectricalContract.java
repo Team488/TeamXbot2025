@@ -1,15 +1,18 @@
 package competition.electrical_contract;
 
+import static edu.wpi.first.units.Units.Meters;
 import edu.wpi.first.units.measure.Distance;
-import xbot.common.controls.sensors.XDigitalInput;
 import xbot.common.injection.electrical_contract.CANMotorControllerInfo;
 import xbot.common.injection.electrical_contract.DeviceInfo;
+import xbot.common.injection.electrical_contract.IMUInfo;
 import xbot.common.injection.electrical_contract.XCameraElectricalContract;
+import xbot.common.injection.electrical_contract.XDeadwheelElectricalContract;
 import xbot.common.injection.electrical_contract.XSwerveDriveElectricalContract;
 import xbot.common.injection.swerve.SwerveInstance;
 import xbot.common.math.XYPair;
 
-public abstract class ElectricalContract implements XSwerveDriveElectricalContract, XCameraElectricalContract {
+public abstract class ElectricalContract implements XSwerveDriveElectricalContract, XCameraElectricalContract,
+        XDeadwheelElectricalContract {
 
     public abstract boolean isDriveReady();
 
@@ -23,6 +26,10 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
 
     public abstract XYPair getSwerveModuleOffsetsInInches(SwerveInstance swerveInstance);
 
+    public abstract IMUInfo getNavXGyroInfo();
+
+    public abstract IMUInfo getPigeon2GyroInfo();
+
     public abstract boolean isElevatorReady();
 
     public abstract CANMotorControllerInfo getElevatorMotor();
@@ -31,15 +38,11 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
 
     public abstract DeviceInfo getElevatorDistanceSensor();
 
-    public abstract boolean isAlgaeCollectionReady();
-
-    public abstract CANMotorControllerInfo getAlgaeCollectionMotor();
-
     public abstract boolean isCoralCollectionMotorReady();
 
     public abstract CANMotorControllerInfo getCoralCollectionMotor();
 
-    public abstract boolean isCoralArmPivotMotorReady();
+    public abstract boolean isCoralArmMotorReady();
 
     public abstract CANMotorControllerInfo getCoralArmPivotMotor();
 
@@ -47,24 +50,37 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
 
     public abstract DeviceInfo getCoralArmPivotAbsoluteEncoder();
 
-    public abstract boolean isCoralArmPivotLowSensorReady();
+    public abstract boolean isCoralArmLowSensorReady();
 
-    public abstract DeviceInfo getCoralArmPivotLowSensor();
+    public abstract DeviceInfo getCoralArmLowSensor();
 
-    public abstract boolean isCoralSensorReady();
+    public abstract boolean isCoralScorerSensorReady();
 
-    public abstract DeviceInfo getCoralSensor();
+    public abstract DeviceInfo getCoralScorerSensor();
 
     public abstract boolean isElevatorBottomSensorReady();
 
     public abstract DeviceInfo getElevatorBottomSensor();
 
     public abstract boolean isHumanLoadRampReady();
-
-    public abstract CANMotorControllerInfo getAlgaeArmPivotMotor();
-
-    public abstract boolean isAlgaeArmPivotMotorReady();
-
+    
     public abstract Distance getDistanceFromCenterToOuterBumperX();
 
+    public Distance getRadiusOfRobot() {
+        var distanceToOuterBumerInMeters = this.getDistanceFromCenterToOuterBumperX().in(Meters);
+        return Meters.of(Math.sqrt(Math.pow(distanceToOuterBumerInMeters, 2.0) * 2.0));
+    }
+
+    public Distance getDiagonalDistanceDifferenceOfRobotRadius() {
+        return getRadiusOfRobot().minus(this.getDistanceFromCenterToOuterBumperX());
+    }
+
+    public abstract DeviceInfo getLightsDio0();
+
+    public abstract DeviceInfo getLightsDio1();
+
+    public abstract DeviceInfo getLightsDio2();
+
+    public abstract DeviceInfo getLightsDio3();
+    public abstract boolean isDeadWheelOdometryReady();
 }

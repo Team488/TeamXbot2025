@@ -6,11 +6,21 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import competition.electrical_contract.ElectricalContract;
+import competition.subsystems.coral_arm.CoralArmSubsystem;
 import competition.subsystems.coral_scorer.CoralScorerSubsystem;
+import competition.subsystems.drive.logic.AlignCameraToAprilTagCalculator;
+import competition.subsystems.elevator.ElevatorSubsystem;
+import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import edu.wpi.first.wpilibj.DriverStation;
 import xbot.common.command.BaseSubsystem;
+import xbot.common.controls.actuators.XDigitalOutput;
 import xbot.common.controls.actuators.XDigitalOutput.XDigitalOutputFactory;
+import xbot.common.controls.sensors.XTimer;
+import xbot.common.properties.DoubleProperty;
+import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.autonomous.AutonomousCommandSelector;
+
+import java.util.Objects;
 
 
 @Singleton
@@ -21,16 +31,52 @@ public class LightSubsystem extends BaseSubsystem {
 
     final AutonomousCommandSelector autonomousCommandSelector;
     final CoralScorerSubsystem coralScorerSubsystem;
+    final CoralArmSubsystem coralArmSubsystem;
+    final ElevatorSubsystem elevatorSubsystem;
+    final AprilTagVisionSubsystemExtended visionSubsystem;
+    private AlignCameraToAprilTagCalculator.Activity activity;
+    private int targetCameraID;
+    private boolean recentlyAligned;
+    private double lastStateTime = -1;
+    private boolean isLastStateTimeSet = false;
+    private DoubleProperty delayTime;
+    LightsStateMessage state = LightsStateMessage.NoCode;
+    DIOInt dioInt;
 
     public enum LightsStateMessage{
         // we never send NoCode, it's implicit when the robot is off
         // and all of the DIOs float high
-        NoCode(maxValue), 
-        RobotDisabled(1),
-        RobotEnabled(2),
-        CoralPresent(3),
-        RequestCoralFromHuman(4),
-        ReadyToScore(5);
+        NoCode(15),
+        RobotDisabledDefault(1),
+        RobotDisabledAuto(2),
+        RobotEnabled(3),
+        CoralPresent(4),
+        RequestCoralFromHuman(5),
+        Victory(6), 
+        //ReadyToScore(7),
+        DisabledCameraUnavailable(8),
+        TargetCameraUnavailable(9),
+        CurrentlyAligning(10),
+        FinishedAligning(11),
+        CreeperActive(12),
+        NoCoralPresent(13);
+
+    
+    
+        // CoralReset(101),
+        // AlgaeDrop(7),
+        // AlgaeGrab(8),
+        // AlgaePush(9),
+        // Auto1(10),
+        // Auto2(11),
+        // Auto3(12),
+        // HangDeep(13),
+        // HangShallow(14),
+        // ElevatorFinish(15),
+        // ElevatorRaise2(16),
+        // ElevatorRaise3(17),
+        // ElevatorRaise4(18),
+        // StartPosition(20);
 
         LightsStateMessage(final int value) {
             if(value > maxValue || value < 0) {
@@ -64,9 +110,24 @@ public class LightSubsystem extends BaseSubsystem {
     public LightSubsystem(XDigitalOutputFactory digitalOutputFactory,
                           ElectricalContract contract,
                           AutonomousCommandSelector autonomousCommandSelector,
-                          CoralScorerSubsystem coralScorerSubsystem) {
+                          CoralScorerSubsystem coralScorerSubsystem,
+                          CoralArmSubsystem coralArmSubsystem,
+                          ElevatorSubsystem elevatorSubsystem,
+                          AprilTagVisionSubsystemExtended visionSubsystem,
+                          PropertyFactory pf) {
+        pf.setPrefix(this);
         this.autonomousCommandSelector = autonomousCommandSelector;
         this.coralScorerSubsystem = coralScorerSubsystem;
+        this.coralArmSubsystem = coralArmSubsystem;
+        this.elevatorSubsystem = elevatorSubsystem;
+        this.visionSubsystem = visionSubsystem;
+        XDigitalOutput[] dios = {
+            digitalOutputFactory.create(contract.getLightsDio0().channel),
+            digitalOutputFactory.create(contract.getLightsDio1().channel), 
+            digitalOutputFactory.create(contract.getLightsDio2().channel), 
+            digitalOutputFactory.create(contract.getLightsDio3().channel)};
+        this.dioInt = new DIOInt(dios);
+        this.delayTime = pf.createPersistentProperty("Light State Time Active", 2);
     }
 
     public LightsStateMessage getCurrentState() {
@@ -76,46 +137,110 @@ public class LightSubsystem extends BaseSubsystem {
         // Needs to implement vision as well
         // Not sure about if the way we are checking the shooter is correct (and collector)
         if (!dsEnabled) {
-            currentState = LightsStateMessage.RobotDisabled;
-        } else if (coralScorerSubsystem.confidentlyHasCoral()) {
-            currentState = LightsStateMessage.CoralPresent;
-        } else if (coralScorerSubsystem.getCoralScorerState() == CoralScorerSubsystem.CoralScorerState.INTAKING) {
-            currentState = LightsStateMessage.RequestCoralFromHuman;
+            if (!visionSubsystem.areAllCamerasConnected()) {
+                currentState = LightsStateMessage.DisabledCameraUnavailable;
+            } else if (!Objects.equals(autonomousCommandSelector.getProgramName(), "EmergencyAutonomousCommand")) {
+                currentState = LightsStateMessage.RobotDisabledAuto;
+            } else {
+                currentState = LightsStateMessage.RobotDisabledDefault;
+            }
         } else {
-            currentState = LightsStateMessage.RobotEnabled;
+            if (activity == AlignCameraToAprilTagCalculator.Activity.TerminalApproach) {
+                if (!visionSubsystem.isCameraConnected(targetCameraID)) {
+                    currentState = LightsStateMessage.TargetCameraUnavailable;
+                } else {
+                    currentState = LightsStateMessage.CurrentlyAligning;
+                    recentlyAligned = true;
+                }
+            } else if (activity == AlignCameraToAprilTagCalculator.Activity.Complete && recentlyAligned) {
+                currentState = LightsStateMessage.FinishedAligning;
+
+                if (!isLastStateTimeSet) {
+                    lastStateTime = XTimer.getFPGATimestamp();
+                    isLastStateTimeSet = true;
+                }
+
+                if (XTimer.getFPGATimestamp() - lastStateTime >= delayTime.get()) {
+                    recentlyAligned = false;
+                    isLastStateTimeSet = false;
+                }
+            } else if (coralScorerSubsystem.getCoralScorerState() == CoralScorerSubsystem.CoralScorerState.INTAKING_CORAL) {
+                currentState = LightsStateMessage.RequestCoralFromHuman;
+            } else if (!coralScorerSubsystem.confidentlyHasCoral()) {
+                currentState = LightsStateMessage.NoCoralPresent;
+            } else if (coralScorerSubsystem.confidentlyHasCoral()) {
+                currentState = LightsStateMessage.CoralPresent;
+            } else {
+                currentState = LightsStateMessage.RobotEnabled;
+            }
         }
         return currentState;
     }
-
     public void sendState(LightsStateMessage state) {
-        var bits = convertIntToBits(state.getValue());
-        // TODO: decide on how communication will actually happen
+        dioInt.setDIOInt(state.getValue());
     }
 
-    /**
-     * Convert an integer to a boolean array representing the bits of the integer.
-     * The leftmost bit in the result is the least significant bit of the integer.
-     * This was chosen so we could add new bits onto the end of the array easily without changing
-     * how earlier numbers were represented.
-     * Eg: 
-     * 0 -> [false, false, false, false]
-     * 1 -> [true, false, false, false]
-     * 14 -> [false, true, true, true]
-     * 15 -> [true, true, true, true]
-     */
-    public static boolean[] convertIntToBits(int value) {
-        boolean[] bits = new boolean[numBits];
-        for(int i = 0; i < numBits; i++) {
-            bits[i] = (value & (1 << i)) != 0;
-        }
-        return bits;
+    public LightsStateMessage getState() {
+        return state;
+    }
+
+    public void updateFromCalculator(AlignCameraToAprilTagCalculator.Activity activity, int targetCameraID) {
+        this.activity = activity;
+        this.targetCameraID = targetCameraID;
     }
 
     @Override
     public void periodic() {
-        var currentState = getCurrentState();
-        aKitLog.record("LightState", currentState.toString());
-        sendState(currentState);
+        this.state = getCurrentState();
+        sendState(state);
 
-    }  
+        aKitLog.record("LightState", state.toString());
+    }
+    
+    protected class DIOInt {
+        private XDigitalOutput[] dios;
+        private static int numDios;
+
+        public DIOInt(XDigitalOutput[] dios) {
+            this.dios = dios;
+            numDios = dios.length;
+        }
+
+        /**
+         * Convert an integer to a boolean array representing the bits of the integer.
+         * The leftmost bit in the result is the least significant bit of the integer.
+         * This was chosen so we could add new bits onto the end of the array easily without changing
+         * how earlier numbers were represented.
+         * Eg: 
+         * 0 -> [false, false, false, false]
+         * 1 -> [true, false, false, false]
+         * 14 -> [false, true, true, true]
+         * 15 -> [true, true, true, true]
+         */
+        private static boolean[] convertIntToBits(int value) {
+            boolean[] bits = new boolean[numDios];
+            for(int i = 0; i < numDios; i++) {
+                bits[i] = (value & (1 << i)) != 0;
+            }
+            return bits;
+        }
+
+        public void setDIOInt(int num) {
+            boolean[] bitsToSet = convertIntToBits(num);
+
+            for(int i = 0; i < numDios; i++) {
+                dios[i].set(bitsToSet[i]);
+            }
+        }
+
+        public int getDIOInt() {
+            int value = 0;
+            
+            for (int i = 0; i < numDios; i++) {
+                value += dios[i].get() ? (1L << i) : 0L;
+            }
+
+            return value;
+        }
+    }
 }

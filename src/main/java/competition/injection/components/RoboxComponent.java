@@ -1,7 +1,6 @@
 package competition.injection.components;
 
-import competition.injection.modules.CommonBinderModule;
-import competition.injection.modules.CommonProviderModule;
+import competition.injection.modules.CommonModule;
 import competition.injection.modules.RoboxModule;
 import dagger.Component;
 import xbot.common.injection.modules.RealControlsModule;
@@ -12,7 +11,7 @@ import javax.inject.Singleton;
 
 @Singleton
 @Component(modules = { RobotModule.class, RealDevicesModule.class, RealControlsModule.class,
-        RoboxModule.class, CommonProviderModule.class, CommonBinderModule.class})
+        RoboxModule.class, CommonModule.class})
 public abstract class RoboxComponent extends BaseRobotComponent {
     
 }

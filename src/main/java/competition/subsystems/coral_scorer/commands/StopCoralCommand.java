@@ -16,6 +16,6 @@ public class StopCoralCommand extends BaseCommand {
 
     @Override
     public void initialize() {
-        coral.stop();
+        coral.setCoralScorerState(CoralScorerSubsystem.CoralScorerState.STOPPED);
     }
 }

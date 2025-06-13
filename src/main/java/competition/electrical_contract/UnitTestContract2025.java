@@ -13,13 +13,14 @@ public class UnitTestContract2025 extends Contract2025 {
 
     public boolean isCoralCollectionMotorReady() { return true; }
 
-    public boolean isCoralSensorReady() { return true;}
+    public boolean isCoralScorerSensorReady() { return true;}
 
-    public boolean isCoralArmPivotMotorReady() { return true; }
+    public boolean isCoralArmMotorReady() { return true; }
 
-    public boolean isCoralArmPivotAbsoluteEncoderReady() { return true; }
+    // we don't have plans to have this sensor on the robot
+    public boolean isCoralArmPivotAbsoluteEncoderReady() { return false; }
 
-    public boolean isCoralArmPivotLowSensorReady() { return true; }
+    public boolean isCoralArmLowSensorReady() { return true; }
 
     public boolean isElevatorReady() { return true;}
 
@@ -32,7 +33,10 @@ public class UnitTestContract2025 extends Contract2025 {
 
     public boolean isElevatorBottomSensorReady() { return true; }
 
+    public boolean isAlgaeArmBottomSensorReady() { return true; }
+
     public boolean isAlgaeArmPivotMotorReady() { return true; }
 
     public boolean isElevatorDistanceSensorReady() { return true ; }
+
 }

@@ -2,14 +2,20 @@ package competition.injection.components;
 
 import competition.electrical_contract.ElectricalContract;
 import competition.motion.TrapezoidProfileManager;
+import competition.operator_interface.NeoTrellisSubsystem;
 import competition.operator_interface.OperatorCommandMap;
+import competition.operator_interface.OperatorInterface;
 import competition.simulation.BaseSimulator;
 import competition.subsystems.SubsystemDefaultCommandMap;
-import competition.subsystems.coral_arm_pivot.CoralArmPivotSubsystem;
+import competition.subsystems.coral_arm.CoralArmSubsystem;
 import competition.subsystems.coral_scorer.CoralScorerSubsystem;
+import competition.subsystems.drive.commands.AlignToNearestCoralStationCommand;
+import competition.subsystems.drive.commands.EmergencyAutonomousCommand;
+import competition.subsystems.deadwheel.DeadWheelSubsystem;
 import competition.subsystems.elevator.ElevatorSubsystem;
-import competition.subsystems.oracle.OracleSubsystem;
 import competition.subsystems.oracle.ReefCoordinateGenerator;
+import competition.subsystems.oracle.ScoringQueue;
+import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import competition.subsystems.elevator_mechanism.SuperstructureMechanismSubsystem;
 import competition.subsystems.lights.LightSubsystem;
@@ -17,8 +23,12 @@ import competition.subsystems.vision.CoprocessorCommunicationSubsystem;
 import xbot.common.injection.components.BaseComponent;
 import xbot.common.injection.swerve.SwerveComponentHolder;
 import xbot.common.subsystems.drive.swerve.SwerveDefaultCommandMap;
+import xbot.common.subsystems.pose.GameField;
 
 public abstract class BaseRobotComponent extends BaseComponent {
+    @Override
+    public abstract PoseSubsystem poseSubsystem();
+
     public abstract SubsystemDefaultCommandMap subsystemDefaultCommandMap();
 
     public abstract OperatorCommandMap operatorCommandMap();
@@ -33,15 +43,13 @@ public abstract class BaseRobotComponent extends BaseComponent {
 
     public abstract BaseSimulator simulator();
 
-    public abstract CoralArmPivotSubsystem armPivotSubsystem();
+    public abstract CoralArmSubsystem armPivotSubsystem();
 
     public abstract ElevatorSubsystem elevatorSubsystem();
 
     public abstract CoralScorerSubsystem coralScorerSubsystem();
 
     public abstract SuperstructureMechanismSubsystem superstructureMechanismSubsystem();
-
-    public abstract OracleSubsystem oracleSubsystem();
 
     public abstract ElectricalContract electricalContract();
 
@@ -50,4 +58,20 @@ public abstract class BaseRobotComponent extends BaseComponent {
     public abstract LightSubsystem lightSubsystem();
 
     public abstract TrapezoidProfileManager.Factory trapezoidProfileManagerFactory();
+
+    public abstract NeoTrellisSubsystem neoTrellisSubsystem();
+
+    public abstract OperatorInterface operatorInterface();
+
+    public abstract ScoringQueue scoringQueue();
+
+    public abstract GameField gameField();
+
+    public abstract CoralArmSubsystem coralArmSubsystem();
+
+    public abstract EmergencyAutonomousCommand emergencyAutonomousCommand();
+
+    public abstract AlignToNearestCoralStationCommand alignToNearestCoralStationCommand();
+
+    public abstract DeadWheelSubsystem deadWheelSubsystem();
 }

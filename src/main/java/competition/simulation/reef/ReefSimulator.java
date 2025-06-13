@@ -13,6 +13,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import competition.subsystems.pose.Landmarks;
+import competition.subsystems.pose.PoseSubsystem;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -23,6 +25,10 @@ import xbot.common.advantage.AKitLogger;
 
 @Singleton
 public class ReefSimulator {
+    enum Alliance {
+        RED, BLUE
+    }
+
     enum ReefFace {
         FAR, FAR_LEFT, FAR_RIGHT, CLOSE, CLOSE_LEFT, CLOSE_RIGHT
     }
@@ -35,11 +41,9 @@ public class ReefSimulator {
         A, B
     }
 
-    record ReefCoralKey(ReefFace face, ReefLevel level, ReefPost post) {
-    }
+    record ReefCoralKey(Alliance alliance, ReefFace face, ReefLevel level, ReefPost post) {}
 
-    record ReefAlgaeKey(ReefFace face, ReefLevel level) {
-    }
+    record ReefAlgaeKey(Alliance alliance, ReefFace face, ReefLevel level) {}
 
     final AKitLogger aKitLog;
     public static final Translation2d reefCenter = Landmarks.BlueCenterOfReef.getTranslation();
@@ -64,10 +68,12 @@ public class ReefSimulator {
     public void fillReefWithCoral() {
         // for debugging positions
         // enumerate faces, levels and posts
-        for (ReefFace face : ReefFace.values()) {
-            for (ReefLevel level : ReefLevel.values()) {
-                for (ReefPost post : ReefPost.values()) {
-                    reefCoralLocations.add(new ReefCoralKey(face, level, post));
+        for (Alliance alliance : Alliance.values()) {
+            for (ReefFace face : ReefFace.values()) {
+                for (ReefLevel level : ReefLevel.values()) {
+                    for (ReefPost post : ReefPost.values()) {
+                        reefCoralLocations.add(new ReefCoralKey(alliance, face, level, post));
+                    }
                 }
             }
         }
@@ -75,15 +81,17 @@ public class ReefSimulator {
 
     public ReefCoralKey findNearestCoral(Translation3d scorerPose) {
         var coralDistanceMap = new HashMap<ReefCoralKey, Distance>();
-        for (ReefFace face : ReefFace.values()) {
-            for (ReefLevel level : ReefLevel.values()) {
-                for (ReefPost post : ReefPost.values()) {
-                    var key = new ReefCoralKey(face, level, post);
-                    // TODO: consider some logic to ignore locations that already have coral on them
-                    // or otherwise cause the coral to drop to the floor if that happens?
-                    var pose = getCoralPose(key.face, key.level, key.post);
-                    var distance = Meters.of(scorerPose.getDistance(pose.getTranslation()));
-                    coralDistanceMap.put(key, distance);
+        for (Alliance alliance : Alliance.values()) {
+            for (ReefFace face : ReefFace.values()) {
+                for (ReefLevel level : ReefLevel.values()) {
+                    for (ReefPost post : ReefPost.values()) {
+                        var key = new ReefCoralKey(alliance, face, level, post);
+                        // TODO: consider some logic to ignore locations that already have coral on them
+                        // or otherwise cause the coral to drop to the floor if that happens?
+                        var pose = getCoralPose(key.alliance, key.face, key.level, key.post);
+                        var distance = Meters.of(scorerPose.getDistance(pose.getTranslation()));
+                        coralDistanceMap.put(key, distance);
+                    }
                 }
             }
         }
@@ -97,6 +105,7 @@ public class ReefSimulator {
 
     public void scoreCoral(ReefCoralKey coral) {
         reefCoralLocations.add(coral);
+        System.out.println("Scoring coral at " + coral);
     }
 
     public boolean isCoralScored(ReefCoralKey coral) {
@@ -113,25 +122,32 @@ public class ReefSimulator {
         reefCoralLocations.clear();
         reefAlgaeLocations.clear();
         // populate algae locations with where algae starts
-        reefAlgaeLocations.add(new ReefAlgaeKey(ReefFace.CLOSE, ReefLevel.LEVEL_3));
-        reefAlgaeLocations.add(new ReefAlgaeKey(ReefFace.CLOSE_LEFT, ReefLevel.LEVEL_2));
-        reefAlgaeLocations.add(new ReefAlgaeKey(ReefFace.CLOSE_RIGHT, ReefLevel.LEVEL_2));
-        reefAlgaeLocations.add(new ReefAlgaeKey(ReefFace.FAR_LEFT, ReefLevel.LEVEL_3));
-        reefAlgaeLocations.add(new ReefAlgaeKey(ReefFace.FAR_RIGHT, ReefLevel.LEVEL_3));
-        reefAlgaeLocations.add(new ReefAlgaeKey(ReefFace.FAR, ReefLevel.LEVEL_2));
+        reefAlgaeLocations.add(new ReefAlgaeKey(Alliance.BLUE, ReefFace.CLOSE, ReefLevel.LEVEL_3));
+        reefAlgaeLocations.add(new ReefAlgaeKey(Alliance.BLUE, ReefFace.CLOSE_LEFT, ReefLevel.LEVEL_2));
+        reefAlgaeLocations.add(new ReefAlgaeKey(Alliance.BLUE, ReefFace.CLOSE_RIGHT, ReefLevel.LEVEL_2));
+        reefAlgaeLocations.add(new ReefAlgaeKey(Alliance.BLUE, ReefFace.FAR_LEFT, ReefLevel.LEVEL_3));
+        reefAlgaeLocations.add(new ReefAlgaeKey(Alliance.BLUE, ReefFace.FAR_RIGHT, ReefLevel.LEVEL_3));
+        reefAlgaeLocations.add(new ReefAlgaeKey(Alliance.BLUE, ReefFace.FAR, ReefLevel.LEVEL_2));
+
+        reefAlgaeLocations.add(new ReefAlgaeKey(Alliance.RED, ReefFace.CLOSE, ReefLevel.LEVEL_3));
+        reefAlgaeLocations.add(new ReefAlgaeKey(Alliance.RED, ReefFace.CLOSE_LEFT, ReefLevel.LEVEL_2));
+        reefAlgaeLocations.add(new ReefAlgaeKey(Alliance.RED, ReefFace.CLOSE_RIGHT, ReefLevel.LEVEL_2));
+        reefAlgaeLocations.add(new ReefAlgaeKey(Alliance.RED, ReefFace.FAR_LEFT, ReefLevel.LEVEL_3));
+        reefAlgaeLocations.add(new ReefAlgaeKey(Alliance.RED, ReefFace.FAR_RIGHT, ReefLevel.LEVEL_3));
+        reefAlgaeLocations.add(new ReefAlgaeKey(Alliance.RED, ReefFace.FAR, ReefLevel.LEVEL_2));
     }
 
     public Pose3d[] getCoralPoses() {
         return reefCoralLocations.stream()
-                .map(coralLocation -> getCoralPose(coralLocation.face(), coralLocation.level(), coralLocation.post()))
+                .map(this::getCoralPose)
                 .toArray(Pose3d[]::new);
     }
 
     public Pose3d getCoralPose(ReefCoralKey key) {
-        return getCoralPose(key.face, key.level, key.post);
+        return getCoralPose(key.alliance, key.face, key.level, key.post);
     }
 
-    public Pose3d getCoralPose(ReefFace face, ReefLevel level, ReefPost post) {
+    public Pose3d getCoralPose(Alliance alliance, ReefFace face, ReefLevel level, ReefPost post) {
         // given a reef face, level, and post, return a Pose3d for where that piece of
         // coral is stuck on the reef
         var rotation = getRotationFromFarFace(face);
@@ -145,7 +161,8 @@ public class ReefSimulator {
             default -> new Translation2d();
         };
         var reefCenterToFarPost = reefCenterToFar.plus(level4Adjustment).plus(postTranslation);
-        var algaeTranslation = reefCenterToFarPost.rotateBy(rotation).plus(reefCenter);
+        var adjustedReefCenter = alliance == Alliance.RED ? PoseSubsystem.convertBlueToRed(reefCenter) : reefCenter;
+        var algaeTranslation = reefCenterToFarPost.rotateBy(rotation).plus(adjustedReefCenter);
 
         var z = switch (level) {
             case LEVEL_1 -> 0.5;
@@ -169,7 +186,14 @@ public class ReefSimulator {
 
     public Pose3d[] getAlgaePoses() {
         return reefAlgaeLocations.stream()
-                .map(algaeLocation -> getAlgaePose(algaeLocation.face(), algaeLocation.level()))
+                .map(algaeLocation -> {
+                    Pose3d originalPose = getAlgaePose(algaeLocation.alliance, algaeLocation.face(), algaeLocation.level());
+                    Pose2d pose = originalPose.toPose2d();
+                    if (algaeLocation.alliance() == Alliance.RED) {
+                        pose = PoseSubsystem.convertBluetoRed(pose);
+                    }
+                    return new Pose3d(pose.getX(), pose.getY(), originalPose.getZ(), new Rotation3d());
+                })
                 .toArray(Pose3d[]::new);
     }
 
@@ -186,13 +210,14 @@ public class ReefSimulator {
         return rotation;
     }
 
-    public Pose3d getAlgaePose(ReefFace face, ReefLevel level) {
+    public Pose3d getAlgaePose(Alliance alliance, ReefFace face, ReefLevel level) {
         // given a reef face and level, return a Pose3d for where that piece of
         // algae is stuck on the reef
         // TODO: this number isn't right, update it
 
         var rotation = getRotationFromFarFace(face);
-        var algaeTranslation = reefCenterToFar.rotateBy(rotation).plus(reefCenter);
+        var adjustedReefCenter = alliance == Alliance.RED ? PoseSubsystem.convertBlueToRed(reefCenter) : reefCenter;
+        var algaeTranslation = reefCenterToFar.rotateBy(rotation).plus(adjustedReefCenter);
 
         var z = switch (level) {
             case LEVEL_1 -> throw new IllegalArgumentException("Algae can't be on level 1");
@@ -202,5 +227,4 @@ public class ReefSimulator {
         };
         return new Pose3d(new Translation3d(algaeTranslation.getX(), algaeTranslation.getY(), z), new Rotation3d());
     }
-
 }

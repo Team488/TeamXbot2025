@@ -1,15 +1,13 @@
 package competition.commandgroups;
 
-import competition.subsystems.coral_arm_pivot.CoralArmPivotSubsystem;
-import competition.subsystems.coral_arm_pivot.commands.SetCoralArmTargetAngleCommand;
-import competition.subsystems.elevator.ElevatorSubsystem;
+import competition.subsystems.coral_arm.commands.SetCoralArmTargetAngleCommand;
 import competition.subsystems.elevator.commands.SetElevatorTargetHeightCommand;
 import competition.subsystems.pose.Landmarks;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import java.util.function.Supplier;
 
 public class PrepCoralSystemCommandGroupFactory {
 
@@ -24,13 +22,14 @@ public class PrepCoralSystemCommandGroupFactory {
         this.setCoralArmTargetAngleCommandProvider = setCoralArmTargetAngleCommandProvider;
     }
 
-    public ParallelCommandGroup create(Landmarks.CoralLevel coralGoal) {
+    public ParallelCommandGroup create(Supplier<Landmarks.CoralLevel> coralLevelSupplier) {
         var group = new ParallelCommandGroup();
+        group.setName("PrepCoralSystemCommandGroup");
 
         var setElevatorTargetHeightCommand = setElevatorTargetHeightCommandProvider.get();
-        setElevatorTargetHeightCommand.setHeight(coralGoal);
+        setElevatorTargetHeightCommand.setHeightSupplier(coralLevelSupplier);
         var setCoralArmTargetAngleCommand = setCoralArmTargetAngleCommandProvider.get();
-        setCoralArmTargetAngleCommand.setAngle(coralGoal);
+        setCoralArmTargetAngleCommand.setAngleSupplier(coralLevelSupplier);
 
         group.addCommands(setElevatorTargetHeightCommand, setCoralArmTargetAngleCommand);
 

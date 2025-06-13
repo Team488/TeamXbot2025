@@ -3,11 +3,13 @@ package competition.operator_interface;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import xbot.common.controls.sensors.XJoystick;
 import xbot.common.controls.sensors.XXboxController;
 import xbot.common.controls.sensors.XXboxController.XXboxControllerFactory;
 import xbot.common.logging.RobotAssertionManager;
 import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
+import xbot.common.properties.Property.PropertyLevel;
 
 /**
  * This class is the glue that binds the controls on the physical operator interface to the commands and command groups
@@ -17,7 +19,7 @@ import xbot.common.properties.PropertyFactory;
 public class OperatorInterface {
     public final XXboxController driverGamepad;
     public final XXboxController operatorGamepad;
-    public final XXboxController neoTrellis;
+    public final XJoystick neoTrellis;
     public final XXboxController oiPanel;
     public final XXboxController superstructureGamepad;
     public final XXboxController algaeAndSysIdGamepad;
@@ -25,11 +27,17 @@ public class OperatorInterface {
     final DoubleProperty driverDeadband;
     final DoubleProperty operatorDeadband;
     final DoubleProperty algaeArmDeadband;
+    final DoubleProperty driverGamePadRumblePrefrence;
+    final DoubleProperty operatorGamePadRumblePrefrence;
 
 
 
     @Inject
-    public OperatorInterface(XXboxControllerFactory controllerFactory, RobotAssertionManager assertionManager, PropertyFactory pf) {
+    public OperatorInterface(
+            XXboxControllerFactory controllerFactory,
+            XJoystick.XJoystickFactory joystickFactory,
+            RobotAssertionManager assertionManager,
+            PropertyFactory pf) {
         driverGamepad = controllerFactory.create(0);
         driverGamepad.setLeftInversion(false, true);
         driverGamepad.setRightInversion(true, true);
@@ -37,8 +45,8 @@ public class OperatorInterface {
         operatorGamepad = controllerFactory.create(1);
         operatorGamepad.setLeftInversion(false, true);
         operatorGamepad.setRightInversion(false, true);
-
-        neoTrellis = controllerFactory.create(2);
+        
+        neoTrellis = joystickFactory.create(2, 32);
         // No axes to invert on the NeoTrellis
 
         oiPanel = controllerFactory.create(3);
@@ -53,9 +61,21 @@ public class OperatorInterface {
         algaeAndSysIdGamepad.setRightInversion(false, true);
 
         pf.setPrefix("OperatorInterface");
+        pf.setDefaultLevel(PropertyLevel.Debug);
+        driverGamePadRumblePrefrence = pf.createPersistentProperty("John/Driver Gamepad rumble level prefrence", .1);
+        operatorGamePadRumblePrefrence = pf.createPersistentProperty("Anthony/Operator Gamepad rumble level prefrence", .1);
+
         driverDeadband = pf.createPersistentProperty("Driver Deadband", 0.12);
         operatorDeadband = pf.createPersistentProperty("Operator Deadband", 0.15);
         algaeArmDeadband= pf.createPersistentProperty("Algae Arm Deadband", .18);
+    }
+
+    public double getDriverGamepadRumbleIntensitity(){
+        return driverGamePadRumblePrefrence.get();
+    }
+    
+    public double getOperatorGamepadRumbleIntensitiy(){
+        return operatorGamePadRumblePrefrence.get();
     }
 
     public double getDriverGamepadTypicalDeadband() {
@@ -64,5 +84,10 @@ public class OperatorInterface {
 
     public double getOperatorGamepadTypicalDeadband() {
         return operatorDeadband.get();
+    }
+
+    public void periodic() {
+        driverGamepad.getRumbleManager().periodic();
+        operatorGamepad.getRumbleManager().periodic();
     }
 }

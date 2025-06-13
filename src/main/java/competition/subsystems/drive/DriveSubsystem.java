@@ -3,21 +3,27 @@ package competition.subsystems.drive;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import competition.electrical_contract.ElectricalContract;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import competition.electrical_contract.ElectricalContract;
 import xbot.common.injection.swerve.FrontLeftDrive;
 import xbot.common.injection.swerve.FrontRightDrive;
 import xbot.common.injection.swerve.RearLeftDrive;
 import xbot.common.injection.swerve.RearRightDrive;
 import xbot.common.injection.swerve.SwerveComponent;
+import xbot.common.math.PIDManager;
 import xbot.common.math.PIDManager.PIDManagerFactory;
 import xbot.common.math.XYPair;
+import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.Property;
 import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.drive.BaseSwerveDriveSubsystem;
@@ -39,13 +45,16 @@ public class DriveSubsystem extends BaseSwerveDriveSubsystem {
 
     private final SysIdRoutine sysIdDrive;
     private final SysIdRoutine sysIdRotation;
+    private final DoubleProperty driveToWaypointsSpeed;
+    private final DoubleProperty driveToWaypointsDurationPerPoint;
 
     @Inject
     public DriveSubsystem(PIDManagerFactory pidFactory, PropertyFactory pf,
-                          @FrontLeftDrive SwerveComponent frontLeftSwerve, @FrontRightDrive SwerveComponent frontRightSwerve,
-                          @RearLeftDrive SwerveComponent rearLeftSwerve, @RearRightDrive SwerveComponent rearRightSwerve) {
+            @FrontLeftDrive SwerveComponent frontLeftSwerve, @FrontRightDrive SwerveComponent frontRightSwerve,
+            @RearLeftDrive SwerveComponent rearLeftSwerve, @RearRightDrive SwerveComponent rearRightSwerve,
+            ElectricalContract electricalContract) {
 
-        super(pidFactory, pf, frontLeftSwerve, frontRightSwerve, rearLeftSwerve, rearRightSwerve);
+        super(pidFactory, pf, frontLeftSwerve, frontRightSwerve, rearLeftSwerve, rearRightSwerve, electricalContract);
         log.info("Creating DriveSubsystem");
 
         pf.setPrefix(this.getPrefix());
@@ -56,26 +65,27 @@ public class DriveSubsystem extends BaseSwerveDriveSubsystem {
                         Volts.of(getMaxTargetSpeedMetersPerSecond() / 5).per(Second),
                         Volts.of(getMaxTargetSpeedMetersPerSecond()),
                         Seconds.of(6),
-                        (state) -> org.littletonrobotics.junction.Logger.recordOutput(this.getPrefix() + "/SysIdState-Drive", state.toString())),
+                        (state) -> org.littletonrobotics.junction.Logger
+                                .recordOutput(this.getPrefix() + "/SysIdState-Drive", state.toString())),
                 new SysIdRoutine.Mechanism(
                         (Voltage volts) -> move(new XYPair(volts.in(Volts), 0), 0),
                         null,
-                        this
-                )
-        );
+                        this));
 
         this.sysIdRotation = new SysIdRoutine(
                 new SysIdRoutine.Config(
                         Volts.of(getMaxTargetTurnRate() / 5).per(Second),
                         Volts.of(getMaxTargetTurnRate()),
                         Seconds.of(6),
-                        (state) -> org.littletonrobotics.junction.Logger.recordOutput(this.getPrefix() + "/SysIdState-Rotation", state.toString())),
+                        (state) -> org.littletonrobotics.junction.Logger
+                                .recordOutput(this.getPrefix() + "/SysIdState-Rotation", state.toString())),
                 new SysIdRoutine.Mechanism(
                         (Voltage volts) -> move(new XYPair(), volts.in(Volts)),
                         null,
-                        this
-                )
-        );
+                        this));
+
+        driveToWaypointsSpeed = pf.createPersistentProperty("Speed to drive to waypoints", 2); // meters/s
+        driveToWaypointsDurationPerPoint = pf.createPersistentProperty("Time to drive to waypoints", 0.1); // seconds
     }
 
     public Translation2d getLookAtPointTarget() {
@@ -113,8 +123,15 @@ public class DriveSubsystem extends BaseSwerveDriveSubsystem {
     public InstantCommand createSetStaticHeadingTargetCommand(Supplier<Rotation2d> staticHeadingTarget) {
         return new InstantCommand(() -> {
             setStaticHeadingTarget(staticHeadingTarget.get());
-            setStaticHeadingTargetActive(true);}
-        );
+            setStaticHeadingTargetActive(true);
+        });
+    }
+
+    public RunCommand createSetDynamicHeadingTargetCommand(Supplier<Rotation2d> dynamicHeadingTarget) {
+        return new RunCommand(() -> {
+            setStaticHeadingTarget(dynamicHeadingTarget.get());
+            setStaticHeadingTargetActive(true);
+        });
     }
 
     public InstantCommand createSetLookAtPointTargetCommand(Supplier<Translation2d> lookAtPointTarget) {
@@ -133,6 +150,7 @@ public class DriveSubsystem extends BaseSwerveDriveSubsystem {
 
     /**
      * Gets a command to run the SysId drive routine in the quasistatic mode.
+     * 
      * @param direction The direction to run the SysId routine.
      * @return The command to run the SysId routine.
      */
@@ -142,6 +160,7 @@ public class DriveSubsystem extends BaseSwerveDriveSubsystem {
 
     /**
      * Gets a command to run the SysId drive routine in the dynamic mode.
+     * 
      * @param direction The direction to run the SysId routine.
      * @return The command to run the SysId routine.
      */
@@ -151,6 +170,7 @@ public class DriveSubsystem extends BaseSwerveDriveSubsystem {
 
     /**
      * Gets a command to run the SysId rotation routine in the quasistatic mode.
+     * 
      * @param direction The direction to run the SysId routine.
      * @return The command to run the SysId routine.
      */
@@ -160,10 +180,27 @@ public class DriveSubsystem extends BaseSwerveDriveSubsystem {
 
     /**
      * Gets a command to run the SysId rotation routine in the dynamic mode.
+     * 
      * @param direction The direction to run the SysId routine.
      * @return The command to run the SysId routine.
      */
     public Command sysIdDynamicRotation(SysIdRoutine.Direction direction) {
         return sysIdRotation.dynamic(direction);
+    }
+
+    public DoubleProperty getDriveToWaypointsSpeed() {
+        return driveToWaypointsSpeed;
+    }
+
+    public DoubleProperty getDriveToWaypointsDurationPerPoint() {
+        return driveToWaypointsDurationPerPoint;
+    }
+
+    public Translation2d getPowerToAchieveFieldPosition(Translation2d current, Translation2d target) {
+        var goalVector = target.minus(current);
+        // This essentially says "our goal is X distance away from where we are now.
+        // Assume we are at zero. How much power should we use to go X distance?"
+        double drivePower = getPositionalPid().calculate(goalVector.getNorm(), 0);
+        return new Translation2d(drivePower, goalVector.getAngle());
     }
 }

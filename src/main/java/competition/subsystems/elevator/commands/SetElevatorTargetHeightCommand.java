@@ -38,4 +38,9 @@ public class SetElevatorTargetHeightCommand extends BaseSetpointCommand {
     public void execute() {
         // No-op, wait for arms to get to the target
     }
+
+    @Override
+    public boolean isFinished() {
+        return true;
+    }
 }
