@@ -5,20 +5,14 @@ import competition.motion.TrapezoidProfileManager;
 import competition.operator_interface.OperatorInterface;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.units.measure.Distance;
-import xbot.common.advantage.AKitLogger;
 import xbot.common.command.BaseMaintainerCommand;
 import xbot.common.logic.CalibrationDecider;
 import xbot.common.logic.HumanVsMachineDecider;
-import xbot.common.math.MathUtils;
 import xbot.common.math.PIDManager;
-import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static xbot.common.logic.CalibrationDecider.CalibrationMode.GaveUp;
-
 import javax.inject.Inject;
 
 public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
@@ -26,18 +20,6 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     private final OperatorInterface oi;
 
     private final ElevatorSubsystem elevator;
-
-    CalibrationDecider calibrationDecider;
-
-    final DoubleProperty humanMaxPowerGoingUp;
-    final DoubleProperty humanMaxPowerGoingDown;
-
-    final DoubleProperty gravityPIDConstantPower;
-
-    final DoubleProperty manualGravityPower;
-
-    final TrapezoidProfileManager.Factory trapezoidProfileManagerFactory;
-    TrapezoidProfileManager profileManager;
 
     final ElectricalContract contract;
 
@@ -52,146 +34,42 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
         super(elevator, pf, hvmFactory, Inches.of(1.5).in(Meters), 0.1);
         pf.setPrefix(this);
         this.elevator = elevator;
-        this.trapezoidProfileManagerFactory = trapezoidProfileManagerFactory;
-        createNewProfileManager();
-
+        
         this.oi = oi;
         this.contract = contract;
-
-        calibrationDecider = calibrationDeciderFactory.create("calibrationDecider");
-        calibrationDecider.reset();
-
-        this.humanMaxPowerGoingUp = pf.createPersistentProperty("humanMaxPowerGoingUp", 0.2);
-        this.humanMaxPowerGoingDown = pf.createPersistentProperty("humanMaxPowerGoingDown", -0.2);
-
-        this.gravityPIDConstantPower = pf.createPersistentProperty("gravityPIDConstant", 0.07416666);
-        this.manualGravityPower = pf.createPersistentProperty("manualGravityPower", 0);
-
-        decider.setDeadband(0.02);
-    }
-
-    private void createNewProfileManager(){
-        profileManager = trapezoidProfileManagerFactory.create(
-                getPrefix() + "trapezoidMotion",
-                5, // 5 for competition
-                3.5, // 3.5 for competition
-                0.16, //tune for real robot
-                elevator.getCurrentValue().in(Meters));
-    }
-
-    @Override
-    public void initialize() {
-        super.initialize();
-        calibrationDecider.reset();
-        /*profileManager.resetState(
-                elevator.getCurrentValue().in(Meters),
-                elevator.getCurrentVelocity().in(MetersPerSecond));*/
-        createNewProfileManager();
-    }
-
-    @Override
-    protected void initializeMachineControlAction() {
-        super.initializeMachineControlAction();
-        /*profileManager.resetState(
-                elevator.getCurrentValue().in(Meters),
-                elevator.getCurrentVelocity().in(MetersPerSecond));*/
-        createNewProfileManager();
     }
 
     @Override
     protected void coastAction() {
-        elevator.setPower(manualGravityPower.get()); // Should help the elevator fall slower instead of falling really fast at 0 power
+        // TODO: during coast, we need to apply a little power so the elevator doesn't drop immediately before machine control kicks in
     }
 
     @Override
     protected void calibratedMachineControlAction() {
-
-        var currentValue = elevator.getCurrentValue();
-
-        aKitLog.setLogLevel(AKitLogger.LogLevel.DEBUG);
-        aKitLog.record("PM-TargetValue", elevator.getTargetValue().in(Meters));
-        aKitLog.record("PM-CurrentValue", currentValue.in(Meters));
-        aKitLog.record("PM-CurrentVelocity", elevator.getCurrentVelocity().in(MetersPerSecond));
-        aKitLog.setLogLevel(AKitLogger.LogLevel.INFO);
-
-        if (elevator.isMotionMagicEnabled()){
-            elevator.setElevatorHeightGoalOnMotor(elevator.getTargetValue().in(Meters));
-        }
-        else {
-            profileManager.setTargetPosition(
-                    elevator.getTargetValue().in(Meters),
-                    currentValue.in(Meters),
-                    elevator.getCurrentVelocity().in(MetersPerSecond)
-            );
-            var setpoint = profileManager.getRecommendedPositionForTime();
-            aKitLog.record("elevatorProfileTarget", setpoint);
-
-            elevator.setElevatorHeightGoalOnMotor(setpoint);
-        }
-    }
-
-    //defaults humanControlAction if there is no bottom sensor
-    @Override
-    protected void uncalibratedMachineControlAction() {
-        var mode = GaveUp;
-
-        switch (mode){
-            case Calibrated -> calibratedMachineControlAction();
-            case Attempting -> attemptCalibration();
-            default -> humanControlAction();
-        }
-    }
-
-    private void attemptCalibration(){
-        elevator.setPower(elevator.calibrationNegativePower.get());
-
-        if (elevator.isTouchingBottom()) {
-            elevator.tryMarkElevatorCalibratedAgainstLowerLimit();
-            elevator.setTargetValue(elevator.getCurrentValue());
-        }
+        // TODO: based on the elevator's current and target value, tell the elevator motor what to do
     }
 
     @Override
     protected void humanControlAction() {
-        elevator.setPower(getHumanInput() + manualGravityPower.get());
-    }
-
-    //returns error magnitude of elevator in inches
-    @Override
-    protected double getErrorMagnitude() {
-        var current = elevator.getCurrentValue();
-        var target = elevator.getTargetValue();
-
-        return Math.abs(target.in(Meters) - current.in(Meters));
+        // TODO: read human input from the operator gamepad and set the elevator motor power accordingly
     }
 
     @Override
     protected double getHumanInput() {
-
-        double humanInput = MathUtils.constrainDouble(
-                MathUtils.deadband(
-                        oi.operatorGamepad.getLeftStickY(),
-                        oi.getOperatorGamepadTypicalDeadband(),
-                        (a) -> MathUtils.exponentAndRetainSign(a, 3)),
-                humanMaxPowerGoingDown.get(), humanMaxPowerGoingUp.get());
-
-        aKitLog.record("elevatorHumanInput", humanInput);
-        return humanInput;
-    }
-
-    @Override
-    public void end(boolean interrupted) {
-        if (interrupted) {
-            // Note - this is really important! We need to force the system out of onboard PID because otherwise,
-            // on enable, the PID will have a brief moment of action where it tries to return to the position
-            // it was at before being disabled.
-            elevator.setPower(0);
-        }
+        // TODO: return the human input from the operator gamepad, scaled to a range of -1 to 1
+        return 0;
     }
 
     @Override
     protected double getHumanInputMagnitude() {
         return Math.abs(getHumanInput());
+    }
+
+    @Override
+    protected double getErrorMagnitude() {
+        // TODO: return the absolute value of the difference between the elevator's current value and target value
+        // this is used to determine if the elevator is close enough to the target value
+        return 0;
     }
 
 
