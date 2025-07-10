@@ -8,8 +8,6 @@ import competition.simulation.BaseSimulator;
 import competition.subsystems.SubsystemDefaultCommandMap;
 import competition.subsystems.coral_arm.CoralArmSubsystem;
 import competition.subsystems.coral_scorer.CoralScorerSubsystem;
-import competition.subsystems.drive.commands.AlignToNearestCoralStationCommand;
-import competition.subsystems.drive.commands.EmergencyAutonomousCommand;
 import competition.subsystems.deadwheel.DeadWheelSubsystem;
 import competition.subsystems.elevator.ElevatorSubsystem;
 import competition.subsystems.oracle.ReefCoordinateGenerator;
@@ -65,10 +63,6 @@ public abstract class BaseRobotComponent extends BaseComponent {
     public abstract GameField gameField();
 
     public abstract CoralArmSubsystem coralArmSubsystem();
-
-    public abstract EmergencyAutonomousCommand emergencyAutonomousCommand();
-
-    public abstract AlignToNearestCoralStationCommand alignToNearestCoralStationCommand();
 
     public abstract DeadWheelSubsystem deadWheelSubsystem();
 }

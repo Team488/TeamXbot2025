@@ -64,8 +64,6 @@ public class Robot extends BaseRobot {
             simulator = Optional.of(getInjectorComponent().simulator());
         }
 
-        autonomousCommandSelector.setCurrentAutonomousCommand(getInjectorComponent().emergencyAutonomousCommand());
-
         dataFrameRefreshables.add(getInjectorComponent().driveSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().poseSubsystem());
         dataFrameRefreshables.add(getInjectorComponent().coprocessorCommunicationSubsystem());

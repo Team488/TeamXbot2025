@@ -1,10 +1,8 @@
 package competition.subsystems;
 import competition.subsystems.coral_arm.CoralArmSubsystem;
-import competition.subsystems.coral_arm.commands.CoralArmMaintainerCommand;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
 import competition.subsystems.elevator.ElevatorSubsystem;
-import competition.subsystems.elevator.commands.ElevatorMaintainerCommand;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -22,15 +20,5 @@ public class SubsystemDefaultCommandMap {
     @Inject
     public void setupDriveSubsystem(DriveSubsystem driveSubsystem, SwerveDriveWithJoysticksCommand command) {
         driveSubsystem.setDefaultCommand(command);
-    }
-
-    @Inject
-    public void setupElevatorSubsystem(ElevatorSubsystem elevatorSubsystem, ElevatorMaintainerCommand command) {
-        elevatorSubsystem.setDefaultCommand(command);
-    }
-
-    @Inject
-    public void setupCoralArmPivotSubsystem(CoralArmSubsystem coralArmPivotSubsystem, CoralArmMaintainerCommand command) {
-        coralArmPivotSubsystem.setDefaultCommand(command);
     }
 }
