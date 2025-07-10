@@ -10,8 +10,6 @@ import competition.subsystems.coral_arm.CoralArmSubsystem;
 import competition.subsystems.coral_scorer.CoralScorerSubsystem;
 import competition.subsystems.deadwheel.DeadWheelSubsystem;
 import competition.subsystems.elevator.ElevatorSubsystem;
-import competition.subsystems.oracle.ReefCoordinateGenerator;
-import competition.subsystems.oracle.ScoringQueue;
 import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import competition.subsystems.elevator_mechanism.SuperstructureMechanismSubsystem;
@@ -50,15 +48,11 @@ public abstract class BaseRobotComponent extends BaseComponent {
 
     public abstract ElectricalContract electricalContract();
 
-    public abstract ReefCoordinateGenerator reefCoordinateGenerator();
-
     public abstract LightSubsystem lightSubsystem();
 
     public abstract TrapezoidProfileManager.Factory trapezoidProfileManagerFactory();
 
     public abstract OperatorInterface operatorInterface();
-
-    public abstract ScoringQueue scoringQueue();
 
     public abstract GameField gameField();
 

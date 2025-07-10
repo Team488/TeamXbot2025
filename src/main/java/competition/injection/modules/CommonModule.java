@@ -3,7 +3,6 @@ package competition.injection.modules;
 import competition.electrical_contract.ElectricalContract;
 import competition.subsystems.coral_scorer.CoralScorerSubsystem;
 import competition.subsystems.drive.DriveSubsystem;
-import competition.subsystems.oracle.contracts.CoralCollectionInfoSource;
 import competition.subsystems.pose.PoseSubsystem;
 import competition.subsystems.vision.AprilTagVisionSubsystemExtended;
 import dagger.Binds;
@@ -104,8 +103,4 @@ public abstract class CommonModule {
     @Binds
     @Singleton
     public abstract AprilTagVisionSubsystem getVisionSubsystem(AprilTagVisionSubsystemExtended impl);
-
-    @Binds
-    @Singleton
-    public abstract CoralCollectionInfoSource getCoralCollectionInfoSource(CoralScorerSubsystem impl);
 }

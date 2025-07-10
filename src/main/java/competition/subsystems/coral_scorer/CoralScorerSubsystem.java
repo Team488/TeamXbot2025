@@ -1,7 +1,6 @@
 package competition.subsystems.coral_scorer;
 
 import competition.electrical_contract.ElectricalContract;
-import competition.subsystems.oracle.contracts.CoralCollectionInfoSource;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.Alert;
 import xbot.common.command.BaseSubsystem;
@@ -20,7 +19,7 @@ import static competition.subsystems.coral_scorer.CoralScorerSubsystem.CoralScor
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 @Singleton
-public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollectionInfoSource {
+public class CoralScorerSubsystem extends BaseSubsystem {
 
     public enum CoralScorerState {
         INTAKING_CORAL,
@@ -159,8 +158,7 @@ public class CoralScorerSubsystem extends BaseSubsystem implements CoralCollecti
     public boolean confidentlyHasScoredCoral() {
         return (getSecondsSinceScoringStarted() > waitTimeAfterScoring.get() && coralScorerState == SCORING_CORAL);
     }
-
-    @Override
+    
     public boolean confidentlyHasCoral() {
         return hasCoralValidator.peekStable();
     }
