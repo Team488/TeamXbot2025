@@ -82,7 +82,7 @@ public class CoralArmSimulator {
 
         if(contract.isCoralArmPivotAbsoluteEncoderReady()) {
             absoluteEncoder.setRawPosition(getAbsoluteEncoderPosition(getArmAngle(), 0.0,
-                    armPivotSubsystem.rangeOfMotionDegrees.get() / 360).in(Rotations) + 0.5);
+                    270.0 / 360.0).in(Rotations) + 0.5);
         }
 
         // if the arm angle is lower than 10.8 degrees it will return true, otherwise return false

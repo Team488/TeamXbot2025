@@ -180,11 +180,6 @@ public class Robot extends BaseRobot {
         }
 
         super.autonomousInit();
-
-
-        if (!coralArmSubsystem.isCalibrated()) {
-            coralArmSubsystem.forceCalibrationAtAutonomous();
-        }
     }
 
     public XScheduler getScheduler() {
