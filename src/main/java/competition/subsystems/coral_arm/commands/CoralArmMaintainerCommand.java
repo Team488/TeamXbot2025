@@ -81,31 +81,7 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
 
     @Override
     protected void calibratedMachineControlAction() {
-        // manages and runs pid
-        // if the arm is being requested to go to a position that would cause a
-        // collision, move to a safe position instead until that changes
-        var imminentReefCollision = wouldCollideWithReef(coralArm.getTargetValue());
         
-        var currentTarget = coralArm.getTargetValue();
-        if(imminentReefCollision) {
-            currentTarget = Degrees.of(this.level4SafeArmAngleDegrees.get());
-        }
-
-        profileManager.setTargetPosition(
-                currentTarget.in(Degrees),
-                coralArm.getCurrentValue().in(Degree),
-                coralArm.getCurrentVelocity().in(DegreesPerSecond));
-        var setpoint = profileManager.getRecommendedPositionForTime();
-
-        aKitLog.record("ProfileTarget", setpoint);
-
-        coralArm.setPositionalGoalIncludingOffset(Degrees.of(setpoint));
-    }
-
-    private boolean wouldCollideWithReef(Angle targetGoal) {
-        var coralArmGoalAboveSafeLevel = targetGoal.gt(Degrees.of(this.level4SafeArmAngleDegrees.get()));
-        var elevatorBelowLevel2Height = elevator.getCurrentValue().lt(elevator.l4Height.get().minus(level4SafeElevatorMarginInches.get()));
-        return coralArmGoalAboveSafeLevel && elevatorBelowLevel2Height;
     }
 
     @Override

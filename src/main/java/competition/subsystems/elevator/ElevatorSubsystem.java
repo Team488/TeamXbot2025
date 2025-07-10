@@ -2,7 +2,7 @@ package competition.subsystems.elevator;
 
 import competition.electrical_contract.ElectricalContract;
 import edu.wpi.first.units.measure.Distance;
-import scala.NotImplementedError;
+
 import xbot.common.command.BaseSetpointSubsystem;
 import xbot.common.controls.actuators.XCANMotorController;
 import xbot.common.controls.actuators.XCANMotorControllerPIDProperties;
@@ -78,13 +78,13 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     @Override
     public Distance getCurrentValue() {
         // TODO: return the current height of the elevator in Meters
-        throw new NotImplementedError();
+        return Meters.zero();
     }
 
     @Override
     public Distance getTargetValue() {
         // TODO: return the target height of the elevator in Meters
-        throw new NotImplementedError();
+        return Meters.zero();
     }
 
     @Override
@@ -95,7 +95,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     @Override
     public boolean isCalibrated() {
         // TODO: return true if the elevator is calibrated, false otherwise
-        throw new NotImplementedError();
+        return false;
     }
 
     @Override
