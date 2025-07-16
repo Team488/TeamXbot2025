@@ -55,9 +55,12 @@ public class CoralScorerSubsystem extends BaseSubsystem {
         motor.setPower(0);
     }
 
+    public void holdCoral() {
+        motor.setPower(0.01);
+    }
+
     public boolean hasCoral() {
-        // TODO: return true if the coral sensor is true
-        return false;
+        return coralSensor.get();
     }
 
     public void periodic() {
