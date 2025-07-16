@@ -43,6 +43,18 @@ public class CoralScorerSubsystem extends BaseSubsystem {
         this.electricalContract = electricalContract;
     }
 
+    public void intake() {
+        motor.setPower(-1);
+    }
+
+    public void eject() {
+        motor.setPower(1);
+    }
+
+    public void idle() {
+        motor.setPower(0);
+    }
+
     public boolean hasCoral() {
         // TODO: return true if the coral sensor is true
         return false;
