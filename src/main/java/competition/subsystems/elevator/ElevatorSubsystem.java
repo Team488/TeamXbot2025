@@ -71,7 +71,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     @Override
     public void setPower(double power) {
         if (contract.isElevatorReady()) {
-            // TODO: set power on the master motor
+            this.masterMotor.setPower(power);
         }
     }
 
