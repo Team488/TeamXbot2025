@@ -41,6 +41,7 @@ public class OperatorCommandMap {
     public void setUpOperatorCommands(OperatorInterface oi, EjectCoralCommand ejectCoralCommand, IntakeCoralCommand intakeCoralCommand) {
         oi.driverGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(intakeCoralCommand);
         oi.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(ejectCoralCommand);
+        oi.driverGamepad.getRumbleManager().rumbleGamepad(1, 0.1);
     }
 
     @Inject
