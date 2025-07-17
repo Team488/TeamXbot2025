@@ -20,8 +20,8 @@ public class CoralScorerSubsystem extends BaseSubsystem {
     final Alert hasCoralAlert = new Alert("Confidently has coral", Alert.AlertType.kInfo);
     public final ElectricalContract electricalContract;
 
-    DoubleProperty ejectMotorPower;
-    DoubleProperty intakeMotorPower;
+    final DoubleProperty ejectMotorPower;
+    final DoubleProperty intakeMotorPower;
 
     @Inject
     public CoralScorerSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
