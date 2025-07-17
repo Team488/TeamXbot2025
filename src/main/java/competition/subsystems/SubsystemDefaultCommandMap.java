@@ -3,6 +3,8 @@ import competition.subsystems.coral_scorer.CoralScorerSubsystem;
 import competition.subsystems.coral_scorer.commands.DefaultCoralCommand;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
+import competition.subsystems.elevator.ElevatorSubsystem;
+import competition.subsystems.elevator.commands.MoveElevatorWithJoysticksCommand;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -25,5 +27,10 @@ public class SubsystemDefaultCommandMap {
     @Inject
     public void setupCoralScorerSubsystem(CoralScorerSubsystem coralScorerSubsystem, DefaultCoralCommand command) {
         coralScorerSubsystem.setDefaultCommand(command);
+    }
+
+    @Inject
+    public void setupElevatorScorerSubsystem(ElevatorSubsystem elevatorSubsystem, MoveElevatorWithJoysticksCommand command) {
+        elevatorSubsystem.setDefaultCommand(command);
     }
 }
