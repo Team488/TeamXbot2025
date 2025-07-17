@@ -20,7 +20,6 @@ public class MoveElevatorWithJoysticksCommand extends BaseCommand {
     @Override
     public void execute() {
         double force = oi.operatorGamepad.getLeftStickY();
-        System.out.println(force);
         elevatorSubsystem.setPower(force);
     }
 }
