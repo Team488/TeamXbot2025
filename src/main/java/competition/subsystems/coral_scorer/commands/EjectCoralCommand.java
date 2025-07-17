@@ -2,13 +2,12 @@ package competition.subsystems.coral_scorer.commands;
 
 import competition.subsystems.coral_scorer.CoralScorerSubsystem;
 import xbot.common.command.BaseCommand;
+import xbot.common.properties.PropertyFactory;
 
 import javax.inject.Inject;
 
 public class EjectCoralCommand extends BaseCommand {
-    CoralScorerSubsystem coralScorer;
-
-    public boolean finished;
+    final CoralScorerSubsystem coralScorer;
 
     @Inject
     EjectCoralCommand(CoralScorerSubsystem coralScorerSubsystem) {
@@ -17,18 +16,7 @@ public class EjectCoralCommand extends BaseCommand {
     }
 
     @Override
-    public void initialize() {
-        this.finished = false;
-    }
-
-    @Override
     public void execute() {
         coralScorer.eject();
-        finished = true;
-    }
-
-    @Override
-    public boolean isFinished() {
-        return finished;
     }
 }

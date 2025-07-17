@@ -39,8 +39,8 @@ public class OperatorCommandMap {
 
     @Inject
     public void setUpOperatorCommands(OperatorInterface oi, EjectCoralCommand ejectCoralCommand, IntakeCoralCommand intakeCoralCommand) {
-        oi.driverGamepad.getifAvailable(XXboxController.XboxButton.A).onTrue(intakeCoralCommand);
-        oi.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).onTrue(ejectCoralCommand);
+        oi.driverGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(intakeCoralCommand);
+        oi.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(ejectCoralCommand);
     }
 
     @Inject
