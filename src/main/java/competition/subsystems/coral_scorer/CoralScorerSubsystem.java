@@ -30,8 +30,8 @@ public class CoralScorerSubsystem extends BaseSubsystem {
                                 XDigitalInput.XDigitalInputFactory xDigitalInputFactory) {
         propertyFactory.setPrefix(this);
 
-        ejectMotorPower = propertyFactory.createPersistentProperty("Eject Motor Speed", 1);
-        intakeMotorPower = propertyFactory.createPersistentProperty("Intake Motor Speed", -1);
+        ejectMotorPower = propertyFactory.createPersistentProperty("Eject Motor Speed", -0.5);
+        intakeMotorPower = propertyFactory.createPersistentProperty("Intake Motor Speed", 1);
         holdCoralMotorPower = propertyFactory.createPersistentProperty("Hold Coral Motor Power", 0.01);
 
         if (electricalContract.isCoralCollectionMotorReady()) {
