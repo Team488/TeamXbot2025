@@ -96,7 +96,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
 
     @Override
     public void setPower(double power) {
-        armMotor.setPower(power);
+        // TODO: set the power to the motor
     }
 
     @Override

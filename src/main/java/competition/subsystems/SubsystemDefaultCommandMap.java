@@ -1,6 +1,4 @@
 package competition.subsystems;
-import competition.subsystems.coral_arm.CoralArmSubsystem;
-import competition.subsystems.coral_arm.commands.MoveArmWithJoysticksCommand;
 import competition.subsystems.coral_scorer.CoralScorerSubsystem;
 import competition.subsystems.coral_scorer.commands.DefaultCoralCommand;
 import competition.subsystems.drive.DriveSubsystem;
@@ -32,12 +30,7 @@ public class SubsystemDefaultCommandMap {
     }
 
     @Inject
-    public void setupElevatorSubsystem(ElevatorSubsystem elevatorSubsystem, MoveElevatorWithJoysticksCommand command) {
+    public void setupElevatorScorerSubsystem(ElevatorSubsystem elevatorSubsystem, MoveElevatorWithJoysticksCommand command) {
         elevatorSubsystem.setDefaultCommand(command);
-    }
-
-    @Inject
-    public void setupCoralArmSubsystem(CoralArmSubsystem coralArmSubsystem, MoveArmWithJoysticksCommand command) {
-        coralArmSubsystem.setDefaultCommand(command);
     }
 }
