@@ -22,6 +22,7 @@ public class CoralScorerSubsystem extends BaseSubsystem {
 
     final DoubleProperty ejectMotorPower;
     final DoubleProperty intakeMotorPower;
+    final DoubleProperty holdCoralMotorPower;
 
     @Inject
     public CoralScorerSubsystem(XCANMotorController.XCANMotorControllerFactory xcanMotorControllerFactory,
@@ -31,6 +32,7 @@ public class CoralScorerSubsystem extends BaseSubsystem {
 
         ejectMotorPower = propertyFactory.createPersistentProperty("Eject Motor Speed", 1);
         intakeMotorPower = propertyFactory.createPersistentProperty("Intake Motor Speed", -1);
+        holdCoralMotorPower = propertyFactory.createPersistentProperty("Hold Coral Motor Power", 0.01);
 
         if (electricalContract.isCoralCollectionMotorReady()) {
             this.motor = xcanMotorControllerFactory.create(electricalContract.getCoralCollectionMotor(),
@@ -64,7 +66,7 @@ public class CoralScorerSubsystem extends BaseSubsystem {
     }
 
     public void holdCoral() {
-        motor.setPower(0.01);
+        motor.setPower(holdCoralMotorPower.get());
     }
 
     public boolean hasCoral() {
