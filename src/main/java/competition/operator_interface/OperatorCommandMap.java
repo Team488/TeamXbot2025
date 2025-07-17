@@ -1,6 +1,8 @@
 package competition.operator_interface;
 
 import competition.simulation.commands.ResetSimulatedPose;
+import competition.subsystems.coral_scorer.commands.EjectCoralCommand;
+import competition.subsystems.coral_scorer.commands.IntakeCoralCommand;
 import competition.subsystems.drive.DriveSubsystem;
 import competition.subsystems.drive.commands.DebugSwerveModuleCommand;
 import competition.subsystems.drive.commands.SwerveDriveWithJoysticksCommand;
@@ -36,9 +38,9 @@ public class OperatorCommandMap {
 
 
     @Inject
-    public void setUpOperatorCommands(OperatorInterface oi) {
-        
-
+    public void setUpOperatorCommands(OperatorInterface oi, EjectCoralCommand ejectCoralCommand, IntakeCoralCommand intakeCoralCommand) {
+        oi.driverGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(intakeCoralCommand);
+        oi.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(ejectCoralCommand);
     }
 
     @Inject
