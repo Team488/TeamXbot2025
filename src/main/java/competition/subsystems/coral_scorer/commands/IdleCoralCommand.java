@@ -6,9 +6,7 @@ import xbot.common.command.BaseCommand;
 import javax.inject.Inject;
 
 public class IdleCoralCommand extends BaseCommand {
-    CoralScorerSubsystem coralScorer;
-
-    public boolean finished;
+    final CoralScorerSubsystem coralScorer;
 
     @Inject
     IdleCoralCommand(CoralScorerSubsystem coralScorerSubsystem) {
@@ -19,16 +17,5 @@ public class IdleCoralCommand extends BaseCommand {
     @Override
     public void execute() {
         coralScorer.idle();
-        finished = true;
-    }
-
-    @Override
-    public void initialize() {
-        finished = false;
-    }
-
-    @Override
-    public boolean isFinished() {
-        return finished;
     }
 }
