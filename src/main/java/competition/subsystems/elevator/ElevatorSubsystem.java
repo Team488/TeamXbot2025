@@ -8,6 +8,7 @@ import xbot.common.controls.actuators.XCANMotorController;
 import xbot.common.controls.actuators.XCANMotorControllerPIDProperties;
 import xbot.common.controls.sensors.XDigitalInput;
 import xbot.common.controls.sensors.XLaserCAN;
+import xbot.common.properties.DoubleProperty;
 import xbot.common.properties.PropertyFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -24,6 +25,8 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     public final XDigitalInput bottomSensor;
     public final XLaserCAN distanceSensor;
 
+    private final DoubleProperty counterGravity;
+
     @Inject
     public ElevatorSubsystem(XCANMotorController.XCANMotorControllerFactory motorFactory, PropertyFactory pf,
                              ElectricalContract contract, XDigitalInput.XDigitalInputFactory xDigitalInputFactory,
@@ -37,6 +40,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
         // 46.16554374 rotations per meter
 
 
+        this.counterGravity = pf.createPersistentProperty("Counter Elevator Gravity", 0.013);
         if (contract.isElevatorReady()) {
             this.masterMotor = motorFactory.create(
                     contract.getElevatorMotor(), this.getPrefix(), "ElevatorMotorPID",
@@ -71,7 +75,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     @Override
     public void setPower(double power) {
         if (contract.isElevatorReady()) {
-            this.masterMotor.setPower(power);
+            this.masterMotor.setPower(power + counterGravity.get());
         }
     }
 
