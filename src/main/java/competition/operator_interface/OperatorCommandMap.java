@@ -103,24 +103,24 @@ public class OperatorCommandMap {
 
 
         // Instantly drives to closest coral station
-        SequentialCommandGroup pathDriveToClosestCoralStation = pathDriveToLocationForCoralStationFactory.createDriveOnly(
-                null, null
-        );
-        SequentialCommandGroup driveToClosestCoralStation =
-                driveToClosestStationCommandGroupFactory.createDriveOnly();
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(new ConditionalCommand(
-                pathDriveToClosestCoralStation,
-                driveToClosestCoralStation,
-                () -> coprocessorCommunicationSubsystem.isCoralStationPathConfident(pose)
-        ));
+//        SequentialCommandGroup pathDriveToClosestCoralStation = pathDriveToLocationForCoralStationFactory.createDriveOnly(
+//                null, null
+//        );
+//        SequentialCommandGroup driveToClosestCoralStation =
+//                driveToClosestStationCommandGroupFactory.createDriveOnly();
+//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(new ConditionalCommand(
+//                pathDriveToClosestCoralStation,
+//                driveToClosestCoralStation,
+//                () -> coprocessorCommunicationSubsystem.isCoralStationPathConfident(pose)
+//        ));
 
 
 
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(new ConditionalCommand(
-                pathDriveToBargeCommand,
-                driveToBargeCommand,
-                () -> coprocessorCommunicationSubsystem.isBargePathConfident(pose)
-        ));
+//        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(new ConditionalCommand(
+//                pathDriveToBargeCommand,
+//                driveToBargeCommand,
+//                () -> coprocessorCommunicationSubsystem.isBargePathConfident(pose)
+//        ));
 
 
 //        operatorInterface.driverGamepad.getPovIfAvailable(0).onTrue(debugModule);
@@ -176,11 +176,11 @@ public class OperatorCommandMap {
         var removeHighAlgae = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.HIGH_ALGAE);
         oi.operatorGamepad.getPovIfAvailable(0).onTrue(removeHighAlgae);
 
-        var scoreAlgaeInNetHeight = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.SCORE_ALGAE_NET);
-        oi.operatorGamepad.getPovIfAvailable(90).onTrue(scoreAlgaeInNetHeight);
-
-        var scoreAlgaeInProcessor = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.SCORE_ALGAE_PROCESSOR);
-        oi.operatorGamepad.getPovIfAvailable(270).onTrue(scoreAlgaeInProcessor);
+//        var scoreAlgaeInNetHeight = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.SCORE_ALGAE_NET);
+//        oi.operatorGamepad.getPovIfAvailable(90).onTrue(scoreAlgaeInNetHeight);
+//
+//        var scoreAlgaeInProcessor = prepCoralSystemCommandGroupFactory.create(() -> Landmarks.CoralLevel.SCORE_ALGAE_PROCESSOR);
+//        oi.operatorGamepad.getPovIfAvailable(270).onTrue(scoreAlgaeInProcessor);
 
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(intakeAlgaeCommand);
         oi.operatorGamepad.getifAvailable(XXboxController.XboxButton.RightBumper).whileTrue(scoreAlgaeCommand);
@@ -228,7 +228,7 @@ public class OperatorCommandMap {
 
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(forceElevatorCalibratedCommand);
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.A).whileTrue(toggleElevatorMotionMagicCommand);
-        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(returnToBase);
+//        oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(returnToBase);
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.B).whileTrue(riseToL3);
         oi.superstructureGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(riseToL4);
 
