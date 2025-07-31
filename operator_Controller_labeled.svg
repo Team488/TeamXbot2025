@@ -31,7 +31,7 @@
      showgrid="false"
      inkscape:zoom="1.7751742"
      inkscape:cx="501.92258"
-     inkscape:cy="289.54905"
+     inkscape:cy="289.26739"
      inkscape:window-x="6708"
      inkscape:window-y="399"
      inkscape:window-maximized="1"
@@ -803,7 +803,7 @@
          sodipodi:role="line"
          id="tspan2-8"
          x="773.79968"
-         y="474.16367">continuouslyPrepareToFireAtSpeaker</tspan></text>
+         y="474.16367" /></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.3333px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:3.2;stroke-dasharray:none;stroke-opacity:1"
@@ -818,10 +818,7 @@
        xml:space="preserve"
        id="button-Back"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.3333px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:end;white-space:pre;shape-inside:url(#rect3);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:3.2;stroke-dasharray:none;stroke-opacity:1"
-       transform="translate(-4.2259894,9.1563104)"><tspan
-         x="247.77533"
-         y="53.719061"
-         id="tspan1">continouslyPrepareToFireAtSpeaker</tspan></text>
+       transform="translate(-4.2259894,9.1563104)" />
     <text
        xml:space="preserve"
        id="button-LeftTrigger"
@@ -829,7 +826,7 @@
        transform="translate(-185.80171,48.305669)"><tspan
          x="405.26192"
          y="53.719061"
-         id="tspan3">intake coral</tspan></text>
+         id="tspan1">intake coral</tspan></text>
     <text
        xml:space="preserve"
        id="button-LeftBumper"
@@ -837,15 +834,12 @@
        transform="translate(-182.9354,92.558021)"><tspan
          x="401.4989"
          y="53.719061"
-         id="tspan4">intake algae</tspan></text>
+         id="tspan3">intake algae</tspan></text>
     <text
        xml:space="preserve"
        id="button-LeftStick"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.3333px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:end;white-space:pre;shape-inside:url(#rect3-8-97);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:3.2;stroke-dasharray:none;stroke-opacity:1"
-       transform="translate(-182.7,216.05331)"><tspan
-         x="247.77533"
-         y="53.719061"
-         id="tspan5">continouslyPrepareToFireAtSpeaker</tspan></text>
+       transform="translate(-182.7,216.05331)" />
     <text
        xml:space="preserve"
        id="text3-1-6"
@@ -858,7 +852,7 @@
        transform="translate(-37.504115,404.32449)"><tspan
          x="366.53154"
          y="53.719061"
-         id="tspan6">collect algae high</tspan></text>
+         id="tspan4">collect algae high</tspan></text>
     <text
        xml:space="preserve"
        id="dpad-down"
@@ -866,6 +860,6 @@
        transform="translate(-35.978718,528.80096)"><tspan
          x="372.70991"
          y="53.719061"
-         id="tspan7">collect algae low</tspan></text>
+         id="tspan5">collect algae low</tspan></text>
   </g>
 </svg>
