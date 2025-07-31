@@ -79,10 +79,10 @@ public class OperatorCommandMap {
         resetHeading.setHeadingToApply(0);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Start).onTrue(resetHeading);
 
-        var pointAtNearestCoralStation = drive.createSetDynamicHeadingTargetCommand(() ->
-                PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.getCoralStationSectionPose(pose.getClosestCoralStation(), Landmarks.CoralStationSection.MID)
-                        .getRotation()));
-        var clearPointAtHeading = drive.createClearAllHeadingTargetsCommand();
+        // var pointAtNearestCoralStation = drive.createSetDynamicHeadingTargetCommand(() ->
+        //         PoseSubsystem.convertBlueToRedIfNeeded(Landmarks.getCoralStationSectionPose(pose.getClosestCoralStation(), Landmarks.CoralStationSection.MID)
+        //                 .getRotation()));
+        // var clearPointAtHeading = drive.createClearAllHeadingTargetsCommand();
 
         double alignToCoralOffsetInches = -2;
         var alignToReefWithAprilTagWithLeftCamera = alignToReefWithAprilTagProvider.get();
@@ -97,9 +97,9 @@ public class OperatorCommandMap {
                 AlignCameraToAprilTagCalculator.Activity.ApproachWhileCentering, false);
         operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.LeftBumper).whileTrue(alignToReefWithAprilTagWithRightCamera);
 
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(pointAtNearestCoralStation)
-                .onFalse(clearPointAtHeading);
-        operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(alignToNearestReefFaceForAlgaeCommand);
+        // operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.Y).whileTrue(pointAtNearestCoralStation)
+        //         .onFalse(clearPointAtHeading);
+        // operatorInterface.driverGamepad.getifAvailable(XXboxController.XboxButton.X).whileTrue(alignToNearestReefFaceForAlgaeCommand);
 
 
         // Instantly drives to closest coral station
