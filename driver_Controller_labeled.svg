@@ -31,7 +31,7 @@
      showgrid="false"
      inkscape:zoom="1.7751742"
      inkscape:cx="585.858"
-     inkscape:cy="272.08598"
+     inkscape:cy="271.80431"
      inkscape:window-x="6708"
      inkscape:window-y="399"
      inkscape:window-maximized="1"
@@ -875,5 +875,19 @@
          x="381.14739"
          y="53.719061"
          id="tspan7">decrease offset</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:48px;line-height:1.5;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI';text-align:center;text-anchor:middle;fill:#000000;stroke-width:3.77953"
+       x="850.05737"
+       y="564.45166"
+       id="text3"><tspan
+         sodipodi:role="line"
+         x="850.05737"
+         y="564.45166"
+         id="tspan12">Driver</tspan><tspan
+         sodipodi:role="line"
+         x="850.05737"
+         y="636.45166"
+         id="tspan13">Controls motion</tspan></text>
   </g>
 </svg>
