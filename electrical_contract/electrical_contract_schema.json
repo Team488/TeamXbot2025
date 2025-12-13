@@ -1,0 +1,560 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "FRC Robot Electrical Contract",
+  "description": "Complete electrical configuration for FRC robot - PRIMARY DATA SOURCE",
+  "type": "object",
+  "required": ["robotName", "contractYear", "motors", "swerveModules", "pdh", "rio", "rsl", "radio"],
+  "properties": {
+    "robotName": {
+      "type": "string",
+      "description": "Name of the robot"
+    },
+    "contractYear": {
+      "type": "integer",
+      "description": "Competition year (e.g., 2025)"
+    },
+    "packageName": {
+      "type": "string",
+      "default": "competition.electrical_contract",
+      "description": "Java package for generated contract"
+    },
+    "className": {
+      "type": "string",
+      "default": "Contract2025",
+      "description": "Generated Java class name"
+    },
+    "extendsClass": {
+      "type": "string",
+      "default": "ElectricalContract",
+      "description": "Base class to extend"
+    },
+    "motors": {
+      "type": "array",
+      "description": "Non-drivetrain motors",
+      "items": {
+        "type": "object",
+        "required": ["name", "type", "canBus", "canId", "PowerFrom"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Motor name (e.g., AlgaeCollectionMotor)"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["TalonFx", "SparkMax", "VictorSPX"],
+            "description": "Motor controller type"
+          },
+          "canBus": {
+            "type": "string",
+            "enum": ["RIO", "Canivore"],
+            "description": "CAN bus location"
+          },
+          "canId": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 62,
+            "description": "CAN device ID"
+          },
+          "inverted": {
+            "type": "boolean",
+            "default": false,
+            "description": "Motor inversion"
+          },
+          "neutralMode": {
+            "type": "string",
+            "enum": ["Brake", "Coast"],
+            "default": "Coast",
+            "description": "Motor neutral mode"
+          },
+          "statorCurrentLimit": {
+            "type": "number",
+            "description": "Stator current limit in Amps"
+          },
+          "supplyCurrentLimit": {
+            "type": "number",
+            "description": "Supply current limit in Amps"
+          },
+          "getterMethod": {
+            "type": "string",
+            "description": "Method name (e.g., getAlgaeCollectionMotor)"
+          },
+          "readyMethod": {
+            "type": "string",
+            "description": "Ready check method (e.g., isAlgaeCollectionReady)"
+          },
+          "subsystem": {
+            "type": "string",
+            "description": "Subsystem name for documentation"
+          },
+          "PowerFrom": {
+            "$ref": "#/definitions/pdh0-19PowerSource"
+          },
+          "location": {
+            "type": "string",
+            "description": "Physical location on robot"
+          },
+          "purpose": {
+            "type": "string",
+            "description": "What this motor does"
+          }
+        }
+      }
+    },
+    "swerveModules": {
+      "type": "array",
+      "description": "Swerve drive modules",
+      "items": {
+        "type": "object",
+        "required": ["name", "location", "offsetInches", "driveMotor", "steeringMotor", "encoder"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "enum": ["FrontRightDrive", "RearRightDrive", "RearLeftDrive", "FrontLeftDrive"]
+          },
+          "location": {
+            "type": "string",
+            "description": "Human readable location"
+          },
+          "offsetInches": {
+            "type": "object",
+            "required": ["x", "y"],
+            "properties": {
+              "x": {"type": "number"},
+              "y": {"type": "number"}
+            }
+          },
+          "driveMotor": {
+            "$ref": "#/properties/motors/items"
+          },
+          "steeringMotor": {
+            "$ref": "#/properties/motors/items"
+          },
+          "encoder": {
+            "$ref": "#/definitions/encoder"
+          }
+        }
+      }
+    },
+    "encoders": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/encoder"
+      }
+    },
+    "digitalIO": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "channel", "deviceConn", "ioType"],
+        "properties": {
+          "name": {"type": "string"},
+          "channel": {"type": "integer", "minimum": 0, "maximum": 25},
+          "deviceConn": {"type": "string", "description": "RIO connection reference (e.g., rio.dio.channel_0)"},
+          "ioType": {"type": "string", "enum": ["input", "output"], "description": "Whether this is an input sensor or output control"},
+          "inverted": {"type": "boolean", "default": false},
+          "simulationScalingValue": {"type": "number"},
+          "getterMethod": {"type": "string"},
+          "readyMethod": {"type": "string"},
+          "subsystem": {"type": "string"},
+          "purpose": {"type": "string"}
+        }
+      }
+    },
+    "imu": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "imuType", "getterMethod"],
+        "properties": {
+          "name": {"type": "string"},
+          "imuType": {"type": "string", "enum": ["navX", "pigeon2"]},
+          "interfaceType": {"type": "string", "enum": ["spi", "i2c", "serial", "can"]},
+          "canBus": {"type": "string"},
+          "deviceId": {"type": "integer"},
+          "getterMethod": {"type": "string"}
+        }
+      }
+    },
+    "cameras": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["cameraName", "networkTablesName", "transformFromRobotCenter", "capabilities"],
+        "properties": {
+          "cameraName": {"type": "string"},
+          "networkTablesName": {"type": "string"},
+          "capabilities": {
+            "type": "array",
+            "items": {"type": "string", "enum": ["APRIL_TAG", "OBJECT_DETECTION", "RETROREFLECTIVE"]}
+          },
+          "enabled": {"type": "boolean", "default": true},
+          "transformFromRobotCenter": {
+            "type": "object",
+            "required": ["translation", "rotation"],
+            "properties": {
+              "translation": {
+                "type": "object",
+                "required": ["x", "y", "z", "unit"],
+                "properties": {
+                  "x": {"type": "number"},
+                  "y": {"type": "number"},
+                  "z": {"type": "number"},
+                  "unit": {"type": "string", "enum": ["inches", "meters"]}
+                }
+              },
+              "rotation": {
+                "type": "object",
+                "required": ["roll", "pitch", "yaw", "unit"],
+                "properties": {
+                  "roll": {"type": "number"},
+                  "pitch": {"type": "number"},
+                  "yaw": {"type": "number"},
+                  "unit": {"type": "string", "enum": ["degrees", "radians"]}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "robotDimensions": {
+      "type": "object",
+      "properties": {
+        "bumperToCenter": {
+          "type": "object",
+          "properties": {
+            "x": {"type": "number"},
+            "unit": {"type": "string", "default": "inches"}
+          }
+        },
+        "driveGearRatio": {"type": "number"},
+        "steeringGearRatio": {"type": "number"}
+      }
+    },
+    "pdh": {
+      "type": "object",
+      "description": "Power Distribution Hub - REQUIRED component",
+      "required": ["canId", "ports"],
+      "properties": {
+        "canId": {"type": "integer", "minimum": 0, "maximum": 62},
+        "ports": {
+          "type": "object",
+          "description": "All 24 PDH power ports (0-23)",
+          "required": [
+            "pdh_00", "pdh_01", "pdh_02", "pdh_03", "pdh_04", "pdh_05",
+            "pdh_06", "pdh_07", "pdh_08", "pdh_09", "pdh_10", "pdh_11",
+            "pdh_12", "pdh_13", "pdh_14", "pdh_15", "pdh_16", "pdh_17",
+            "pdh_18", "pdh_19", "pdh_20", "pdh_21", "pdh_22", "pdh_23"
+          ],
+          "properties": {
+            "pdh_00": {"type": "string", "description": "Device powered by port 0 or Not Used"},
+            "pdh_01": {"type": "string", "description": "Device powered by port 1 or Not Used"},
+            "pdh_02": {"type": "string", "description": "Device powered by port 2 or Not Used"},
+            "pdh_03": {"type": "string", "description": "Device powered by port 3 or Not Used"},
+            "pdh_04": {"type": "string", "description": "Device powered by port 4 or Not Used"},
+            "pdh_05": {"type": "string", "description": "Device powered by port 5 or Not Used"},
+            "pdh_06": {"type": "string", "description": "Device powered by port 6 or Not Used"},
+            "pdh_07": {"type": "string", "description": "Device powered by port 7 or Not Used"},
+            "pdh_08": {"type": "string", "description": "Device powered by port 8 or Not Used"},
+            "pdh_09": {"type": "string", "description": "Device powered by port 9 or Not Used"},
+            "pdh_10": {"type": "string", "description": "Device powered by port 10 or Not Used"},
+            "pdh_11": {"type": "string", "description": "Device powered by port 11 or Not Used"},
+            "pdh_12": {"type": "string", "description": "Device powered by port 12 or Not Used"},
+            "pdh_13": {"type": "string", "description": "Device powered by port 13 or Not Used"},
+            "pdh_14": {"type": "string", "description": "Device powered by port 14 or Not Used"},
+            "pdh_15": {"type": "string", "description": "Device powered by port 15 or Not Used"},
+            "pdh_16": {"type": "string", "description": "Device powered by port 16 or Not Used"},
+            "pdh_17": {"type": "string", "description": "Device powered by port 17 or Not Used"},
+            "pdh_18": {"type": "string", "description": "Device powered by port 18 or Not Used"},
+            "pdh_19": {"type": "string", "description": "Device powered by port 19 or Not Used"},
+            "pdh_20": {"type": "string", "description": "Typically Radio or VRM"},
+            "pdh_21": {"type": "string", "description": "Typically Radio or VRM"},
+            "pdh_22": {"type": "string", "description": "Typically Radio or VRM"},
+            "pdh_23": {"type": "string", "description": "Typically Radio or VRM"}
+          }
+        }
+      }
+    },
+    "rio": {
+      "type": "object",
+      "description": "RoboRIO - REQUIRED main robot controller",
+      "required": ["powerFrom", "canId"],
+      "properties": {
+        "powerFrom":   {"$ref": "#/definitions/pdh20-22PowerSource"},
+        "canId": {"type": "integer", "default": 0},
+        "i2c": {"type": "string", "description": "I2C connected device"},
+        "rs232": {"type": "string", "description": "RS232 connected device"},
+        "spi": {"type": "string", "description": "SPI connected device"},
+        "ethernet": {"type": "string", "description": "Ethernet connected device"},
+        "usb": {"type": "string", "description": "USB connected device"},
+        "dio": {
+          "type": "object",
+          "description": "Digital I/O channels 0-9",
+          "properties": {
+            "channel_0": {"type": "string", "default": "Not Connected"},
+            "channel_1": {"type": "string", "default": "Not Connected"},
+            "channel_2": {"type": "string", "default": "Not Connected"},
+            "channel_3": {"type": "string", "default": "Not Connected"},
+            "channel_4": {"type": "string", "default": "Not Connected"},
+            "channel_5": {"type": "string", "default": "Not Connected"},
+            "channel_6": {"type": "string", "default": "Not Connected"},
+            "channel_7": {"type": "string", "default": "Not Connected"},
+            "channel_8": {"type": "string", "default": "Not Connected"},
+            "channel_9": {"type": "string", "default": "Not Connected"}
+          }
+        },
+        "relay": {
+          "type": "object",
+          "description": "Relay channels 0-3",
+          "properties": {
+            "channel_0": {"type": "string", "default": "Not Connected"},
+            "channel_1": {"type": "string", "default": "Not Connected"},
+            "channel_2": {"type": "string", "default": "Not Connected"},
+            "channel_3": {"type": "string", "default": "Not Connected"}
+          }
+        },
+        "analogIn": {
+          "type": "object",
+          "description": "Analog input channels 0-3",
+          "properties": {
+            "channel_0": {"type": "string", "default": "Not Connected"},
+            "channel_1": {"type": "string", "default": "Not Connected"},
+            "channel_2": {"type": "string", "default": "Not Connected"},
+            "channel_3": {"type": "string", "default": "Not Connected"}
+          }
+        },
+        "pwm": {
+          "type": "object",
+          "description": "PWM channels 0-9",
+          "properties": {
+            "channel_0": {"type": "string", "default": "Not Connected"},
+            "channel_1": {"type": "string", "default": "Not Connected"},
+            "channel_2": {"type": "string", "default": "Not Connected"},
+            "channel_3": {"type": "string", "default": "Not Connected"},
+            "channel_4": {"type": "string", "default": "Not Connected"},
+            "channel_5": {"type": "string", "default": "Not Connected"},
+            "channel_6": {"type": "string", "default": "Not Connected"},
+            "channel_7": {"type": "string", "default": "Not Connected"},
+            "channel_8": {"type": "string", "default": "Not Connected"},
+            "channel_9": {"type": "string", "default": "Not Connected"}
+          }
+        },
+        "mxp": {
+          "type": "object",
+          "description": "MXP expansion port",
+          "properties": {
+            "ai0": {"type": "string", "default": "Not Connected"},
+            "ai1": {"type": "string", "default": "Not Connected"},
+            "ai2": {"type": "string", "default": "Not Connected"},
+            "ai3": {"type": "string", "default": "Not Connected"},
+            "ao0": {"type": "string", "default": "Not Connected"},
+            "ao1": {"type": "string", "default": "Not Connected"},
+            "dio00": {"type": "string", "default": "Not Connected"},
+            "dio01": {"type": "string", "default": "Not Connected"},
+            "dio02": {"type": "string", "default": "Not Connected"},
+            "dio03": {"type": "string", "default": "Not Connected"},
+            "dio04": {"type": "string", "default": "Not Connected"},
+            "dio05": {"type": "string", "default": "Not Connected"},
+            "dio06": {"type": "string", "default": "Not Connected"},
+            "dio07": {"type": "string", "default": "Not Connected"},
+            "dio08": {"type": "string", "default": "Not Connected"},
+            "dio09": {"type": "string", "default": "Not Connected"},
+            "dio10": {"type": "string", "default": "Not Connected"},
+            "dio11": {"type": "string", "default": "Not Connected"},
+            "dio12": {"type": "string", "default": "Not Connected"},
+            "dio13": {"type": "string", "default": "Not Connected"},
+            "dio14": {"type": "string", "default": "Not Connected"},
+            "dio15": {"type": "string", "default": "Not Connected"},
+            "uart_rx": {"type": "string", "default": "Not Connected"},
+            "uart_tx": {"type": "string", "default": "Not Connected"},
+            "Pout5V": {"type": "string", "default": "Not Connected"},
+            "Pout3V3": {"type": "string", "default": "Not Connected"},
+            "PoutGND": {"type": "string", "default": "Not Connected"}
+          }
+        }
+      }
+    },
+    "rsl": {
+      "type": "object",
+      "description": "Robot Signal Light - REQUIRED component",
+      "required": ["powerFrom"],
+      "properties": {
+        "powerFrom": {"type": "string", "description": "Power source (always RIO)"}
+      }
+    },
+    "radio": {
+      "type": "object",
+      "description": "VH-109 WiFi Radio - REQUIRED component",
+      "required": ["powerFrom"],
+      "properties": {
+        "powerFrom": {"$ref": "#/definitions/pdh20-22PowerSource"}
+      }
+    },
+    "vrm": {
+      "type": "array",
+      "description": "Voltage Regulator Modules (optional)",
+      "items": {
+        "type": "object",
+        "required": ["name", "powerFrom"],
+        "properties": {
+          "name": {"type": "string"},
+          "powerFrom": {"$ref": "#/definitions/pdh0-19PowerSource"},
+          "outputs_12v_2a": {"type": "string"},
+          "outputs_12v_2b": {"type": "string"},
+          "outputs_12v_500ma": {"type": "string"},
+          "outputs_12v_500mb": {"type": "string"},
+          "outputs_5v_2a": {"type": "string"},
+          "outputs_5v_2b": {"type": "string"},
+          "outputs_5v_500ma": {"type": "string"},
+          "outputs_5v_500mb": {"type": "string"}
+        }
+      }
+    },
+    "pneumaticHub": {
+      "type": "array",
+      "description": "REV Pneumatic Hubs (optional)",
+      "items": {
+        "type": "object",
+        "required": ["canId", "powerFrom"],
+        "properties": {
+          "canId": {"type": "integer"},
+          "powerFrom": {"$ref": "#/definitions/pdh0-19PowerSource"},
+          "compressorPowerTo": {"type": "string"},
+          "voltageSelect": {"type": "string"},
+          "solenoidPorts": {
+            "type": "object",
+            "description": "Pneumatic solenoid ports 0-15",
+            "properties": {
+              "port_00": {"type": "string"},
+              "port_01": {"type": "string"},
+              "port_02": {"type": "string"},
+              "port_03": {"type": "string"},
+              "port_04": {"type": "string"},
+              "port_05": {"type": "string"},
+              "port_06": {"type": "string"},
+              "port_07": {"type": "string"},
+              "port_08": {"type": "string"},
+              "port_09": {"type": "string"},
+              "port_10": {"type": "string"},
+              "port_11": {"type": "string"},
+              "port_12": {"type": "string"},
+              "port_13": {"type": "string"},
+              "port_14": {"type": "string"},
+              "port_15": {"type": "string"}
+            }
+          },
+          "analogIn0": {"type": "string", "description": "Pressure sensor"},
+          "analogIn1": {"type": "string", "description": "Pressure sensor"},
+          "digitalIn": {"type": "string"}
+        }
+      }
+    },
+    "radioPowerModule": {
+      "type": "object",
+      "description": "Power module for radio with ethernet passthrough (optional)",
+      "properties": {
+        "powerFrom": {"$ref": "#/definitions/pdh0-19PowerSource"},
+        "ethernetIn": {"type": "string"},
+        "ethernetOut": {"type": "string"}
+      }
+    },
+    "ethernetSwitch": {
+      "type": "object",
+      "description": "Network switch for ethernet connections (optional)",
+      "properties": {
+        "powerFrom": {"$ref": "#/definitions/pdh0-19PowerSource"}
+      }
+    },
+    "canivore": {
+      "type": "array",
+      "description": "CTR Electronics CANivore CAN bus interfaces (optional)",
+      "items": {
+        "type": "object",
+        "required": ["name", "powerFrom"],
+        "properties": {
+          "name": {"type": "string", "description": "CANivore name"},
+          "powerFrom": {"$ref": "#/definitions/combinedPowerSource"}
+        }
+      }
+    },
+    "pigeon2": {
+      "type": "array",
+      "description": "CTRE Pigeon 2.0 IMU sensors (optional, tracked separately from imu array)",
+      "items": {
+        "type": "object",
+        "required": ["canId", "powerFrom"],
+        "properties": {
+          "canId": {"type": "integer"},
+          "canBus": {"type": "string"},
+          "powerFrom": {"$ref": "#/definitions/combinedPowerSource"}
+        }
+      }
+    },
+    "coprocessor": {
+      "type": "array",
+      "description": "Coprocessors like Jetson Nano Orin (optional)",
+      "items": {
+        "type": "object",
+        "required": ["name", "type", "powerFrom"],
+        "properties": {
+          "name": {"type": "string"},
+          "type": {"type": "string", "enum": ["NanoOrin", "RaspberryPi", "Other"]},
+          "powerFrom": {"type": "string"},
+          "powerModule": {"type": "string", "description": "Dedicated power module if needed"}
+        }
+      }
+    }
+  },
+  "definitions": {
+    "pdhAllPowerSource": {
+      "type": "string",
+      "enum": [
+        "PDH-00", "PDH-01", "PDH-02", "PDH-03", "PDH-04", "PDH-05", "PDH-06", "PDH-07", "PDH-08", "PDH-09",
+        "PDH-10", "PDH-11", "PDH-12", "PDH-13", "PDH-14", "PDH-15", "PDH-16", "PDH-17", "PDH-18", "PDH-19",
+        "PDH-20", "PDH-21", "PDH-22", "PDH-23"
+      ]
+    },
+    "pdh0-19PowerSource": {
+      "type": "string",
+      "enum": [
+        "PDH-00", "PDH-01", "PDH-02", "PDH-03", "PDH-04", "PDH-05", "PDH-06", "PDH-07", "PDH-08", "PDH-09",
+        "PDH-10", "PDH-11", "PDH-12", "PDH-13", "PDH-14", "PDH-15", "PDH-16", "PDH-17", "PDH-18", "PDH-19"
+      ]
+    },
+    "pdh20-22PowerSource": {
+      "type": "string",
+      "enum": ["PDH-20", "PDH-21", "PDH-22"]
+    },
+    "vrmPowerSource": {
+      "type": "string",
+      "enum": [
+        "VRM-12v_2a", "VRM-12v_2b", "VRM-12v_500ma", "VRM-12v_500mb",
+        "VRM-5v_2a", "VRM-5v_2b", "VRM-5v_500ma", "VRM-5v_500mb"
+      ]
+    },
+    "combinedPowerSource": {
+      "type": "string",
+      "enum": [
+        "PDH-00", "PDH-01", "PDH-02", "PDH-03", "PDH-04", "PDH-05", "PDH-06", "PDH-07", "PDH-08", "PDH-09",
+        "PDH-10", "PDH-11", "PDH-12", "PDH-13", "PDH-14", "PDH-15", "PDH-16", "PDH-17", "PDH-18", "PDH-19",
+        "PDH-20", "PDH-21", "PDH-22", "PDH-23",
+        "VRM-12v_2a", "VRM-12v_2b", "VRM-12v_500ma", "VRM-12v_500mb",
+        "VRM-5v_2a", "VRM-5v_2b", "VRM-5v_500ma", "VRM-5v_500mb"
+      ]
+    },
+    "encoder": {
+      "type": "object",
+      "required": ["name", "canBus", "canId"],
+      "properties": {
+        "name": {"type": "string"},
+        "canBus": {"type": "string"},
+        "canId": {"type": "integer"},
+        "inverted": {"type": "boolean", "default": false},
+        "getterMethod": {"type": "string"},
+        "readyMethod": {"type": "string"},
+        "subsystem": {"type": "string"},
+        "purpose": {"type": "string"}
+      }
+    }
+  }
+}

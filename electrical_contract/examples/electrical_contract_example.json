@@ -1,0 +1,445 @@
+{
+  "robotName": "2025 Competition Robot",
+  "contractVersion": "2025.1.0",
+  "lastUpdated": "2025-12-10",
+  "motors": [
+    {
+      "name": "AlgaeCollectionMotor",
+      "type": "TalonFx",
+      "canBus": "RIO",
+      "canId": 32,
+      "powerSource": "PDH",
+      "subsystem": "AlgaeCollection",
+      "inverted": true,
+      "currentLimit": {
+        "stator": 80,
+        "supply": null
+      },
+      "neutralMode": "Coast",
+      "location": "Front intake mechanism",
+      "purpose": "Collects algae game pieces from field"
+    },
+    {
+      "name": "CoralCollectionMotor",
+      "type": "TalonFx",
+      "canBus": "RIO",
+      "canId": 25,
+      "powerSource": "PDH",
+      "subsystem": "CoralCollection",
+      "inverted": false,
+      "currentLimit": {
+        "stator": 28,
+        "supply": null
+      },
+      "neutralMode": "Brake",
+      "location": "Coral intake",
+      "purpose": "Collects coral game pieces"
+    },
+    {
+      "name": "CoralArmPivotMotor",
+      "type": "TalonFx",
+      "canBus": "RIO",
+      "canId": 24,
+      "powerSource": "PDH",
+      "subsystem": "CoralArm",
+      "inverted": false,
+      "currentLimit": {
+        "stator": 45,
+        "supply": null
+      },
+      "neutralMode": "Coast",
+      "location": "Arm pivot joint",
+      "purpose": "Pivots coral arm to different angles"
+    },
+    {
+      "name": "ElevatorMotor",
+      "type": "TalonFx",
+      "canBus": "RIO",
+      "canId": 23,
+      "powerSource": "PDH",
+      "subsystem": "Elevator",
+      "inverted": true,
+      "currentLimit": {
+        "stator": 60,
+        "supply": null
+      },
+      "neutralMode": "Brake",
+      "location": "Elevator carriage",
+      "purpose": "Raises and lowers elevator for scoring"
+    }
+  ],
+  "swerveModules": [
+    {
+      "name": "FrontRightDrive",
+      "location": "Front Right",
+      "offsetInches": {
+        "x": 12,
+        "y": -12
+      },
+      "driveMotor": {
+        "name": "FrontRightDriveMotor",
+        "type": "TalonFx",
+        "canBus": "DefaultCanivore",
+        "canId": 39,
+        "powerSource": "PDH",
+        "inverted": false,
+        "currentLimit": {
+          "stator": 80,
+          "supply": null
+        },
+        "neutralMode": "Brake"
+      },
+      "steeringMotor": {
+        "name": "FrontRightSteeringMotor",
+        "type": "TalonFx",
+        "canBus": "DefaultCanivore",
+        "canId": 38,
+        "powerSource": "PDH",
+        "inverted": true,
+        "currentLimit": {
+          "stator": 45,
+          "supply": null
+        },
+        "neutralMode": "Brake"
+      },
+      "encoder": {
+        "name": "FrontRightSteeringEncoder",
+        "type": "CANCoder",
+        "canBus": "DefaultCanivore",
+        "canId": 54,
+        "inverted": false
+      }
+    },
+    {
+      "name": "RearRightDrive",
+      "location": "Rear Right",
+      "offsetInches": {
+        "x": -12,
+        "y": -12
+      },
+      "driveMotor": {
+        "name": "RearRightDriveMotor",
+        "type": "TalonFx",
+        "canBus": "DefaultCanivore",
+        "canId": 31,
+        "powerSource": "PDH",
+        "inverted": false,
+        "currentLimit": {
+          "stator": 80,
+          "supply": null
+        },
+        "neutralMode": "Brake"
+      },
+      "steeringMotor": {
+        "name": "RearRightSteeringMotor",
+        "type": "TalonFx",
+        "canBus": "DefaultCanivore",
+        "canId": 30,
+        "powerSource": "PDH",
+        "inverted": true,
+        "currentLimit": {
+          "stator": 45,
+          "supply": null
+        },
+        "neutralMode": "Brake"
+      },
+      "encoder": {
+        "name": "RearRightSteeringEncoder",
+        "type": "CANCoder",
+        "canBus": "DefaultCanivore",
+        "canId": 53,
+        "inverted": false
+      }
+    },
+    {
+      "name": "RearLeftDrive",
+      "location": "Rear Left",
+      "offsetInches": {
+        "x": -12,
+        "y": 12
+      },
+      "driveMotor": {
+        "name": "RearLeftDriveMotor",
+        "type": "TalonFx",
+        "canBus": "DefaultCanivore",
+        "canId": 20,
+        "powerSource": "PDH",
+        "inverted": false,
+        "currentLimit": {
+          "stator": 80,
+          "supply": null
+        },
+        "neutralMode": "Brake"
+      },
+      "steeringMotor": {
+        "name": "RearLeftSteeringMotor",
+        "type": "TalonFx",
+        "canBus": "DefaultCanivore",
+        "canId": 21,
+        "powerSource": "PDH",
+        "inverted": true,
+        "currentLimit": {
+          "stator": 45,
+          "supply": null
+        },
+        "neutralMode": "Brake"
+      },
+      "encoder": {
+        "name": "RearLeftSteeringEncoder",
+        "type": "CANCoder",
+        "canBus": "DefaultCanivore",
+        "canId": 52,
+        "inverted": false
+      }
+    },
+    {
+      "name": "FrontLeftDrive",
+      "location": "Front Left",
+      "offsetInches": {
+        "x": 12,
+        "y": 12
+      },
+      "driveMotor": {
+        "name": "FrontLeftDriveMotor",
+        "type": "TalonFx",
+        "canBus": "DefaultCanivore",
+        "canId": 29,
+        "powerSource": "PDH",
+        "inverted": false,
+        "currentLimit": {
+          "stator": 80,
+          "supply": null
+        },
+        "neutralMode": "Brake"
+      },
+      "steeringMotor": {
+        "name": "FrontLeftSteeringMotor",
+        "type": "TalonFx",
+        "canBus": "DefaultCanivore",
+        "canId": 28,
+        "powerSource": "PDH",
+        "inverted": true,
+        "currentLimit": {
+          "stator": 45,
+          "supply": null
+        },
+        "neutralMode": "Brake"
+      },
+      "encoder": {
+        "name": "FrontLeftSteeringEncoder",
+        "type": "CANCoder",
+        "canBus": "DefaultCanivore",
+        "canId": 51,
+        "inverted": false
+      }
+    }
+  ],
+  "encoders": [
+    {
+      "name": "ArmPivotAbsoluteEncoder",
+      "type": "CANCoder",
+      "canBus": "RIO",
+      "canId": 29,
+      "inverted": false,
+      "subsystem": "CoralArm",
+      "purpose": "Absolute position feedback for arm pivot",
+      "ready": false
+    }
+  ],
+  "digitalIO": [
+    {
+      "name": "CoralSensor",
+      "type": "RIODIO",
+      "channel": 0,
+      "inverted": true,
+      "subsystem": "CoralCollection",
+      "purpose": "Detects when coral is in scoring position"
+    },
+    {
+      "name": "ArmPivotLowSensor",
+      "type": "RIODIO",
+      "channel": 1,
+      "inverted": true,
+      "subsystem": "CoralArm",
+      "purpose": "Limit switch for arm low position"
+    },
+    {
+      "name": "ElevatorBottomSensor",
+      "type": "RIODIO",
+      "channel": 3,
+      "inverted": true,
+      "subsystem": "Elevator",
+      "purpose": "Limit switch for elevator bottom position"
+    },
+    {
+      "name": "ElevatorDistanceSensor",
+      "type": "RIODIO",
+      "channel": 5,
+      "inverted": false,
+      "subsystem": "Elevator",
+      "purpose": "Distance sensor for elevator positioning"
+    },
+    {
+      "name": "Lights0",
+      "type": "RIODIO",
+      "channel": 10,
+      "inverted": false,
+      "subsystem": "Lights",
+      "purpose": "LED control bit 0"
+    },
+    {
+      "name": "Lights1",
+      "type": "RIODIO",
+      "channel": 11,
+      "inverted": false,
+      "subsystem": "Lights",
+      "purpose": "LED control bit 1"
+    },
+    {
+      "name": "Lights2",
+      "type": "RIODIO",
+      "channel": 12,
+      "inverted": false,
+      "subsystem": "Lights",
+      "purpose": "LED control bit 2"
+    },
+    {
+      "name": "Lights3",
+      "type": "RIODIO",
+      "channel": 13,
+      "inverted": false,
+      "subsystem": "Lights",
+      "purpose": "LED control bit 3"
+    }
+  ],
+  "imu": [
+    {
+      "name": "IMU",
+      "type": "navX",
+      "interface": "spi",
+      "canBus": null,
+      "deviceId": 1,
+      "subsystem": "Drive",
+      "purpose": "Primary gyroscope for robot orientation"
+    },
+    {
+      "name": "IMU_Pigeon2",
+      "type": "pigeon2",
+      "interface": "can",
+      "canBus": "DefaultCanivore",
+      "deviceId": 10,
+      "subsystem": "Drive",
+      "purpose": "Secondary gyroscope (Pigeon 2.0)"
+    }
+  ],
+  "cameras": [
+    {
+      "name": "Apriltag_FrontLeft_Camera",
+      "networkTablesName": "AprilTagFrontLeft",
+      "type": "Photonvision",
+      "capabilities": ["APRIL_TAG"],
+      "transformFromRobotCenter": {
+        "translation": {
+          "x": 10.14,
+          "y": 6.535,
+          "z": 6.7,
+          "unit": "inches"
+        },
+        "rotation": {
+          "roll": 0,
+          "pitch": -21,
+          "yaw": 0,
+          "unit": "degrees"
+        }
+      },
+      "location": "Front left side of robot",
+      "purpose": "AprilTag detection for pose estimation"
+    },
+    {
+      "name": "Apriltag_FrontRight_Camera",
+      "networkTablesName": "AprilTagFrontRight",
+      "type": "Photonvision",
+      "capabilities": ["APRIL_TAG"],
+      "transformFromRobotCenter": {
+        "translation": {
+          "x": 10.14,
+          "y": -6.535,
+          "z": 6.7,
+          "unit": "inches"
+        },
+        "rotation": {
+          "roll": 0,
+          "pitch": -21,
+          "yaw": 0,
+          "unit": "degrees"
+        }
+      },
+      "location": "Front right side of robot",
+      "purpose": "AprilTag detection for pose estimation"
+    },
+    {
+      "name": "Apriltag_Back_Camera",
+      "networkTablesName": "AprilTagBack",
+      "type": "Photonvision",
+      "capabilities": ["APRIL_TAG"],
+      "transformFromRobotCenter": {
+        "translation": {
+          "x": -0.55,
+          "y": -0.25,
+          "z": 6.3,
+          "unit": "inches"
+        },
+        "rotation": {
+          "roll": 0,
+          "pitch": -14.5,
+          "yaw": 180,
+          "unit": "degrees"
+        }
+      },
+      "location": "Back of robot",
+      "purpose": "AprilTag detection for pose estimation",
+      "enabled": false
+    }
+  ],
+  "powerDistribution": {
+    "type": "PDH",
+    "canBus": "RIO",
+    "canId": 1,
+    "channels": [
+      {
+        "channel": 0,
+        "device": "AlgaeCollectionMotor",
+        "notes": "Algae collection motor"
+      },
+      {
+        "channel": 1,
+        "device": "CoralCollectionMotor",
+        "notes": "Coral collection motor"
+      },
+      {
+        "channel": 2,
+        "device": "CoralArmPivotMotor",
+        "notes": "Arm pivot motor"
+      },
+      {
+        "channel": 3,
+        "device": "ElevatorMotor",
+        "notes": "Elevator motor"
+      }
+    ]
+  },
+  "robotDimensions": {
+    "bumperToCenter": {
+      "x": 18,
+      "unit": "inches"
+    },
+    "drivetrainGearRatios": {
+      "drive": 6.48,
+      "steering": 12.1
+    },
+    "wheelDiameter": {
+      "value": 4,
+      "unit": "inches"
+    }
+  }
+}
