@@ -273,5 +273,18 @@ jacocoTestReport {
     }
 }
 
+
+// Configuration for Electrical Contract Report
+task(electricalReport, type: JavaExec) {
+    mainClass = "electrical.report.Main"
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+// Configuration for Electrical Analysis
+task(electricalAnalysis, type: JavaExec) {
+    mainClass = "electrical.analysis.Main"
+    classpath = sourceSets.main.runtimeClasspath
+}
+
 // always generate the coverage report after the tests run
 test.finalizedBy { jacocoTestReport }
