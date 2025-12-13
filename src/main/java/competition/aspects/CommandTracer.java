@@ -37,7 +37,7 @@ public class CommandTracer {
     public void createCommandAlert(JoinPoint joinPoint) {
         if (!runningCommandAlerts.containsKey((Command)joinPoint.getThis())) {
             var command = (Command)joinPoint.getThis();
-            var alertType = command instanceof BaseMaintainerCommand<?> ? Alert.AlertType.kWarning : Alert.AlertType.kInfo;
+            var alertType = command instanceof BaseMaintainerCommand<?, ?> ? Alert.AlertType.kWarning : Alert.AlertType.kInfo;
             var alert = new Alert("RunningCommands", command.getName(), alertType);
             alert.set(true);
             commandStartTimes.put(command, XTimer.getFPGATimestamp());

@@ -28,7 +28,7 @@ import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 @Singleton
-public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
+public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle, Double> {
 
     public final XCANMotorController armMotor;
     public final XDutyCycleEncoder armAbsoluteEncoder;
@@ -207,7 +207,7 @@ public class CoralArmSubsystem extends BaseSetpointSubsystem<Angle> {
     }
 
     @Override
-    public void setPower(double power) {
+    public void setPower(Double power) {
         if (electricalContract.isCoralArmMotorReady()) {
             if (isCalibrated) {
                 double currentLocationInDegrees = getCurrentValue().in(Degrees);

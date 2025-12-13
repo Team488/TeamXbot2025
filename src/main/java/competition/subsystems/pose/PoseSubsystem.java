@@ -34,6 +34,7 @@ import xbot.common.controls.sensors.XGyro;
 import xbot.common.controls.sensors.XGyro.XGyroFactory;
 import xbot.common.math.WrappedRotation2d;
 import xbot.common.math.estimator.DeadwheelPoseEstimator;
+import xbot.common.math.kinematics.DeadwheelKinematics;
 import xbot.common.math.kinematics.DeadwheelWheelPositions;
 import xbot.common.properties.BooleanProperty;
 import xbot.common.properties.Property;
@@ -111,7 +112,7 @@ public class PoseSubsystem extends BasePoseSubsystem {
     }
 
     private DeadwheelPoseEstimator initializeDeadwheelOdometry() {
-        return new DeadwheelPoseEstimator(drive.getDeadwheelDriveKinematics(), getCurrentHeadingGyroOnly(),
+        return new DeadwheelPoseEstimator(new DeadwheelKinematics(1), getCurrentHeadingGyroOnly(),
                 this.deadWheelSubsystem.getLeftAdjustedDistance().in(Meters),
                 this.deadWheelSubsystem.getRightAdjustedDistance().in(Meters),
                 this.deadWheelSubsystem.getFrontAdjustedDistance().in(Meters),

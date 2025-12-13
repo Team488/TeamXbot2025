@@ -22,7 +22,7 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Inches;
 
-public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
+public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle, Double> {
 
     final CoralArmSubsystem coralArm;
     final ElevatorSubsystem elevator;
@@ -76,7 +76,7 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
     @Override
     protected void coastAction() {
         // rest when no human control and before pid
-        coralArm.setPower(0);
+        coralArm.setPower(0.);
     }
 
     @Override
@@ -119,7 +119,7 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
     }
 
     @Override
-    protected double getHumanInput() {
+    protected Double getHumanInput() {
         // gamepad controls: Left joy stick up/down & Left bumper to switch between
         // elevator/arm
         if (!oi.operatorGamepad.getXboxButton(XXboxController.XboxButton.Back).getAsBoolean()) {
@@ -131,7 +131,7 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
                     humanMinPower.get(), humanMaxPower.get());
 
         }
-        return 0;
+        return 0.;
     }
 
     @Override
@@ -146,7 +146,7 @@ public class CoralArmMaintainerCommand extends BaseMaintainerCommand<Angle> {
             // Note - this is really important! We need to force the system out of onboard PID because otherwise,
             // on enable, the PID will have a brief moment of action where it tries to return to the position
             // it was at before being disabled.
-            coralArm.setPower(0);
+            coralArm.setPower(0.);
         }
     }
 }
