@@ -5,6 +5,7 @@ import edu.wpi.first.units.measure.Distance;
 import xbot.common.injection.electrical_contract.CANMotorControllerInfo;
 import xbot.common.injection.electrical_contract.DeviceInfo;
 import xbot.common.injection.electrical_contract.IMUInfo;
+import xbot.common.injection.electrical_contract.PDHPort;
 import xbot.common.injection.electrical_contract.XCameraElectricalContract;
 import xbot.common.injection.electrical_contract.XDeadwheelElectricalContract;
 import xbot.common.injection.electrical_contract.XSwerveDriveElectricalContract;
@@ -83,4 +84,19 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
 
     public abstract DeviceInfo getLightsDio3();
     public abstract boolean isDeadWheelOdometryReady();
+
+    // PDH Power Distribution Methods
+    /**
+     * Get the PDH port for a swerve drive motor
+     * @param swerveInstance The swerve module instance
+     * @return The PDH port, or null if not configured
+     */
+    public abstract PDHPort getDriveMotorPDHPort(SwerveInstance swerveInstance);
+
+    /**
+     * Get the PDH port for a swerve steering motor
+     * @param swerveInstance The swerve module instance
+     * @return The PDH port, or null if not configured
+     */
+    public abstract PDHPort getSteeringMotorPDHPort(SwerveInstance swerveInstance);
 }

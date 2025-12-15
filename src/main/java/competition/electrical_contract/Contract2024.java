@@ -16,6 +16,7 @@ import xbot.common.subsystems.vision.CameraCapabilities;
 
 import javax.inject.Inject;
 import java.util.EnumSet;
+import java.util.Map;
 
 public class Contract2024 extends Contract2025 {
 
@@ -44,108 +45,84 @@ public class Contract2024 extends Contract2025 {
         return "DriveSubsystem/" + swerveInstance.label() + "/SteeringEncoder";
     }
 
+    // Swerve motor configuration structure
+    private static class SwerveModuleConfig {
+        final int driveMotorId;
+        final int steeringMotorId;
+        final int steeringEncoderId;
+        final XYPair moduleOffsets; // in inches
+        
+        SwerveModuleConfig(int driveMotorId, int steeringMotorId, int steeringEncoderId, XYPair moduleOffsets) {
+            this.driveMotorId = driveMotorId;
+            this.steeringMotorId = steeringMotorId;
+            this.steeringEncoderId = steeringEncoderId;
+            this.moduleOffsets = moduleOffsets;
+        }
+    }
+    
+    // Centralized swerve module configuration map
+    private static final Map<String, SwerveModuleConfig> SWERVE_CONFIG = Map.of(
+        "FrontLeftDrive",  new SwerveModuleConfig(39, 38, 54, new XYPair(15, 15)),
+        "FrontRightDrive", new SwerveModuleConfig(31, 30, 53, new XYPair(15, -15)),
+        "RearLeftDrive",   new SwerveModuleConfig(20, 21, 52, new XYPair(-15, 15)),
+        "RearRightDrive",  new SwerveModuleConfig(29, 28, 51, new XYPair(-15, -15))
+    );
+
     @Override
     public CANMotorControllerInfo getDriveMotor(SwerveInstance swerveInstance) {
-        return switch (swerveInstance.label()) {
-            case "FrontLeftDrive" ->
-                    new CANMotorControllerInfo(
-                            getDriveControllerName(swerveInstance),
-                            MotorControllerType.SparkMax,
-                            CANBusId.RIO,
-                            39,
-                            new CANMotorControllerOutputConfig());
-            case "FrontRightDrive" ->
-                    new CANMotorControllerInfo(
-                            getDriveControllerName(swerveInstance),
-                            MotorControllerType.SparkMax,
-                            CANBusId.RIO,
-                            31,
-                            new CANMotorControllerOutputConfig());
-            case "RearLeftDrive" ->
-                    new CANMotorControllerInfo(
-                            getDriveControllerName(swerveInstance),
-                            MotorControllerType.SparkMax,
-                            CANBusId.RIO,
-                            20,
-                            new CANMotorControllerOutputConfig());
-            case "RearRightDrive" ->
-                    new CANMotorControllerInfo(
-                            getDriveControllerName(swerveInstance),
-                            MotorControllerType.SparkMax,
-                            CANBusId.RIO,
-                            29,
-                            new CANMotorControllerOutputConfig());
-            default -> null;
-        };
+        SwerveModuleConfig config = SWERVE_CONFIG.get(swerveInstance.label());
+        if (config == null) {
+            return null;
+        }
+        
+        return new CANMotorControllerInfo(
+                getDriveControllerName(swerveInstance),
+                MotorControllerType.SparkMax,
+                CANBusId.RIO,
+                config.driveMotorId,
+                null,
+                new CANMotorControllerOutputConfig());
     }
 
     @Override
     public CANMotorControllerInfo getSteeringMotor(SwerveInstance swerveInstance) {
-        double simulationScalingValue = 1.0;
-
-        return switch (swerveInstance.label()) {
-            case "FrontLeftDrive" ->
-                    new CANMotorControllerInfo(
-                            getSteeringControllerName(swerveInstance),
-                            MotorControllerType.SparkMax,
-                            CANBusId.RIO,
-                            38,
-                            new CANMotorControllerOutputConfig());
-            case "FrontRightDrive" ->
-                    new CANMotorControllerInfo(
-                            getSteeringControllerName(swerveInstance),
-                            MotorControllerType.SparkMax,
-                            CANBusId.RIO,
-                            30,
-                            new CANMotorControllerOutputConfig());
-            case "RearLeftDrive" ->
-                    new CANMotorControllerInfo(
-                            getSteeringControllerName(swerveInstance),
-                            MotorControllerType.SparkMax,
-                            CANBusId.RIO,
-                            21,
-                            new CANMotorControllerOutputConfig());
-            case "RearRightDrive" ->
-                    new CANMotorControllerInfo(
-                            getSteeringControllerName(swerveInstance),
-                            MotorControllerType.SparkMax,
-                            CANBusId.RIO,
-                            28,
-                            new CANMotorControllerOutputConfig());
-            default -> null;
-        };
+        SwerveModuleConfig config = SWERVE_CONFIG.get(swerveInstance.label());
+        if (config == null) {
+            return null;
+        }
+        
+        return new CANMotorControllerInfo(
+                getSteeringControllerName(swerveInstance),
+                MotorControllerType.SparkMax,
+                CANBusId.RIO,
+                config.steeringMotorId,
+                null,
+                new CANMotorControllerOutputConfig());
     }
 
     @Override
     public DeviceInfo getSteeringEncoder(SwerveInstance swerveInstance) {
+        SwerveModuleConfig config = SWERVE_CONFIG.get(swerveInstance.label());
+        if (config == null) {
+            return null;
+        }
+        
         double simulationScalingValue = 1.0;
-
-        return switch (swerveInstance.label()) {
-            case "FrontLeftDrive" ->
-                    new DeviceInfo(getSteeringEncoderControllerName(swerveInstance), 54, false, simulationScalingValue);
-            case "FrontRightDrive" ->
-                    new DeviceInfo(getSteeringEncoderControllerName(swerveInstance), 53, false, simulationScalingValue);
-            case "RearLeftDrive" ->
-                    new DeviceInfo(getSteeringEncoderControllerName(swerveInstance), 52, false, simulationScalingValue);
-            case "RearRightDrive" ->
-                    new DeviceInfo(getSteeringEncoderControllerName(swerveInstance), 51, false, simulationScalingValue);
-            default -> null;
-        };
+        return new DeviceInfo(
+                getSteeringEncoderControllerName(swerveInstance),
+                config.steeringEncoderId,
+                false,
+                simulationScalingValue,
+                null);
     }
 
     @Override
     public XYPair getSwerveModuleOffsetsInInches(SwerveInstance swerveInstance) {
-        return getSwerveModuleOffsets(swerveInstance);
-    }
-
-    public XYPair getSwerveModuleOffsets(SwerveInstance swerveInstance) {
-        return switch (swerveInstance.label()) {
-            case "FrontLeftDrive" -> new XYPair(15, 15);
-            case "FrontRightDrive" -> new XYPair(15, -15);
-            case "RearLeftDrive" -> new XYPair(-15, 15);
-            case "RearRightDrive" -> new XYPair(-15, -15);
-            default -> new XYPair(0, 0);
-        };
+        SwerveModuleConfig config = SWERVE_CONFIG.get(swerveInstance.label());
+        if (config != null) {
+            return config.moduleOffsets;
+        }
+        return new XYPair(0, 0);
     }
 
     @Override
