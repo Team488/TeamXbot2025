@@ -13,6 +13,8 @@ import competition.subsystems.pose.vision.Paths;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
+import static edu.wpi.first.units.Units.Seconds;
+
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import xbot.common.subsystems.autonomous.AutonomousCommandSelector;
 
@@ -25,7 +27,7 @@ public class RightFourCoralAuto extends BaseAutonomousSequentialCommandGroup {
             Provider<PathDriveToLocationForCoralStationFactory> pathDriveToLocationAndIntakeUntilCollectedProvider) {
         super(autoSelector);
 
-
+        this.addCommands(new WaitCommand(Seconds.of(1)));
 
         // Score 1
         getDriveAndScoreStatusMessageCommand(Landmarks.ReefFace.FAR_RIGHT,

@@ -7,7 +7,10 @@ import competition.subsystems.pose.Landmarks;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import xbot.common.subsystems.autonomous.AutonomousCommandSelector;
+
+import static edu.wpi.first.units.Units.Seconds;
 
 import javax.inject.Inject;
 
@@ -43,6 +46,8 @@ public class FromCageScoreOneCoralAutoFactory {
                 )
                 .alongWith(new InstantCommand(() -> simulator.resetPosition(PoseSubsystem.convertBlueToRedIfNeeded(startingLocation))));
         auto.addCommands(initializeStateCommand);
+
+        auto.addCommands(new WaitCommand(Seconds.of(1)));
 
         var driveAndScore = driveToFaceAndScoreCommandGroupFact.create(targetReefFace, targetBranch, targetLevel)
                 .alongWith(
