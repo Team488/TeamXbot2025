@@ -54,7 +54,7 @@ public class DriveSubsystem extends BaseSwerveDriveSubsystem {
             @RearLeftDrive SwerveComponent rearLeftSwerve, @RearRightDrive SwerveComponent rearRightSwerve,
             ElectricalContract electricalContract) {
 
-        super(pidFactory, pf, frontLeftSwerve, frontRightSwerve, rearLeftSwerve, rearRightSwerve, electricalContract);
+        super(pidFactory, pf, frontLeftSwerve, frontRightSwerve, rearLeftSwerve, rearRightSwerve);
         log.info("Creating DriveSubsystem");
 
         pf.setPrefix(this.getPrefix());

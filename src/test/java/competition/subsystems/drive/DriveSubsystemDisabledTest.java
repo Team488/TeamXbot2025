@@ -37,7 +37,7 @@ public class DriveSubsystemDisabledTest extends BaseCompetitionTest {
         driveSubsystem.refreshDataFrame();
         driveSubsystem.periodic();
 
-        var moduleStates = driveSubsystem.getSwerveModuleStates();
+        var moduleStates = driveSubsystem.getCurrentSwerveStates().toArray();
         assertEquals(4, moduleStates.length);
 
         for (var moduleState : moduleStates) {

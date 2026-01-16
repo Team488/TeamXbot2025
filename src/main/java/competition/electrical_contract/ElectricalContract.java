@@ -1,6 +1,8 @@
 package competition.electrical_contract;
 
 import static edu.wpi.first.units.Units.Meters;
+
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Distance;
 import xbot.common.injection.electrical_contract.CANMotorControllerInfo;
 import xbot.common.injection.electrical_contract.DeviceInfo;
@@ -9,7 +11,6 @@ import xbot.common.injection.electrical_contract.XCameraElectricalContract;
 import xbot.common.injection.electrical_contract.XDeadwheelElectricalContract;
 import xbot.common.injection.electrical_contract.XSwerveDriveElectricalContract;
 import xbot.common.injection.swerve.SwerveInstance;
-import xbot.common.math.XYPair;
 
 public abstract class ElectricalContract implements XSwerveDriveElectricalContract, XCameraElectricalContract,
         XDeadwheelElectricalContract {
@@ -24,7 +25,7 @@ public abstract class ElectricalContract implements XSwerveDriveElectricalContra
 
     public abstract DeviceInfo getSteeringEncoder(SwerveInstance swerveInstance);
 
-    public abstract XYPair getSwerveModuleOffsetsInInches(SwerveInstance swerveInstance);
+    public abstract Translation2d getSwerveModuleOffsets(SwerveInstance swerveInstance);
 
     public abstract IMUInfo getNavXGyroInfo();
 

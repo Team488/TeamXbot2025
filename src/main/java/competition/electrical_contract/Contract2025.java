@@ -3,6 +3,7 @@ package competition.electrical_contract;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Distance;
 import xbot.common.controls.sensors.XGyro;
@@ -254,14 +255,14 @@ public class Contract2025 extends ElectricalContract {
     }
 
     @Override
-    public XYPair getSwerveModuleOffsetsInInches(SwerveInstance swerveInstance) {
+    public Translation2d getSwerveModuleOffsets(SwerveInstance swerveInstance) {
         // Update these XYPairs with the swerve module locations!!! (In inches)
         return switch (swerveInstance.label()) {
-            case "FrontLeftDrive" -> new XYPair(12, 12);
-            case "FrontRightDrive" -> new XYPair(12, -12);
-            case "RearLeftDrive" -> new XYPair(-12, 12);
-            case "RearRightDrive" -> new XYPair(-12, -12);
-            default -> new XYPair(0, 0);
+            case "FrontLeftDrive" -> new Translation2d(Inches.of(12), Inches.of(12));
+            case "FrontRightDrive" -> new Translation2d(Inches.of(12), Inches.of(-12));
+            case "RearLeftDrive" -> new Translation2d(Inches.of(-12), Inches.of(12));
+            case "RearRightDrive" -> new Translation2d(Inches.of(-12), Inches.of(-12));
+            default -> new Translation2d(0, 0);
         };
     }
 

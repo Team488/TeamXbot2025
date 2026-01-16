@@ -21,7 +21,7 @@ import static xbot.common.logic.CalibrationDecider.CalibrationMode.GaveUp;
 
 import javax.inject.Inject;
 
-public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
+public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance, Double> {
 
     private final OperatorInterface oi;
 
@@ -166,7 +166,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
     }
 
     @Override
-    protected double getHumanInput() {
+    protected Double getHumanInput() {
 
         double humanInput = MathUtils.constrainDouble(
                 MathUtils.deadband(
@@ -185,7 +185,7 @@ public class ElevatorMaintainerCommand extends BaseMaintainerCommand<Distance> {
             // Note - this is really important! We need to force the system out of onboard PID because otherwise,
             // on enable, the PID will have a brief moment of action where it tries to return to the position
             // it was at before being disabled.
-            elevator.setPower(0);
+            elevator.setPower(0.);
         }
     }
 

@@ -42,7 +42,7 @@ import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 @Singleton
-public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
+public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance, Double> {
 
     private double periodicTickCounter;
 
@@ -195,7 +195,7 @@ public class ElevatorSubsystem extends BaseSetpointSubsystem<Distance> {
     }
 
     @Override
-    public void setPower(double power) {
+    public void setPower(Double power) {
         if (contract.isElevatorReady()) {
             if (isTouchingBottom()) {
                 power = MathUtils.constrainDouble(power, powerWhenBottomSensorHit.get(), 1);

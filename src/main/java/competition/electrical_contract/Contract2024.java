@@ -3,6 +3,7 @@ package competition.electrical_contract;
 import competition.subsystems.pose.PoseSubsystem;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import xbot.common.injection.electrical_contract.CANBusId;
 import xbot.common.injection.electrical_contract.CANMotorControllerInfo;
@@ -16,6 +17,8 @@ import xbot.common.subsystems.vision.CameraCapabilities;
 
 import javax.inject.Inject;
 import java.util.EnumSet;
+
+import static edu.wpi.first.units.Units.Inches;
 
 public class Contract2024 extends Contract2025 {
 
@@ -134,17 +137,13 @@ public class Contract2024 extends Contract2025 {
     }
 
     @Override
-    public XYPair getSwerveModuleOffsetsInInches(SwerveInstance swerveInstance) {
-        return getSwerveModuleOffsets(swerveInstance);
-    }
-
-    public XYPair getSwerveModuleOffsets(SwerveInstance swerveInstance) {
+    public Translation2d getSwerveModuleOffsets(SwerveInstance swerveInstance) {
         return switch (swerveInstance.label()) {
-            case "FrontLeftDrive" -> new XYPair(15, 15);
-            case "FrontRightDrive" -> new XYPair(15, -15);
-            case "RearLeftDrive" -> new XYPair(-15, 15);
-            case "RearRightDrive" -> new XYPair(-15, -15);
-            default -> new XYPair(0, 0);
+            case "FrontLeftDrive" -> new Translation2d(Inches.of(15), Inches.of(15));
+            case "FrontRightDrive" -> new Translation2d(Inches.of(15), Inches.of(-15));
+            case "RearLeftDrive" -> new Translation2d(Inches.of(-15), Inches.of(15));
+            case "RearRightDrive" -> new Translation2d(Inches.of(-15), Inches.of(-15));
+            default -> new Translation2d(0, 0);
         };
     }
 
