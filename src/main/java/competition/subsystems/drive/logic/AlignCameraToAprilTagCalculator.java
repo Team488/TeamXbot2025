@@ -29,6 +29,8 @@ import xbot.common.properties.PropertyFactory;
 import xbot.common.subsystems.drive.control_logic.HeadingModule;
 import xbot.common.subsystems.vision.AprilTagVisionIO;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import static edu.wpi.first.units.Units.Degrees;
@@ -97,6 +99,7 @@ public class AlignCameraToAprilTagCalculator {
 
     final DoubleProperty globalHorizontalOffsetInches;
     private double globalTemporaryHorizontalOffsetInches;
+    private double branchOffsetMeters;
 
     double lastKnownHorizontalErrorMeters = 999999;
     double shoveStartTime = 0;
@@ -112,6 +115,9 @@ public class AlignCameraToAprilTagCalculator {
     private boolean hasEverSeenAprilTag = false;
     private Translation2d coralStationPreShovePoint;
     boolean retryActive;
+
+    record BranchOffsetKey(Landmarks.Branch branch, Integer tagID) {}
+    Map<BranchOffsetKey, DoubleProperty> branchOffsetHashMap = new HashMap<>();
 
     public static Translation2d generateAlignmentPointOffset(Distance robotCenterToOuterBumperX, CameraInfo cameraInfo,
                                                              Distance offset, boolean isCameraBackwards) {
@@ -161,6 +167,8 @@ public class AlignCameraToAprilTagCalculator {
         closeInterstitialActivationRange = pf.createPersistentProperty("CloseInterstitialActivationRange-m", 1.33);
 
         globalHorizontalOffsetInches = pf.createPersistentProperty("GlobalHorizontalOffset-Inches", 0.0);
+
+        initializeBranchOffsets(pf);
 
         reset();
     }
@@ -219,9 +227,13 @@ public class AlignCameraToAprilTagCalculator {
                 isCameraBackwards
         );
 
+
+        branchOffsetMeters = branchOffsetHashMap.get(
+                new BranchOffsetKey(targetCameraID == 0 ? Landmarks.Branch.B : Landmarks.Branch.A, targetAprilTagID)).get();
+
         this.alignmentPointOffset = new Translation2d(
                 alignmentPointOffset.getX(),
-                -getHorizontalTrimAdjustmentMeters()
+                (-getHorizontalTrimAdjustmentMeters() + branchOffsetMeters)
         );
 
         // Now for some other one-time calculations about the tag itself
@@ -280,7 +292,7 @@ public class AlignCameraToAprilTagCalculator {
             );
         }
 
-
+        akitLog.record("alignmentPointOffset", alignmentPointOffset);
         akitLog.record("InterstitialPoint", interstitialPoint);
     }
 
@@ -477,7 +489,7 @@ public class AlignCameraToAprilTagCalculator {
         Optional<Translation2d> aprilTagData = aprilTagVisionSubsystem.getRobotRelativeLocationOfAprilTag(targetCameraID, targetAprilTagID);
 
         if (aprilTagData.isPresent()) {
-            lastKnownHorizontalErrorMeters = aprilTagData.get().getY() + getHorizontalTrimAdjustmentMeters();
+            lastKnownHorizontalErrorMeters = aprilTagData.get().getY() + getHorizontalTrimAdjustmentMeters() + branchOffsetMeters;
         }
         akitLog.record("AprilTagData", aprilTagData.orElse(null));
 
@@ -514,5 +526,15 @@ public class AlignCameraToAprilTagCalculator {
 
         var projectedDelta = new Translation2d(0.25, stationLocation.getRotation());
         return stationLocation.getTranslation().plus(projectedDelta);
+    }
+
+    private void initializeBranchOffsets(PropertyFactory pf) {
+        int[] tagIds = {6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22};
+        for (int tagId : tagIds) {
+            branchOffsetHashMap.put(new BranchOffsetKey(Landmarks.Branch.A, tagId),
+                    pf.createPersistentProperty("BranchAOffset-Tag" + tagId, 0.0));
+            branchOffsetHashMap.put(new BranchOffsetKey(Landmarks.Branch.B, tagId),
+                    pf.createPersistentProperty("BranchBOffset-Tag" + tagId, 0.0));
+        }
     }
 }
